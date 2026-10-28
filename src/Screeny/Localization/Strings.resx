@@ -85,10 +85,10 @@
     <value>Exit</value>
   </data>
   <data name="Tray.TipClick" xml:space="preserve">
-    <value>Screeny: click to take a screenshot</value>
+    <value>Screeny {0}: click to take a screenshot</value>
   </data>
   <data name="Tray.TipHotkeys" xml:space="preserve">
-    <value>Screeny: {0} to take a screenshot</value>
+    <value>Screeny {0}: {1} to take a screenshot</value>
   </data>
   <data name="App.StartFailed" xml:space="preserve">
     <value>Screeny couldn't start.
@@ -1275,5 +1275,38 @@ Replace it?</value>
   </data>
   <data name="File.Replace" xml:space="preserve">
     <value>Replace</value>
+  </data>
+  <data name="Settings.SectionAbout" xml:space="preserve">
+    <value>ABOUT</value>
+  </data>
+  <data name="About.CheckNow" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="About.Checking" xml:space="preserve">
+    <value>Checking…</value>
+  </data>
+  <data name="About.Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="About.CheckFailed" xml:space="preserve">
+    <value>Couldn't check: {0}</value>
+  </data>
+  <data name="About.ReasonNetwork" xml:space="preserve">
+    <value>no internet connection, or GitHub can't be reached</value>
+  </data>
+  <data name="About.ReasonLimit" xml:space="preserve">
+    <value>GitHub is limiting requests right now. Try again later</value>
+  </data>
+  <data name="About.ReasonServer" xml:space="preserve">
+    <value>GitHub is having problems right now. Try again later</value>
+  </data>
+  <data name="About.ReasonTimeout" xml:space="preserve">
+    <value>GitHub took too long to respond</value>
+  </data>
+  <data name="About.NotUpdatable" xml:space="preserve">
+    <value>This copy can't update itself. New versions are on the GitHub releases page.</value>
+  </data>
+  <data name="About.License" xml:space="preserve">
+    <value>License: GPL-3.0</value>
   </data>
 </root>

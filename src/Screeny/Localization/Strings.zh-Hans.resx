@@ -85,10 +85,10 @@
     <value>退出</value>
   </data>
   <data name="Tray.TipClick" xml:space="preserve">
-    <value>Screeny：单击截图</value>
+    <value>Screeny {0}：单击截图</value>
   </data>
   <data name="Tray.TipHotkeys" xml:space="preserve">
-    <value>Screeny：按 {0} 截图</value>
+    <value>Screeny {0}：按 {1} 截图</value>
   </data>
   <data name="App.StartFailed" xml:space="preserve">
     <value>Screeny 无法启动。
@@ -1275,5 +1275,38 @@ Screeny 将关闭。请重新启动并再次更新。</value>
   </data>
   <data name="File.Replace" xml:space="preserve">
     <value>替换</value>
+  </data>
+  <data name="Settings.SectionAbout" xml:space="preserve">
+    <value>关于</value>
+  </data>
+  <data name="About.CheckNow" xml:space="preserve">
+    <value>检查更新</value>
+  </data>
+  <data name="About.Checking" xml:space="preserve">
+    <value>正在检查…</value>
+  </data>
+  <data name="About.Update" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="About.CheckFailed" xml:space="preserve">
+    <value>无法检查：{0}</value>
+  </data>
+  <data name="About.ReasonNetwork" xml:space="preserve">
+    <value>没有网络连接，或无法访问 GitHub</value>
+  </data>
+  <data name="About.ReasonLimit" xml:space="preserve">
+    <value>GitHub 暂时限制了请求，请稍后再试</value>
+  </data>
+  <data name="About.ReasonServer" xml:space="preserve">
+    <value>GitHub 暂时出现问题，请稍后再试</value>
+  </data>
+  <data name="About.ReasonTimeout" xml:space="preserve">
+    <value>GitHub 响应超时</value>
+  </data>
+  <data name="About.NotUpdatable" xml:space="preserve">
+    <value>此副本无法自动更新。新版本可在 GitHub 的发布页面下载。</value>
+  </data>
+  <data name="About.License" xml:space="preserve">
+    <value>许可证：GPL-3.0</value>
   </data>
 </root>

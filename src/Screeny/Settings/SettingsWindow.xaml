@@ -100,6 +100,25 @@
       <CheckBox x:Name="UpdatesInput" Margin="0,12,0,0" Content="{l:Loc Common.CheckUpdatesBox}"/>
       <TextBlock Style="{StaticResource Caption}" Margin="28,4,0,0" TextWrapping="Wrap" LineHeight="17"
                  Text="{l:Loc Common.PrivacyNote}"/>
+
+      <!-- О программе: версия, ручная проверка обновлений (та же, что в меню трея; идёт и без галочки выше) и ссылки -->
+      <TextBlock Text="{l:Loc Settings.SectionAbout}" Style="{StaticResource SectionLabel}" Margin="0,28,0,10"/>
+      <TextBlock x:Name="VersionText" Text="Screeny" Style="{StaticResource Body}"/>
+      <Button x:Name="CheckUpdatesButton" Content="{l:Loc About.CheckNow}" HorizontalAlignment="Left" Margin="0,12,0,0" Click="OnCheckUpdates"/>
+      <TextBlock x:Name="UpdateStatus" Style="{StaticResource Caption}" Margin="0,8,0,0" TextWrapping="Wrap" LineHeight="17" Visibility="Collapsed"/>
+      <Button x:Name="InstallUpdateButton" Content="{l:Loc About.Update}" HorizontalAlignment="Left" MinWidth="96" Margin="0,8,0,0"
+              Style="{StaticResource AccentButton}" Click="OnInstallUpdate" Visibility="Collapsed"/>
+      <WrapPanel Margin="0,14,0,0">
+        <TextBlock Style="{StaticResource Caption}" Margin="0,0,20,0">
+          <Hyperlink Click="OnOpenReleasePage" Foreground="{DynamicResource Brush.Accent}"><Run Text="{l:Loc Update.WhatsNew}"/></Hyperlink>
+        </TextBlock>
+        <TextBlock Style="{StaticResource Caption}" Margin="0,0,20,0">
+          <Hyperlink Click="OnOpenLicense" Foreground="{DynamicResource Brush.Accent}"><Run Text="{l:Loc About.License}"/></Hyperlink>
+        </TextBlock>
+        <TextBlock Style="{StaticResource Caption}">
+          <Hyperlink Click="OnOpenRepository" Foreground="{DynamicResource Brush.Accent}"><Run Text="GitHub"/></Hyperlink>
+        </TextBlock>
+      </WrapPanel>
     </StackPanel>
     </ScrollViewer>
   </DockPanel>

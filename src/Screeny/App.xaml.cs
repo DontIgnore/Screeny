@@ -397,10 +397,11 @@ public partial class App : Application, INotifyPropertyChanged
         if (_tray is not null)
         {
             var names = HotkeyReport.ActiveNames;
-            // Подсказка трея ограничена 127 символами: длинный список сокращается так же, как в меню.
-            _tray.ToolTipText = IsDev ? DevTrayText
-                : names.Count == 0 ? Loc.T("Tray.TipClick")
-                : Loc.F("Tray.TipHotkeys", HotkeyReport.FormatNames(names, maxLength: 90));
+            var version = CurrentVersion;
+            // Подсказка трея ограничена 127 символами: длинный список сокращается так же, как в меню (и короче на длину версии).
+            _tray.ToolTipText = IsDev ? $"Screeny {version} (dev)"
+                : names.Count == 0 ? Loc.F("Tray.TipClick", version)
+                : Loc.F("Tray.TipHotkeys", version, HotkeyReport.FormatNames(names, maxLength: Math.Max(40, 89 - version.Length)));
         }
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HotkeyText)));
     }

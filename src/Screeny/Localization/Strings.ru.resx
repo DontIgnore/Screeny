@@ -85,10 +85,10 @@
     <value>Выход</value>
   </data>
   <data name="Tray.TipClick" xml:space="preserve">
-    <value>Screeny — клик для скриншота</value>
+    <value>Screeny {0} — клик для скриншота</value>
   </data>
   <data name="Tray.TipHotkeys" xml:space="preserve">
-    <value>Screeny — {0} для скриншота</value>
+    <value>Screeny {0} — {1} для скриншота</value>
   </data>
   <data name="App.StartFailed" xml:space="preserve">
     <value>Screeny не удалось запустить.
@@ -200,7 +200,7 @@ Screeny закроется; запустите его снова и повтор
     <value>Настройки</value>
   </data>
   <data name="Settings.SectionCapture" xml:space="preserve">
-    <value>СНИМОК</value>
+    <value>СКРИНШОТ</value>
   </data>
   <data name="Settings.PrintScreenReserved" xml:space="preserve">
     <value>Сейчас PrintScreen открывает системный захват экрана Windows, и до Screeny нажатие не доходит.</value>
@@ -503,7 +503,7 @@ Screeny закроется; запустите его снова и повтор
     <value>Проверить снова</value>
   </data>
   <data name="Wizard.SectionHotkeys" xml:space="preserve">
-    <value>ХОТКЕИ СНИМКА</value>
+    <value>ХОТКЕИ СКРИНШОТА</value>
   </data>
   <data name="Wizard.CustomOptional" xml:space="preserve">
     <value>Своё сочетание (необязательно)</value>
@@ -1275,5 +1275,38 @@ Screeny закроется; запустите его снова и повтор
   </data>
   <data name="File.Replace" xml:space="preserve">
     <value>Заменить</value>
+  </data>
+  <data name="Settings.SectionAbout" xml:space="preserve">
+    <value>О ПРОГРАММЕ</value>
+  </data>
+  <data name="About.CheckNow" xml:space="preserve">
+    <value>Проверить обновления</value>
+  </data>
+  <data name="About.Checking" xml:space="preserve">
+    <value>Проверяю…</value>
+  </data>
+  <data name="About.Update" xml:space="preserve">
+    <value>Обновить</value>
+  </data>
+  <data name="About.CheckFailed" xml:space="preserve">
+    <value>Не удалось проверить: {0}</value>
+  </data>
+  <data name="About.ReasonNetwork" xml:space="preserve">
+    <value>нет подключения к интернету или GitHub недоступен</value>
+  </data>
+  <data name="About.ReasonLimit" xml:space="preserve">
+    <value>GitHub временно ограничил запросы. Попробуйте позже</value>
+  </data>
+  <data name="About.ReasonServer" xml:space="preserve">
+    <value>у GitHub сейчас сбой. Попробуйте позже</value>
+  </data>
+  <data name="About.ReasonTimeout" xml:space="preserve">
+    <value>GitHub не ответил вовремя</value>
+  </data>
+  <data name="About.NotUpdatable" xml:space="preserve">
+    <value>Эта копия не обновляется сама. Новые версии — на странице релизов GitHub.</value>
+  </data>
+  <data name="About.License" xml:space="preserve">
+    <value>Лицензия: GPL-3.0</value>
   </data>
 </root>

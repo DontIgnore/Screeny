@@ -62,6 +62,8 @@ public partial class SettingsWindow : ChromeWindow
         // Содержимое прокручивается, кнопки внизу всегда видны: окно не выше 780 DIP и рабочей области своего монитора
         // (ChromeWindow подгоняет его при открытии и при переходе на другой монитор).
         NaturalMaxHeight = 780;
+        // Клиент обновлений App создаёт после окон из ключей запуска (--settings): версию и состояние — после загрузки окна.
+        Loaded += (_, _) => InitAbout();
         Loc.Changed += OnLanguageChanged;
         Closed += (_, _) => Loc.Changed -= OnLanguageChanged;
     }
@@ -75,6 +77,7 @@ public partial class SettingsWindow : ChromeWindow
         LanguagePicker.Relabel(LanguageInput);
         ShowCurrentProblems(_report); // тексты проблем хоткеев собираются заново на новом языке
         _preciseOcr?.Refresh();
+        ShowAboutStatus();
     }
 
     private HotkeySpec? _fallback;

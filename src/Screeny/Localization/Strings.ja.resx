@@ -85,10 +85,10 @@
     <value>終了</value>
   </data>
   <data name="Tray.TipClick" xml:space="preserve">
-    <value>Screeny: クリックでキャプチャ</value>
+    <value>Screeny {0}: クリックでキャプチャ</value>
   </data>
   <data name="Tray.TipHotkeys" xml:space="preserve">
-    <value>Screeny: {0} でキャプチャ</value>
+    <value>Screeny {0}: {1} でキャプチャ</value>
   </data>
   <data name="App.StartFailed" xml:space="preserve">
     <value>Screeny を起動できませんでした。
@@ -1275,5 +1275,38 @@ Screeny を終了します。もう一度起動して、更新をやり直して
   </data>
   <data name="File.Replace" xml:space="preserve">
     <value>置き換える</value>
+  </data>
+  <data name="Settings.SectionAbout" xml:space="preserve">
+    <value>バージョン情報</value>
+  </data>
+  <data name="About.CheckNow" xml:space="preserve">
+    <value>更新を確認</value>
+  </data>
+  <data name="About.Checking" xml:space="preserve">
+    <value>確認中…</value>
+  </data>
+  <data name="About.Update" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="About.CheckFailed" xml:space="preserve">
+    <value>確認できませんでした: {0}</value>
+  </data>
+  <data name="About.ReasonNetwork" xml:space="preserve">
+    <value>インターネットに接続されていないか、GitHub に接続できません</value>
+  </data>
+  <data name="About.ReasonLimit" xml:space="preserve">
+    <value>GitHub がリクエストを制限しています。しばらくしてからもう一度お試しください</value>
+  </data>
+  <data name="About.ReasonServer" xml:space="preserve">
+    <value>GitHub で問題が発生しています。しばらくしてからもう一度お試しください</value>
+  </data>
+  <data name="About.ReasonTimeout" xml:space="preserve">
+    <value>GitHub から時間内に応答がありませんでした</value>
+  </data>
+  <data name="About.NotUpdatable" xml:space="preserve">
+    <value>このコピーは自動で更新できません。新しいバージョンは GitHub のリリース ページにあります。</value>
+  </data>
+  <data name="About.License" xml:space="preserve">
+    <value>ライセンス: GPL-3.0</value>
   </data>
 </root>

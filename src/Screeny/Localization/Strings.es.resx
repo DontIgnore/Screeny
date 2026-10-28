@@ -85,10 +85,10 @@
     <value>Salir</value>
   </data>
   <data name="Tray.TipClick" xml:space="preserve">
-    <value>Screeny: haz clic para capturar</value>
+    <value>Screeny {0}: haz clic para capturar</value>
   </data>
   <data name="Tray.TipHotkeys" xml:space="preserve">
-    <value>Screeny: {0} para capturar</value>
+    <value>Screeny {0}: {1} para capturar</value>
   </data>
   <data name="App.StartFailed" xml:space="preserve">
     <value>No se pudo iniciar Screeny.
@@ -1275,5 +1275,38 @@ Se eliminarán las capturas ({1}) sin pasar por la Papelera de reciclaje. No se 
   </data>
   <data name="File.Replace" xml:space="preserve">
     <value>Reemplazar</value>
+  </data>
+  <data name="Settings.SectionAbout" xml:space="preserve">
+    <value>ACERCA DE</value>
+  </data>
+  <data name="About.CheckNow" xml:space="preserve">
+    <value>Buscar actualizaciones</value>
+  </data>
+  <data name="About.Checking" xml:space="preserve">
+    <value>Buscando…</value>
+  </data>
+  <data name="About.Update" xml:space="preserve">
+    <value>Actualizar</value>
+  </data>
+  <data name="About.CheckFailed" xml:space="preserve">
+    <value>No se pudo comprobar: {0}</value>
+  </data>
+  <data name="About.ReasonNetwork" xml:space="preserve">
+    <value>no hay conexión a internet o no se puede acceder a GitHub</value>
+  </data>
+  <data name="About.ReasonLimit" xml:space="preserve">
+    <value>GitHub está limitando las solicitudes. Inténtalo más tarde</value>
+  </data>
+  <data name="About.ReasonServer" xml:space="preserve">
+    <value>GitHub tiene problemas ahora mismo. Inténtalo más tarde</value>
+  </data>
+  <data name="About.ReasonTimeout" xml:space="preserve">
+    <value>GitHub tardó demasiado en responder</value>
+  </data>
+  <data name="About.NotUpdatable" xml:space="preserve">
+    <value>Esta copia no se actualiza sola. Las versiones nuevas están en la página de versiones de GitHub.</value>
+  </data>
+  <data name="About.License" xml:space="preserve">
+    <value>Licencia: GPL-3.0</value>
   </data>
 </root>

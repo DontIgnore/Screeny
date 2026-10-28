@@ -55,7 +55,17 @@ public partial class App
 
         if (UpdateService.AutomaticAllowed(IsDev, Args.UpdateSource is not null, client.CanUpdate)) _ = _updates.RunAsync();
         if (Args.CheckUpdates) _ = CheckForUpdatesManuallyAsync();
+        OnHotkeysChanged(); // подсказка трея была собрана до появления клиента: теперь с версией из пакета Velopack
     }
+
+    /// <summary>
+    /// Версия этой копии: из пакета Velopack (та же, что у проверки обновлений), у копии без него — из сборки.
+    /// До <see cref="InitUpdates"/> — всегда из сборки.
+    /// </summary>
+    public string CurrentVersion => AppVersion.Choose(_updates?.Client.CurrentVersion, AppVersion.Informational());
+
+    /// <summary>Копия умеет обновляться сама (установлена или портативная, и есть источник обновлений).</summary>
+    public bool CanUpdateItself => _updates?.Client.CanUpdate == true;
 
     /// <summary>
     /// Автозапуск включён, но указывает на другой exe (старый портативный <c>publish\Screeny.exe</c>, прежняя папка) —
@@ -109,13 +119,22 @@ public partial class App
         }
     }
 
+    /// <summary>
+    /// Ручная проверка (меню трея и «О программе» в настройках): идёт и при выключенной автоматической. null — проверки не
+    /// было: приложение выходит или окно обновления уже открыто (тогда оно выводится вперёд).
+    /// </summary>
+    public async Task<UpdateCheckResult?> CheckForUpdatesAsync()
+    {
+        if (_updates is null || IsShuttingDown) return null;
+        if (_updateWindow is not null) { _updateWindow.Activate(); return null; }
+        var result = await _updates.CheckAsync(UpdateCheckKind.Manual);
+        return IsShuttingDown ? null : result;
+    }
+
+    /// <summary>Пункт трея: итог — диалогом, найденная версия — окном обновления.</summary>
     private async Task CheckForUpdatesManuallyAsync()
     {
-        if (_updates is null || IsShuttingDown) return;
-        if (_updateWindow is not null) { _updateWindow.Activate(); return; }
-        var result = await _updates.CheckAsync(UpdateCheckKind.Manual);
-        if (IsShuttingDown) return;
-        switch (result)
+        switch (await CheckForUpdatesAsync())
         {
             case UpdateCheckResult.Available found:
                 ShowUpdateWindow(found.Update);
@@ -133,7 +152,7 @@ public partial class App
     }
 
     /// <summary>Окно показывается всегда, даже если все изменения — про выключенные функции (так бывает у ручной проверки).</summary>
-    private void ShowUpdateWindow(UpdateCandidate update)
+    public void ShowUpdateWindow(UpdateCandidate update)
     {
         _updateBalloon = null;
         if (_updates is null || IsShuttingDown) return;
