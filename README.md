@@ -18,9 +18,10 @@ language and falls back to English if it isn't one of these. You can pick anothe
 Get either version from the [releases page](https://github.com/DontIgnore/Screeny/releases/latest). Both need
 Windows 10 or 11, 64-bit.
 
-- **Installer**, `Screeny-win-Setup.exe` (about 17 MB). Installs Screeny for your user account, without admin rights,
+- **Installer**, `Screeny-win-Setup.exe` (about 17 MB). Installs Screeny just for your user account, no admin rights needed,
   into `%LocalAppData%\DontIgnore.Screeny\`. It adds a Start menu shortcut and an entry in Settings > Apps, so you can
-  uninstall it the usual way. If the .NET 8 Desktop Runtime is missing, the installer downloads and installs it.
+  uninstall it the usual way. If your PC doesn't have Microsoft .NET 8 yet, the installer downloads and adds it, and
+  Windows may ask for permission.
 - **Portable**, `Screeny-win-Portable.zip` (about 10 MB). Unzip it anywhere and run `Screeny.exe`. You need the
   [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0) installed first (free, from Microsoft).
   The portable version updates itself too, in its own folder.

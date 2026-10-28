@@ -150,7 +150,7 @@ public class HotkeyManagerTests
         var r = m.Apply([HotkeyBinding.PrintScreen(false), HotkeyBinding.WinShiftS(false), HotkeyBinding.Custom("Ctrl+Q")], strict: false);
         Assert.Null(r.Report.Fallback);
         Assert.Empty(r.Report.ActiveNames);
-        Assert.Contains("Снимок — по клику", r.Report.ProblemSummary());
+        Assert.Contains("Скриншот — по клику", r.Report.ProblemSummary());
     }
 
     [Fact]

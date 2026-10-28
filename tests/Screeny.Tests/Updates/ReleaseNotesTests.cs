@@ -236,7 +236,7 @@ public class ReleaseNotesTests
         Assert.Equal("ocr", Tags("QR и штрихкоды"));
         Assert.Equal("history", Tags("Повторное редактирование"));
         Assert.Equal("history", Tags("Можно хранить оригинал"));
-        Assert.Equal("beautify", Tags("Оформление снимка"));
+        Assert.Equal("beautify", Tags("Оформление скриншота"));
         Assert.Equal("pipette,ruler", Tags("Пипетка и линейка"));
         Assert.Equal("", Tags("Обводка и заливка"));
         Assert.Equal("", Tags("Снимки сохраняются в фоне"));

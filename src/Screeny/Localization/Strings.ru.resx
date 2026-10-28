@@ -43,7 +43,7 @@
     <value>Буфер обмена занят</value>
   </data>
   <data name="Common.SaveScreenshotTitle" xml:space="preserve">
-    <value>Сохранить снимок</value>
+    <value>Сохранить скриншот</value>
   </data>
   <data name="Common.CheckConflicts" xml:space="preserve">
     <value>Проверить конфликты…</value>
@@ -52,7 +52,7 @@
     <value>Проверять обновления</value>
   </data>
   <data name="Common.PrivacyNote" xml:space="preserve">
-    <value>Снимки никуда не отправляются. В сеть Screeny ходит только за проверкой новых версий на GitHub и — если вы сами попросите — за модулем точного распознавания текста. Его загрузку эта галочка не запрещает.</value>
+    <value>Скриншоты никуда не отправляются. В сеть Screeny ходит только за проверкой новых версий на GitHub и — если вы сами попросите — за модулем точного распознавания текста. Его загрузку эта галочка не запрещает.</value>
   </data>
   <data name="Common.SeeLog" xml:space="preserve">
     <value>Подробности — в журнале.</value>
@@ -67,7 +67,7 @@
     <value>Язык интерфейса</value>
   </data>
   <data name="Tray.Capture" xml:space="preserve">
-    <value>Снимок</value>
+    <value>Скриншот</value>
   </data>
   <data name="Tray.History" xml:space="preserve">
     <value>История…</value>
@@ -85,10 +85,10 @@
     <value>Выход</value>
   </data>
   <data name="Tray.TipClick" xml:space="preserve">
-    <value>Screeny — клик для снимка</value>
+    <value>Screeny — клик для скриншота</value>
   </data>
   <data name="Tray.TipHotkeys" xml:space="preserve">
-    <value>Screeny — {0} для снимка</value>
+    <value>Screeny — {0} для скриншота</value>
   </data>
   <data name="App.StartFailed" xml:space="preserve">
     <value>Screeny не удалось запустить.
@@ -111,7 +111,7 @@
     <value>Удалить сохранённые оригиналы ({0} шт.)?</value>
   </data>
   <data name="App.DeleteOriginalsText" xml:space="preserve">
-    <value>Они содержат то, что было скрыто размытием. Снимки истории и пометки останутся; повторно открытые снимки будут редактироваться как готовые картинки.</value>
+    <value>Они содержат то, что было скрыто размытием. Скриншоты истории и пометки останутся; повторно открытые скриншоты будут редактироваться как готовые картинки.</value>
   </data>
   <data name="App.Keep" xml:space="preserve">
     <value>Оставить</value>
@@ -126,10 +126,10 @@
     <value>Не удалось открыть папку истории: {0}</value>
   </data>
   <data name="App.DisplaysChanged" xml:space="preserve">
-    <value>Конфигурация экранов изменилась, снимок отменён.</value>
+    <value>Конфигурация экранов изменилась, скриншот отменён.</value>
   </data>
   <data name="App.CaptureFailed" xml:space="preserve">
-    <value>Не удалось сделать снимок экрана.</value>
+    <value>Не удалось сделать скриншот.</value>
   </data>
   <data name="App.CopyTextFailed" xml:space="preserve">
     <value>Не удалось скопировать текст: {0}</value>
@@ -144,13 +144,13 @@
     <value>Копирование не удалось: {0}.</value>
   </data>
   <data name="App.FailedSavedToHistory" xml:space="preserve">
-    <value>{0} Снимок сохранён в истории.</value>
+    <value>{0} Скриншот сохранён в истории.</value>
   </data>
   <data name="App.ClipboardBusyInHistory" xml:space="preserve">
-    <value>Буфер обмена занят другим приложением — снимок сохранён в историю.</value>
+    <value>Буфер обмена занят другим приложением — скриншот сохранён в историю.</value>
   </data>
   <data name="App.ClipboardBusyNotCopied" xml:space="preserve">
-    <value>Буфер обмена занят другим приложением, снимок не скопирован.</value>
+    <value>Буфер обмена занят другим приложением, скриншот не скопирован.</value>
   </data>
   <data name="App.ClipboardBusyText" xml:space="preserve">
     <value>Буфер обмена занят другим приложением, текст не скопирован.</value>
@@ -159,16 +159,16 @@
     <value>Текст скопирован: {0}</value>
   </data>
   <data name="App.OpenShotFailedTitle" xml:space="preserve">
-    <value>Не удалось открыть снимок</value>
+    <value>Не удалось открыть скриншот</value>
   </data>
   <data name="App.OpenShotFailedText" xml:space="preserve">
     <value>Файл мог быть удалён или повреждён.</value>
   </data>
   <data name="App.SaveShotFailed" xml:space="preserve">
-    <value>Не удалось сохранить снимок: {0}</value>
+    <value>Не удалось сохранить скриншот: {0}</value>
   </data>
   <data name="App.WizardScanFailed" xml:space="preserve">
-    <value>Не удалось проверить другие программы снимков. Подробности — в журнале.</value>
+    <value>Не удалось проверить другие программы для скриншотов. Подробности — в журнале.</value>
   </data>
   <data name="App.WizardSaveFailed" xml:space="preserve">
     <value>Не удалось сохранить настройки мастера. Проверьте доступ к файлу настроек.</value>
@@ -221,7 +221,7 @@ Screeny закроется; запустите его снова и повтор
     <value>Свои сочетания</value>
   </data>
   <data name="Settings.AddShortcutTip" xml:space="preserve">
-    <value>Добавить ещё одно сочетание для снимка</value>
+    <value>Добавить ещё одно сочетание для скриншота</value>
   </data>
   <data name="Settings.Add" xml:space="preserve">
     <value>Добавить</value>
@@ -248,31 +248,31 @@ Screeny закроется; запустите его снова и повтор
     <value>От 1 до 500</value>
   </data>
   <data name="Settings.Screenshots" xml:space="preserve">
-    <value>снимков</value>
+    <value>скриншотов</value>
   </data>
   <data name="Settings.KeepOriginals" xml:space="preserve">
     <value>Хранить оригиналы для повторного редактирования</value>
   </data>
   <data name="Settings.KeepOriginalsNote" xml:space="preserve">
-    <value>Рядом со снимком сохраняется версия без пометок. Она содержит всё, что скрыто размытием и пикселизацией. Если выключить, Screeny предложит удалить уже сохранённые оригиналы.</value>
+    <value>Рядом со скриншотом сохраняется версия без пометок. Она содержит всё, что скрыто размытием и пикселизацией. Если выключить, Screeny предложит удалить уже сохранённые оригиналы.</value>
   </data>
   <data name="Settings.SectionBehavior" xml:space="preserve">
     <value>ПОВЕДЕНИЕ</value>
   </data>
   <data name="Settings.EnterCopies" xml:space="preserve">
-    <value>Enter копирует снимок в буфер обмена (иначе только сохраняет в историю)</value>
+    <value>Enter копирует скриншот в буфер обмена (иначе только сохраняет в историю)</value>
   </data>
   <data name="Settings.StartWithWindows" xml:space="preserve">
     <value>Запускать вместе с Windows</value>
   </data>
   <data name="Settings.ExcludePins" xml:space="preserve">
-    <value>Не захватывать закреплённые снимки в новых снимках экрана</value>
+    <value>Не захватывать закреплённые скриншоты в новых скриншотах</value>
   </data>
   <data name="Settings.Snap" xml:space="preserve">
     <value>Прилипание рамки и направляющие</value>
   </data>
   <data name="Settings.SnapNote" xml:space="preserve">
-    <value>Рамка снимка прилипает к краям окон и контрастным границам, фигуры — к краям и центрам других фигур и области. Alt временно отключает.</value>
+    <value>Рамка скриншота прилипает к краям окон и контрастным границам, фигуры — к краям и центрам других фигур и области. Alt временно отключает.</value>
   </data>
   <data name="Settings.FallbackActive" xml:space="preserve">
     <value>Сейчас работает запасной {0}: PrintScreen недоступен, а других хоткеев нет. Он отключится сам, как только заработает любой хоткей выше.</value>
@@ -290,13 +290,13 @@ Screeny закроется; запустите его снова и повтор
     <value>Не удалось открыть Параметры. Откройте вручную: Специальные возможности → Клавиатура.</value>
   </data>
   <data name="Settings.HistoryFolderDialog" xml:space="preserve">
-    <value>Папка истории снимков</value>
+    <value>Папка истории скриншотов</value>
   </data>
   <data name="Settings.FolderRequired" xml:space="preserve">
     <value>Укажите полный путь к папке истории.</value>
   </data>
   <data name="Settings.LimitInvalid" xml:space="preserve">
-    <value>Количество снимков в истории — число от {0} до {1}.</value>
+    <value>Количество скриншотов в истории — число от {0} до {1}.</value>
   </data>
   <data name="Hotkeys.PrintScreenUseBox" xml:space="preserve">
     <value>PrintScreen включается галочкой выше.</value>
@@ -305,7 +305,7 @@ Screeny закроется; запустите его снова и повтор
     <value>Это сочетание уже есть в списке.</value>
   </data>
   <data name="Hotkeys.NeedOne" xml:space="preserve">
-    <value>Включите хотя бы один хоткей — иначе снимок можно будет сделать только из трея.</value>
+    <value>Включите хотя бы один хоткей — иначе скриншот можно будет сделать только из трея.</value>
   </data>
   <data name="Units.Megabytes" xml:space="preserve">
     <value>{0} МБ</value>
@@ -314,7 +314,7 @@ Screeny закроется; запустите его снова и повтор
     <value>Точное распознавание (PaddleOCR)</value>
   </data>
   <data name="PreciseOcr.Caption" xml:space="preserve">
-    <value>Намного лучше читает мелкий текст и ники. Модуль около {0} скачивается один раз и работает на этом компьютере: снимки никуда не отправляются. Скачивается только по этой кнопке — даже при выключенной проверке обновлений.</value>
+    <value>Намного лучше читает мелкий текст и ники. Модуль около {0} скачивается один раз и работает на этом компьютере: скриншоты никуда не отправляются. Скачивается только по этой кнопке — даже при выключенной проверке обновлений.</value>
   </data>
   <data name="PreciseOcr.Use" xml:space="preserve">
     <value>Использовать точное распознавание</value>
@@ -461,10 +461,10 @@ Screeny закроется; запустите его снова и повтор
     <value>{0} Используется {1}. Сменить можно в настройках.</value>
   </data>
   <data name="Hotkeys.TrayOnly" xml:space="preserve">
-    <value>{0} Снимок — по клику на иконку в трее.</value>
+    <value>{0} Скриншот — по клику на иконку в трее.</value>
   </data>
   <data name="Hotkeys.TrayOnlyWithError" xml:space="preserve">
-    <value>{0} {1} Снимок — по клику на иконку в трее.</value>
+    <value>{0} {1} Скриншот — по клику на иконку в трее.</value>
   </data>
   <data name="Hotkeys.PrintScreenReserved" xml:space="preserve">
     <value>PrintScreen занят системным захватом экрана Windows (Параметры → Специальные возможности → Клавиатура).</value>
@@ -515,7 +515,7 @@ Screeny закроется; запустите его снова и повтор
     <value>ОБНОВЛЕНИЯ</value>
   </data>
   <data name="Wizard.PrivacyNote" xml:space="preserve">
-    <value>Снимки никуда не отправляются; в сеть Screeny ходит только за проверкой новых версий на GitHub и — если вы сами попросите — за модулем точного распознавания.</value>
+    <value>Скриншоты никуда не отправляются; в сеть Screeny ходит только за проверкой новых версий на GitHub и — если вы сами попросите — за модулем точного распознавания.</value>
   </data>
   <data name="Wizard.FakeSuffix" xml:space="preserve">
     <value>{0} (dev: подставная среда)</value>
@@ -530,7 +530,7 @@ Screeny закроется; запустите его снова и повтор
     <value>Отметьте, что сделать, и нажмите «Применить». Без вашего согласия ничего не меняется; Screeny ничего не удаляет сам.</value>
   </data>
   <data name="Wizard.IntroReady" xml:space="preserve">
-    <value>Других программ, которые перехватывают PrintScreen или Win+Shift+S, не найдено. Выберите хоткеи снимка и нужные функции.</value>
+    <value>Других программ, которые перехватывают PrintScreen или Win+Shift+S, не найдено. Выберите хоткеи скриншота и нужные функции.</value>
   </data>
   <data name="Wizard.Blocks" xml:space="preserve">
     <value>Мешает: {0}.</value>
@@ -539,7 +539,7 @@ Screeny закроется; запустите его снова и повтор
     <value>Мешает: {0} (обычно занимает {1}).</value>
   </data>
   <data name="Wizard.UsuallyTakes" xml:space="preserve">
-    <value>Обычно занимает {0} — с хоткеями Screeny по умолчанию не пересекается, но это второй инструмент снимков.</value>
+    <value>Обычно занимает {0} — с хоткеями Screeny по умолчанию не пересекается, но это второй инструмент для скриншотов.</value>
   </data>
   <data name="Wizard.PowerToysKeys" xml:space="preserve">
     <value>переназначение клавиш в Keyboard Manager</value>
@@ -620,7 +620,7 @@ Screeny закроется; запустите его снова и повтор
     <value>Скачать точное распознавание текста ({0})</value>
   </data>
   <data name="Wizard.PreciseOcrHint" xml:space="preserve">
-    <value>PaddleOCR: намного лучше читает мелкий текст и ники. Работает на этом компьютере, снимки никуда не отправляются.</value>
+    <value>PaddleOCR: намного лучше читает мелкий текст и ники. Работает на этом компьютере, скриншоты никуда не отправляются.</value>
   </data>
   <data name="Wizard.HotkeyFailed" xml:space="preserve">
     <value>Хоткей не заработал.</value>
@@ -731,22 +731,22 @@ Screeny закроется; запустите его снова и повтор
     <value>Распознавание текста и QR</value>
   </data>
   <data name="Feature.Ocr.Description" xml:space="preserve">
-    <value>Режим текста (Ctrl+T): выделение и копирование текста со снимка, QR и штрихкоды.</value>
+    <value>Режим текста (Ctrl+T): выделение и копирование текста со скриншота, QR и штрихкоды.</value>
   </data>
   <data name="Feature.History.Title" xml:space="preserve">
-    <value>История снимков</value>
+    <value>История скриншотов</value>
   </data>
   <data name="Feature.History.Description" xml:space="preserve">
-    <value>Снимки сохраняются в папку, окно истории и повторное редактирование. Без истории снимок только копируется.</value>
+    <value>Скриншоты сохраняются в папку, окно истории и повторное редактирование. Без истории скриншот только копируется.</value>
   </data>
   <data name="Feature.Pins.Title" xml:space="preserve">
-    <value>Закрепление снимков</value>
+    <value>Закрепление скриншотов</value>
   </data>
   <data name="Feature.Pins.Description" xml:space="preserve">
-    <value>Снимок поверх всех окон (F3), в том числе из истории.</value>
+    <value>Скриншот поверх всех окон (F3), в том числе из истории.</value>
   </data>
   <data name="Feature.Beautify.Title" xml:space="preserve">
-    <value>Оформление снимка</value>
+    <value>Оформление скриншота</value>
   </data>
   <data name="Feature.Beautify.Description" xml:space="preserve">
     <value>Градиентный фон, отступ, скругление и тень (B).</value>
@@ -755,7 +755,7 @@ Screeny закроется; запустите его снова и повтор
     <value>Пипетка</value>
   </data>
   <data name="Feature.Pipette.Description" xml:space="preserve">
-    <value>Цвет пикселя со снимка (I), HEX под лупой до выделения (C).</value>
+    <value>Цвет пикселя со скриншота (I), HEX под лупой до выделения (C).</value>
   </data>
   <data name="Feature.Ruler.Title" xml:space="preserve">
     <value>Линейка</value>
@@ -845,7 +845,7 @@ Screeny закроется; запустите его снова и повтор
     <value>Линейка: Δx, Δy и длина в пикселях, Shift — шаг 45°</value>
   </data>
   <data name="Toolbar.Pipette" xml:space="preserve">
-    <value>Пипетка: цвет со снимка (I)</value>
+    <value>Пипетка: цвет со скриншота (I)</value>
   </data>
   <data name="Toolbar.Thickness" xml:space="preserve">
     <value>Толщина — колесо мыши</value>
@@ -860,7 +860,7 @@ Screeny закроется; запустите его снова и повтор
     <value>Оформление: фон, отступ, скругление, тень (B)</value>
   </data>
   <data name="Toolbar.Ocr" xml:space="preserve">
-    <value>Выделить текст на снимке (Ctrl+T)</value>
+    <value>Выделить текст на скриншоте (Ctrl+T)</value>
   </data>
   <data name="Toolbar.OcrBack" xml:space="preserve">
     <value>Вернуться к рисованию (Ctrl+T, Esc)</value>
@@ -992,7 +992,7 @@ Screeny закроется; запустите его снова и повтор
     <value>Мягкая</value>
   </data>
   <data name="Beautify.SoftTip" xml:space="preserve">
-    <value>Мягкая тень под снимком</value>
+    <value>Мягкая тень под скриншотом</value>
   </data>
   <data name="Beautify.Sunset" xml:space="preserve">
     <value>Закат</value>
@@ -1097,10 +1097,10 @@ Screeny закроется; запустите его снова и повтор
     <value>История пуста</value>
   </data>
   <data name="History.EmptyHintHotkey" xml:space="preserve">
-    <value>Нажмите {0}, чтобы сделать первый снимок.</value>
+    <value>Нажмите {0}, чтобы сделать первый скриншот.</value>
   </data>
   <data name="History.EmptyHintTray" xml:space="preserve">
-    <value>Кликните по иконке Screeny в трее, чтобы сделать первый снимок.</value>
+    <value>Кликните по иконке Screeny в трее, чтобы сделать первый скриншот.</value>
   </data>
   <data name="History.FolderUnavailable" xml:space="preserve">
     <value>Папка истории недоступна</value>
@@ -1109,7 +1109,7 @@ Screeny закроется; запустите его снова и повтор
     <value>Не удалось прочитать папку истории</value>
   </data>
   <data name="History.Count" xml:space="preserve">
-    <value>{0} из {1} снимков</value>
+    <value>{0} из {1} скриншотов</value>
   </data>
   <data name="History.ClipboardBusy" xml:space="preserve">
     <value>Буфер занят</value>
@@ -1121,13 +1121,13 @@ Screeny закроется; запустите его снова и повтор
     <value>Файл мог быть удалён или для PNG не назначена программа просмотра.</value>
   </data>
   <data name="History.DeleteTitle" xml:space="preserve">
-    <value>Удалить снимок?</value>
+    <value>Удалить скриншот?</value>
   </data>
   <data name="History.DeleteText" xml:space="preserve">
     <value>Файл удаляется без корзины, восстановить его будет нельзя.</value>
   </data>
   <data name="History.DeleteFailedTitle" xml:space="preserve">
-    <value>Не удалось удалить снимок</value>
+    <value>Не удалось удалить скриншот</value>
   </data>
   <data name="History.DeleteFailedText" xml:space="preserve">
     <value>Файл занят другой программой или нет доступа к папке.</value>
@@ -1146,7 +1146,7 @@ Screeny закроется; запустите его снова и повтор
   </data>
   <data name="History.ClearText" xml:space="preserve">
     <value>Папка: {0}
-Будут удалены снимки ({1}) без корзины. Восстановить их будет нельзя.</value>
+Будут удалены скриншоты ({1}) без корзины. Восстановить их будет нельзя.</value>
   </data>
   <data name="History.DeleteAll" xml:space="preserve">
     <value>Удалить всё</value>
@@ -1155,7 +1155,7 @@ Screeny закроется; запустите его снова и повтор
     <value>Редактор</value>
   </data>
   <data name="Editor.TitleShot" xml:space="preserve">
-    <value>Редактор — снимок {0}</value>
+    <value>Редактор — скриншот {0}</value>
   </data>
   <data name="Editor.TitleFile" xml:space="preserve">
     <value>Редактор — {0}</value>
@@ -1164,7 +1164,7 @@ Screeny закроется; запустите его снова и повтор
     <value>Оригинал</value>
   </data>
   <data name="Editor.OriginalTip" xml:space="preserve">
-    <value>Снимок без пометок: пометки скрыты, но не удалены</value>
+    <value>Скриншот без пометок: пометки скрыты, но не удалены</value>
   </data>
   <data name="Editor.WithMarkup" xml:space="preserve">
     <value>С пометками</value>
@@ -1194,7 +1194,7 @@ Screeny закроется; запустите его снова и повтор
     <value>Оригинал без пометок: пометки скрыты и не удалены, рисовать в этом режиме нельзя.</value>
   </data>
   <data name="Editor.NoticeNoOriginal" xml:space="preserve">
-    <value>Оригинал не сохранён — пометки рисуются поверх готового снимка. Включите хранение оригиналов в настройках.</value>
+    <value>Оригинал не сохранён — пометки рисуются поверх готового скриншота. Включите хранение оригиналов в настройках.</value>
   </data>
   <data name="Editor.ComposeFailed" xml:space="preserve">
     <value>Не удалось собрать картинку: {0}</value>
@@ -1239,7 +1239,7 @@ Screeny закроется; запустите его снова и повтор
     <value>Размер в документе пометок ({0}×{1}) не совпадает с оригиналом ({2}×{3})</value>
   </data>
   <data name="Edit.UnknownMarks" xml:space="preserve">
-    <value>Неизвестных пометок: {0} (снимок из более новой версии Screeny)</value>
+    <value>Неизвестных пометок: {0} (скриншот из более новой версии Screeny)</value>
   </data>
   <data name="Edit.ReadOriginalFailed" xml:space="preserve">
     <value>Не удалось прочитать оригинал</value>
@@ -1251,7 +1251,7 @@ Screeny закроется; запустите его снова и повтор
     <value>Документ пометок версии {0} — из более новой версии Screeny</value>
   </data>
   <data name="Edit.OpenedFlat" xml:space="preserve">
-    <value>{0}. Снимок открыт как готовая картинка: прежние пометки — её часть.</value>
+    <value>{0}. Скриншот открыт как готовая картинка: прежние пометки — её часть.</value>
   </data>
   <data name="Pin.Save" xml:space="preserve">
     <value>Сохранить…</value>
