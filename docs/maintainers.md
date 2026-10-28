@@ -239,10 +239,16 @@ glyph forms.
 
 ## Why the installer is built this way
 
-- **Framework-dependent with `--framework net8.0-x64-desktop`**, not self-contained. The installer is about 17 MB and
+- **Framework-dependent with `--framework net10.0-x64-desktop`**, not self-contained. The installer is about 17 MB and
   each update about 10 MB, instead of about 70 MB every time. The Velopack installer installs the runtime if it's
   missing ([bootstrapping](https://docs.velopack.io/packaging/bootstrapping)). The cost is that the portable version
-  needs the .NET 8 Desktop Runtime installed already.
+  needs the .NET 10 Desktop Runtime installed already.
+- **Changing the runtime (0.2.3 moved from .NET 8 to .NET 10).** The runtime is recorded in each package's nuspec
+  (`runtimeDependencies`), not in `releases.win.json`. Before applying an update, `Update.exe` checks it: if the
+  runtime is missing, it asks the user to install it, then runs Microsoft's installer (Windows asks for permission).
+  If the user cancels, nothing is applied and the old version starts again. A silent apply (`silent: true`, used for
+  updates that only touch disabled features) cancels instead of asking, so a release that changes the runtime must
+  never be fully tagged: its notes have to show the normal update window.
 - **Single file** stays on: `vpk` finds `Velopack.dll` inside the single-file exe and checks that it calls
   `VelopackApp.Run()`.
 - **Own `Program.Main`** (`<StartupObject>Screeny.Program</StartupObject>`), because `VelopackApp.Build().Run()` has to

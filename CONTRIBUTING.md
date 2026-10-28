@@ -23,7 +23,7 @@ Don't include private information in reports. Blur or crop anything you wouldn't
 
 ## Contributing code
 
-You need Windows and the .NET 8 SDK (the exact version is pinned in `global.json`).
+You need Windows and the .NET 10 SDK (the exact version is pinned in `global.json`).
 
 ```
 dotnet build Screeny.sln

@@ -20,10 +20,10 @@ Windows 10 or 11, 64-bit.
 
 - **Installer**, `Screeny-win-Setup.exe` (about 17 MB). Installs Screeny just for your user account, no admin rights needed,
   into `%LocalAppData%\DontIgnore.Screeny\`. It adds a Start menu shortcut and an entry in Settings > Apps, so you can
-  uninstall it the usual way. If your PC doesn't have Microsoft .NET 8 yet, the installer downloads and adds it, and
+  uninstall it the usual way. If your PC doesn't have Microsoft .NET 10 yet, the installer downloads and adds it, and
   Windows may ask for permission.
 - **Portable**, `Screeny-win-Portable.zip` (about 10 MB). Unzip it anywhere and run `Screeny.exe`. You need the
-  [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0) installed first (free, from Microsoft).
+  [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) installed first (free, from Microsoft).
   The portable version updates itself too, in its own folder.
 
 Both versions keep your settings and history in the same place, so switching from portable to the installer loses
@@ -248,7 +248,7 @@ problems privately, as described in [SECURITY.md](SECURITY.md).
 
 ## Building from source
 
-You need Windows and the .NET 8 SDK (the exact version is pinned in `global.json`).
+You need Windows and the .NET 10 SDK (the exact version is pinned in `global.json`).
 
 ```powershell
 dotnet build Screeny.sln

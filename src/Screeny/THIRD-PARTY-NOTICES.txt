@@ -12,8 +12,7 @@ H.NotifyIcon, H.NotifyIcon.Wpf,              MIT
 Velopack 1.2.161                             MIT
 ZXing.Net 0.16.9                             Apache License 2.0
 Microsoft.ML.OnnxRuntime.Managed 1.31.0      MIT
-System.Numerics.Tensors 9.0.0,               MIT (.NET)
-  System.Drawing.Common 8.0.7
+System.Numerics.Tensors 9.0.0                MIT (.NET)
 WinRT.Runtime, Microsoft.Windows.SDK.NET     Microsoft, part of the .NET SDK
   (Windows SDK projection for .NET)          (C#/WinRT runtime: MIT)
 
@@ -96,7 +95,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ==============================================================================
-System.Numerics.Tensors, System.Drawing.Common (.NET)
+System.Numerics.Tensors (.NET)
 https://github.com/dotnet/runtime
 
 The MIT License (MIT)

@@ -1,5 +1,5 @@
 # Публикация Screeny в publish/Screeny.exe (один файл).
-#   powershell -File tools/publish.ps1                 — нужен установленный .NET 8 Desktop Runtime (~1 МБ exe)
+#   powershell -File tools/publish.ps1                 — нужен установленный .NET 10 Desktop Runtime (~1 МБ exe)
 #   powershell -File tools/publish.ps1 -SelfContained — автономный exe со встроенным рантаймом (~70 МБ)
 param([switch]$SelfContained)
 $ErrorActionPreference = 'Stop'

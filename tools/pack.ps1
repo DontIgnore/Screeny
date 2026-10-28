@@ -3,8 +3,8 @@
 #   powershell -File tools/pack.ps1                       — версия из тега текущего коммита (v0.2.0 → 0.2.0)
 #   powershell -File tools/pack.ps1 -Version 0.2.1 -OutputDir C:\tmp\rel-0.2.1
 # Результат в releases/ (или -OutputDir):
-#   Screeny-win-Setup.exe     — установщик (per-user, %LocalAppData%\DontIgnore.Screeny, ставит .NET 8 Desktop Runtime при необходимости)
-#   Screeny-win-Portable.zip  — портативная версия (тоже обновляется; .NET 8 Desktop Runtime нужен заранее)
+#   Screeny-win-Setup.exe     — установщик (per-user, %LocalAppData%\DontIgnore.Screeny, ставит .NET 10 Desktop Runtime при необходимости)
+#   Screeny-win-Portable.zip  — портативная версия (тоже обновляется; .NET 10 Desktop Runtime нужен заранее)
 #   DontIgnore.Screeny-<версия>-full.nupkg, *-delta.nupkg, releases.win.json — файлы обновлений
 # Все файлы из папки прикладываются к релизу GitHub (см. docs/maintainers.md, «Making a release»).
 # Для дельта-обновлений в -OutputDir должны лежать пакеты предыдущей версии (vpk сам найдёт последний *-full.nupkg).
@@ -49,7 +49,7 @@ try {
         --runtime win-x64 `
         --icon (Join-Path $root 'src/Screeny/Assets/screeny.ico') `
         --releaseNotes $NotesFile `
-        --framework net8.0-x64-desktop `
+        --framework net10.0-x64-desktop `
         --shortcuts StartMenuRoot `
         --outputDir $OutputDir
     if ($LASTEXITCODE -ne 0) { throw "vpk pack failed ($LASTEXITCODE)" }
