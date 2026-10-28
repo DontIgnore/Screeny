@@ -1,0 +1,29 @@
+name: Feature request
+description: Suggest an improvement or a new idea
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea. Screeny keeps everything on your computer, so ideas that need cloud upload, accounts or telemetry of screenshots are out of scope.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: Tell us about the situation, not only the fix you have in mind.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea
+      description: How could Screeny help?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: Anything you do today instead, or other ways it could work.
+    validations:
+      required: false
