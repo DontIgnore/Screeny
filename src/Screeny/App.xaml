@@ -28,6 +28,9 @@
             <MenuItem Header="{l:Loc Common.CheckConflicts}" Command="{Binding SetupWizardCommand}"/>
             <MenuItem Header="{l:Loc Tray.CheckUpdates}" Command="{Binding CheckUpdatesCommand}"/>
             <Separator/>
+            <MenuItem Header="{l:Loc Tray.ReportBug}" Command="{Binding ReportBugCommand}"/>
+            <MenuItem Header="{l:Loc Tray.SuggestIdea}" Command="{Binding SuggestIdeaCommand}"/>
+            <Separator/>
             <MenuItem Header="{l:Loc Tray.Exit}" Command="{Binding ExitCommand}"/>
           </ContextMenu>
         </tb:TaskbarIcon.ContextMenu>

@@ -175,7 +175,7 @@ Without history, a screenshot is only copied to the clipboard.
 
 ## Updates and privacy
 
-Your screenshots never leave your computer. Screeny goes online for two things only:
+Your screenshots never leave your computer. Screeny goes online for three things only:
 
 - **Update checks.** About 30 seconds after start, and then once a day, Screeny checks
   [GitHub Releases](https://github.com/DontIgnore/Screeny/releases) for a new version. If there is one, a tray
@@ -185,6 +185,10 @@ Your screenshots never leave your computer. Screeny goes online for two things o
   tray menu ("Check for updates…") or turn checks off in settings ("Check for updates"). Turning checks off stops
   both the prompts and the quiet updates.
 - **The precise OCR module**, only when you click to download it. This works even with update checks turned off.
+- **A report you send yourself**, from "Report a bug…" or "Suggest an improvement…". It goes to screeny.page with
+  what you typed and, for a bug, technical details: versions, interface language, display scaling, the number of
+  monitors and the last lines of the error log with your user name taken out. You can see them before sending or
+  turn them off. Screenshots are never attached.
 
 The module is accepted only if its SHA256 matches the hash built into the app, and every file is checked again before
 the models load. Recognition itself runs on your computer.
@@ -231,6 +235,16 @@ Screeny shows a notification instead of the whole wizard.
   both much better.
 - **A shortcut taken by another app can't be entered in settings**, because the key press never reaches Screeny.
   Pick a different one.
+
+## Feedback and contributing
+
+Found a bug or have an idea? Use "Report a bug…" or "Suggest an improvement…" in the tray menu (also in settings,
+under "About"). You don't need an account. Reports are reviewed before anything is made public; good ones become
+GitHub issues or land on the [roadmap](https://screeny.page/roadmap). If you'd rather post on GitHub yourself, the
+same window has a link for that.
+
+Want to help with code, translations or docs? Start with [CONTRIBUTING.md](CONTRIBUTING.md). Please report security
+problems privately, as described in [SECURITY.md](SECURITY.md).
 
 ## Building from source
 

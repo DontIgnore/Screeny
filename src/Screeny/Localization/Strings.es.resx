@@ -52,7 +52,7 @@
     <value>Buscar actualizaciones</value>
   </data>
   <data name="Common.PrivacyNote" xml:space="preserve">
-    <value>Las capturas nunca se envían a ningún sitio. Screeny solo se conecta para buscar actualizaciones y, si tú lo pides, para descargar el reconocimiento de texto preciso. Esta casilla no impide esa descarga.</value>
+    <value>Las capturas nunca se envían a ningún sitio. Screeny solo se conecta para buscar actualizaciones, para descargar el reconocimiento de texto preciso si tú lo pides y cuando tú mismo envías un informe. Esta casilla no impide esa descarga.</value>
   </data>
   <data name="Common.SeeLog" xml:space="preserve">
     <value>Encontrarás los detalles en el registro.</value>
@@ -515,7 +515,7 @@ Screeny se cerrará. Vuelve a abrirlo y repite la actualización.</value>
     <value>ACTUALIZACIONES</value>
   </data>
   <data name="Wizard.PrivacyNote" xml:space="preserve">
-    <value>Las capturas nunca se envían a ningún sitio. Screeny solo se conecta para buscar versiones nuevas en GitHub y, si tú lo pides, para descargar el módulo de OCR preciso.</value>
+    <value>Las capturas nunca se envían a ningún sitio. Screeny solo se conecta para buscar versiones nuevas en GitHub, para descargar el módulo de OCR preciso si tú lo pides y cuando tú mismo envías un informe.</value>
   </data>
   <data name="Wizard.FakeSuffix" xml:space="preserve">
     <value>{0} (dev: entorno simulado)</value>
@@ -1308,5 +1308,125 @@ Se eliminarán las capturas ({1}) sin pasar por la Papelera de reciclaje. No se 
   </data>
   <data name="About.License" xml:space="preserve">
     <value>Licencia: GPL-3.0</value>
+  </data>
+  <data name="Tray.ReportBug" xml:space="preserve">
+    <value>Informar de un error…</value>
+  </data>
+  <data name="Tray.SuggestIdea" xml:space="preserve">
+    <value>Sugerir una mejora…</value>
+  </data>
+  <data name="Feedback.BugTitle" xml:space="preserve">
+    <value>Informar de un error</value>
+  </data>
+  <data name="Feedback.IdeaTitle" xml:space="preserve">
+    <value>Sugerir una mejora</value>
+  </data>
+  <data name="Feedback.BugIntro" xml:space="preserve">
+    <value>Cuéntanos qué ha fallado. No hace falta cuenta.</value>
+  </data>
+  <data name="Feedback.IdeaIntro" xml:space="preserve">
+    <value>¿Qué haría Screeny mejor para ti? No hace falta cuenta.</value>
+  </data>
+  <data name="Feedback.TitleLabel" xml:space="preserve">
+    <value>Título</value>
+  </data>
+  <data name="Feedback.DescriptionLabel" xml:space="preserve">
+    <value>Descripción</value>
+  </data>
+  <data name="Feedback.ContactLabel" xml:space="preserve">
+    <value>Contacto (opcional)</value>
+  </data>
+  <data name="Feedback.BugTitlePlaceholder" xml:space="preserve">
+    <value>En pocas palabras: qué ha fallado</value>
+  </data>
+  <data name="Feedback.IdeaTitlePlaceholder" xml:space="preserve">
+    <value>En pocas palabras: tu idea</value>
+  </data>
+  <data name="Feedback.BugDescriptionPlaceholder" xml:space="preserve">
+    <value>Qué ha pasado, qué esperabas y los pasos para que vuelva a ocurrir.</value>
+  </data>
+  <data name="Feedback.IdeaDescriptionPlaceholder" xml:space="preserve">
+    <value>¿Qué problema resolvería? ¿Cómo lo resuelves ahora?</value>
+  </data>
+  <data name="Feedback.ContactPlaceholder" xml:space="preserve">
+    <value>Correo o Telegram</value>
+  </data>
+  <data name="Feedback.ContactNote" xml:space="preserve">
+    <value>Solo lo ve el desarrollador, y solo para responderte.</value>
+  </data>
+  <data name="Feedback.AttachDetails" xml:space="preserve">
+    <value>Adjuntar datos técnicos</value>
+  </data>
+  <data name="Feedback.ShowDetails" xml:space="preserve">
+    <value>Ver qué se envía</value>
+  </data>
+  <data name="Feedback.HideDetails" xml:space="preserve">
+    <value>Ocultar</value>
+  </data>
+  <data name="Feedback.Privacy" xml:space="preserve">
+    <value>Nunca se adjuntan capturas. Los informes se revisan antes de publicar nada.</value>
+  </data>
+  <data name="Feedback.Send" xml:space="preserve">
+    <value>Enviar</value>
+  </data>
+  <data name="Feedback.OpenGitHub" xml:space="preserve">
+    <value>Abrir en GitHub</value>
+  </data>
+  <data name="Feedback.Sending" xml:space="preserve">
+    <value>Enviando…</value>
+  </data>
+  <data name="Feedback.Sent" xml:space="preserve">
+    <value>¡Gracias! Informe #{0} enviado.</value>
+  </data>
+  <data name="Feedback.SentNoId" xml:space="preserve">
+    <value>¡Gracias! Informe enviado.</value>
+  </data>
+  <data name="Feedback.SuccessNote" xml:space="preserve">
+    <value>Se revisará antes de publicar nada.</value>
+  </data>
+  <data name="Feedback.TooShort" xml:space="preserve">
+    <value>Al menos {0} caracteres.</value>
+  </data>
+  <data name="Feedback.TooLong" xml:space="preserve">
+    <value>Como máximo {0} caracteres.</value>
+  </data>
+  <data name="Feedback.ErrorOffline" xml:space="preserve">
+    <value>No se pudo conectar con el servidor. Comprueba tu conexión a internet e inténtalo de nuevo. Tu texto sigue aquí.</value>
+  </data>
+  <data name="Feedback.ErrorRateLimited" xml:space="preserve">
+    <value>Demasiados informes desde este equipo. Inténtalo más tarde.</value>
+  </data>
+  <data name="Feedback.ErrorRateLimitedMinutes" xml:space="preserve">
+    <value>Demasiados informes desde este equipo. Inténtalo de nuevo dentro de {0} min.</value>
+  </data>
+  <data name="Feedback.ErrorInvalid" xml:space="preserve">
+    <value>El servidor no aceptó el informe: {0}</value>
+  </data>
+  <data name="Feedback.ErrorInvalidNoMessage" xml:space="preserve">
+    <value>El servidor no aceptó el informe. Revisa los campos e inténtalo de nuevo.</value>
+  </data>
+  <data name="Feedback.ErrorServer" xml:space="preserve">
+    <value>Algo ha fallado en el servidor (error {0}). Inténtalo más tarde. Tu texto sigue aquí.</value>
+  </data>
+  <data name="Feedback.DevNotConfigured" xml:space="preserve">
+    <value>Instancia de prueba: no hay dirección para los informes. Para enviar, iníciala con --feedback-endpoint &lt;url&gt;.</value>
+  </data>
+  <data name="Feedback.DiagAppVersion" xml:space="preserve">
+    <value>Versión</value>
+  </data>
+  <data name="Feedback.DiagOs" xml:space="preserve">
+    <value>Windows</value>
+  </data>
+  <data name="Feedback.DiagLanguage" xml:space="preserve">
+    <value>Idioma de la interfaz</value>
+  </data>
+  <data name="Feedback.DiagDpi" xml:space="preserve">
+    <value>DPI</value>
+  </data>
+  <data name="Feedback.DiagMonitors" xml:space="preserve">
+    <value>Monitores</value>
+  </data>
+  <data name="Feedback.DiagLog" xml:space="preserve">
+    <value>Registro de Screeny, últimas {0} líneas (nombre de usuario sustituido):</value>
   </data>
 </root>

@@ -17,6 +17,8 @@ namespace Screeny.Settings;
 /// Само поле появилось без смены версии: в старом файле его нет, и все функции включены.</item>
 /// <item>Любая версия ≤ текущей: <c>Language</c> не строка — убирается (язык «как в системе»), а не сбрасывает весь файл.
 /// Поле появилось без смены версии: у старого файла его нет — тоже «как в системе».</item>
+/// <item>Любая версия ≤ текущей: <c>InstallId</c> не строка — убирается (создастся при следующей отправке сообщения).
+/// Поле появилось без смены версии.</item>
 /// <item>Версия новее текущей (файл от более новой Screeny): не трогаем.</item>
 /// </list>
 /// </summary>
@@ -38,13 +40,18 @@ public static class SettingsMigrator
         changed |= SanitizeHotkeys(obj);
         changed |= SanitizeStringList(obj, "DisabledFeatures");
         changed |= SanitizeString(obj, "Language");
+        changed |= SanitizeString(obj, "InstallId", allowNull: true);
         return (obj, changed);
     }
 
-    /// <summary>Строковое поле другого типа (число, массив, null) убирается: остаётся значение по умолчанию.</summary>
-    private static bool SanitizeString(JsonObject obj, string name)
+    /// <summary>
+    /// Строковое поле другого типа (число, массив, null) убирается: остаётся значение по умолчанию. С <paramref name="allowNull"/>
+    /// null — допустимое значение (поле, которое сохраняется как null), его не трогаем, чтобы файл не переписывался при каждом запуске.
+    /// </summary>
+    private static bool SanitizeString(JsonObject obj, string name, bool allowNull = false)
     {
         if (!obj.TryGetPropertyValue(name, out var node) || node?.GetValueKind() == JsonValueKind.String) return false;
+        if (node is null && allowNull) return false;
         obj.Remove(name);
         return true;
     }

@@ -1,0 +1,142 @@
+<t:ChromeWindow x:Class="Screeny.Feedback.FeedbackWindow"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:l="clr-namespace:Screeny.Localization"
+                xmlns:t="clr-namespace:Screeny.Themes"
+                Width="480" SizeToContent="Height" ResizeMode="NoResize"
+                WindowStartupLocation="CenterScreen" Icon="/Assets/screeny.ico">
+  <Window.Resources>
+    <Style x:Key="FieldLabel" TargetType="TextBlock" BasedOn="{StaticResource Body}">
+      <Setter Property="Margin" Value="0,14,0,6"/>
+    </Style>
+    <!-- Подсказка поверх пустого поля: клики проходят в поле -->
+    <Style x:Key="Placeholder" TargetType="TextBlock" BasedOn="{StaticResource Body}">
+      <Setter Property="Foreground" Value="{DynamicResource Brush.Ink50}"/>
+      <Setter Property="IsHitTestVisible" Value="False"/>
+      <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+    <!-- Многострочное поле: текст сверху, полоса прокрутки при длинном тексте (у общего стиля её нет) -->
+    <Style x:Key="MultilineBox" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+      <Setter Property="AcceptsReturn" Value="True"/>
+      <Setter Property="TextWrapping" Value="Wrap"/>
+      <Setter Property="VerticalContentAlignment" Value="Top"/>
+      <Setter Property="Padding" Value="10,7"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="TextBox">
+            <Grid>
+              <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                      BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                <ScrollViewer x:Name="PART_ContentHost" Focusable="False" Padding="0,0,2,0"
+                              HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"/>
+              </Border>
+              <Border x:Name="Focus" BorderBrush="{StaticResource Brush.Accent}" BorderThickness="2" CornerRadius="8"
+                      Visibility="Collapsed" IsHitTestVisible="False"/>
+            </Grid>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Brush.StrokeStrong}"/></Trigger>
+              <Trigger Property="IsKeyboardFocusWithin" Value="True"><Setter TargetName="Focus" Property="Visibility" Value="Visible"/></Trigger>
+              <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bd" Property="Opacity" Value="0.5"/></Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </Window.Resources>
+
+  <DockPanel>
+    <!-- Нижняя панель: ссылка на GitHub слева, «Отмена» и «Отправить» справа; после отправки — только «Закрыть» -->
+    <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource Brush.Stroke}" BorderThickness="0,1,0,0" Padding="24,14,24,18">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+          <Button x:Name="CancelButton" Content="{l:Loc Common.Cancel}" IsCancel="True" MinWidth="96" Click="OnCancel"/>
+          <Button x:Name="SendButton" Content="{l:Loc Feedback.Send}" IsDefault="True" MinWidth="112" Margin="8,0,0,0"
+                  Style="{StaticResource AccentButton}" Click="OnSend"/>
+          <Button x:Name="CloseButton" Content="{l:Loc Common.Close}" MinWidth="112" Style="{StaticResource AccentButton}"
+                  Click="OnCancel" Visibility="Collapsed"/>
+        </StackPanel>
+        <TextBlock x:Name="GitHubLink" Style="{StaticResource Caption}" VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,12,0">
+          <Hyperlink Click="OnOpenGitHub" Foreground="{DynamicResource Brush.Accent}"><Run Text="{l:Loc Feedback.OpenGitHub}"/></Hyperlink>
+        </TextBlock>
+      </DockPanel>
+    </Border>
+
+    <ScrollViewer x:Name="BodyScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+      <StackPanel Margin="24,4,24,20">
+        <TextBlock x:Name="HeadingText" Style="{StaticResource H1}" TextWrapping="Wrap"/>
+        <TextBlock x:Name="IntroText" Style="{StaticResource Caption}" Margin="0,4,0,0" TextWrapping="Wrap" LineHeight="17"/>
+
+        <!-- Форма: блокируется на время отправки, после успеха прячется -->
+        <StackPanel x:Name="FormPanel">
+          <TextBlock Text="{l:Loc Feedback.TitleLabel}" Style="{StaticResource FieldLabel}"/>
+          <Grid>
+            <TextBox x:Name="TitleInput" TextChanged="OnFieldChanged" AutomationProperties.Name="{l:Loc Feedback.TitleLabel}"/>
+            <TextBlock x:Name="TitlePlaceholder" Style="{StaticResource Placeholder}" Margin="11,0,11,0" VerticalAlignment="Center"
+                       TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
+          </Grid>
+          <TextBlock x:Name="TitleError" Style="{StaticResource ErrorText}"/>
+
+          <TextBlock Text="{l:Loc Feedback.DescriptionLabel}" Style="{StaticResource FieldLabel}"/>
+          <Grid>
+            <TextBox x:Name="DescriptionInput" Style="{StaticResource MultilineBox}" Height="128" TextChanged="OnFieldChanged"
+                     AutomationProperties.Name="{l:Loc Feedback.DescriptionLabel}"/>
+            <TextBlock x:Name="DescriptionPlaceholder" Style="{StaticResource Placeholder}" Margin="11,8,11,0" VerticalAlignment="Top"
+                       LineHeight="18"/>
+          </Grid>
+          <TextBlock x:Name="DescriptionError" Style="{StaticResource ErrorText}"/>
+
+          <TextBlock Text="{l:Loc Feedback.ContactLabel}" Style="{StaticResource FieldLabel}"/>
+          <Grid>
+            <TextBox x:Name="ContactInput" TextChanged="OnFieldChanged" AutomationProperties.Name="{l:Loc Feedback.ContactLabel}"/>
+            <TextBlock x:Name="ContactPlaceholder" Text="{l:Loc Feedback.ContactPlaceholder}" Style="{StaticResource Placeholder}"
+                       Margin="11,0,11,0" VerticalAlignment="Center" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
+          </Grid>
+          <TextBlock x:Name="ContactError" Style="{StaticResource ErrorText}"/>
+          <TextBlock Text="{l:Loc Feedback.ContactNote}" Style="{StaticResource Caption}" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="17"/>
+
+          <!-- Только для ошибки: технические подробности и то, что именно уходит -->
+          <StackPanel x:Name="DetailsPanel" Margin="0,16,0,0">
+            <DockPanel>
+              <TextBlock DockPanel.Dock="Right" Style="{StaticResource Caption}" Margin="12,1,0,0">
+                <Hyperlink x:Name="DetailsToggle" Click="OnToggleDetails" Foreground="{DynamicResource Brush.Accent}"><Run x:Name="DetailsToggleText"/></Hyperlink>
+              </TextBlock>
+              <CheckBox x:Name="AttachDetailsInput" Content="{l:Loc Feedback.AttachDetails}" IsChecked="True"
+                        Checked="OnAttachChanged" Unchecked="OnAttachChanged"/>
+            </DockPanel>
+            <TextBox x:Name="DetailsPreview" Margin="0,8,0,0" Height="150" IsReadOnly="True" IsReadOnlyCaretVisible="False"
+                     Style="{StaticResource MultilineBox}" FontFamily="{DynamicResource Font.Mono}" FontSize="11"
+                     Visibility="Collapsed" AutomationProperties.Name="{l:Loc Feedback.ShowDetails}"/>
+          </StackPanel>
+
+          <TextBlock Text="{l:Loc Feedback.Privacy}" Style="{StaticResource Caption}" Margin="0,16,0,0" TextWrapping="Wrap" LineHeight="17"/>
+        </StackPanel>
+
+        <!-- Отправка: бегущая полоса и подпись -->
+        <StackPanel x:Name="SendingPanel" Margin="0,16,0,0" Visibility="Collapsed">
+          <Border Height="3" CornerRadius="1.5" Background="{DynamicResource Brush.Ink10}" ClipToBounds="True">
+            <Canvas x:Name="ProgressTrack" ClipToBounds="True">
+              <Rectangle x:Name="ProgressBar" Width="96" Height="3" RadiusX="1.5" RadiusY="1.5" Fill="{StaticResource Brush.Accent}"/>
+            </Canvas>
+          </Border>
+          <TextBlock Text="{l:Loc Feedback.Sending}" Style="{StaticResource Caption}" Margin="0,8,0,0"/>
+        </StackPanel>
+
+        <!-- Ошибка отправки: текст в полях остаётся, можно отправить ещё раз -->
+        <Border x:Name="ErrorPanel" Margin="0,16,0,0" Padding="12,10" CornerRadius="8" Background="{DynamicResource Brush.DangerSubtle}"
+                Visibility="Collapsed">
+          <TextBlock x:Name="ErrorText" Style="{StaticResource Body}" Foreground="{DynamicResource Brush.DangerText}" TextWrapping="Wrap" LineHeight="18"/>
+        </Border>
+
+        <!-- Успех -->
+        <StackPanel x:Name="SuccessPanel" Margin="0,20,0,4" Visibility="Collapsed">
+          <Border Width="40" Height="40" CornerRadius="20" Background="{StaticResource Brush.Accent}" HorizontalAlignment="Left">
+            <Path Data="M 11,20.5 L 17.5,27 L 29,14" Stroke="{StaticResource Brush.OnAccent}" StrokeThickness="2.6"
+                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+          </Border>
+          <TextBlock x:Name="SuccessText" Style="{StaticResource Body}" FontWeight="SemiBold" Margin="0,14,0,0" TextWrapping="Wrap"/>
+          <TextBlock Text="{l:Loc Feedback.SuccessNote}" Style="{StaticResource Caption}" Margin="0,4,0,0" TextWrapping="Wrap" LineHeight="17"/>
+        </StackPanel>
+      </StackPanel>
+    </ScrollViewer>
+  </DockPanel>
+</t:ChromeWindow>

@@ -47,8 +47,9 @@ public sealed class AppSettings
     /// </summary>
     public bool SnapEnabled { get; set; } = true;
     /// <summary>
-    /// Проверять обновления на GitHub Releases. Снимки никуда не отправляются: в сеть Screeny ходит только за обновлениями
-    /// и, по просьбе пользователя, за модулем точного распознавания (его загрузку эта настройка не запрещает).
+    /// Проверять обновления на GitHub Releases. Снимки никуда не отправляются: в сеть Screeny ходит только за обновлениями,
+    /// по просьбе пользователя — за модулем точного распознавания (его загрузку эта настройка не запрещает) и когда
+    /// пользователь сам отправляет сообщение об ошибке или предложение.
     /// По умолчанию включено; показывается в настройках и в мастере первого запуска.
     /// </summary>
     public bool CheckForUpdates { get; set; } = true;
@@ -79,6 +80,11 @@ public sealed class AppSettings
     /// неизвестное значение — как «auto».
     /// </summary>
     public string Language { get; set; } = Loc.Auto;
+    /// <summary>
+    /// Случайный GUID для сообщений об ошибках и предложений (<c>installId</c>): сервер по нему только ограничивает частоту.
+    /// Ни с чем не связан; создаётся при первой настоящей отправке, до неё — null. Не GUID — null (создастся заново).
+    /// </summary>
+    public string? InstallId { get; set; }
 
     public bool IsFeatureOn(string id) => !DisabledFeatures.Contains(id);
 
@@ -128,6 +134,7 @@ public sealed class AppSettings
         BeautifyRadius = BeautifyOptions.SnapRadius(BeautifyRadius);
         if (SetupWizardVersion < 0) SetupWizardVersion = 0;
         Language = Loc.NormalizeSetting(Language);
+        InstallId = Guid.TryParse(InstallId, out var installId) ? installId.ToString("D") : null;
         KnownConflicts = (KnownConflicts ?? []).Where(id => !string.IsNullOrWhiteSpace(id)).Distinct(StringComparer.Ordinal).ToList();
         DisabledFeatures = (DisabledFeatures ?? []).Where(id => !string.IsNullOrWhiteSpace(id))
             .Select(id => id.Trim().ToLowerInvariant()).Distinct(StringComparer.Ordinal).ToList();

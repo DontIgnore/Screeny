@@ -26,13 +26,19 @@ namespace Screeny;
 /// <item><c>--module-source &lt;папка&gt;</c> (только с <c>--dev</c>) — брать архив модуля точного распознавания
 /// (<c>Screeny-OcrModule-N.zip</c>, результат <c>tools/pack-ocr-module.ps1</c>) из локальной папки вместо GitHub. Без этого
 /// ключа dev-экземпляр модуль не скачивает никогда.</item>
+/// <item><c>--feedback-endpoint &lt;url&gt;</c> (только с <c>--dev</c>) — куда отправлять сообщения об ошибках и предложения
+/// (свой тестовый сервер). Без этого ключа dev-экземпляр сообщения не отправляет никогда, а «Отправить» говорит, что адрес не задан.</item>
+/// <item><c>--feedback bug|idea</c> — открыть окно сообщения об ошибке или предложения сразу после старта. С <c>--dev</c> и
+/// <c>--scenario</c> (<c>sending</c>, <c>sent</c>, <c>offline</c>, <c>rate-limited</c>, <c>invalid</c>, <c>server</c>,
+/// <c>validation</c>, <c>details</c>) — готовое состояние окна с подставной отправкой, без сети.</item>
 /// <item>Переменная окружения <c>SCREENY_DEV=1</c> — то же, что <c>--dev</c>: она переживает перезапуск через
 /// Velopack-стаб и Update.exe, поэтому тестовая копия не превращается в рабочий экземпляр.</item>
 /// </list>
 /// Без <c>--dev</c> тестовые ключи игнорируются: рабочий экземпляр не открывает оверлей по чужому файлу.
 /// </summary>
 public sealed record StartupArgs(bool Dev, bool OpenSettings, bool OpenHistory, string? OverlayTest, PixelRect? Select, string? Scenario, string? Edit = null, bool EnableLlHook = false,
-    string? UpdateSource = null, bool CheckUpdates = false, bool SetupWizard = false, string? ModuleSource = null)
+    string? UpdateSource = null, bool CheckUpdates = false, bool SetupWizard = false, string? ModuleSource = null,
+    string? FeedbackEndpoint = null, string? Feedback = null)
 {
     public const string DevSuffix = ".Dev";
     public const string DevEnvironmentVariable = "SCREENY_DEV";
@@ -49,7 +55,7 @@ public sealed record StartupArgs(bool Dev, bool OpenSettings, bool OpenHistory, 
     {
         bool dev = devEnvironment?.Trim() is "1" || string.Equals(devEnvironment?.Trim(), "true", StringComparison.OrdinalIgnoreCase);
         bool settings = false, history = false, llHook = false, checkUpdates = false, wizard = false;
-        string? overlay = null, scenario = null, edit = null, updateSource = null, moduleSource = null;
+        string? overlay = null, scenario = null, edit = null, updateSource = null, moduleSource = null, feedbackEndpoint = null, feedback = null;
         PixelRect? select = null;
         for (int i = 0; i < args.Count; i++)
         {
@@ -67,14 +73,19 @@ public sealed record StartupArgs(bool Dev, bool OpenSettings, bool OpenHistory, 
             else if (Is(a, "--check-updates")) checkUpdates = true;
             else if (Is(a, "--setup-wizard")) wizard = true;
             else if (Is(a, "--module-source")) moduleSource = Next();
+            else if (Is(a, "--feedback-endpoint")) feedbackEndpoint = Next();
+            else if (Is(a, "--feedback")) feedback = Next()?.Trim().ToLowerInvariant();
         }
-        if (!dev) (overlay, select, scenario, edit, llHook, updateSource, checkUpdates, moduleSource) = (null, null, null, null, false, null, false, null);
+        if (!dev) (overlay, select, scenario, edit, llHook, updateSource, checkUpdates, moduleSource, feedbackEndpoint) = (null, null, null, null, false, null, false, null, null);
+        if (string.IsNullOrWhiteSpace(feedbackEndpoint)) feedbackEndpoint = null;
+        if (feedback is not ("bug" or "idea")) feedback = null;
         if (string.IsNullOrWhiteSpace(updateSource)) updateSource = null;
         if (string.IsNullOrWhiteSpace(moduleSource)) moduleSource = null;
         if (string.IsNullOrWhiteSpace(overlay)) (overlay, select) = (null, null);
         if (string.IsNullOrWhiteSpace(edit)) edit = null;
-        if (overlay is null && edit is null && !history && !settings && !wizard) scenario = null;
-        return new StartupArgs(dev, settings, history, overlay, select, scenario, edit, llHook, updateSource, checkUpdates, wizard, moduleSource);
+        if (overlay is null && edit is null && !history && !settings && !wizard && feedback is null) scenario = null;
+        return new StartupArgs(dev, settings, history, overlay, select, scenario, edit, llHook, updateSource, checkUpdates, wizard, moduleSource,
+            feedbackEndpoint, feedback);
     }
 
     private static bool Is(string a, string key) => string.Equals(a, key, StringComparison.OrdinalIgnoreCase);

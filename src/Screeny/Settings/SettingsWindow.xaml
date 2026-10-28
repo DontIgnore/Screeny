@@ -119,6 +119,15 @@
           <Hyperlink Click="OnOpenRepository" Foreground="{DynamicResource Brush.Accent}"><Run Text="GitHub"/></Hyperlink>
         </TextBlock>
       </WrapPanel>
+      <!-- Сообщить об ошибке или предложить улучшение: то же окно, что из меню трея -->
+      <WrapPanel Margin="0,8,0,0">
+        <TextBlock Style="{StaticResource Caption}" Margin="0,0,20,0">
+          <Hyperlink Click="OnReportBug" Foreground="{DynamicResource Brush.Accent}"><Run Text="{l:Loc Tray.ReportBug}"/></Hyperlink>
+        </TextBlock>
+        <TextBlock Style="{StaticResource Caption}">
+          <Hyperlink Click="OnSuggestIdea" Foreground="{DynamicResource Brush.Accent}"><Run Text="{l:Loc Tray.SuggestIdea}"/></Hyperlink>
+        </TextBlock>
+      </WrapPanel>
     </StackPanel>
     </ScrollViewer>
   </DockPanel>

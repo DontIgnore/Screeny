@@ -16,8 +16,9 @@ renders the same vector shapes with the same code at 96 DPI, so the clipboard im
 It has its own mutex, settings (`settings.dev.json`), history (`%LocalAppData%\Screeny\Dev\History\`), update state
 (`update-state.dev.json`) and module folder (`%LocalAppData%\Screeny\Dev\Modules\`). It registers no regular capture hotkeys
 (only the Win+Shift+S hook, with `--enable-ll-hook` and if it's on in `settings.dev.json`) and never touches the real
-autostart entry. Without `--update-source` it doesn't look for updates, and without
-`--module-source` it doesn't download the OCR module, so it makes no network requests.
+autostart entry. Without `--update-source` it doesn't look for updates, without
+`--module-source` it doesn't download the OCR module, and without `--feedback-endpoint` it doesn't send bug reports or
+ideas ("Send" says the endpoint isn't set), so it makes no network requests.
 
 ```powershell
 dotnet run --project src/Screeny -- --settings          # open settings right away (or --history)
@@ -27,7 +28,16 @@ dotnet run --project src/Screeny -- --dev --history [--scenario hover]
 dotnet run --project src/Screeny -- --dev --settings --scenario hotkey-problems
 dotnet run --project src/Screeny -- --dev --setup-wizard [--scenario conflicts]   # fake environment, no real actions
 dotnet run --project src/Screeny -- --dev --enable-ll-hook                        # allow the Win+Shift+S hook
+dotnet run --project src/Screeny -- --dev --feedback bug [--scenario <name>]     # the report window (or idea)
+dotnet run --project src/Screeny -- --dev --feedback-endpoint http://localhost:5199/api/feedback   # send to a test server
 ```
+
+Feedback window scenarios fill in the fields and use a fake sender, with no network: `sending` (never finishes),
+`sent`, `offline`, `rate-limited`, `invalid`, `server`, `validation` (empty fields after "Send") and `details` (the
+technical details list open). The working copy always sends to `https://screeny.page/api/feedback`. `installId` in
+the settings is created on the first real send. The technical details are the last 100 lines of `screeny.log` with
+the profile folder replaced by `%USERPROFILE%`, other `Users\` folders and the user name by `<user>`, and the
+recognized-text line of the dev text mode removed (`LogScrubber`).
 
 Overlay scenarios: `shape`, `shape-tool`, `arrow`, `text`, `ruler`, `badge`, `guides`, `textalign`, `edgesnap`,
 `flyout-beautify`, `flyout-beautify-mid`, `flyout-tool`, `flyout-shape`, `pen-bounds`, `ocr`, `ocr-select`, `qr`,

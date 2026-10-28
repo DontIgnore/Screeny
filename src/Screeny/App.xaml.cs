@@ -181,6 +181,7 @@ public partial class App : Application, INotifyPropertyChanged
     {
         if (Args.OpenSettings) ShowSettings();
         if (Args.OpenHistory) ShowHistory();
+        if (Args.Feedback is { } feedback) ShowFeedback(feedback == "idea" ? Feedback.FeedbackKind.Idea : Feedback.FeedbackKind.Bug, Args.Scenario);
         if (Args.OverlayTest is not null) StartCapture();
         if (Args.Edit is not null) OpenEditor(Args.Edit)?.ApplyDevScenario(Args.Scenario);
     }
@@ -718,6 +719,7 @@ public partial class App : Application, INotifyPropertyChanged
         foreach (var pin in Pins.ToList()) pin.Close();
         _historyWindow?.Close();
         _settingsWindow?.Close();
+        DisposeFeedback();
         DisposeUpdates();
         DisposePreciseOcr();
         _hotkeys?.Dispose(); // снимает RegisterHotKey и низкоуровневый хук

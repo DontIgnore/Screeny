@@ -8,7 +8,7 @@ using Screeny.Updates;
 namespace Screeny.Settings;
 
 /// <summary>
-/// Раздел «О программе»: версия, ручная проверка обновлений и ссылки. Проверку и окно обновления ведёт App (тот же путь,
+/// Раздел «О программе»: версия, ручная проверка обновлений, ссылки и «Сообщить об ошибке» / «Предложить улучшение». Проверку и окно обновления ведёт App (тот же путь,
 /// что у пункта трея «Проверить обновления…»); здесь только итог строкой под кнопкой.
 /// </summary>
 public partial class SettingsWindow
@@ -73,6 +73,10 @@ public partial class SettingsWindow
     private void OnOpenLicense(object sender, RoutedEventArgs e) => OpenLink(AppVersion.LicenseUrl);
 
     private void OnOpenRepository(object sender, RoutedEventArgs e) => OpenLink(VelopackUpdateClient.RepositoryUrl);
+
+    private void OnReportBug(object sender, RoutedEventArgs e) => CurrentApp?.ShowFeedback(Feedback.FeedbackKind.Bug);
+
+    private void OnSuggestIdea(object sender, RoutedEventArgs e) => CurrentApp?.ShowFeedback(Feedback.FeedbackKind.Idea);
 
     private static void OpenLink(string url)
     {

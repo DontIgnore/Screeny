@@ -9,7 +9,7 @@
     <RootNamespace>Screeny</RootNamespace>
     <ApplicationIcon>Assets\screeny.ico</ApplicationIcon>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Version>0.2.1</Version>
+    <Version>0.2.2</Version>
     <!-- Свой Main (Program.cs): VelopackApp.Build().Run() должен выполниться раньше WPF. -->
     <StartupObject>Screeny.Program</StartupObject>
     <Product>Screeny</Product>

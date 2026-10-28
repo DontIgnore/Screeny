@@ -71,10 +71,11 @@ public class SettingsStoreTests : IDisposable
             BeautifyRadius = 16,
             BeautifyShadow = false,
             Language = "ja",
+            InstallId = "0f8fad5b-d9cb-469f-a165-70867728950e",
         };
         var defaults = new AppSettings();
         var props = typeof(AppSettings).GetProperties();
-        Assert.Equal(28, props.Length); // новое поле — добавить его сюда
+        Assert.Equal(29, props.Length); // новое поле — добавить его сюда
         // Каждое поле действительно проверяется; версия формата у сохранённого файла всегда текущая.
         foreach (var p in props.Where(p => p.Name != nameof(AppSettings.SettingsVersion))) Assert.NotEqual(p.GetValue(defaults), p.GetValue(s));
 
@@ -325,4 +326,39 @@ public class SettingsStoreTests : IDisposable
     }
 
     public void Dispose() { if (Directory.Exists(_dir)) Directory.Delete(_dir, true); }
+
+    [Fact]
+    public void InstallId_MissingOrNull_StaysNull_AndFileIsNotRewritten()
+    {
+        Assert.Null(LoadJson("""{ "SettingsVersion": 2 }""").InstallId);
+        var json = """{ "SettingsVersion": 2, "InstallId": null }""";
+        Assert.Null(LoadJson(json).InstallId);
+        Assert.Equal(json, File.ReadAllText(FilePath)); // null — допустимое значение, а не повод переписать файл
+    }
+
+    [Theory]
+    [InlineData("not-a-guid")]
+    [InlineData("")]
+    public void InstallId_Invalid_BecomesNull(string value)
+        => Assert.Null(LoadJson($$"""{ "SettingsVersion": 2, "InstallId": "{{value}}" }""").InstallId);
+
+    [Fact]
+    public void InstallId_WrongType_IsDropped_OtherSettingsKept()
+    {
+        var s = LoadJson("""{ "SettingsVersion": 2, "InstallId": 42, "HistoryLimit": 7 }""");
+        Assert.Null(s.InstallId);
+        Assert.Equal(7, s.HistoryLimit);
+    }
+
+    [Fact]
+    public void InstallId_IsNormalizedAndPersists()
+    {
+        var store = new SettingsStore(FilePath);
+        Assert.Equal("0f8fad5b-d9cb-469f-a165-70867728950e",
+            LoadJson("""{ "SettingsVersion": 2, "InstallId": "{0F8FAD5B-D9CB-469F-A165-70867728950E}" }""").InstallId);
+        var s = store.Load();
+        s.InstallId = Guid.NewGuid().ToString("D");
+        store.Save(s);
+        Assert.Equal(s.InstallId, store.Load().InstallId);
+    }
 }

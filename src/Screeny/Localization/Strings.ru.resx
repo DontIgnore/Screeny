@@ -52,7 +52,7 @@
     <value>Проверять обновления</value>
   </data>
   <data name="Common.PrivacyNote" xml:space="preserve">
-    <value>Скриншоты никуда не отправляются. В интернет Screeny выходит только за проверкой обновлений и, если вы сами попросите, чтобы скачать точное распознавание текста. Эта галочка такую загрузку не запрещает.</value>
+    <value>Скриншоты никуда не отправляются. В интернет Screeny выходит только за проверкой обновлений, за точным распознаванием текста, если вы сами попросите его скачать, и когда вы сами отправляете отчёт. Эта галочка такую загрузку не запрещает.</value>
   </data>
   <data name="Common.SeeLog" xml:space="preserve">
     <value>Подробности — в журнале.</value>
@@ -515,7 +515,7 @@ Screeny закроется; запустите его снова и повтор
     <value>ОБНОВЛЕНИЯ</value>
   </data>
   <data name="Wizard.PrivacyNote" xml:space="preserve">
-    <value>Скриншоты никуда не отправляются; в сеть Screeny ходит только за проверкой новых версий на GitHub и — если вы сами попросите — за модулем точного распознавания.</value>
+    <value>Скриншоты никуда не отправляются. В сеть Screeny ходит только за проверкой новых версий на GitHub, за модулем точного распознавания, если вы сами попросите, и когда вы сами отправляете отчёт.</value>
   </data>
   <data name="Wizard.FakeSuffix" xml:space="preserve">
     <value>{0} (dev: подставная среда)</value>
@@ -1308,5 +1308,125 @@ Screeny закроется; запустите его снова и повтор
   </data>
   <data name="About.License" xml:space="preserve">
     <value>Лицензия: GPL-3.0</value>
+  </data>
+  <data name="Tray.ReportBug" xml:space="preserve">
+    <value>Сообщить об ошибке…</value>
+  </data>
+  <data name="Tray.SuggestIdea" xml:space="preserve">
+    <value>Предложить улучшение…</value>
+  </data>
+  <data name="Feedback.BugTitle" xml:space="preserve">
+    <value>Сообщить об ошибке</value>
+  </data>
+  <data name="Feedback.IdeaTitle" xml:space="preserve">
+    <value>Предложить улучшение</value>
+  </data>
+  <data name="Feedback.BugIntro" xml:space="preserve">
+    <value>Расскажите, что пошло не так. Аккаунт не нужен.</value>
+  </data>
+  <data name="Feedback.IdeaIntro" xml:space="preserve">
+    <value>Что сделало бы Screeny удобнее для вас? Аккаунт не нужен.</value>
+  </data>
+  <data name="Feedback.TitleLabel" xml:space="preserve">
+    <value>Заголовок</value>
+  </data>
+  <data name="Feedback.DescriptionLabel" xml:space="preserve">
+    <value>Описание</value>
+  </data>
+  <data name="Feedback.ContactLabel" xml:space="preserve">
+    <value>Контакт (необязательно)</value>
+  </data>
+  <data name="Feedback.BugTitlePlaceholder" xml:space="preserve">
+    <value>Коротко: что не так</value>
+  </data>
+  <data name="Feedback.IdeaTitlePlaceholder" xml:space="preserve">
+    <value>Коротко: ваша идея</value>
+  </data>
+  <data name="Feedback.BugDescriptionPlaceholder" xml:space="preserve">
+    <value>Что произошло, что вы ожидали и как это повторить по шагам.</value>
+  </data>
+  <data name="Feedback.IdeaDescriptionPlaceholder" xml:space="preserve">
+    <value>Какую проблему это решит? Как вы обходитесь сейчас?</value>
+  </data>
+  <data name="Feedback.ContactPlaceholder" xml:space="preserve">
+    <value>Почта или Telegram</value>
+  </data>
+  <data name="Feedback.ContactNote" xml:space="preserve">
+    <value>Его видит только разработчик, и только чтобы ответить вам.</value>
+  </data>
+  <data name="Feedback.AttachDetails" xml:space="preserve">
+    <value>Приложить технические подробности</value>
+  </data>
+  <data name="Feedback.ShowDetails" xml:space="preserve">
+    <value>Показать, что отправится</value>
+  </data>
+  <data name="Feedback.HideDetails" xml:space="preserve">
+    <value>Скрыть</value>
+  </data>
+  <data name="Feedback.Privacy" xml:space="preserve">
+    <value>Скриншоты никогда не прикладываются. Отчёты просматриваются, прежде чем что-либо станет публичным.</value>
+  </data>
+  <data name="Feedback.Send" xml:space="preserve">
+    <value>Отправить</value>
+  </data>
+  <data name="Feedback.OpenGitHub" xml:space="preserve">
+    <value>Открыть на GitHub</value>
+  </data>
+  <data name="Feedback.Sending" xml:space="preserve">
+    <value>Отправка…</value>
+  </data>
+  <data name="Feedback.Sent" xml:space="preserve">
+    <value>Спасибо! Отчёт #{0} отправлен.</value>
+  </data>
+  <data name="Feedback.SentNoId" xml:space="preserve">
+    <value>Спасибо! Отчёт отправлен.</value>
+  </data>
+  <data name="Feedback.SuccessNote" xml:space="preserve">
+    <value>Его прочитают, прежде чем что-либо станет публичным.</value>
+  </data>
+  <data name="Feedback.TooShort" xml:space="preserve">
+    <value>Нужно не меньше {0} символов.</value>
+  </data>
+  <data name="Feedback.TooLong" xml:space="preserve">
+    <value>Не больше {0} символов.</value>
+  </data>
+  <data name="Feedback.ErrorOffline" xml:space="preserve">
+    <value>Не удалось связаться с сервером. Проверьте подключение к интернету и попробуйте ещё раз. Ваш текст остался в полях.</value>
+  </data>
+  <data name="Feedback.ErrorRateLimited" xml:space="preserve">
+    <value>Слишком много отчётов с этого компьютера. Попробуйте позже.</value>
+  </data>
+  <data name="Feedback.ErrorRateLimitedMinutes" xml:space="preserve">
+    <value>Слишком много отчётов с этого компьютера. Попробуйте снова через {0} мин.</value>
+  </data>
+  <data name="Feedback.ErrorInvalid" xml:space="preserve">
+    <value>Сервер не принял отчёт: {0}</value>
+  </data>
+  <data name="Feedback.ErrorInvalidNoMessage" xml:space="preserve">
+    <value>Сервер не принял отчёт. Проверьте поля и попробуйте ещё раз.</value>
+  </data>
+  <data name="Feedback.ErrorServer" xml:space="preserve">
+    <value>На сервере что-то пошло не так (ошибка {0}). Попробуйте позже. Ваш текст остался в полях.</value>
+  </data>
+  <data name="Feedback.DevNotConfigured" xml:space="preserve">
+    <value>Тестовый экземпляр: адрес для отчётов не задан. Чтобы отправлять, запустите его с --feedback-endpoint &lt;url&gt;.</value>
+  </data>
+  <data name="Feedback.DiagAppVersion" xml:space="preserve">
+    <value>Версия</value>
+  </data>
+  <data name="Feedback.DiagOs" xml:space="preserve">
+    <value>Windows</value>
+  </data>
+  <data name="Feedback.DiagLanguage" xml:space="preserve">
+    <value>Язык интерфейса</value>
+  </data>
+  <data name="Feedback.DiagDpi" xml:space="preserve">
+    <value>DPI</value>
+  </data>
+  <data name="Feedback.DiagMonitors" xml:space="preserve">
+    <value>Мониторы</value>
+  </data>
+  <data name="Feedback.DiagLog" xml:space="preserve">
+    <value>Последние строки журнала Screeny ({0}), имя пользователя заменено:</value>
   </data>
 </root>

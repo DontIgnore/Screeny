@@ -52,7 +52,7 @@
     <value>检查更新</value>
   </data>
   <data name="Common.PrivacyNote" xml:space="preserve">
-    <value>截图不会上传到任何地方。Screeny 只在检查更新时联网，以及在你要求时下载精确文字识别。关闭此选项不会阻止这项下载。</value>
+    <value>截图不会上传到任何地方。Screeny 只在检查更新、在你要求时下载精确文字识别，以及你自己发送报告时联网。关闭此选项不会阻止这项下载。</value>
   </data>
   <data name="Common.SeeLog" xml:space="preserve">
     <value>详细信息请查看日志。</value>
@@ -515,7 +515,7 @@ Screeny 将关闭。请重新启动并再次更新。</value>
     <value>更新</value>
   </data>
   <data name="Wizard.PrivacyNote" xml:space="preserve">
-    <value>截图不会发送到任何地方。Screeny 只会联网到 GitHub 检查新版本，以及在你要求时下载精确文字识别模块。</value>
+    <value>截图不会发送到任何地方。Screeny 只会在 GitHub 检查新版本、在你要求时下载精确文字识别模块，以及你自己发送报告时联网。</value>
   </data>
   <data name="Wizard.FakeSuffix" xml:space="preserve">
     <value>{0}（dev：模拟环境）</value>
@@ -1308,5 +1308,125 @@ Screeny 将关闭。请重新启动并再次更新。</value>
   </data>
   <data name="About.License" xml:space="preserve">
     <value>许可证：GPL-3.0</value>
+  </data>
+  <data name="Tray.ReportBug" xml:space="preserve">
+    <value>报告问题…</value>
+  </data>
+  <data name="Tray.SuggestIdea" xml:space="preserve">
+    <value>提出改进建议…</value>
+  </data>
+  <data name="Feedback.BugTitle" xml:space="preserve">
+    <value>报告问题</value>
+  </data>
+  <data name="Feedback.IdeaTitle" xml:space="preserve">
+    <value>提出改进建议</value>
+  </data>
+  <data name="Feedback.BugIntro" xml:space="preserve">
+    <value>告诉我们出了什么问题。无需账号。</value>
+  </data>
+  <data name="Feedback.IdeaIntro" xml:space="preserve">
+    <value>怎样能让 Screeny 更好用？无需账号。</value>
+  </data>
+  <data name="Feedback.TitleLabel" xml:space="preserve">
+    <value>标题</value>
+  </data>
+  <data name="Feedback.DescriptionLabel" xml:space="preserve">
+    <value>描述</value>
+  </data>
+  <data name="Feedback.ContactLabel" xml:space="preserve">
+    <value>联系方式（可选）</value>
+  </data>
+  <data name="Feedback.BugTitlePlaceholder" xml:space="preserve">
+    <value>一句话说明出了什么问题</value>
+  </data>
+  <data name="Feedback.IdeaTitlePlaceholder" xml:space="preserve">
+    <value>一句话说明你的想法</value>
+  </data>
+  <data name="Feedback.BugDescriptionPlaceholder" xml:space="preserve">
+    <value>发生了什么、你期望的结果，以及重现问题的步骤。</value>
+  </data>
+  <data name="Feedback.IdeaDescriptionPlaceholder" xml:space="preserve">
+    <value>它能解决什么问题？你现在是怎么处理的？</value>
+  </data>
+  <data name="Feedback.ContactPlaceholder" xml:space="preserve">
+    <value>邮箱或 Telegram</value>
+  </data>
+  <data name="Feedback.ContactNote" xml:space="preserve">
+    <value>只有开发者能看到，仅用于回复你。</value>
+  </data>
+  <data name="Feedback.AttachDetails" xml:space="preserve">
+    <value>附加技术信息</value>
+  </data>
+  <data name="Feedback.ShowDetails" xml:space="preserve">
+    <value>查看发送内容</value>
+  </data>
+  <data name="Feedback.HideDetails" xml:space="preserve">
+    <value>隐藏</value>
+  </data>
+  <data name="Feedback.Privacy" xml:space="preserve">
+    <value>绝不附带截图。报告在公开任何内容之前都会经过审核。</value>
+  </data>
+  <data name="Feedback.Send" xml:space="preserve">
+    <value>发送</value>
+  </data>
+  <data name="Feedback.OpenGitHub" xml:space="preserve">
+    <value>改在 GitHub 上提交</value>
+  </data>
+  <data name="Feedback.Sending" xml:space="preserve">
+    <value>正在发送…</value>
+  </data>
+  <data name="Feedback.Sent" xml:space="preserve">
+    <value>谢谢！报告 #{0} 已发送。</value>
+  </data>
+  <data name="Feedback.SentNoId" xml:space="preserve">
+    <value>谢谢！报告已发送。</value>
+  </data>
+  <data name="Feedback.SuccessNote" xml:space="preserve">
+    <value>公开任何内容之前都会先审核。</value>
+  </data>
+  <data name="Feedback.TooShort" xml:space="preserve">
+    <value>至少 {0} 个字符。</value>
+  </data>
+  <data name="Feedback.TooLong" xml:space="preserve">
+    <value>最多 {0} 个字符。</value>
+  </data>
+  <data name="Feedback.ErrorOffline" xml:space="preserve">
+    <value>无法连接服务器。请检查网络连接后重试。你填写的内容仍然保留。</value>
+  </data>
+  <data name="Feedback.ErrorRateLimited" xml:space="preserve">
+    <value>此电脑发送的报告过多，请稍后再试。</value>
+  </data>
+  <data name="Feedback.ErrorRateLimitedMinutes" xml:space="preserve">
+    <value>此电脑发送的报告过多，请在 {0} 分钟后重试。</value>
+  </data>
+  <data name="Feedback.ErrorInvalid" xml:space="preserve">
+    <value>服务器未接受该报告：{0}</value>
+  </data>
+  <data name="Feedback.ErrorInvalidNoMessage" xml:space="preserve">
+    <value>服务器未接受该报告。请检查各项内容后重试。</value>
+  </data>
+  <data name="Feedback.ErrorServer" xml:space="preserve">
+    <value>服务器出错（错误 {0}）。请稍后再试，你填写的内容仍然保留。</value>
+  </data>
+  <data name="Feedback.DevNotConfigured" xml:space="preserve">
+    <value>测试实例：未设置报告地址。如需发送，请使用 --feedback-endpoint &lt;url&gt; 启动。</value>
+  </data>
+  <data name="Feedback.DiagAppVersion" xml:space="preserve">
+    <value>版本</value>
+  </data>
+  <data name="Feedback.DiagOs" xml:space="preserve">
+    <value>Windows</value>
+  </data>
+  <data name="Feedback.DiagLanguage" xml:space="preserve">
+    <value>界面语言</value>
+  </data>
+  <data name="Feedback.DiagDpi" xml:space="preserve">
+    <value>DPI</value>
+  </data>
+  <data name="Feedback.DiagMonitors" xml:space="preserve">
+    <value>显示器数量</value>
+  </data>
+  <data name="Feedback.DiagLog" xml:space="preserve">
+    <value>Screeny 日志最后 {0} 行（已替换用户名）：</value>
   </data>
 </root>

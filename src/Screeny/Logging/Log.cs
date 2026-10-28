@@ -8,6 +8,9 @@ public static class Log
     private static readonly string PathValue = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Screeny", "screeny.log");
     private static readonly object Gate = new();
 
+    /// <summary>Файл журнала (общий для рабочего и тестового экземпляров).</summary>
+    public static string FilePath => PathValue;
+
     public static void Error(string message, Exception? ex = null)
     {
         try
