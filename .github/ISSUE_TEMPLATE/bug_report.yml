@@ -1,0 +1,54 @@
+name: Bug report
+description: Something in Screeny doesn't work the way it should
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time. A clear report makes a fix much faster.
+
+        **Please don't include private information.** Screenshots, logs and settings can show names, emails, file paths or passwords. Blur or crop anything you wouldn't post in public.
+  - type: input
+    id: version
+    attributes:
+      label: Screeny version
+      description: You can find it in Settings, under About.
+      placeholder: "0.2.1"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      description: For example Windows 11 23H2. Press Win+R and run `winver` to see it.
+      placeholder: "Windows 11 23H2"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Press PrintScreen
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Optional. Drag images here, and remember to hide private information.
+    validations:
+      required: false
