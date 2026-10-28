@@ -1,0 +1,1279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Common.Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="Common.Save" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="Common.OK" xml:space="preserve">
+    <value>确定</value>
+  </data>
+  <data name="Common.Close" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="Common.Minimize" xml:space="preserve">
+    <value>最小化</value>
+  </data>
+  <data name="Common.Delete" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="Common.Copy" xml:space="preserve">
+    <value>复制</value>
+  </data>
+  <data name="Common.Open" xml:space="preserve">
+    <value>打开</value>
+  </data>
+  <data name="Common.Copied" xml:space="preserve">
+    <value>已复制</value>
+  </data>
+  <data name="Common.ClipboardBusy" xml:space="preserve">
+    <value>剪贴板被占用</value>
+  </data>
+  <data name="Common.SaveScreenshotTitle" xml:space="preserve">
+    <value>保存截图</value>
+  </data>
+  <data name="Common.CheckConflicts" xml:space="preserve">
+    <value>检查冲突…</value>
+  </data>
+  <data name="Common.CheckUpdatesBox" xml:space="preserve">
+    <value>检查更新</value>
+  </data>
+  <data name="Common.PrivacyNote" xml:space="preserve">
+    <value>截图不会发送到任何地方。Screeny 只会联网到 GitHub 检查新版本，以及在你要求时下载精确文字识别模块。此选项不会阻止该模块的下载。</value>
+  </data>
+  <data name="Common.SeeLog" xml:space="preserve">
+    <value>详细信息请查看日志。</value>
+  </data>
+  <data name="Language.Section" xml:space="preserve">
+    <value>语言</value>
+  </data>
+  <data name="Language.System" xml:space="preserve">
+    <value>跟随系统（{0}）</value>
+  </data>
+  <data name="Language.Name" xml:space="preserve">
+    <value>界面语言</value>
+  </data>
+  <data name="Tray.Capture" xml:space="preserve">
+    <value>截图</value>
+  </data>
+  <data name="Tray.History" xml:space="preserve">
+    <value>历史记录…</value>
+  </data>
+  <data name="Tray.OpenHistoryFolder" xml:space="preserve">
+    <value>打开历史记录文件夹</value>
+  </data>
+  <data name="Tray.Settings" xml:space="preserve">
+    <value>设置…</value>
+  </data>
+  <data name="Tray.CheckUpdates" xml:space="preserve">
+    <value>检查更新…</value>
+  </data>
+  <data name="Tray.Exit" xml:space="preserve">
+    <value>退出</value>
+  </data>
+  <data name="Tray.TipClick" xml:space="preserve">
+    <value>Screeny：单击截图</value>
+  </data>
+  <data name="Tray.TipHotkeys" xml:space="preserve">
+    <value>Screeny：按 {0} 截图</value>
+  </data>
+  <data name="App.StartFailed" xml:space="preserve">
+    <value>Screeny 无法启动。
+
+{0}</value>
+  </data>
+  <data name="App.HistoryFolderCreateFailed" xml:space="preserve">
+    <value>无法创建历史记录文件夹：{0}</value>
+  </data>
+  <data name="App.StartupFailed" xml:space="preserve">
+    <value>无法更改开机启动：没有注册表访问权限。</value>
+  </data>
+  <data name="App.HotkeyFailedChooseAnother" xml:space="preserve">
+    <value>{0} 请选择其他快捷键，或关闭此项。</value>
+  </data>
+  <data name="App.SettingsSaveFailed" xml:space="preserve">
+    <value>设置在退出前仍然有效，但无法保存。请检查设置文件的访问权限后重试。</value>
+  </data>
+  <data name="App.DeleteOriginalsTitle" xml:space="preserve">
+    <value>删除已保存的原图（{0} 张）？</value>
+  </data>
+  <data name="App.DeleteOriginalsText" xml:space="preserve">
+    <value>原图包含被模糊遮住的内容。历史记录中的截图和标注会保留；再次打开时，截图将作为成品图片编辑。</value>
+  </data>
+  <data name="App.Keep" xml:space="preserve">
+    <value>保留</value>
+  </data>
+  <data name="App.OriginalsPartlyDeletedTitle" xml:space="preserve">
+    <value>并非所有原图都已删除</value>
+  </data>
+  <data name="App.OriginalsPartlyDeletedText" xml:space="preserve">
+    <value>已删除 {0} 张，共 {1} 张。详细信息请查看日志。</value>
+  </data>
+  <data name="App.OpenHistoryFolderFailed" xml:space="preserve">
+    <value>无法打开历史记录文件夹：{0}</value>
+  </data>
+  <data name="App.DisplaysChanged" xml:space="preserve">
+    <value>显示器配置已更改，截图已取消。</value>
+  </data>
+  <data name="App.CaptureFailed" xml:space="preserve">
+    <value>无法截图。</value>
+  </data>
+  <data name="App.CopyTextFailed" xml:space="preserve">
+    <value>无法复制文字：{0}</value>
+  </data>
+  <data name="App.SaveFailed" xml:space="preserve">
+    <value>保存失败：{0}。</value>
+  </data>
+  <data name="App.PinFailed" xml:space="preserve">
+    <value>固定失败：{0}。</value>
+  </data>
+  <data name="App.CopyFailed" xml:space="preserve">
+    <value>复制失败：{0}。</value>
+  </data>
+  <data name="App.FailedSavedToHistory" xml:space="preserve">
+    <value>{0}截图已保存到历史记录。</value>
+  </data>
+  <data name="App.ClipboardBusyInHistory" xml:space="preserve">
+    <value>剪贴板正被其他应用占用，截图已保存到历史记录。</value>
+  </data>
+  <data name="App.ClipboardBusyNotCopied" xml:space="preserve">
+    <value>剪贴板正被其他应用占用，截图未复制。</value>
+  </data>
+  <data name="App.ClipboardBusyText" xml:space="preserve">
+    <value>剪贴板正被其他应用占用，文字未复制。</value>
+  </data>
+  <data name="App.TextCopied" xml:space="preserve">
+    <value>已复制文字：{0}</value>
+  </data>
+  <data name="App.OpenShotFailedTitle" xml:space="preserve">
+    <value>无法打开截图</value>
+  </data>
+  <data name="App.OpenShotFailedText" xml:space="preserve">
+    <value>文件可能已被删除或损坏。</value>
+  </data>
+  <data name="App.SaveShotFailed" xml:space="preserve">
+    <value>无法保存截图：{0}</value>
+  </data>
+  <data name="App.WizardScanFailed" xml:space="preserve">
+    <value>无法检查其他截图程序。详细信息请查看日志。</value>
+  </data>
+  <data name="App.WizardSaveFailed" xml:space="preserve">
+    <value>无法保存向导设置。请检查设置文件的访问权限。</value>
+  </data>
+  <data name="Updates.AvailableBalloon" xml:space="preserve">
+    <value>新版本 {0} 可用。单击查看新功能。</value>
+  </data>
+  <data name="Updates.UpToDateTitle" xml:space="preserve">
+    <value>已是最新版本</value>
+  </data>
+  <data name="Updates.NotUpdatableTitle" xml:space="preserve">
+    <value>无法更新</value>
+  </data>
+  <data name="Updates.NotUpdatableText" xml:space="preserve">
+    <value>此 Screeny 副本既不是通过安装程序安装的，也不是便携版，因此无法自动更新。可在 GitHub 发布页面下载新版本。</value>
+  </data>
+  <data name="Updates.CheckFailedTitle" xml:space="preserve">
+    <value>无法检查更新</value>
+  </data>
+  <data name="Updates.ApplyFailedTitle" xml:space="preserve">
+    <value>无法更新</value>
+  </data>
+  <data name="Updates.ApplyFailedText" xml:space="preserve">
+    <value>{0}
+
+Screeny 将关闭。请重新启动并再次更新。</value>
+  </data>
+  <data name="Settings.Title" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="Settings.SectionCapture" xml:space="preserve">
+    <value>截图</value>
+  </data>
+  <data name="Settings.PrintScreenReserved" xml:space="preserve">
+    <value>目前 PrintScreen 会打开 Windows 屏幕截图，按键传不到 Screeny。</value>
+  </data>
+  <data name="Settings.HowToTurnOff" xml:space="preserve">
+    <value>如何关闭</value>
+  </data>
+  <data name="Hotkeys.WinShiftS" xml:space="preserve">
+    <value>Win+Shift+S（代替 Windows 截图工具）</value>
+  </data>
+  <data name="Hotkeys.HookNote" xml:space="preserve">
+    <value>使用系统键盘钩子：Screeny 会读取按键，以识别此快捷键。</value>
+  </data>
+  <data name="Hotkeys.HookNoteAntivirus" xml:space="preserve">
+    <value>使用系统键盘钩子：Screeny 会读取按键，以识别此快捷键。部分杀毒软件可能会对此发出提示。</value>
+  </data>
+  <data name="Settings.CustomShortcuts" xml:space="preserve">
+    <value>自定义快捷键</value>
+  </data>
+  <data name="Settings.AddShortcutTip" xml:space="preserve">
+    <value>再添加一个截图快捷键</value>
+  </data>
+  <data name="Settings.Add" xml:space="preserve">
+    <value>添加</value>
+  </data>
+  <data name="Settings.ConflictsTip" xml:space="preserve">
+    <value>查找会拦截 PrintScreen 或 Win+Shift+S 的程序（Lightshot、ShareX 等）</value>
+  </data>
+  <data name="Settings.SectionFeatures" xml:space="preserve">
+    <value>功能</value>
+  </data>
+  <data name="Settings.SectionHistory" xml:space="preserve">
+    <value>历史记录</value>
+  </data>
+  <data name="Settings.Folder" xml:space="preserve">
+    <value>文件夹</value>
+  </data>
+  <data name="Settings.Browse" xml:space="preserve">
+    <value>浏览…</value>
+  </data>
+  <data name="Settings.KeepLast" xml:space="preserve">
+    <value>保留最近</value>
+  </data>
+  <data name="Settings.LimitRange" xml:space="preserve">
+    <value>1 到 500</value>
+  </data>
+  <data name="Settings.Screenshots" xml:space="preserve">
+    <value>张截图</value>
+  </data>
+  <data name="Settings.KeepOriginals" xml:space="preserve">
+    <value>保留原图以便再次编辑</value>
+  </data>
+  <data name="Settings.KeepOriginalsNote" xml:space="preserve">
+    <value>每张截图旁会另存一份不带标注的副本，其中包含被模糊和像素化遮住的内容。关闭此项后，Screeny 会询问是否删除已保存的原图。</value>
+  </data>
+  <data name="Settings.SectionBehavior" xml:space="preserve">
+    <value>行为</value>
+  </data>
+  <data name="Settings.EnterCopies" xml:space="preserve">
+    <value>按 Enter 将截图复制到剪贴板（否则只保存到历史记录）</value>
+  </data>
+  <data name="Settings.StartWithWindows" xml:space="preserve">
+    <value>随 Windows 启动</value>
+  </data>
+  <data name="Settings.ExcludePins" xml:space="preserve">
+    <value>新截图中不包含已固定的截图</value>
+  </data>
+  <data name="Settings.Snap" xml:space="preserve">
+    <value>吸附和参考线</value>
+  </data>
+  <data name="Settings.SnapNote" xml:space="preserve">
+    <value>选区会吸附到窗口边缘和清晰的边界，图形会吸附到其他图形和选区的边缘与中心。按住 Alt 可暂时关闭。</value>
+  </data>
+  <data name="Settings.FallbackActive" xml:space="preserve">
+    <value>正在使用备用快捷键 {0}：PrintScreen 不可用，也没有其他可用的快捷键。只要上面任一快捷键生效，它就会自动关闭。</value>
+  </data>
+  <data name="Hotkeys.BoxTip" xml:space="preserve">
+    <value>单击后按下组合键；按 Backspace 清除</value>
+  </data>
+  <data name="Settings.RemoveShortcut" xml:space="preserve">
+    <value>删除快捷键</value>
+  </data>
+  <data name="Hotkeys.CustomName" xml:space="preserve">
+    <value>自定义快捷键</value>
+  </data>
+  <data name="Settings.OpenSettingsFailed" xml:space="preserve">
+    <value>无法打开 Windows 设置。请手动打开：辅助功能 &gt; 键盘。</value>
+  </data>
+  <data name="Settings.HistoryFolderDialog" xml:space="preserve">
+    <value>截图历史记录文件夹</value>
+  </data>
+  <data name="Settings.FolderRequired" xml:space="preserve">
+    <value>请输入历史记录文件夹的完整路径。</value>
+  </data>
+  <data name="Settings.LimitInvalid" xml:space="preserve">
+    <value>历史记录中的截图数量必须在 {0} 到 {1} 之间。</value>
+  </data>
+  <data name="Hotkeys.PrintScreenUseBox" xml:space="preserve">
+    <value>请用上方的复选框开启 PrintScreen。</value>
+  </data>
+  <data name="Settings.DuplicateShortcut" xml:space="preserve">
+    <value>此快捷键已在列表中。</value>
+  </data>
+  <data name="Hotkeys.NeedOne" xml:space="preserve">
+    <value>请至少开启一个快捷键，否则只能从通知区域图标截图。</value>
+  </data>
+  <data name="Units.Megabytes" xml:space="preserve">
+    <value>{0} MB</value>
+  </data>
+  <data name="PreciseOcr.Title" xml:space="preserve">
+    <value>精确文字识别（PaddleOCR）</value>
+  </data>
+  <data name="PreciseOcr.Caption" xml:space="preserve">
+    <value>能更准确地识别小字和昵称。模块约 {0}，只需下载一次，在本机运行，截图不会发送到任何地方。只有点击此按钮才会下载，即使关闭了更新检查也是如此。</value>
+  </data>
+  <data name="PreciseOcr.Use" xml:space="preserve">
+    <value>使用精确文字识别</value>
+  </data>
+  <data name="PreciseOcr.Remove" xml:space="preserve">
+    <value>删除模块</value>
+  </data>
+  <data name="PreciseOcr.Undo" xml:space="preserve">
+    <value>不删除</value>
+  </data>
+  <data name="PreciseOcr.Progress" xml:space="preserve">
+    <value>模块下载</value>
+  </data>
+  <data name="PreciseOcr.Update" xml:space="preserve">
+    <value>更新模块（{0}）</value>
+  </data>
+  <data name="PreciseOcr.Download" xml:space="preserve">
+    <value>下载（{0}）</value>
+  </data>
+  <data name="PreciseOcr.Downloading" xml:space="preserve">
+    <value>正在下载模块… {0}%</value>
+  </data>
+  <data name="PreciseOcr.RemovalPending" xml:space="preserve">
+    <value>模块已删除。其文件将在 Screeny 重启后清除。</value>
+  </data>
+  <data name="PreciseOcr.Outdated" xml:space="preserve">
+    <value>已安装的模块版本为 {0}，但此版本的 Screeny 需要 {1}。目前使用 Windows 文字识别。</value>
+  </data>
+  <data name="PreciseOcr.Ready" xml:space="preserve">
+    <value>模块已安装。按 Ctrl+T 会立即显示 Windows 识别结果，并在后台进一步优化。</value>
+  </data>
+  <data name="PreciseOcr.LoadFailed" xml:space="preserve">
+    <value>模块未能加载：{0}</value>
+  </data>
+  <data name="PreciseOcr.Cancelled" xml:space="preserve">
+    <value>下载已取消。</value>
+  </data>
+  <data name="PreciseOcr.NoAccess" xml:space="preserve">
+    <value>无法访问模块文件夹。请检查 %LocalAppData%\Screeny 的权限后重试。</value>
+  </data>
+  <data name="PreciseOcr.WriteFailed" xml:space="preserve">
+    <value>无法写入模块文件（磁盘已满或文件被其他程序占用）。请稍后重试。</value>
+  </data>
+  <data name="PreciseOcr.ArchiveCorrupt" xml:space="preserve">
+    <value>下载的模块压缩包已损坏。请重新下载。</value>
+  </data>
+  <data name="PreciseOcr.InstallFailed" xml:space="preserve">
+    <value>无法安装模块。详细信息请查看 Screeny 日志。</value>
+  </data>
+  <data name="PreciseOcr.AlreadyDeleted" xml:space="preserve">
+    <value>模块文件已被删除。请在 Screeny 重启后重新下载。</value>
+  </data>
+  <data name="PreciseOcr.Installed" xml:space="preserve">
+    <value>精确文字识别已安装：现在在文字模式中按 Ctrl+T 会优化识别结果。</value>
+  </data>
+  <data name="PreciseOcr.DownloadFailed" xml:space="preserve">
+    <value>无法下载精确文字识别模块：{0} 可在设置中重试。</value>
+  </data>
+  <data name="PreciseOcr.NeedsUpdate" xml:space="preserve">
+    <value>精确文字识别暂时关闭：此版本的 Screeny 需要更新模块。请在设置中更新。</value>
+  </data>
+  <data name="Module.NotFound404" xml:space="preserve">
+    <value>服务器上找不到模块（404）。</value>
+  </data>
+  <data name="Module.ServerStatus" xml:space="preserve">
+    <value>服务器返回 {0}。</value>
+  </data>
+  <data name="Module.FileMissing" xml:space="preserve">
+    <value>{0} 中没有 {1}。</value>
+  </data>
+  <data name="Module.NoConnection" xml:space="preserve">
+    <value>无法连接服务器。请检查网络连接后重试。</value>
+  </data>
+  <data name="Module.HashMismatch" xml:space="preserve">
+    <value>下载的文件与预期不符（SHA256）。模块未安装。</value>
+  </data>
+  <data name="Module.Corrupt" xml:space="preserve">
+    <value>模块已损坏：{0}。</value>
+  </data>
+  <data name="Module.OldFilesBusy" xml:space="preserve">
+    <value>旧的模块文件正被占用。请重启 Screeny 后重试。</value>
+  </data>
+  <data name="Module.TooLarge" xml:space="preserve">
+    <value>模块文件过大。</value>
+  </data>
+  <data name="Module.FilesLocked" xml:space="preserve">
+    <value>无法放置模块文件：它们被其他程序（可能是杀毒软件）占用。请一分钟后重试。</value>
+  </data>
+  <data name="Module.BadPath" xml:space="preserve">
+    <value>模块压缩包中的路径无效：{0}</value>
+  </data>
+  <data name="Module.UnpackTooLarge" xml:space="preserve">
+    <value>模块压缩包解压后体积过大。</value>
+  </data>
+  <data name="Manifest.Missing" xml:space="preserve">
+    <value>{0} 不存在或已损坏</value>
+  </data>
+  <data name="Manifest.Changed" xml:space="preserve">
+    <value>{0} 已被修改</value>
+  </data>
+  <data name="Manifest.Unreadable" xml:space="preserve">
+    <value>无法读取 {0}</value>
+  </data>
+  <data name="Manifest.WrongModule" xml:space="preserve">
+    <value>{0} 中是模块 {1} 版本 {2}，应为 {3} 版本 {4}</value>
+  </data>
+  <data name="Manifest.BadPath" xml:space="preserve">
+    <value>{0} 中的路径无效：{1}</value>
+  </data>
+  <data name="Manifest.Duplicate" xml:space="preserve">
+    <value>文件被列出两次：{0}</value>
+  </data>
+  <data name="Manifest.NoFile" xml:space="preserve">
+    <value>缺少文件 {0}</value>
+  </data>
+  <data name="Manifest.SizeMismatch" xml:space="preserve">
+    <value>{0} 的大小不匹配</value>
+  </data>
+  <data name="Manifest.HashMismatch" xml:space="preserve">
+    <value>{0} 的 SHA256 不匹配</value>
+  </data>
+  <data name="Manifest.ExtraFile" xml:space="preserve">
+    <value>多余的文件 {0}</value>
+  </data>
+  <data name="PreciseOcr.FilesDamaged" xml:space="preserve">
+    <value>模块文件已损坏或被修改（{0}）。请删除模块后重新下载。</value>
+  </data>
+  <data name="PreciseOcr.OnnxLoadFailed" xml:space="preserve">
+    <value>无法加载 onnxruntime.dll（需要 64 位 Windows；文件可能被杀毒软件拦截）。</value>
+  </data>
+  <data name="PreciseOcr.ModuleLoadFailed" xml:space="preserve">
+    <value>模块未能加载，详细信息请查看 Screeny 日志。</value>
+  </data>
+  <data name="PreciseOcr.OldVcRuntime" xml:space="preserve">
+    <value>Screeny 已加载旧版 Visual C++ 运行库（{0} {1}，来自 {2}），而模块需要 {3} 或更高版本。请安装最新的 Visual C++ 2015–2022 可再发行组件包 (x64) 并重启 Screeny；在此之前使用 Windows 文字识别。</value>
+  </data>
+  <data name="Hotkeys.Busy" xml:space="preserve">
+    <value>快捷键 {0} 已被其他应用占用。</value>
+  </data>
+  <data name="Hotkeys.RegisterFailed" xml:space="preserve">
+    <value>无法注册快捷键 {0}（Windows 错误 {1}）。</value>
+  </data>
+  <data name="Hotkeys.FallbackInUse" xml:space="preserve">
+    <value>{0} 现使用 {1}。可在设置中更改。</value>
+  </data>
+  <data name="Hotkeys.TrayOnly" xml:space="preserve">
+    <value>{0} 单击通知区域图标即可截图。</value>
+  </data>
+  <data name="Hotkeys.TrayOnlyWithError" xml:space="preserve">
+    <value>{0} {1} 单击通知区域图标即可截图。</value>
+  </data>
+  <data name="Hotkeys.PrintScreenReserved" xml:space="preserve">
+    <value>PrintScreen 已被 Windows 屏幕截图占用（设置 &gt; 辅助功能 &gt; 键盘）。</value>
+  </data>
+  <data name="Hotkeys.Unrecognized" xml:space="preserve">
+    <value>无法识别快捷键“{0}”。</value>
+  </data>
+  <data name="Hotkeys.HookFailed" xml:space="preserve">
+    <value>无法启用 Win+Shift+S 拦截（Windows 错误 {0}）。</value>
+  </data>
+  <data name="Hotkeys.WinShiftSSeparate" xml:space="preserve">
+    <value>Win+Shift+S 请用上方单独的复选框开启：Windows 不允许将其设为普通快捷键。</value>
+  </data>
+  <data name="Hotkeys.NeedModifier" xml:space="preserve">
+    <value>请加上 Ctrl、Alt 或 Win：否则输入文字时这个键将无法正常使用。</value>
+  </data>
+  <data name="Wizard.Title" xml:space="preserve">
+    <value>Screeny：首次运行</value>
+  </data>
+  <data name="Wizard.Skip" xml:space="preserve">
+    <value>跳过</value>
+  </data>
+  <data name="Wizard.SkipTip" xml:space="preserve">
+    <value>不做任何更改。之后可以通过“设置 &gt; 检查冲突…”打开向导</value>
+  </data>
+  <data name="Wizard.Apply" xml:space="preserve">
+    <value>应用</value>
+  </data>
+  <data name="Wizard.Done" xml:space="preserve">
+    <value>完成</value>
+  </data>
+  <data name="Wizard.RescanTip" xml:space="preserve">
+    <value>重新查找干扰快捷键的程序</value>
+  </data>
+  <data name="Wizard.Rescan" xml:space="preserve">
+    <value>重新检查</value>
+  </data>
+  <data name="Wizard.SectionHotkeys" xml:space="preserve">
+    <value>截图快捷键</value>
+  </data>
+  <data name="Wizard.CustomOptional" xml:space="preserve">
+    <value>自定义快捷键（可选）</value>
+  </data>
+  <data name="Wizard.FeaturesNote" xml:space="preserve">
+    <value>可以关闭不需要的功能，其按钮、按键和菜单项都会消失。之后可在设置中重新开启。</value>
+  </data>
+  <data name="Wizard.SectionUpdates" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="Wizard.PrivacyNote" xml:space="preserve">
+    <value>截图不会发送到任何地方。Screeny 只会联网到 GitHub 检查新版本，以及在你要求时下载精确文字识别模块。</value>
+  </data>
+  <data name="Wizard.FakeSuffix" xml:space="preserve">
+    <value>{0}（dev：模拟环境）</value>
+  </data>
+  <data name="Wizard.HeadingConflicts" xml:space="preserve">
+    <value>这些程序会干扰 Screeny 的快捷键</value>
+  </data>
+  <data name="Wizard.HeadingReady" xml:space="preserve">
+    <value>Screeny 已准备就绪</value>
+  </data>
+  <data name="Wizard.IntroConflicts" xml:space="preserve">
+    <value>勾选要执行的操作，然后单击“应用”。未经你同意不会做任何更改，Screeny 也不会自行卸载任何程序。</value>
+  </data>
+  <data name="Wizard.IntroReady" xml:space="preserve">
+    <value>没有发现其他会拦截 PrintScreen 或 Win+Shift+S 的程序。请选择截图快捷键和需要的功能。</value>
+  </data>
+  <data name="Wizard.Blocks" xml:space="preserve">
+    <value>干扰：{0}。</value>
+  </data>
+  <data name="Wizard.BlocksUsually" xml:space="preserve">
+    <value>干扰：{0}（通常占用 {1}）。</value>
+  </data>
+  <data name="Wizard.UsuallyTakes" xml:space="preserve">
+    <value>通常占用 {0}。与 Screeny 的默认快捷键不冲突，但它是另一个截图工具。</value>
+  </data>
+  <data name="Wizard.PowerToysKeys" xml:space="preserve">
+    <value>Keyboard Manager 中的按键重新映射</value>
+  </data>
+  <data name="Wizard.CloseNow" xml:space="preserve">
+    <value>立即关闭</value>
+  </data>
+  <data name="Wizard.CloseNowTip" xml:space="preserve">
+    <value>关闭该程序以释放快捷键。如果 2 秒内没有自行关闭，将强制结束。</value>
+  </data>
+  <data name="Wizard.RemoveAutostart" xml:space="preserve">
+    <value>从开机启动中移除</value>
+  </data>
+  <data name="Wizard.RemoveAutostartTip" xml:space="preserve">
+    <value>与“任务管理器 &gt; 启动应用”中的“禁用”相同：可以恢复，程序本身不会被卸载。</value>
+  </data>
+  <data name="Wizard.MachineAutostart" xml:space="preserve">
+    <value>已为所有用户设置开机启动。可以在该程序自己的设置中或“任务管理器 &gt; 启动应用”中手动关闭，也可以在这里关闭，但需要管理员权限。</value>
+  </data>
+  <data name="Wizard.DisableAsAdmin" xml:space="preserve">
+    <value>以管理员身份关闭</value>
+  </data>
+  <data name="Wizard.PowerToysHint" xml:space="preserve">
+    <value>请在 PowerToys &gt; Keyboard Manager 中移除重新映射。PowerToys 的开机启动可在其常规设置中关闭。</value>
+  </data>
+  <data name="Wizard.Uninstall" xml:space="preserve">
+    <value>卸载程序…</value>
+  </data>
+  <data name="Wizard.UninstallTip" xml:space="preserve">
+    <value>运行该程序自带的卸载程序。Screeny 不会自行卸载任何程序。</value>
+  </data>
+  <data name="Wizard.Resolved" xml:space="preserve">
+    <value>✓ 不再干扰：未运行，也不会自行启动。</value>
+  </data>
+  <data name="Wizard.WindowsCapture" xml:space="preserve">
+    <value>Windows 屏幕截图</value>
+  </data>
+  <data name="Wizard.SystemPrintScreen" xml:space="preserve">
+    <value>目前 PrintScreen 会打开 Windows 截图工具，按键传不到 Screeny。</value>
+  </data>
+  <data name="Wizard.GivePrintScreen" xml:space="preserve">
+    <value>将 PrintScreen 交给 Screeny</value>
+  </data>
+  <data name="Wizard.GivePrintScreenTip" xml:space="preserve">
+    <value>等同于在 Windows 设置中关闭“使用 Print Screen 键打开屏幕截图”。无需管理员权限。</value>
+  </data>
+  <data name="Wizard.SignOutNote" xml:space="preserve">
+    <value>Windows 可能需要注销并重新登录后才会应用此设置。</value>
+  </data>
+  <data name="Wizard.FoundRunning" xml:space="preserve">
+    <value>正在运行</value>
+  </data>
+  <data name="Wizard.FoundRemap" xml:space="preserve">
+    <value>Keyboard Manager 中重新映射了按键</value>
+  </data>
+  <data name="Wizard.FoundNoInstaller" xml:space="preserve">
+    <value>未找到安装程序（便携版？）</value>
+  </data>
+  <data name="Wizard.Found" xml:space="preserve">
+    <value>发现：{0}。</value>
+  </data>
+  <data name="Wizard.RescanFailed" xml:space="preserve">
+    <value>无法重新检查程序。详细信息请查看日志。</value>
+  </data>
+  <data name="Wizard.StillMachineAutostart" xml:space="preserve">
+    <value>{0} 仍为所有用户开机启动。请手动关闭：任务管理器 &gt; 启动应用。</value>
+  </data>
+  <data name="Wizard.UninstallTitle" xml:space="preserve">
+    <value>卸载 {0}？</value>
+  </data>
+  <data name="Wizard.UninstallText" xml:space="preserve">
+    <value>将打开该程序自带的卸载程序，由你在其中决定。Screeny 不会自行卸载任何程序。卸载完成后，请单击“重新检查”。</value>
+  </data>
+  <data name="Wizard.OpenUninstaller" xml:space="preserve">
+    <value>打开卸载程序</value>
+  </data>
+  <data name="Wizard.DownloadPreciseOcr" xml:space="preserve">
+    <value>下载精确文字识别（{0}）</value>
+  </data>
+  <data name="Wizard.PreciseOcrHint" xml:space="preserve">
+    <value>PaddleOCR 能更准确地识别小字和昵称。它在本机运行，截图不会发送到任何地方。</value>
+  </data>
+  <data name="Wizard.HotkeyFailed" xml:space="preserve">
+    <value>快捷键未生效。</value>
+  </data>
+  <data name="Wizard.ChooseAnother" xml:space="preserve">
+    <value>{0} 请选择其他快捷键，或取消勾选。</value>
+  </data>
+  <data name="Wizard.RegisteredSignOut" xml:space="preserve">
+    <value>已注册。如果 PrintScreen 仍打开截图工具，请注销后重新登录。</value>
+  </data>
+  <data name="Wizard.RegisteredButBlocked" xml:space="preserve">
+    <value>已注册，但 {0} 仍在运行或会自行启动，可能会拦截该按键。</value>
+  </data>
+  <data name="Wizard.Works" xml:space="preserve">
+    <value>✓ 可以使用。</value>
+  </data>
+  <data name="Wizard.NotWorking" xml:space="preserve">
+    <value>无法使用。</value>
+  </data>
+  <data name="Wizard.BlockedBy" xml:space="preserve">
+    <value>{0} 干扰程序：{1}。</value>
+  </data>
+  <data name="Wizard.NotifyOne" xml:space="preserve">
+    <value>{0} 被 {1} 占用。要打开向导吗？请单击此通知，或在通知区域菜单中选择“检查冲突…”。</value>
+  </data>
+  <data name="Wizard.NotifyMany" xml:space="preserve">
+    <value>{0} 被以下程序占用：{1}。要打开向导吗？请单击此通知，或在通知区域菜单中选择“检查冲突…”。</value>
+  </data>
+  <data name="Wizard.HotkeyGeneric" xml:space="preserve">
+    <value>快捷键</value>
+  </data>
+  <data name="Autostart.RunUser" xml:space="preserve">
+    <value>当前用户的开机启动</value>
+  </data>
+  <data name="Autostart.StartupFolderUser" xml:space="preserve">
+    <value>用户的“启动”文件夹</value>
+  </data>
+  <data name="Autostart.StartupFolderCommon" xml:space="preserve">
+    <value>公共“启动”文件夹（所有用户）</value>
+  </data>
+  <data name="Autostart.Machine" xml:space="preserve">
+    <value>所有用户的开机启动</value>
+  </data>
+  <data name="Action.NotClosed" xml:space="preserve">
+    <value>{0} 未关闭。请通过其通知区域图标手动关闭。</value>
+  </data>
+  <data name="Action.Closed" xml:space="preserve">
+    <value>已关闭 {0}。</value>
+  </data>
+  <data name="Action.CloseNoRights" xml:space="preserve">
+    <value>无法关闭 {0}：它似乎以管理员身份运行。请通过其通知区域图标手动关闭。</value>
+  </data>
+  <data name="Action.AutostartNeedsAdmin" xml:space="preserve">
+    <value>{0} 为所有用户开机启动，需要管理员权限。</value>
+  </data>
+  <data name="Action.AutostartAlreadyOff" xml:space="preserve">
+    <value>{0} 的开机启动已关闭。</value>
+  </data>
+  <data name="Action.AutostartNoRegistry" xml:space="preserve">
+    <value>无法关闭 {0} 的开机启动：没有注册表访问权限。</value>
+  </data>
+  <data name="Action.AutostartUserOffMachineNeedsAdmin" xml:space="preserve">
+    <value>已为当前用户关闭 {0} 的开机启动；所有用户的启动项需要管理员权限。</value>
+  </data>
+  <data name="Action.AutostartOff" xml:space="preserve">
+    <value>已关闭 {0} 的开机启动。如需重新开启：任务管理器 &gt; 启动应用。</value>
+  </data>
+  <data name="Action.UnknownApp" xml:space="preserve">
+    <value>未知程序。</value>
+  </data>
+  <data name="Action.MachineAutostartOff" xml:space="preserve">
+    <value>已为所有用户关闭 {0} 的开机启动。如需重新开启：任务管理器 &gt; 启动应用。</value>
+  </data>
+  <data name="Action.AutostartFailedCode" xml:space="preserve">
+    <value>无法关闭 {0} 的开机启动（代码 {1}）。详细信息请查看日志。</value>
+  </data>
+  <data name="Action.ElevationCancelled" xml:space="preserve">
+    <value>已取消管理员权限请求，开机启动未更改。</value>
+  </data>
+  <data name="Action.ElevationFailed" xml:space="preserve">
+    <value>无法请求管理员权限：{0}</value>
+  </data>
+  <data name="Action.UninstallerNotFound" xml:space="preserve">
+    <value>找不到 {0} 的卸载程序。请通过“设置 &gt; 应用”卸载。</value>
+  </data>
+  <data name="Action.UninstallerStarted" xml:space="preserve">
+    <value>已启动 {0} 的卸载程序。完成后请单击“重新检查”。</value>
+  </data>
+  <data name="Action.UninstallerCancelled" xml:space="preserve">
+    <value>已取消启动卸载程序。</value>
+  </data>
+  <data name="Action.UninstallerFailed" xml:space="preserve">
+    <value>无法启动 {0} 的卸载程序。请通过“设置 &gt; 应用”卸载。</value>
+  </data>
+  <data name="Action.PrintScreenSettingFailed" xml:space="preserve">
+    <value>无法更改该设置。请手动关闭：设置 &gt; 辅助功能 &gt; 键盘。</value>
+  </data>
+  <data name="Action.PrintScreenDone" xml:space="preserve">
+    <value>完成。Windows 可能需要注销并重新登录后才会应用；在此之前 PrintScreen 可能仍会打开系统截图。</value>
+  </data>
+  <data name="Action.DevUninstaller" xml:space="preserve">
+    <value>（dev）不会启动 {0} 的卸载程序。正常情况下：“已启动卸载程序，请单击重新检查”。</value>
+  </data>
+  <data name="Action.DevHotkeysNotRegistered" xml:space="preserve">
+    <value>（dev）测试实例不会注册快捷键。</value>
+  </data>
+  <data name="Feature.Ocr.Title" xml:space="preserve">
+    <value>文字识别和二维码</value>
+  </data>
+  <data name="Feature.Ocr.Description" xml:space="preserve">
+    <value>文字模式（Ctrl+T）：从截图中选择并复制文字，识别二维码和条形码。</value>
+  </data>
+  <data name="Feature.History.Title" xml:space="preserve">
+    <value>截图历史记录</value>
+  </data>
+  <data name="Feature.History.Description" xml:space="preserve">
+    <value>截图会保存到文件夹，并提供历史记录窗口和再次编辑。关闭后截图只会被复制。</value>
+  </data>
+  <data name="Feature.Pins.Title" xml:space="preserve">
+    <value>固定截图</value>
+  </data>
+  <data name="Feature.Pins.Description" xml:space="preserve">
+    <value>将截图置于所有窗口之上（F3），也可从历史记录固定。</value>
+  </data>
+  <data name="Feature.Beautify.Title" xml:space="preserve">
+    <value>截图美化</value>
+  </data>
+  <data name="Feature.Beautify.Description" xml:space="preserve">
+    <value>渐变背景、边距、圆角和阴影（B）。</value>
+  </data>
+  <data name="Feature.Pipette.Title" xml:space="preserve">
+    <value>取色器</value>
+  </data>
+  <data name="Feature.Pipette.Description" xml:space="preserve">
+    <value>从截图中取像素颜色（I），选区前复制放大镜下的 HEX 颜色（C）。</value>
+  </data>
+  <data name="Feature.Ruler.Title" xml:space="preserve">
+    <value>标尺</value>
+  </data>
+  <data name="Feature.Ruler.Description" xml:space="preserve">
+    <value>以像素为单位的距离和角度（=）。</value>
+  </data>
+  <data name="Update.Title" xml:space="preserve">
+    <value>Screeny 更新</value>
+  </data>
+  <data name="Update.Later" xml:space="preserve">
+    <value>稍后</value>
+  </data>
+  <data name="Update.UpdateAndRestart" xml:space="preserve">
+    <value>更新并重启</value>
+  </data>
+  <data name="Update.SkipVersion" xml:space="preserve">
+    <value>跳过此版本</value>
+  </data>
+  <data name="Update.WhatsNew" xml:space="preserve">
+    <value>更新内容</value>
+  </data>
+  <data name="Update.Available" xml:space="preserve">
+    <value>新版本 {0} 可用</value>
+  </data>
+  <data name="Update.Current" xml:space="preserve">
+    <value>当前安装版本：{0}</value>
+  </data>
+  <data name="Update.OnlyDisabled" xml:space="preserve">
+    <value>这些更改只涉及你已关闭的功能。</value>
+  </data>
+  <data name="Update.NoNotes" xml:space="preserve">
+    <value>未附带更新说明。</value>
+  </data>
+  <data name="Update.Downloading" xml:space="preserve">
+    <value>正在下载更新…</value>
+  </data>
+  <data name="Update.DownloadingPercent" xml:space="preserve">
+    <value>正在下载更新… {0}%</value>
+  </data>
+  <data name="Update.Restarting" xml:space="preserve">
+    <value>正在重启…</value>
+  </data>
+  <data name="Update.Failed" xml:space="preserve">
+    <value>无法更新：{0}</value>
+  </data>
+  <data name="Update.SkipFailed" xml:space="preserve">
+    <value>无法保存你的选择。详细信息请查看日志。</value>
+  </data>
+  <data name="Tool.WithKey" xml:space="preserve">
+    <value>{0}（{1}）</value>
+  </data>
+  <data name="Tool.Select" xml:space="preserve">
+    <value>选择和移动</value>
+  </data>
+  <data name="Tool.Rect" xml:space="preserve">
+    <value>矩形</value>
+  </data>
+  <data name="Tool.Ellipse" xml:space="preserve">
+    <value>椭圆</value>
+  </data>
+  <data name="Tool.Line" xml:space="preserve">
+    <value>直线</value>
+  </data>
+  <data name="Tool.Arrow" xml:space="preserve">
+    <value>箭头</value>
+  </data>
+  <data name="Tool.Pen" xml:space="preserve">
+    <value>画笔</value>
+  </data>
+  <data name="Tool.Highlighter" xml:space="preserve">
+    <value>荧光笔</value>
+  </data>
+  <data name="Tool.Text" xml:space="preserve">
+    <value>文字</value>
+  </data>
+  <data name="Tool.Number" xml:space="preserve">
+    <value>数字标记</value>
+  </data>
+  <data name="Tool.Pixelate" xml:space="preserve">
+    <value>像素化</value>
+  </data>
+  <data name="Tool.Blur" xml:space="preserve">
+    <value>模糊</value>
+  </data>
+  <data name="Tool.Ruler" xml:space="preserve">
+    <value>标尺：以像素为单位的 Δx、Δy 和长度，按住 Shift 以 45° 为步长</value>
+  </data>
+  <data name="Toolbar.Pipette" xml:space="preserve">
+    <value>取色器：从截图取色（I）</value>
+  </data>
+  <data name="Toolbar.Thickness" xml:space="preserve">
+    <value>粗细：滚动鼠标滚轮</value>
+  </data>
+  <data name="Toolbar.Undo" xml:space="preserve">
+    <value>撤销（Ctrl+Z）</value>
+  </data>
+  <data name="Toolbar.Redo" xml:space="preserve">
+    <value>重做（Ctrl+Y）</value>
+  </data>
+  <data name="Toolbar.Beautify" xml:space="preserve">
+    <value>美化：背景、边距、圆角、阴影（B）</value>
+  </data>
+  <data name="Toolbar.Ocr" xml:space="preserve">
+    <value>选择截图中的文字（Ctrl+T）</value>
+  </data>
+  <data name="Toolbar.OcrBack" xml:space="preserve">
+    <value>返回绘图（Ctrl+T、Esc）</value>
+  </data>
+  <data name="Toolbar.Pin" xml:space="preserve">
+    <value>固定在其他窗口之上（F3）</value>
+  </data>
+  <data name="Toolbar.SaveAs" xml:space="preserve">
+    <value>另存为…（Ctrl+S）</value>
+  </data>
+  <data name="Toolbar.Cancel" xml:space="preserve">
+    <value>取消（Esc）</value>
+  </data>
+  <data name="Toolbar.Close" xml:space="preserve">
+    <value>关闭（Esc）</value>
+  </data>
+  <data name="Toolbar.CopyEnter" xml:space="preserve">
+    <value>复制到剪贴板（Enter）</value>
+  </data>
+  <data name="Toolbar.CopyEditorHistory" xml:space="preserve">
+    <value>复制到剪贴板（Ctrl+C）并添加一条新的历史记录</value>
+  </data>
+  <data name="Toolbar.CopyEditor" xml:space="preserve">
+    <value>复制到剪贴板（Ctrl+C）</value>
+  </data>
+  <data name="Toolbar.CopyText" xml:space="preserve">
+    <value>复制文字</value>
+  </data>
+  <data name="Toolbar.CopyTextTip" xml:space="preserve">
+    <value>复制选中的文字，未选择时复制全部（Enter、Ctrl+C）</value>
+  </data>
+  <data name="Options.Stroke" xml:space="preserve">
+    <value>描边</value>
+  </data>
+  <data name="Options.StrokeSwatch" xml:space="preserve">
+    <value>描边：用调色板着色</value>
+  </data>
+  <data name="Options.NoStroke" xml:space="preserve">
+    <value>无描边</value>
+  </data>
+  <data name="Options.RestoreStroke" xml:space="preserve">
+    <value>恢复描边</value>
+  </data>
+  <data name="Options.Fill" xml:space="preserve">
+    <value>填充</value>
+  </data>
+  <data name="Options.FillSwatch" xml:space="preserve">
+    <value>填充：用调色板着色</value>
+  </data>
+  <data name="Options.NoFill" xml:space="preserve">
+    <value>无填充</value>
+  </data>
+  <data name="Options.RestoreFill" xml:space="preserve">
+    <value>恢复填充</value>
+  </data>
+  <data name="Options.NeedStrokeOrFill" xml:space="preserve">
+    <value>不能同时去掉描边和填充</value>
+  </data>
+  <data name="Options.FillOpacity" xml:space="preserve">
+    <value>填充不透明度：单击更改</value>
+  </data>
+  <data name="Options.ArrowNormal" xml:space="preserve">
+    <value>普通</value>
+  </data>
+  <data name="Options.ArrowDouble" xml:space="preserve">
+    <value>双向</value>
+  </data>
+  <data name="Options.ArrowDashed" xml:space="preserve">
+    <value>虚线</value>
+  </data>
+  <data name="Options.ArrowThick" xml:space="preserve">
+    <value>粗（楔形）</value>
+  </data>
+  <data name="Options.Text" xml:space="preserve">
+    <value>文字</value>
+  </data>
+  <data name="Options.TextSwatch" xml:space="preserve">
+    <value>文字颜色：用调色板着色</value>
+  </data>
+  <data name="Options.Background" xml:space="preserve">
+    <value>背景</value>
+  </data>
+  <data name="Options.BackgroundSwatch" xml:space="preserve">
+    <value>背景：用调色板着色</value>
+  </data>
+  <data name="Options.NoBackground" xml:space="preserve">
+    <value>无背景</value>
+  </data>
+  <data name="Options.AddBackground" xml:space="preserve">
+    <value>添加背景</value>
+  </data>
+  <data name="Options.Align" xml:space="preserve">
+    <value>对齐</value>
+  </data>
+  <data name="Options.AlignLeft" xml:space="preserve">
+    <value>左对齐</value>
+  </data>
+  <data name="Options.AlignCenter" xml:space="preserve">
+    <value>居中</value>
+  </data>
+  <data name="Options.AlignRight" xml:space="preserve">
+    <value>右对齐</value>
+  </data>
+  <data name="Beautify.Background" xml:space="preserve">
+    <value>背景</value>
+  </data>
+  <data name="Beautify.BackgroundPreset" xml:space="preserve">
+    <value>背景：{0}</value>
+  </data>
+  <data name="Beautify.Padding" xml:space="preserve">
+    <value>边距</value>
+  </data>
+  <data name="Beautify.PaddingPixels" xml:space="preserve">
+    <value>边距 {0} 像素</value>
+  </data>
+  <data name="Beautify.Radius" xml:space="preserve">
+    <value>圆角</value>
+  </data>
+  <data name="Beautify.NoRadius" xml:space="preserve">
+    <value>直角</value>
+  </data>
+  <data name="Beautify.RadiusPixels" xml:space="preserve">
+    <value>圆角 {0} 像素</value>
+  </data>
+  <data name="Beautify.Shadow" xml:space="preserve">
+    <value>阴影</value>
+  </data>
+  <data name="Beautify.Soft" xml:space="preserve">
+    <value>柔和</value>
+  </data>
+  <data name="Beautify.SoftTip" xml:space="preserve">
+    <value>截图下方的柔和阴影</value>
+  </data>
+  <data name="Beautify.Sunset" xml:space="preserve">
+    <value>日落</value>
+  </data>
+  <data name="Beautify.Mint" xml:space="preserve">
+    <value>薄荷</value>
+  </data>
+  <data name="Beautify.Graphite" xml:space="preserve">
+    <value>石墨</value>
+  </data>
+  <data name="Beautify.Light" xml:space="preserve">
+    <value>浅色</value>
+  </data>
+  <data name="Beautify.Warm" xml:space="preserve">
+    <value>暖色</value>
+  </data>
+  <data name="Beautify.Blue" xml:space="preserve">
+    <value>蓝色</value>
+  </data>
+  <data name="Codes.FormatLink" xml:space="preserve">
+    <value>{0} · 链接</value>
+  </data>
+  <data name="Codes.OpenInBrowser" xml:space="preserve">
+    <value>在浏览器中打开：{0}</value>
+  </data>
+  <data name="Codes.Copied" xml:space="preserve">
+    <value>已复制条码内容</value>
+  </data>
+  <data name="Codes.OpenFailed" xml:space="preserve">
+    <value>无法打开链接</value>
+  </data>
+  <data name="Codes.QrCode" xml:space="preserve">
+    <value>二维码</value>
+  </data>
+  <data name="Pipette.Copied" xml:space="preserve">
+    <value>已复制 {0}</value>
+  </data>
+  <data name="TextMode.Recognizing" xml:space="preserve">
+    <value>正在识别文字…</value>
+  </data>
+  <data name="TextMode.OcrUnavailable" xml:space="preserve">
+    <value>文字识别不可用：请在“设置 &gt; 时间和语言 &gt; 语言”中添加支持文字识别的语言。</value>
+  </data>
+  <data name="TextMode.Failed" xml:space="preserve">
+    <value>无法识别文字：{0}</value>
+  </data>
+  <data name="TextMode.NotFound" xml:space="preserve">
+    <value>未找到文字</value>
+  </data>
+  <data name="TextMode.Refining" xml:space="preserve">
+    <value>正在识别文字… 优化中</value>
+  </data>
+  <data name="TextMode.OneCode" xml:space="preserve">
+    <value>发现一个条码：单击它 · Enter 复制内容 · Esc 返回</value>
+  </data>
+  <data name="TextMode.ManyCodes" xml:space="preserve">
+    <value>发现多个条码：单击某个条码查看内容 · Esc 返回</value>
+  </data>
+  <data name="TextMode.HintNoSelection" xml:space="preserve">
+    <value>用鼠标选择文字 · Ctrl+A 全选 · Enter 复制全部文字 · Esc 返回</value>
+  </data>
+  <data name="TextMode.HintNoSelectionCodes" xml:space="preserve">
+    <value>用鼠标选择文字 · 单击条码查看内容 · Ctrl+A 全选 · Enter 复制全部文字 · Esc 返回</value>
+  </data>
+  <data name="TextMode.HintSelection" xml:space="preserve">
+    <value>Enter 或 Ctrl+C 复制所选内容 · Ctrl+A 全选 · Esc 取消选择</value>
+  </data>
+  <data name="TextMode.WithRefining" xml:space="preserve">
+    <value>{0} · 优化中…</value>
+  </data>
+  <data name="TextMode.CopyWhenReady" xml:space="preserve">
+    <value>正在识别文字… 完成后会立即复制</value>
+  </data>
+  <data name="TextMode.ClickCode" xml:space="preserve">
+    <value>单击条码可查看并复制其内容</value>
+  </data>
+  <data name="TextMode.NoTextInSelection" xml:space="preserve">
+    <value>所选区域中没有文字 · Ctrl+A 全选 · Esc 取消选择</value>
+  </data>
+  <data name="History.Title" xml:space="preserve">
+    <value>历史记录</value>
+  </data>
+  <data name="History.Edit" xml:space="preserve">
+    <value>编辑</value>
+  </data>
+  <data name="History.PinOnScreen" xml:space="preserve">
+    <value>固定到屏幕</value>
+  </data>
+  <data name="History.ShowInFolder" xml:space="preserve">
+    <value>在文件夹中显示</value>
+  </data>
+  <data name="History.OpenFolder" xml:space="preserve">
+    <value>打开文件夹</value>
+  </data>
+  <data name="History.ClearAll" xml:space="preserve">
+    <value>全部清除</value>
+  </data>
+  <data name="History.CardTip" xml:space="preserve">
+    <value>单击复制，双击打开，按 E 编辑，右键查看更多操作</value>
+  </data>
+  <data name="History.Empty" xml:space="preserve">
+    <value>历史记录为空</value>
+  </data>
+  <data name="History.EmptyHintHotkey" xml:space="preserve">
+    <value>按 {0} 截取第一张截图。</value>
+  </data>
+  <data name="History.EmptyHintTray" xml:space="preserve">
+    <value>单击通知区域中的 Screeny 图标截取第一张截图。</value>
+  </data>
+  <data name="History.FolderUnavailable" xml:space="preserve">
+    <value>历史记录文件夹不可用</value>
+  </data>
+  <data name="History.ReadFailed" xml:space="preserve">
+    <value>无法读取历史记录文件夹</value>
+  </data>
+  <data name="History.Count" xml:space="preserve">
+    <value>{0} / {1} 张截图</value>
+  </data>
+  <data name="History.ClipboardBusy" xml:space="preserve">
+    <value>剪贴板被占用</value>
+  </data>
+  <data name="History.Error" xml:space="preserve">
+    <value>错误</value>
+  </data>
+  <data name="History.OpenFailedText" xml:space="preserve">
+    <value>文件可能已被删除，或者没有设置用于打开 PNG 文件的应用。</value>
+  </data>
+  <data name="History.DeleteTitle" xml:space="preserve">
+    <value>删除截图？</value>
+  </data>
+  <data name="History.DeleteText" xml:space="preserve">
+    <value>文件将直接删除，不会放入回收站，且无法恢复。</value>
+  </data>
+  <data name="History.DeleteFailedTitle" xml:space="preserve">
+    <value>无法删除截图</value>
+  </data>
+  <data name="History.DeleteFailedText" xml:space="preserve">
+    <value>文件正被其他程序占用，或者没有该文件夹的访问权限。</value>
+  </data>
+  <data name="History.CreateFolderFailed" xml:space="preserve">
+    <value>无法创建历史记录文件夹</value>
+  </data>
+  <data name="History.ExplorerFailedTitle" xml:space="preserve">
+    <value>无法打开文件资源管理器</value>
+  </data>
+  <data name="History.ExplorerFailedText" xml:space="preserve">
+    <value>详细信息已写入 Screeny 日志。</value>
+  </data>
+  <data name="History.ClearTitle" xml:space="preserve">
+    <value>清除历史记录？</value>
+  </data>
+  <data name="History.ClearText" xml:space="preserve">
+    <value>文件夹：{0}
+将直接删除截图（{1} 张），不会放入回收站，且无法恢复。</value>
+  </data>
+  <data name="History.DeleteAll" xml:space="preserve">
+    <value>全部删除</value>
+  </data>
+  <data name="Editor.Title" xml:space="preserve">
+    <value>编辑器</value>
+  </data>
+  <data name="Editor.TitleShot" xml:space="preserve">
+    <value>编辑器：{0} 的截图</value>
+  </data>
+  <data name="Editor.TitleFile" xml:space="preserve">
+    <value>编辑器：{0}</value>
+  </data>
+  <data name="Editor.Original" xml:space="preserve">
+    <value>原图</value>
+  </data>
+  <data name="Editor.OriginalTip" xml:space="preserve">
+    <value>不带标注的截图：标注只是隐藏，并未删除</value>
+  </data>
+  <data name="Editor.WithMarkup" xml:space="preserve">
+    <value>带标注</value>
+  </data>
+  <data name="Editor.Clear" xml:space="preserve">
+    <value>清除标注</value>
+  </data>
+  <data name="Editor.ClearTip" xml:space="preserve">
+    <value>一次删除所有标注（按 Ctrl+Z 可恢复）</value>
+  </data>
+  <data name="Editor.Hide" xml:space="preserve">
+    <value>隐藏</value>
+  </data>
+  <data name="Editor.Restart" xml:space="preserve">
+    <value>从原图重新开始</value>
+  </data>
+  <data name="Editor.ZoomTip" xml:space="preserve">
+    <value>适应窗口 / 100%（Ctrl+0、Ctrl+1）· Ctrl+滚轮缩放 · 空格+拖动平移</value>
+  </data>
+  <data name="Editor.Zoom" xml:space="preserve">
+    <value>{0}%</value>
+  </data>
+  <data name="Editor.ZoomFit" xml:space="preserve">
+    <value>适应 · {0}%</value>
+  </data>
+  <data name="Editor.NoticeOriginal" xml:space="preserve">
+    <value>不带标注的原图：标注只是隐藏，并未删除，此模式下无法绘制。</value>
+  </data>
+  <data name="Editor.NoticeNoOriginal" xml:space="preserve">
+    <value>未保存原图，标注将绘制在成品截图之上。请在设置中开启保留原图。</value>
+  </data>
+  <data name="Editor.ComposeFailed" xml:space="preserve">
+    <value>无法生成图片：{0}</value>
+  </data>
+  <data name="Editor.Saving" xml:space="preserve">
+    <value>正在保存…</value>
+  </data>
+  <data name="Editor.ToastNewEntry" xml:space="preserve">
+    <value>{0} · 已添加新的历史记录</value>
+  </data>
+  <data name="Editor.ToastHistoryFailed" xml:space="preserve">
+    <value>{0} · 无法写入历史记录</value>
+  </data>
+  <data name="Editor.Saved" xml:space="preserve">
+    <value>已保存</value>
+  </data>
+  <data name="Editor.Pinned" xml:space="preserve">
+    <value>已固定</value>
+  </data>
+  <data name="Editor.Failed" xml:space="preserve">
+    <value>失败：{0}</value>
+  </data>
+  <data name="Editor.CloseTitle" xml:space="preserve">
+    <value>不保存就关闭？</value>
+  </data>
+  <data name="Editor.CloseHistoryPins" xml:space="preserve">
+    <value>标注不会进入历史记录：“复制”“另存为…”和“固定”会添加新记录。</value>
+  </data>
+  <data name="Editor.CloseHistory" xml:space="preserve">
+    <value>标注不会进入历史记录：“复制”和“另存为…”会添加新记录。</value>
+  </data>
+  <data name="Editor.ClosePins" xml:space="preserve">
+    <value>标注将丢失：可以复制、保存（“另存为…”）或固定带标注的图片。</value>
+  </data>
+  <data name="Editor.CloseLost" xml:space="preserve">
+    <value>标注将丢失：可以复制或保存（“另存为…”）带标注的图片。</value>
+  </data>
+  <data name="Edit.NoDocument" xml:space="preserve">
+    <value>找不到标注文档</value>
+  </data>
+  <data name="Edit.SizeMismatch" xml:space="preserve">
+    <value>标注文档中的尺寸（{0}×{1}）与原图（{2}×{3}）不一致</value>
+  </data>
+  <data name="Edit.UnknownMarks" xml:space="preserve">
+    <value>未知标注：{0} 个（截图来自更新版本的 Screeny）</value>
+  </data>
+  <data name="Edit.ReadOriginalFailed" xml:space="preserve">
+    <value>无法读取原图</value>
+  </data>
+  <data name="Edit.DocumentDamaged" xml:space="preserve">
+    <value>标注文档已损坏</value>
+  </data>
+  <data name="Edit.NewerDocument" xml:space="preserve">
+    <value>标注文档版本为 {0}，来自更新版本的 Screeny</value>
+  </data>
+  <data name="Edit.OpenedFlat" xml:space="preserve">
+    <value>{0}。截图已作为成品图片打开：之前的标注已成为图片的一部分。</value>
+  </data>
+  <data name="Pin.Save" xml:space="preserve">
+    <value>保存…</value>
+  </data>
+  <data name="Pin.ResetZoom" xml:space="preserve">
+    <value>重置缩放</value>
+  </data>
+  <data name="Pin.Opacity" xml:space="preserve">
+    <value>不透明度</value>
+  </data>
+  <data name="Pin.OpacityBadge" xml:space="preserve">
+    <value>不透明度 {0}%</value>
+  </data>
+  <data name="File.ReplaceTitle" xml:space="preserve">
+    <value>替换文件？</value>
+  </data>
+  <data name="File.ReplaceText" xml:space="preserve">
+    <value>文件已存在：
+{0}
+要替换它吗？</value>
+  </data>
+  <data name="File.Replace" xml:space="preserve">
+    <value>替换</value>
+  </data>
+</root>

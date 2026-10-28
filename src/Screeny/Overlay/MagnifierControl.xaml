@@ -1,0 +1,22 @@
+<UserControl x:Class="Screeny.Overlay.MagnifierControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Width="132">
+  <Border Background="#F2202020" CornerRadius="6" BorderBrush="#66FFFFFF" BorderThickness="1" Padding="3">
+    <StackPanel>
+      <Grid Width="124" Height="124" ClipToBounds="True">
+        <Rectangle x:Name="Zoom" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+        <!-- Перекрестие: полосы через центр и рамка центрального пикселя -->
+        <Rectangle Width="124" Height="1" Fill="#5530A0FF" VerticalAlignment="Center"/>
+        <Rectangle Width="1" Height="124" Fill="#5530A0FF" HorizontalAlignment="Center"/>
+        <Rectangle x:Name="CenterCell" Stroke="White" StrokeThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+      </Grid>
+      <TextBlock x:Name="Coords" Foreground="White" FontFamily="Consolas" FontSize="11" Margin="2,3,2,0"/>
+      <!-- Цвет пикселя: пипетка; без неё строка свёрнута -->
+      <StackPanel x:Name="ColorRow" Orientation="Horizontal" Margin="2,2,2,1">
+        <Border x:Name="Swatch" Width="11" Height="11" BorderBrush="#88FFFFFF" BorderThickness="1" Margin="0,0,5,0"/>
+        <TextBlock x:Name="ColorText" Foreground="#CCFFFFFF" FontFamily="Consolas" FontSize="11"/>
+      </StackPanel>
+    </StackPanel>
+  </Border>
+</UserControl>

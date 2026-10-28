@@ -1,0 +1,35 @@
+<Window x:Class="Screeny.Pin.PinWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:l="clr-namespace:Screeny.Localization"
+        Title="Screeny Pin" WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Topmost="True" ShowInTaskbar="False" ResizeMode="NoResize" ShowActivated="True"
+        WindowStartupLocation="Manual" Left="0" Top="0" Width="1" Height="1"
+        UseLayoutRounding="True" SnapsToDevicePixels="True" Cursor="SizeAll">
+  <Grid x:Name="Root">
+    <Image x:Name="PinImage" Stretch="Fill"/>
+    <!-- Рамка поверх края картинки: снимок остаётся ровно там, где был на экране -->
+    <Rectangle x:Name="Frame" Stroke="{DynamicResource Overlay.PinFrame}" StrokeThickness="1" IsHitTestVisible="False"/>
+    <Border x:Name="ZoomBadge" Background="{DynamicResource Overlay.Panel}" BorderBrush="{DynamicResource Overlay.ShotRing}" BorderThickness="1"
+            CornerRadius="6" Padding="7,3" Margin="8"
+            HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Collapsed" IsHitTestVisible="False">
+      <TextBlock x:Name="ZoomText" Foreground="{DynamicResource Overlay.Ink}" FontSize="11" FontFamily="{DynamicResource Font.Mono}"/>
+    </Border>
+  </Grid>
+  <Window.ContextMenu>
+    <ContextMenu>
+      <MenuItem Header="{l:Loc Common.Copy}" InputGestureText="Ctrl+C" Click="OnCopy"/>
+      <MenuItem Header="{l:Loc Pin.Save}" InputGestureText="Ctrl+S" Click="OnSave"/>
+      <Separator/>
+      <MenuItem Header="{l:Loc Pin.ResetZoom}" Click="OnResetZoom"/>
+      <MenuItem Header="{l:Loc Pin.Opacity}">
+        <MenuItem Header="100 %" Tag="1.0" Click="OnOpacity"/>
+        <MenuItem Header="75 %" Tag="0.75" Click="OnOpacity"/>
+        <MenuItem Header="50 %" Tag="0.5" Click="OnOpacity"/>
+        <MenuItem Header="25 %" Tag="0.25" Click="OnOpacity"/>
+      </MenuItem>
+      <Separator/>
+      <MenuItem Header="{l:Loc Common.Close}" InputGestureText="Esc" Click="OnClose"/>
+    </ContextMenu>
+  </Window.ContextMenu>
+</Window>

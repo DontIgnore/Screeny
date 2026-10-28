@@ -1,0 +1,83 @@
+<t:ChromeWindow x:Class="Screeny.Migration.SetupWizardWindow"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:l="clr-namespace:Screeny.Localization"
+                xmlns:s="clr-namespace:Screeny.Settings"
+                xmlns:t="clr-namespace:Screeny.Themes"
+                Title="{l:Loc Wizard.Title}" Width="620" SizeToContent="Height" ResizeMode="NoResize"
+                WindowStartupLocation="CenterScreen" Icon="/Assets/screeny.ico">
+  <Window.Resources>
+    <Style TargetType="s:HotkeyBox" BasedOn="{StaticResource {x:Type TextBox}}">
+      <Setter Property="FontFamily" Value="{DynamicResource Font.Mono}"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style x:Key="Hint" TargetType="TextBlock" BasedOn="{StaticResource Caption}">
+      <Setter Property="Margin" Value="28,4,0,0"/>
+      <Setter Property="TextWrapping" Value="Wrap"/>
+      <Setter Property="LineHeight" Value="17"/>
+    </Style>
+  </Window.Resources>
+
+  <DockPanel>
+    <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource Brush.Stroke}" BorderThickness="0,1,0,0" Padding="24,16,24,20">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+          <Button x:Name="SkipButton" Content="{l:Loc Wizard.Skip}" MinWidth="104" Click="OnSkip"
+                  ToolTip="{l:Loc Wizard.SkipTip}"/>
+          <Button x:Name="ApplyButton" Content="{l:Loc Wizard.Apply}" IsDefault="True" MinWidth="112" Margin="8,0,0,0"
+                  Style="{StaticResource AccentButton}" Click="OnApply"/>
+        </StackPanel>
+        <Button x:Name="RescanButton" DockPanel.Dock="Left" Click="OnRescan" HorizontalAlignment="Left"
+                ToolTip="{l:Loc Wizard.RescanTip}">
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Text="&#xE72C;" FontFamily="{DynamicResource Font.Icon}" FontSize="12" VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <TextBlock Text="{l:Loc Wizard.Rescan}" VerticalAlignment="Center"/>
+          </StackPanel>
+        </Button>
+        <TextBlock x:Name="GeneralError" Style="{StaticResource ErrorText}" Margin="12,0,16,0" VerticalAlignment="Center" TextWrapping="Wrap"/>
+      </DockPanel>
+    </Border>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Margin="24,4,24,24">
+        <!-- Язык — в первой строке, рядом с заголовком: его выбирают до того, как читать остальное -->
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top" Margin="16,0,0,0">
+            <TextBlock Text="&#xE774;" FontFamily="{DynamicResource Font.Icon}" FontSize="14" VerticalAlignment="Center"
+                       Foreground="{DynamicResource Brush.Ink70}" Margin="0,0,8,0"/>
+            <ComboBox x:Name="LanguageInput" Width="240" AutomationProperties.Name="{l:Loc Language.Name}"/>
+          </StackPanel>
+          <TextBlock x:Name="HeadingText" Style="{StaticResource H1}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+        </DockPanel>
+        <TextBlock x:Name="IntroText" Style="{StaticResource Body}" Foreground="{DynamicResource Brush.Ink70}"
+                   TextWrapping="Wrap" Margin="0,8,0,0" LineHeight="20"/>
+
+        <StackPanel x:Name="ConflictPanel" Margin="0,16,0,0"/>
+
+        <TextBlock Text="{l:Loc Wizard.SectionHotkeys}" Style="{StaticResource SectionLabel}" Margin="0,16,0,8"/>
+        <CheckBox x:Name="PrintScreenInput" Content="PrintScreen"/>
+        <TextBlock x:Name="PrintScreenStatus" Style="{StaticResource Hint}" Visibility="Collapsed"/>
+
+        <CheckBox x:Name="WinShiftSInput" Margin="0,12,0,0" Content="{l:Loc Hotkeys.WinShiftS}"/>
+        <TextBlock Style="{StaticResource Hint}"
+                   Text="{l:Loc Hotkeys.HookNote}"/>
+        <TextBlock x:Name="WinShiftSStatus" Style="{StaticResource Hint}" Visibility="Collapsed"/>
+
+        <TextBlock Text="{l:Loc Wizard.CustomOptional}" Style="{StaticResource Body}" Margin="0,16,0,6"/>
+        <s:HotkeyBox x:Name="CustomInput" ToolTip="{l:Loc Hotkeys.BoxTip}" AutomationProperties.Name="{l:Loc Hotkeys.CustomName}"/>
+        <TextBlock x:Name="CustomStatus" Style="{StaticResource Caption}" Margin="0,4,0,0" TextWrapping="Wrap" Visibility="Collapsed"/>
+
+        <!-- Функции: те же галочки, что в настройках (FeatureCatalog); по умолчанию включены все -->
+        <TextBlock Text="{l:Loc Settings.SectionFeatures}" Style="{StaticResource SectionLabel}" Margin="0,28,0,8"/>
+        <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" LineHeight="17" Margin="0,0,0,10"
+                   Text="{l:Loc Wizard.FeaturesNote}"/>
+        <StackPanel x:Name="FeaturesPanel"/>
+
+        <TextBlock Text="{l:Loc Wizard.SectionUpdates}" Style="{StaticResource SectionLabel}" Margin="0,28,0,8"/>
+        <CheckBox x:Name="UpdatesInput" Content="{l:Loc Common.CheckUpdatesBox}"/>
+        <TextBlock Style="{StaticResource Hint}"
+                   Text="{l:Loc Wizard.PrivacyNote}"/>
+      </StackPanel>
+    </ScrollViewer>
+  </DockPanel>
+</t:ChromeWindow>

@@ -1,0 +1,75 @@
+<UserControl x:Class="Screeny.Overlay.OptionsPanelControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:Screeny.Localization"
+             Cursor="Arrow" Focusable="False">
+  <!-- Параметры активного инструмента или выбранной фигуры: содержимое flyout'а (строки появляются поочерёдно) -->
+  <UserControl.Resources>
+    <ResourceDictionary Source="FlyoutStyles.xaml"/>
+  </UserControl.Resources>
+  <!-- Видна одна секция за раз (Show) -->
+  <Grid x:Name="Sections">
+      <StackPanel x:Name="ShapeSection" Visibility="Collapsed">
+        <!-- Прямоугольник и эллипс -->
+        <StackPanel Style="{StaticResource Row}">
+          <TextBlock Style="{StaticResource Label}" Text="{l:Loc Options.Stroke}"/>
+          <Button x:Name="StrokeSwatch" Style="{StaticResource SwatchButton}" ToolTip="{l:Loc Options.StrokeSwatch}" Click="OnStrokeSwatch">
+            <Grid><Border x:Name="StrokeChip" CornerRadius="4" BorderThickness="3"/><Path x:Name="StrokeNone" Data="M2,16 L16,2" Stroke="#FFFF6B61" StrokeThickness="2" Visibility="Collapsed"/></Grid>
+          </Button>
+          <ToggleButton x:Name="StrokeNoneButton" Style="{StaticResource NoneButton}" Click="OnStrokeNone"/>
+        </StackPanel>
+        <StackPanel Style="{StaticResource Row}">
+          <TextBlock Style="{StaticResource Label}" Text="{l:Loc Options.Fill}"/>
+          <Button x:Name="FillSwatch" Style="{StaticResource SwatchButton}" ToolTip="{l:Loc Options.FillSwatch}" Click="OnFillSwatch">
+            <Grid><Border x:Name="FillChip" CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource Overlay.Divider}"/><Path x:Name="FillNone" Data="M2,16 L16,2" Stroke="#FFFF6B61" StrokeThickness="2" Visibility="Collapsed"/></Grid>
+          </Button>
+          <ToggleButton x:Name="FillNoneButton" Style="{StaticResource NoneButton}" Click="OnFillNone"/>
+          <Button x:Name="FillOpacityButton" Style="{StaticResource StripButton}" FontFamily="{DynamicResource Font.Mono}" MinWidth="44"
+                  ToolTip="{l:Loc Options.FillOpacity}" Click="OnFillOpacity"/>
+        </StackPanel>
+      </StackPanel>
+
+      <!-- Стрелка: четыре стиля, кнопки появляются по одной -->
+      <StackPanel x:Name="ArrowSection" Orientation="Horizontal" Visibility="Collapsed">
+        <ToggleButton x:Name="ArrowNormal" Style="{StaticResource StripButton}" Width="36" Height="30" ToolTip="{l:Loc Options.ArrowNormal}" Click="OnArrowStyle" Tag="Normal">
+          <Path Style="{StaticResource ArrowIcon}" Data="M1,6 L14,6 M13,1.5 L21,6 L13,10.5 Z" StrokeThickness="2"/>
+        </ToggleButton>
+        <ToggleButton x:Name="ArrowDouble" Style="{StaticResource StripButton}" Width="36" Height="30" ToolTip="{l:Loc Options.ArrowDouble}" Click="OnArrowStyle" Tag="Double">
+          <Path Style="{StaticResource ArrowIcon}" Data="M8,6 L14,6 M13,1.5 L21,6 L13,10.5 Z M9,1.5 L1,6 L9,10.5 Z" StrokeThickness="2"/>
+        </ToggleButton>
+        <ToggleButton x:Name="ArrowDashed" Style="{StaticResource StripButton}" Width="36" Height="30" ToolTip="{l:Loc Options.ArrowDashed}" Click="OnArrowStyle" Tag="Dashed">
+          <Grid>
+            <Path Style="{StaticResource ArrowIcon}" Data="M1,6 L13,6" StrokeThickness="2" StrokeDashArray="1.5 1"/>
+            <Path Style="{StaticResource ArrowIcon}" Data="M13,1.5 L21,6 L13,10.5 Z" StrokeThickness="1"/>
+          </Grid>
+        </ToggleButton>
+        <ToggleButton x:Name="ArrowThick" Style="{StaticResource StripButton}" Width="36" Height="30" ToolTip="{l:Loc Options.ArrowThick}" Click="OnArrowStyle" Tag="Thick">
+          <Path Style="{StaticResource ArrowIcon}" Data="M1,5.6 L12,4 L12,0.5 L21,6 L12,11.5 L12,8 L1,6.4 Z" StrokeThickness="0.5"/>
+        </ToggleButton>
+      </StackPanel>
+
+      <!-- Текст -->
+      <StackPanel x:Name="TextSection" Visibility="Collapsed">
+        <StackPanel Style="{StaticResource Row}">
+          <TextBlock Style="{StaticResource Label}" Text="{l:Loc Options.Text}"/>
+          <Button x:Name="TextSwatch" Style="{StaticResource SwatchButton}" ToolTip="{l:Loc Options.TextSwatch}" Click="OnTextSwatch">
+            <Border x:Name="TextChip" CornerRadius="4"/>
+          </Button>
+        </StackPanel>
+        <StackPanel Style="{StaticResource Row}">
+          <TextBlock Style="{StaticResource Label}" Text="{l:Loc Options.Background}"/>
+          <Button x:Name="BackgroundSwatch" Style="{StaticResource SwatchButton}" ToolTip="{l:Loc Options.BackgroundSwatch}" Click="OnBackgroundSwatch">
+            <Grid><Border x:Name="BackgroundChip" CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource Overlay.Divider}"/><Path x:Name="BackgroundNone" Data="M2,16 L16,2" Stroke="#FFFF6B61" StrokeThickness="2" Visibility="Collapsed"/></Grid>
+          </Button>
+          <ToggleButton x:Name="BackgroundNoneButton" Style="{StaticResource NoneButton}" Click="OnBackgroundNone"/>
+        </StackPanel>
+        <!-- Выравнивание строк внутри блока текста -->
+        <StackPanel Style="{StaticResource Row}">
+          <TextBlock Style="{StaticResource Label}" Text="{l:Loc Options.Align}"/>
+          <ToggleButton x:Name="AlignLeft" Style="{StaticResource AlignButton}" Tag="Left" Content="&#xE8E4;" ToolTip="{l:Loc Options.AlignLeft}" Click="OnTextAlign"/>
+          <ToggleButton x:Name="AlignCenter" Style="{StaticResource AlignButton}" Tag="Center" Content="&#xE8E3;" ToolTip="{l:Loc Options.AlignCenter}" Click="OnTextAlign"/>
+          <ToggleButton x:Name="AlignRight" Style="{StaticResource AlignButton}" Tag="Right" Content="&#xE8E2;" ToolTip="{l:Loc Options.AlignRight}" Click="OnTextAlign"/>
+        </StackPanel>
+      </StackPanel>
+  </Grid>
+</UserControl>

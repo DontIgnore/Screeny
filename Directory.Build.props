@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>12</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Языки интерфейса Screeny (см. Localization/Loc.cs); сопутствующие сборки пакетов — только этих языков. -->
+    <SatelliteResourceLanguages>en;ru;es;zh-Hans;ja</SatelliteResourceLanguages>
+  </PropertyGroup>
+</Project>

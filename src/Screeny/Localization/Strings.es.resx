@@ -1,0 +1,1279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Common.Cancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="Common.Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="Common.OK" xml:space="preserve">
+    <value>Aceptar</value>
+  </data>
+  <data name="Common.Close" xml:space="preserve">
+    <value>Cerrar</value>
+  </data>
+  <data name="Common.Minimize" xml:space="preserve">
+    <value>Minimizar</value>
+  </data>
+  <data name="Common.Delete" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="Common.Copy" xml:space="preserve">
+    <value>Copiar</value>
+  </data>
+  <data name="Common.Open" xml:space="preserve">
+    <value>Abrir</value>
+  </data>
+  <data name="Common.Copied" xml:space="preserve">
+    <value>Copiado</value>
+  </data>
+  <data name="Common.ClipboardBusy" xml:space="preserve">
+    <value>El portapapeles está ocupado</value>
+  </data>
+  <data name="Common.SaveScreenshotTitle" xml:space="preserve">
+    <value>Guardar captura</value>
+  </data>
+  <data name="Common.CheckConflicts" xml:space="preserve">
+    <value>Buscar conflictos…</value>
+  </data>
+  <data name="Common.CheckUpdatesBox" xml:space="preserve">
+    <value>Buscar actualizaciones</value>
+  </data>
+  <data name="Common.PrivacyNote" xml:space="preserve">
+    <value>Las capturas nunca se envían a ningún sitio. Screeny solo se conecta para buscar versiones nuevas en GitHub y, si tú lo pides, para descargar el módulo de OCR preciso. Esta casilla no impide esa descarga.</value>
+  </data>
+  <data name="Common.SeeLog" xml:space="preserve">
+    <value>Encontrarás los detalles en el registro.</value>
+  </data>
+  <data name="Language.Section" xml:space="preserve">
+    <value>IDIOMA</value>
+  </data>
+  <data name="Language.System" xml:space="preserve">
+    <value>Igual que Windows ({0})</value>
+  </data>
+  <data name="Language.Name" xml:space="preserve">
+    <value>Idioma de la interfaz</value>
+  </data>
+  <data name="Tray.Capture" xml:space="preserve">
+    <value>Hacer captura</value>
+  </data>
+  <data name="Tray.History" xml:space="preserve">
+    <value>Historial…</value>
+  </data>
+  <data name="Tray.OpenHistoryFolder" xml:space="preserve">
+    <value>Abrir carpeta del historial</value>
+  </data>
+  <data name="Tray.Settings" xml:space="preserve">
+    <value>Configuración…</value>
+  </data>
+  <data name="Tray.CheckUpdates" xml:space="preserve">
+    <value>Buscar actualizaciones…</value>
+  </data>
+  <data name="Tray.Exit" xml:space="preserve">
+    <value>Salir</value>
+  </data>
+  <data name="Tray.TipClick" xml:space="preserve">
+    <value>Screeny: haz clic para capturar</value>
+  </data>
+  <data name="Tray.TipHotkeys" xml:space="preserve">
+    <value>Screeny: {0} para capturar</value>
+  </data>
+  <data name="App.StartFailed" xml:space="preserve">
+    <value>No se pudo iniciar Screeny.
+
+{0}</value>
+  </data>
+  <data name="App.HistoryFolderCreateFailed" xml:space="preserve">
+    <value>No se pudo crear la carpeta del historial: {0}</value>
+  </data>
+  <data name="App.StartupFailed" xml:space="preserve">
+    <value>No se pudo cambiar el inicio automático: no hay acceso al registro.</value>
+  </data>
+  <data name="App.HotkeyFailedChooseAnother" xml:space="preserve">
+    <value>{0} Elige otro atajo o desactiva esta entrada.</value>
+  </data>
+  <data name="App.SettingsSaveFailed" xml:space="preserve">
+    <value>La configuración se aplica hasta que salgas de la aplicación, pero no se pudo guardar. Revisa el acceso al archivo de configuración y vuelve a intentarlo.</value>
+  </data>
+  <data name="App.DeleteOriginalsTitle" xml:space="preserve">
+    <value>¿Eliminar los originales guardados ({0})?</value>
+  </data>
+  <data name="App.DeleteOriginalsText" xml:space="preserve">
+    <value>Contienen lo que se ocultó con desenfoque. Las capturas del historial y sus anotaciones se conservan; al volver a abrirlas se editarán como imágenes terminadas.</value>
+  </data>
+  <data name="App.Keep" xml:space="preserve">
+    <value>Conservar</value>
+  </data>
+  <data name="App.OriginalsPartlyDeletedTitle" xml:space="preserve">
+    <value>No se eliminaron todos los originales</value>
+  </data>
+  <data name="App.OriginalsPartlyDeletedText" xml:space="preserve">
+    <value>Se eliminaron {0} de {1}. Encontrarás los detalles en el registro.</value>
+  </data>
+  <data name="App.OpenHistoryFolderFailed" xml:space="preserve">
+    <value>No se pudo abrir la carpeta del historial: {0}</value>
+  </data>
+  <data name="App.DisplaysChanged" xml:space="preserve">
+    <value>La configuración de pantallas cambió y se canceló la captura.</value>
+  </data>
+  <data name="App.CaptureFailed" xml:space="preserve">
+    <value>No se pudo hacer la captura de pantalla.</value>
+  </data>
+  <data name="App.CopyTextFailed" xml:space="preserve">
+    <value>No se pudo copiar el texto: {0}</value>
+  </data>
+  <data name="App.SaveFailed" xml:space="preserve">
+    <value>No se pudo guardar: {0}.</value>
+  </data>
+  <data name="App.PinFailed" xml:space="preserve">
+    <value>No se pudo fijar: {0}.</value>
+  </data>
+  <data name="App.CopyFailed" xml:space="preserve">
+    <value>No se pudo copiar: {0}.</value>
+  </data>
+  <data name="App.FailedSavedToHistory" xml:space="preserve">
+    <value>{0} La captura se guardó en el historial.</value>
+  </data>
+  <data name="App.ClipboardBusyInHistory" xml:space="preserve">
+    <value>Otra aplicación está usando el portapapeles. La captura se guardó en el historial.</value>
+  </data>
+  <data name="App.ClipboardBusyNotCopied" xml:space="preserve">
+    <value>Otra aplicación está usando el portapapeles; la captura no se copió.</value>
+  </data>
+  <data name="App.ClipboardBusyText" xml:space="preserve">
+    <value>Otra aplicación está usando el portapapeles; el texto no se copió.</value>
+  </data>
+  <data name="App.TextCopied" xml:space="preserve">
+    <value>Texto copiado: {0}</value>
+  </data>
+  <data name="App.OpenShotFailedTitle" xml:space="preserve">
+    <value>No se pudo abrir la captura</value>
+  </data>
+  <data name="App.OpenShotFailedText" xml:space="preserve">
+    <value>Puede que el archivo se haya eliminado o esté dañado.</value>
+  </data>
+  <data name="App.SaveShotFailed" xml:space="preserve">
+    <value>No se pudo guardar la captura: {0}</value>
+  </data>
+  <data name="App.WizardScanFailed" xml:space="preserve">
+    <value>No se pudo comprobar si hay otras aplicaciones de captura. Encontrarás los detalles en el registro.</value>
+  </data>
+  <data name="App.WizardSaveFailed" xml:space="preserve">
+    <value>No se pudo guardar la configuración del asistente. Revisa el acceso al archivo de configuración.</value>
+  </data>
+  <data name="Updates.AvailableBalloon" xml:space="preserve">
+    <value>La versión {0} está disponible. Haz clic para ver las novedades.</value>
+  </data>
+  <data name="Updates.UpToDateTitle" xml:space="preserve">
+    <value>Tienes la última versión</value>
+  </data>
+  <data name="Updates.NotUpdatableTitle" xml:space="preserve">
+    <value>Actualización no disponible</value>
+  </data>
+  <data name="Updates.NotUpdatableText" xml:space="preserve">
+    <value>Esta copia de Screeny no se creó con el instalador ni como versión portátil, así que no puede actualizarse sola. Puedes descargar la versión nueva en la página de versiones de GitHub.</value>
+  </data>
+  <data name="Updates.CheckFailedTitle" xml:space="preserve">
+    <value>No se pudieron buscar actualizaciones</value>
+  </data>
+  <data name="Updates.ApplyFailedTitle" xml:space="preserve">
+    <value>No se pudo actualizar</value>
+  </data>
+  <data name="Updates.ApplyFailedText" xml:space="preserve">
+    <value>{0}
+
+Screeny se cerrará. Vuelve a abrirlo y repite la actualización.</value>
+  </data>
+  <data name="Settings.Title" xml:space="preserve">
+    <value>Configuración</value>
+  </data>
+  <data name="Settings.SectionCapture" xml:space="preserve">
+    <value>CAPTURA</value>
+  </data>
+  <data name="Settings.PrintScreenReserved" xml:space="preserve">
+    <value>Ahora PrintScreen abre la captura de pantalla de Windows y la pulsación no llega a Screeny.</value>
+  </data>
+  <data name="Settings.HowToTurnOff" xml:space="preserve">
+    <value>Cómo desactivarlo</value>
+  </data>
+  <data name="Hotkeys.WinShiftS" xml:space="preserve">
+    <value>Win+Shift+S (sustituye a Recortes de Windows)</value>
+  </data>
+  <data name="Hotkeys.HookNote" xml:space="preserve">
+    <value>Usa un enlace de teclado del sistema: Screeny ve las pulsaciones de teclas para reconocer este atajo.</value>
+  </data>
+  <data name="Hotkeys.HookNoteAntivirus" xml:space="preserve">
+    <value>Usa un enlace de teclado del sistema: Screeny ve las pulsaciones de teclas para reconocer este atajo. Algunos antivirus pueden reaccionar a ello.</value>
+  </data>
+  <data name="Settings.CustomShortcuts" xml:space="preserve">
+    <value>Atajos propios</value>
+  </data>
+  <data name="Settings.AddShortcutTip" xml:space="preserve">
+    <value>Añadir otro atajo de captura</value>
+  </data>
+  <data name="Settings.Add" xml:space="preserve">
+    <value>Añadir</value>
+  </data>
+  <data name="Settings.ConflictsTip" xml:space="preserve">
+    <value>Buscar aplicaciones que interceptan PrintScreen o Win+Shift+S (Lightshot, ShareX y otras)</value>
+  </data>
+  <data name="Settings.SectionFeatures" xml:space="preserve">
+    <value>FUNCIONES</value>
+  </data>
+  <data name="Settings.SectionHistory" xml:space="preserve">
+    <value>HISTORIAL</value>
+  </data>
+  <data name="Settings.Folder" xml:space="preserve">
+    <value>Carpeta</value>
+  </data>
+  <data name="Settings.Browse" xml:space="preserve">
+    <value>Examinar…</value>
+  </data>
+  <data name="Settings.KeepLast" xml:space="preserve">
+    <value>Conservar las últimas</value>
+  </data>
+  <data name="Settings.LimitRange" xml:space="preserve">
+    <value>De 1 a 500</value>
+  </data>
+  <data name="Settings.Screenshots" xml:space="preserve">
+    <value>capturas</value>
+  </data>
+  <data name="Settings.KeepOriginals" xml:space="preserve">
+    <value>Conservar los originales para volver a editar</value>
+  </data>
+  <data name="Settings.KeepOriginalsNote" xml:space="preserve">
+    <value>Junto a cada captura se guarda una copia sin anotaciones. Contiene todo lo que ocultaste con desenfoque o pixelado. Si lo desactivas, Screeny te ofrecerá eliminar los originales ya guardados.</value>
+  </data>
+  <data name="Settings.SectionBehavior" xml:space="preserve">
+    <value>COMPORTAMIENTO</value>
+  </data>
+  <data name="Settings.EnterCopies" xml:space="preserve">
+    <value>Enter copia la captura al portapapeles (si no, solo la guarda en el historial)</value>
+  </data>
+  <data name="Settings.StartWithWindows" xml:space="preserve">
+    <value>Iniciar con Windows</value>
+  </data>
+  <data name="Settings.ExcludePins" xml:space="preserve">
+    <value>No incluir las capturas fijadas en las capturas nuevas</value>
+  </data>
+  <data name="Settings.Snap" xml:space="preserve">
+    <value>Ajuste y guías</value>
+  </data>
+  <data name="Settings.SnapNote" xml:space="preserve">
+    <value>La selección se ajusta a los bordes de las ventanas y a los contornos nítidos; las formas, a los bordes y centros de otras formas y de la selección. Alt lo desactiva temporalmente.</value>
+  </data>
+  <data name="Settings.FallbackActive" xml:space="preserve">
+    <value>Está activo el atajo de reserva {0}: PrintScreen no está disponible y no funciona ningún otro atajo. Se desactivará solo en cuanto funcione cualquiera de los de arriba.</value>
+  </data>
+  <data name="Hotkeys.BoxTip" xml:space="preserve">
+    <value>Haz clic y pulsa una combinación de teclas; Retroceso la borra</value>
+  </data>
+  <data name="Settings.RemoveShortcut" xml:space="preserve">
+    <value>Quitar atajo</value>
+  </data>
+  <data name="Hotkeys.CustomName" xml:space="preserve">
+    <value>Atajo propio</value>
+  </data>
+  <data name="Settings.OpenSettingsFailed" xml:space="preserve">
+    <value>No se pudo abrir Configuración de Windows. Ábrela manualmente: Accesibilidad &gt; Teclado.</value>
+  </data>
+  <data name="Settings.HistoryFolderDialog" xml:space="preserve">
+    <value>Carpeta del historial de capturas</value>
+  </data>
+  <data name="Settings.FolderRequired" xml:space="preserve">
+    <value>Indica la ruta completa de la carpeta del historial.</value>
+  </data>
+  <data name="Settings.LimitInvalid" xml:space="preserve">
+    <value>El número de capturas del historial debe estar entre {0} y {1}.</value>
+  </data>
+  <data name="Hotkeys.PrintScreenUseBox" xml:space="preserve">
+    <value>PrintScreen se activa con la casilla de arriba.</value>
+  </data>
+  <data name="Settings.DuplicateShortcut" xml:space="preserve">
+    <value>Este atajo ya está en la lista.</value>
+  </data>
+  <data name="Hotkeys.NeedOne" xml:space="preserve">
+    <value>Activa al menos un atajo. Si no, solo podrás hacer capturas desde la bandeja.</value>
+  </data>
+  <data name="Units.Megabytes" xml:space="preserve">
+    <value>{0} MB</value>
+  </data>
+  <data name="PreciseOcr.Title" xml:space="preserve">
+    <value>OCR preciso (PaddleOCR)</value>
+  </data>
+  <data name="PreciseOcr.Caption" xml:space="preserve">
+    <value>Lee mucho mejor el texto pequeño y los apodos. El módulo, de unos {0}, se descarga una sola vez y funciona en este equipo: las capturas nunca se envían a ningún sitio. Solo se descarga con este botón, incluso con la búsqueda de actualizaciones desactivada.</value>
+  </data>
+  <data name="PreciseOcr.Use" xml:space="preserve">
+    <value>Usar OCR preciso</value>
+  </data>
+  <data name="PreciseOcr.Remove" xml:space="preserve">
+    <value>Quitar módulo</value>
+  </data>
+  <data name="PreciseOcr.Undo" xml:space="preserve">
+    <value>No quitar</value>
+  </data>
+  <data name="PreciseOcr.Progress" xml:space="preserve">
+    <value>Descarga del módulo</value>
+  </data>
+  <data name="PreciseOcr.Update" xml:space="preserve">
+    <value>Actualizar módulo ({0})</value>
+  </data>
+  <data name="PreciseOcr.Download" xml:space="preserve">
+    <value>Descargar ({0})</value>
+  </data>
+  <data name="PreciseOcr.Downloading" xml:space="preserve">
+    <value>Descargando el módulo… {0} %</value>
+  </data>
+  <data name="PreciseOcr.RemovalPending" xml:space="preserve">
+    <value>Módulo quitado. Sus archivos se borrarán cuando Screeny se reinicie.</value>
+  </data>
+  <data name="PreciseOcr.Outdated" xml:space="preserve">
+    <value>Está instalada la versión {0} del módulo, pero esta versión de Screeny necesita la {1}. Mientras tanto se usa el OCR de Windows.</value>
+  </data>
+  <data name="PreciseOcr.Ready" xml:space="preserve">
+    <value>Módulo instalado. Ctrl+T muestra al instante el resultado del OCR de Windows y lo mejora en segundo plano.</value>
+  </data>
+  <data name="PreciseOcr.LoadFailed" xml:space="preserve">
+    <value>El módulo no se cargó: {0}</value>
+  </data>
+  <data name="PreciseOcr.Cancelled" xml:space="preserve">
+    <value>Descarga cancelada.</value>
+  </data>
+  <data name="PreciseOcr.NoAccess" xml:space="preserve">
+    <value>No hay acceso a la carpeta de módulos. Revisa los permisos de %LocalAppData%\Screeny y vuelve a intentarlo.</value>
+  </data>
+  <data name="PreciseOcr.WriteFailed" xml:space="preserve">
+    <value>No se pudieron escribir los archivos del módulo (el disco está lleno u otro programa los está usando). Inténtalo más tarde.</value>
+  </data>
+  <data name="PreciseOcr.ArchiveCorrupt" xml:space="preserve">
+    <value>El archivo descargado del módulo está dañado. Vuelve a descargarlo.</value>
+  </data>
+  <data name="PreciseOcr.InstallFailed" xml:space="preserve">
+    <value>No se pudo instalar el módulo. Encontrarás los detalles en el registro de Screeny.</value>
+  </data>
+  <data name="PreciseOcr.AlreadyDeleted" xml:space="preserve">
+    <value>Los archivos del módulo ya se han borrado. Vuelve a descargarlo después de reiniciar Screeny.</value>
+  </data>
+  <data name="PreciseOcr.Installed" xml:space="preserve">
+    <value>OCR preciso instalado: ahora Ctrl+T mejora el resultado en el modo de texto.</value>
+  </data>
+  <data name="PreciseOcr.DownloadFailed" xml:space="preserve">
+    <value>No se pudo descargar el módulo de OCR preciso: {0} Puedes volver a intentarlo en la configuración.</value>
+  </data>
+  <data name="PreciseOcr.NeedsUpdate" xml:space="preserve">
+    <value>El OCR preciso está desactivado por ahora: esta versión de Screeny necesita un módulo actualizado. Actualízalo en la configuración.</value>
+  </data>
+  <data name="Module.NotFound404" xml:space="preserve">
+    <value>No se encontró el módulo en el servidor (404).</value>
+  </data>
+  <data name="Module.ServerStatus" xml:space="preserve">
+    <value>El servidor respondió {0}.</value>
+  </data>
+  <data name="Module.FileMissing" xml:space="preserve">
+    <value>Falta {1} en {0}.</value>
+  </data>
+  <data name="Module.NoConnection" xml:space="preserve">
+    <value>No se puede conectar con el servidor. Revisa la conexión a internet y vuelve a intentarlo.</value>
+  </data>
+  <data name="Module.HashMismatch" xml:space="preserve">
+    <value>El archivo descargado no coincide con el esperado (SHA256). El módulo no se instaló.</value>
+  </data>
+  <data name="Module.Corrupt" xml:space="preserve">
+    <value>El módulo está dañado: {0}.</value>
+  </data>
+  <data name="Module.OldFilesBusy" xml:space="preserve">
+    <value>Los archivos anteriores del módulo están en uso. Reinicia Screeny y vuelve a intentarlo.</value>
+  </data>
+  <data name="Module.TooLarge" xml:space="preserve">
+    <value>El archivo del módulo es demasiado grande.</value>
+  </data>
+  <data name="Module.FilesLocked" xml:space="preserve">
+    <value>No se pudieron colocar los archivos del módulo: otro programa los está bloqueando (quizá un antivirus). Vuelve a intentarlo en un minuto.</value>
+  </data>
+  <data name="Module.BadPath" xml:space="preserve">
+    <value>Ruta no válida en el archivo del módulo: {0}</value>
+  </data>
+  <data name="Module.UnpackTooLarge" xml:space="preserve">
+    <value>El archivo del módulo ocupa demasiado al descomprimirse.</value>
+  </data>
+  <data name="Manifest.Missing" xml:space="preserve">
+    <value>{0} falta o está dañado</value>
+  </data>
+  <data name="Manifest.Changed" xml:space="preserve">
+    <value>{0} se ha modificado</value>
+  </data>
+  <data name="Manifest.Unreadable" xml:space="preserve">
+    <value>{0} no se puede leer</value>
+  </data>
+  <data name="Manifest.WrongModule" xml:space="preserve">
+    <value>{0} describe el módulo {1} versión {2}; se esperaba {3} versión {4}</value>
+  </data>
+  <data name="Manifest.BadPath" xml:space="preserve">
+    <value>ruta no válida en {0}: {1}</value>
+  </data>
+  <data name="Manifest.Duplicate" xml:space="preserve">
+    <value>archivo listado dos veces: {0}</value>
+  </data>
+  <data name="Manifest.NoFile" xml:space="preserve">
+    <value>falta el archivo {0}</value>
+  </data>
+  <data name="Manifest.SizeMismatch" xml:space="preserve">
+    <value>el tamaño de {0} no coincide</value>
+  </data>
+  <data name="Manifest.HashMismatch" xml:space="preserve">
+    <value>el SHA256 de {0} no coincide</value>
+  </data>
+  <data name="Manifest.ExtraFile" xml:space="preserve">
+    <value>archivo sobrante {0}</value>
+  </data>
+  <data name="PreciseOcr.FilesDamaged" xml:space="preserve">
+    <value>los archivos del módulo están dañados o modificados ({0}). Quita el módulo y vuelve a descargarlo.</value>
+  </data>
+  <data name="PreciseOcr.OnnxLoadFailed" xml:space="preserve">
+    <value>no se carga onnxruntime.dll (se necesita Windows de 64 bits; puede que un antivirus haya bloqueado el archivo).</value>
+  </data>
+  <data name="PreciseOcr.ModuleLoadFailed" xml:space="preserve">
+    <value>el módulo no se cargó; encontrarás los detalles en el registro de Screeny.</value>
+  </data>
+  <data name="PreciseOcr.OldVcRuntime" xml:space="preserve">
+    <value>Screeny ya tiene cargada una versión antigua del runtime de Visual C++ ({0} {1} desde {2}), pero el módulo necesita la {3} o posterior. Instala el último paquete redistribuible de Visual C++ 2015–2022 (x64) y reinicia Screeny; mientras tanto se usa el OCR de Windows.</value>
+  </data>
+  <data name="Hotkeys.Busy" xml:space="preserve">
+    <value>Otra aplicación ya usa el atajo {0}.</value>
+  </data>
+  <data name="Hotkeys.RegisterFailed" xml:space="preserve">
+    <value>No se pudo registrar el atajo {0} (error de Windows {1}).</value>
+  </data>
+  <data name="Hotkeys.FallbackInUse" xml:space="preserve">
+    <value>{0} Se usa {1}. Puedes cambiarlo en la configuración.</value>
+  </data>
+  <data name="Hotkeys.TrayOnly" xml:space="preserve">
+    <value>{0} Haz clic en el icono de la bandeja para capturar.</value>
+  </data>
+  <data name="Hotkeys.TrayOnlyWithError" xml:space="preserve">
+    <value>{0} {1} Haz clic en el icono de la bandeja para capturar.</value>
+  </data>
+  <data name="Hotkeys.PrintScreenReserved" xml:space="preserve">
+    <value>PrintScreen lo usa la captura de pantalla de Windows (Configuración &gt; Accesibilidad &gt; Teclado).</value>
+  </data>
+  <data name="Hotkeys.Unrecognized" xml:space="preserve">
+    <value>No se reconoce el atajo «{0}».</value>
+  </data>
+  <data name="Hotkeys.HookFailed" xml:space="preserve">
+    <value>No se pudo activar el enlace de teclado de Win+Shift+S (error de Windows {0}).</value>
+  </data>
+  <data name="Hotkeys.WinShiftSSeparate" xml:space="preserve">
+    <value>Win+Shift+S tiene su propia casilla arriba: Windows no permite asignarlo como un atajo normal.</value>
+  </data>
+  <data name="Hotkeys.NeedModifier" xml:space="preserve">
+    <value>Añade Ctrl, Alt o Win: sin ellas, la tecla dejaría de funcionar al escribir.</value>
+  </data>
+  <data name="Wizard.Title" xml:space="preserve">
+    <value>Screeny: primer inicio</value>
+  </data>
+  <data name="Wizard.Skip" xml:space="preserve">
+    <value>Omitir</value>
+  </data>
+  <data name="Wizard.SkipTip" xml:space="preserve">
+    <value>No cambiar nada. Puedes abrir el asistente más tarde: Configuración &gt; «Buscar conflictos…»</value>
+  </data>
+  <data name="Wizard.Apply" xml:space="preserve">
+    <value>Aplicar</value>
+  </data>
+  <data name="Wizard.Done" xml:space="preserve">
+    <value>Listo</value>
+  </data>
+  <data name="Wizard.RescanTip" xml:space="preserve">
+    <value>Volver a buscar aplicaciones que interfieren con los atajos</value>
+  </data>
+  <data name="Wizard.Rescan" xml:space="preserve">
+    <value>Comprobar de nuevo</value>
+  </data>
+  <data name="Wizard.SectionHotkeys" xml:space="preserve">
+    <value>ATAJOS DE CAPTURA</value>
+  </data>
+  <data name="Wizard.CustomOptional" xml:space="preserve">
+    <value>Atajo propio (opcional)</value>
+  </data>
+  <data name="Wizard.FeaturesNote" xml:space="preserve">
+    <value>Desactiva lo que no necesites: desaparecerán sus botones, teclas y elementos de menú. Puedes recuperarlo en la configuración.</value>
+  </data>
+  <data name="Wizard.SectionUpdates" xml:space="preserve">
+    <value>ACTUALIZACIONES</value>
+  </data>
+  <data name="Wizard.PrivacyNote" xml:space="preserve">
+    <value>Las capturas nunca se envían a ningún sitio. Screeny solo se conecta para buscar versiones nuevas en GitHub y, si tú lo pides, para descargar el módulo de OCR preciso.</value>
+  </data>
+  <data name="Wizard.FakeSuffix" xml:space="preserve">
+    <value>{0} (dev: entorno simulado)</value>
+  </data>
+  <data name="Wizard.HeadingConflicts" xml:space="preserve">
+    <value>Estas aplicaciones interfieren con los atajos de Screeny</value>
+  </data>
+  <data name="Wizard.HeadingReady" xml:space="preserve">
+    <value>Screeny está listo</value>
+  </data>
+  <data name="Wizard.IntroConflicts" xml:space="preserve">
+    <value>Marca lo que quieres hacer y pulsa «Aplicar». No se cambia nada sin tu permiso, y Screeny nunca desinstala nada por su cuenta.</value>
+  </data>
+  <data name="Wizard.IntroReady" xml:space="preserve">
+    <value>No se encontraron otras aplicaciones que intercepten PrintScreen o Win+Shift+S. Elige los atajos de captura y las funciones que quieras.</value>
+  </data>
+  <data name="Wizard.Blocks" xml:space="preserve">
+    <value>Interfiere con: {0}.</value>
+  </data>
+  <data name="Wizard.BlocksUsually" xml:space="preserve">
+    <value>Interfiere con: {0} (normalmente usa {1}).</value>
+  </data>
+  <data name="Wizard.UsuallyTakes" xml:space="preserve">
+    <value>Normalmente usa {0}. No coincide con los atajos predeterminados de Screeny, pero es una segunda herramienta de captura.</value>
+  </data>
+  <data name="Wizard.PowerToysKeys" xml:space="preserve">
+    <value>la reasignación de teclas de Keyboard Manager</value>
+  </data>
+  <data name="Wizard.CloseNow" xml:space="preserve">
+    <value>Cerrar ahora</value>
+  </data>
+  <data name="Wizard.CloseNowTip" xml:space="preserve">
+    <value>Cierra la aplicación para liberar el atajo. Si no se cierra sola en 2 segundos, se finalizará.</value>
+  </data>
+  <data name="Wizard.RemoveAutostart" xml:space="preserve">
+    <value>Quitar del inicio automático</value>
+  </data>
+  <data name="Wizard.RemoveAutostartTip" xml:space="preserve">
+    <value>Como «Deshabilitar» en Administrador de tareas &gt; Aplicaciones de arranque: es reversible y la aplicación no se desinstala.</value>
+  </data>
+  <data name="Wizard.MachineAutostart" xml:space="preserve">
+    <value>El inicio automático está configurado para todos los usuarios. Para desactivarlo manualmente, usa la configuración de la propia aplicación o Administrador de tareas &gt; Aplicaciones de arranque. O hazlo aquí: se necesitan permisos de administrador.</value>
+  </data>
+  <data name="Wizard.DisableAsAdmin" xml:space="preserve">
+    <value>Desactivar como administrador</value>
+  </data>
+  <data name="Wizard.PowerToysHint" xml:space="preserve">
+    <value>Quita la reasignación en PowerToys &gt; Keyboard Manager. El inicio automático de PowerToys se desactiva en su configuración general.</value>
+  </data>
+  <data name="Wizard.Uninstall" xml:space="preserve">
+    <value>Desinstalar aplicación…</value>
+  </data>
+  <data name="Wizard.UninstallTip" xml:space="preserve">
+    <value>Ejecutar el desinstalador de la propia aplicación. Screeny nunca desinstala nada por su cuenta.</value>
+  </data>
+  <data name="Wizard.Resolved" xml:space="preserve">
+    <value>✓ Ya no interfiere: no se está ejecutando ni se inicia sola.</value>
+  </data>
+  <data name="Wizard.WindowsCapture" xml:space="preserve">
+    <value>Captura de pantalla de Windows</value>
+  </data>
+  <data name="Wizard.SystemPrintScreen" xml:space="preserve">
+    <value>Ahora PrintScreen abre Recortes de Windows y la pulsación no llega a Screeny.</value>
+  </data>
+  <data name="Wizard.GivePrintScreen" xml:space="preserve">
+    <value>Dar PrintScreen a Screeny</value>
+  </data>
+  <data name="Wizard.GivePrintScreenTip" xml:space="preserve">
+    <value>Equivale a desactivar «Usar la tecla Imprimir pantalla para abrir la captura de pantalla» en Configuración. No se necesitan permisos de administrador.</value>
+  </data>
+  <data name="Wizard.SignOutNote" xml:space="preserve">
+    <value>Puede que Windows lo aplique solo después de cerrar sesión y volver a iniciarla.</value>
+  </data>
+  <data name="Wizard.FoundRunning" xml:space="preserve">
+    <value>en ejecución</value>
+  </data>
+  <data name="Wizard.FoundRemap" xml:space="preserve">
+    <value>teclas reasignadas en Keyboard Manager</value>
+  </data>
+  <data name="Wizard.FoundNoInstaller" xml:space="preserve">
+    <value>no se encontró el instalador (¿versión portátil?)</value>
+  </data>
+  <data name="Wizard.Found" xml:space="preserve">
+    <value>Detectado: {0}.</value>
+  </data>
+  <data name="Wizard.RescanFailed" xml:space="preserve">
+    <value>No se pudieron volver a comprobar las aplicaciones. Encontrarás los detalles en el registro.</value>
+  </data>
+  <data name="Wizard.StillMachineAutostart" xml:space="preserve">
+    <value>{0} sigue iniciándose para todos los usuarios. Desactívalo manualmente: Administrador de tareas &gt; Aplicaciones de arranque.</value>
+  </data>
+  <data name="Wizard.UninstallTitle" xml:space="preserve">
+    <value>¿Desinstalar {0}?</value>
+  </data>
+  <data name="Wizard.UninstallText" xml:space="preserve">
+    <value>Se abrirá el desinstalador de la propia aplicación y allí decides. Screeny nunca desinstala nada por su cuenta. Cuando termine el desinstalador, pulsa «Comprobar de nuevo».</value>
+  </data>
+  <data name="Wizard.OpenUninstaller" xml:space="preserve">
+    <value>Abrir desinstalador</value>
+  </data>
+  <data name="Wizard.DownloadPreciseOcr" xml:space="preserve">
+    <value>Descargar OCR preciso ({0})</value>
+  </data>
+  <data name="Wizard.PreciseOcrHint" xml:space="preserve">
+    <value>PaddleOCR lee mucho mejor el texto pequeño y los apodos. Funciona en este equipo; las capturas nunca se envían a ningún sitio.</value>
+  </data>
+  <data name="Wizard.HotkeyFailed" xml:space="preserve">
+    <value>El atajo no funcionó.</value>
+  </data>
+  <data name="Wizard.ChooseAnother" xml:space="preserve">
+    <value>{0} Elige otro atajo o desmarca la casilla.</value>
+  </data>
+  <data name="Wizard.RegisteredSignOut" xml:space="preserve">
+    <value>Registrado. Si PrintScreen sigue abriendo Recortes, cierra sesión y vuelve a iniciarla.</value>
+  </data>
+  <data name="Wizard.RegisteredButBlocked" xml:space="preserve">
+    <value>Registrado, pero {0} sigue en ejecución o se inicia solo y puede interceptar la tecla.</value>
+  </data>
+  <data name="Wizard.Works" xml:space="preserve">
+    <value>✓ Funciona.</value>
+  </data>
+  <data name="Wizard.NotWorking" xml:space="preserve">
+    <value>No funciona.</value>
+  </data>
+  <data name="Wizard.BlockedBy" xml:space="preserve">
+    <value>{0} Interfiere: {1}.</value>
+  </data>
+  <data name="Wizard.NotifyOne" xml:space="preserve">
+    <value>{1} está usando {0}. ¿Abrir el asistente? Haz clic en esta notificación o en «Buscar conflictos…» del menú de la bandeja.</value>
+  </data>
+  <data name="Wizard.NotifyMany" xml:space="preserve">
+    <value>Estas aplicaciones usan {0}: {1}. ¿Abrir el asistente? Haz clic en esta notificación o en «Buscar conflictos…» del menú de la bandeja.</value>
+  </data>
+  <data name="Wizard.HotkeyGeneric" xml:space="preserve">
+    <value>El atajo</value>
+  </data>
+  <data name="Autostart.RunUser" xml:space="preserve">
+    <value>inicio automático del usuario actual</value>
+  </data>
+  <data name="Autostart.StartupFolderUser" xml:space="preserve">
+    <value>carpeta Inicio del usuario</value>
+  </data>
+  <data name="Autostart.StartupFolderCommon" xml:space="preserve">
+    <value>carpeta Inicio común (todos los usuarios)</value>
+  </data>
+  <data name="Autostart.Machine" xml:space="preserve">
+    <value>inicio automático de todos los usuarios</value>
+  </data>
+  <data name="Action.NotClosed" xml:space="preserve">
+    <value>{0} no se cerró. Ciérralo manualmente desde su icono de la bandeja.</value>
+  </data>
+  <data name="Action.Closed" xml:space="preserve">
+    <value>{0} cerrado.</value>
+  </data>
+  <data name="Action.CloseNoRights" xml:space="preserve">
+    <value>No se pudo cerrar {0}: parece que se ejecuta como administrador. Ciérralo manualmente desde su icono de la bandeja.</value>
+  </data>
+  <data name="Action.AutostartNeedsAdmin" xml:space="preserve">
+    <value>{0} se inicia para todos los usuarios: se necesitan permisos de administrador.</value>
+  </data>
+  <data name="Action.AutostartAlreadyOff" xml:space="preserve">
+    <value>El inicio automático de {0} ya está desactivado.</value>
+  </data>
+  <data name="Action.AutostartNoRegistry" xml:space="preserve">
+    <value>No se pudo desactivar el inicio automático de {0}: no hay acceso al registro.</value>
+  </data>
+  <data name="Action.AutostartUserOffMachineNeedsAdmin" xml:space="preserve">
+    <value>El inicio automático de {0} está desactivado para el usuario actual; la entrada para todos los usuarios necesita permisos de administrador.</value>
+  </data>
+  <data name="Action.AutostartOff" xml:space="preserve">
+    <value>El inicio automático de {0} está desactivado. Para volver a activarlo: Administrador de tareas &gt; Aplicaciones de arranque.</value>
+  </data>
+  <data name="Action.UnknownApp" xml:space="preserve">
+    <value>Aplicación desconocida.</value>
+  </data>
+  <data name="Action.MachineAutostartOff" xml:space="preserve">
+    <value>El inicio automático de {0} está desactivado para todos los usuarios. Para volver a activarlo: Administrador de tareas &gt; Aplicaciones de arranque.</value>
+  </data>
+  <data name="Action.AutostartFailedCode" xml:space="preserve">
+    <value>No se pudo desactivar el inicio automático de {0} (código {1}). Encontrarás los detalles en el registro.</value>
+  </data>
+  <data name="Action.ElevationCancelled" xml:space="preserve">
+    <value>Se canceló la solicitud de permisos de administrador; el inicio automático no se cambió.</value>
+  </data>
+  <data name="Action.ElevationFailed" xml:space="preserve">
+    <value>No se pudieron solicitar permisos de administrador: {0}</value>
+  </data>
+  <data name="Action.UninstallerNotFound" xml:space="preserve">
+    <value>No se encontró el desinstalador de {0}. Desinstala la aplicación desde Configuración &gt; Aplicaciones.</value>
+  </data>
+  <data name="Action.UninstallerStarted" xml:space="preserve">
+    <value>Se está ejecutando el desinstalador de {0}. Cuando termine, pulsa «Comprobar de nuevo».</value>
+  </data>
+  <data name="Action.UninstallerCancelled" xml:space="preserve">
+    <value>Se canceló el inicio del desinstalador.</value>
+  </data>
+  <data name="Action.UninstallerFailed" xml:space="preserve">
+    <value>No se pudo iniciar el desinstalador de {0}. Desinstala la aplicación desde Configuración &gt; Aplicaciones.</value>
+  </data>
+  <data name="Action.PrintScreenSettingFailed" xml:space="preserve">
+    <value>No se pudo cambiar la configuración. Desactívala manualmente: Configuración &gt; Accesibilidad &gt; Teclado.</value>
+  </data>
+  <data name="Action.PrintScreenDone" xml:space="preserve">
+    <value>Listo. Puede que Windows lo aplique solo después de cerrar sesión y volver a iniciarla; hasta entonces, PrintScreen puede seguir abriendo la captura de Windows.</value>
+  </data>
+  <data name="Action.DevUninstaller" xml:space="preserve">
+    <value>(dev) El desinstalador de {0} no se inicia. Normalmente: «el desinstalador se está ejecutando, pulsa Comprobar de nuevo».</value>
+  </data>
+  <data name="Action.DevHotkeysNotRegistered" xml:space="preserve">
+    <value>(dev) La instancia de prueba no registra atajos.</value>
+  </data>
+  <data name="Feature.Ocr.Title" xml:space="preserve">
+    <value>Reconocimiento de texto y QR</value>
+  </data>
+  <data name="Feature.Ocr.Description" xml:space="preserve">
+    <value>Modo de texto (Ctrl+T): selecciona y copia texto de la captura, lee códigos QR y de barras.</value>
+  </data>
+  <data name="Feature.History.Title" xml:space="preserve">
+    <value>Historial de capturas</value>
+  </data>
+  <data name="Feature.History.Description" xml:space="preserve">
+    <value>Las capturas se guardan en una carpeta, con ventana de historial y edición posterior. Sin historial, la captura solo se copia.</value>
+  </data>
+  <data name="Feature.Pins.Title" xml:space="preserve">
+    <value>Capturas fijadas</value>
+  </data>
+  <data name="Feature.Pins.Description" xml:space="preserve">
+    <value>Una captura encima de todas las ventanas (F3), también desde el historial.</value>
+  </data>
+  <data name="Feature.Beautify.Title" xml:space="preserve">
+    <value>Marco de fondo</value>
+  </data>
+  <data name="Feature.Beautify.Description" xml:space="preserve">
+    <value>Fondo degradado, margen, esquinas redondeadas y sombra (B).</value>
+  </data>
+  <data name="Feature.Pipette.Title" xml:space="preserve">
+    <value>Cuentagotas</value>
+  </data>
+  <data name="Feature.Pipette.Description" xml:space="preserve">
+    <value>Color de un píxel de la captura (I), HEX bajo la lupa antes de seleccionar (C).</value>
+  </data>
+  <data name="Feature.Ruler.Title" xml:space="preserve">
+    <value>Regla</value>
+  </data>
+  <data name="Feature.Ruler.Description" xml:space="preserve">
+    <value>Distancia y ángulo en píxeles (=).</value>
+  </data>
+  <data name="Update.Title" xml:space="preserve">
+    <value>Actualización de Screeny</value>
+  </data>
+  <data name="Update.Later" xml:space="preserve">
+    <value>Más tarde</value>
+  </data>
+  <data name="Update.UpdateAndRestart" xml:space="preserve">
+    <value>Actualizar y reiniciar</value>
+  </data>
+  <data name="Update.SkipVersion" xml:space="preserve">
+    <value>Omitir esta versión</value>
+  </data>
+  <data name="Update.WhatsNew" xml:space="preserve">
+    <value>Novedades</value>
+  </data>
+  <data name="Update.Available" xml:space="preserve">
+    <value>La versión {0} está disponible</value>
+  </data>
+  <data name="Update.Current" xml:space="preserve">
+    <value>Versión instalada: {0}</value>
+  </data>
+  <data name="Update.OnlyDisabled" xml:space="preserve">
+    <value>Los cambios solo afectan a funciones que desactivaste.</value>
+  </data>
+  <data name="Update.NoNotes" xml:space="preserve">
+    <value>No se adjuntó la lista de cambios.</value>
+  </data>
+  <data name="Update.Downloading" xml:space="preserve">
+    <value>Descargando la actualización…</value>
+  </data>
+  <data name="Update.DownloadingPercent" xml:space="preserve">
+    <value>Descargando la actualización… {0} %</value>
+  </data>
+  <data name="Update.Restarting" xml:space="preserve">
+    <value>Reiniciando…</value>
+  </data>
+  <data name="Update.Failed" xml:space="preserve">
+    <value>No se pudo actualizar: {0}</value>
+  </data>
+  <data name="Update.SkipFailed" xml:space="preserve">
+    <value>No se pudo guardar tu elección. Encontrarás los detalles en el registro.</value>
+  </data>
+  <data name="Tool.WithKey" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+  <data name="Tool.Select" xml:space="preserve">
+    <value>Seleccionar y mover</value>
+  </data>
+  <data name="Tool.Rect" xml:space="preserve">
+    <value>Rectángulo</value>
+  </data>
+  <data name="Tool.Ellipse" xml:space="preserve">
+    <value>Elipse</value>
+  </data>
+  <data name="Tool.Line" xml:space="preserve">
+    <value>Línea</value>
+  </data>
+  <data name="Tool.Arrow" xml:space="preserve">
+    <value>Flecha</value>
+  </data>
+  <data name="Tool.Pen" xml:space="preserve">
+    <value>Lápiz</value>
+  </data>
+  <data name="Tool.Highlighter" xml:space="preserve">
+    <value>Marcador</value>
+  </data>
+  <data name="Tool.Text" xml:space="preserve">
+    <value>Texto</value>
+  </data>
+  <data name="Tool.Number" xml:space="preserve">
+    <value>Marca numerada</value>
+  </data>
+  <data name="Tool.Pixelate" xml:space="preserve">
+    <value>Pixelar</value>
+  </data>
+  <data name="Tool.Blur" xml:space="preserve">
+    <value>Desenfocar</value>
+  </data>
+  <data name="Tool.Ruler" xml:space="preserve">
+    <value>Regla: Δx, Δy y longitud en píxeles; Shift para pasos de 45°</value>
+  </data>
+  <data name="Toolbar.Pipette" xml:space="preserve">
+    <value>Cuentagotas: toma un color de la captura (I)</value>
+  </data>
+  <data name="Toolbar.Thickness" xml:space="preserve">
+    <value>Grosor: rueda del ratón</value>
+  </data>
+  <data name="Toolbar.Undo" xml:space="preserve">
+    <value>Deshacer (Ctrl+Z)</value>
+  </data>
+  <data name="Toolbar.Redo" xml:space="preserve">
+    <value>Rehacer (Ctrl+Y)</value>
+  </data>
+  <data name="Toolbar.Beautify" xml:space="preserve">
+    <value>Marco de fondo: fondo, margen, esquinas, sombra (B)</value>
+  </data>
+  <data name="Toolbar.Ocr" xml:space="preserve">
+    <value>Seleccionar texto en la captura (Ctrl+T)</value>
+  </data>
+  <data name="Toolbar.OcrBack" xml:space="preserve">
+    <value>Volver a dibujar (Ctrl+T, Esc)</value>
+  </data>
+  <data name="Toolbar.Pin" xml:space="preserve">
+    <value>Fijar encima de las ventanas (F3)</value>
+  </data>
+  <data name="Toolbar.SaveAs" xml:space="preserve">
+    <value>Guardar como… (Ctrl+S)</value>
+  </data>
+  <data name="Toolbar.Cancel" xml:space="preserve">
+    <value>Cancelar (Esc)</value>
+  </data>
+  <data name="Toolbar.Close" xml:space="preserve">
+    <value>Cerrar (Esc)</value>
+  </data>
+  <data name="Toolbar.CopyEnter" xml:space="preserve">
+    <value>Copiar al portapapeles (Enter)</value>
+  </data>
+  <data name="Toolbar.CopyEditorHistory" xml:space="preserve">
+    <value>Copiar al portapapeles (Ctrl+C) y añadir una entrada nueva al historial</value>
+  </data>
+  <data name="Toolbar.CopyEditor" xml:space="preserve">
+    <value>Copiar al portapapeles (Ctrl+C)</value>
+  </data>
+  <data name="Toolbar.CopyText" xml:space="preserve">
+    <value>Copiar texto</value>
+  </data>
+  <data name="Toolbar.CopyTextTip" xml:space="preserve">
+    <value>Copiar el texto seleccionado, o todo si no hay selección (Enter, Ctrl+C)</value>
+  </data>
+  <data name="Options.Stroke" xml:space="preserve">
+    <value>Borde</value>
+  </data>
+  <data name="Options.StrokeSwatch" xml:space="preserve">
+    <value>Borde: la paleta lo colorea</value>
+  </data>
+  <data name="Options.NoStroke" xml:space="preserve">
+    <value>Sin borde</value>
+  </data>
+  <data name="Options.RestoreStroke" xml:space="preserve">
+    <value>Recuperar el borde</value>
+  </data>
+  <data name="Options.Fill" xml:space="preserve">
+    <value>Relleno</value>
+  </data>
+  <data name="Options.FillSwatch" xml:space="preserve">
+    <value>Relleno: la paleta lo colorea</value>
+  </data>
+  <data name="Options.NoFill" xml:space="preserve">
+    <value>Sin relleno</value>
+  </data>
+  <data name="Options.RestoreFill" xml:space="preserve">
+    <value>Recuperar el relleno</value>
+  </data>
+  <data name="Options.NeedStrokeOrFill" xml:space="preserve">
+    <value>No puedes quitar a la vez el borde y el relleno</value>
+  </data>
+  <data name="Options.FillOpacity" xml:space="preserve">
+    <value>Opacidad del relleno: haz clic para cambiarla</value>
+  </data>
+  <data name="Options.ArrowNormal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="Options.ArrowDouble" xml:space="preserve">
+    <value>Doble punta</value>
+  </data>
+  <data name="Options.ArrowDashed" xml:space="preserve">
+    <value>Discontinua</value>
+  </data>
+  <data name="Options.ArrowThick" xml:space="preserve">
+    <value>Gruesa (cuña)</value>
+  </data>
+  <data name="Options.Text" xml:space="preserve">
+    <value>Texto</value>
+  </data>
+  <data name="Options.TextSwatch" xml:space="preserve">
+    <value>Color del texto: la paleta lo colorea</value>
+  </data>
+  <data name="Options.Background" xml:space="preserve">
+    <value>Fondo</value>
+  </data>
+  <data name="Options.BackgroundSwatch" xml:space="preserve">
+    <value>Fondo: la paleta lo colorea</value>
+  </data>
+  <data name="Options.NoBackground" xml:space="preserve">
+    <value>Sin fondo</value>
+  </data>
+  <data name="Options.AddBackground" xml:space="preserve">
+    <value>Añadir fondo</value>
+  </data>
+  <data name="Options.Align" xml:space="preserve">
+    <value>Alineación</value>
+  </data>
+  <data name="Options.AlignLeft" xml:space="preserve">
+    <value>Alinear a la izquierda</value>
+  </data>
+  <data name="Options.AlignCenter" xml:space="preserve">
+    <value>Centrar</value>
+  </data>
+  <data name="Options.AlignRight" xml:space="preserve">
+    <value>Alinear a la derecha</value>
+  </data>
+  <data name="Beautify.Background" xml:space="preserve">
+    <value>Fondo</value>
+  </data>
+  <data name="Beautify.BackgroundPreset" xml:space="preserve">
+    <value>Fondo: {0}</value>
+  </data>
+  <data name="Beautify.Padding" xml:space="preserve">
+    <value>Margen</value>
+  </data>
+  <data name="Beautify.PaddingPixels" xml:space="preserve">
+    <value>Margen de {0} px</value>
+  </data>
+  <data name="Beautify.Radius" xml:space="preserve">
+    <value>Esquinas</value>
+  </data>
+  <data name="Beautify.NoRadius" xml:space="preserve">
+    <value>Esquinas rectas</value>
+  </data>
+  <data name="Beautify.RadiusPixels" xml:space="preserve">
+    <value>Radio de {0} px</value>
+  </data>
+  <data name="Beautify.Shadow" xml:space="preserve">
+    <value>Sombra</value>
+  </data>
+  <data name="Beautify.Soft" xml:space="preserve">
+    <value>Suave</value>
+  </data>
+  <data name="Beautify.SoftTip" xml:space="preserve">
+    <value>Sombra suave bajo la captura</value>
+  </data>
+  <data name="Beautify.Sunset" xml:space="preserve">
+    <value>Atardecer</value>
+  </data>
+  <data name="Beautify.Mint" xml:space="preserve">
+    <value>Menta</value>
+  </data>
+  <data name="Beautify.Graphite" xml:space="preserve">
+    <value>Grafito</value>
+  </data>
+  <data name="Beautify.Light" xml:space="preserve">
+    <value>Claro</value>
+  </data>
+  <data name="Beautify.Warm" xml:space="preserve">
+    <value>Cálido</value>
+  </data>
+  <data name="Beautify.Blue" xml:space="preserve">
+    <value>Azul</value>
+  </data>
+  <data name="Codes.FormatLink" xml:space="preserve">
+    <value>{0} · enlace</value>
+  </data>
+  <data name="Codes.OpenInBrowser" xml:space="preserve">
+    <value>Abrir en el navegador: {0}</value>
+  </data>
+  <data name="Codes.Copied" xml:space="preserve">
+    <value>Contenido del código copiado</value>
+  </data>
+  <data name="Codes.OpenFailed" xml:space="preserve">
+    <value>No se pudo abrir el enlace</value>
+  </data>
+  <data name="Codes.QrCode" xml:space="preserve">
+    <value>Código QR</value>
+  </data>
+  <data name="Pipette.Copied" xml:space="preserve">
+    <value>{0} copiado</value>
+  </data>
+  <data name="TextMode.Recognizing" xml:space="preserve">
+    <value>Reconociendo el texto…</value>
+  </data>
+  <data name="TextMode.OcrUnavailable" xml:space="preserve">
+    <value>El OCR no está disponible: añade un idioma con reconocimiento de texto en Configuración &gt; Hora e idioma &gt; Idioma.</value>
+  </data>
+  <data name="TextMode.Failed" xml:space="preserve">
+    <value>No se pudo reconocer el texto: {0}</value>
+  </data>
+  <data name="TextMode.NotFound" xml:space="preserve">
+    <value>No se encontró texto</value>
+  </data>
+  <data name="TextMode.Refining" xml:space="preserve">
+    <value>Reconociendo el texto… mejorando</value>
+  </data>
+  <data name="TextMode.OneCode" xml:space="preserve">
+    <value>Código encontrado: haz clic en él · Enter copia su contenido · Esc vuelve</value>
+  </data>
+  <data name="TextMode.ManyCodes" xml:space="preserve">
+    <value>Códigos encontrados: haz clic en uno para ver su contenido · Esc vuelve</value>
+  </data>
+  <data name="TextMode.HintNoSelection" xml:space="preserve">
+    <value>Selecciona texto con el ratón · Ctrl+A todo · Enter copia todo el texto · Esc vuelve</value>
+  </data>
+  <data name="TextMode.HintNoSelectionCodes" xml:space="preserve">
+    <value>Selecciona texto con el ratón · clic en un código para ver su contenido · Ctrl+A todo · Enter copia todo el texto · Esc vuelve</value>
+  </data>
+  <data name="TextMode.HintSelection" xml:space="preserve">
+    <value>Enter o Ctrl+C copia la selección · Ctrl+A todo · Esc quita la selección</value>
+  </data>
+  <data name="TextMode.WithRefining" xml:space="preserve">
+    <value>{0} · mejorando…</value>
+  </data>
+  <data name="TextMode.CopyWhenReady" xml:space="preserve">
+    <value>Reconociendo el texto… se copiará en cuanto termine</value>
+  </data>
+  <data name="TextMode.ClickCode" xml:space="preserve">
+    <value>Haz clic en un código para ver y copiar su contenido</value>
+  </data>
+  <data name="TextMode.NoTextInSelection" xml:space="preserve">
+    <value>No hay texto en la selección · Ctrl+A todo · Esc quita la selección</value>
+  </data>
+  <data name="History.Title" xml:space="preserve">
+    <value>Historial</value>
+  </data>
+  <data name="History.Edit" xml:space="preserve">
+    <value>Editar</value>
+  </data>
+  <data name="History.PinOnScreen" xml:space="preserve">
+    <value>Fijar en pantalla</value>
+  </data>
+  <data name="History.ShowInFolder" xml:space="preserve">
+    <value>Mostrar en la carpeta</value>
+  </data>
+  <data name="History.OpenFolder" xml:space="preserve">
+    <value>Abrir carpeta</value>
+  </data>
+  <data name="History.ClearAll" xml:space="preserve">
+    <value>Borrar todo</value>
+  </data>
+  <data name="History.CardTip" xml:space="preserve">
+    <value>Clic para copiar, doble clic para abrir, E para editar, clic derecho para más acciones</value>
+  </data>
+  <data name="History.Empty" xml:space="preserve">
+    <value>El historial está vacío</value>
+  </data>
+  <data name="History.EmptyHintHotkey" xml:space="preserve">
+    <value>Pulsa {0} para hacer tu primera captura.</value>
+  </data>
+  <data name="History.EmptyHintTray" xml:space="preserve">
+    <value>Haz clic en el icono de Screeny en la bandeja para hacer tu primera captura.</value>
+  </data>
+  <data name="History.FolderUnavailable" xml:space="preserve">
+    <value>Carpeta del historial no disponible</value>
+  </data>
+  <data name="History.ReadFailed" xml:space="preserve">
+    <value>No se pudo leer la carpeta del historial</value>
+  </data>
+  <data name="History.Count" xml:space="preserve">
+    <value>{0} de {1} capturas</value>
+  </data>
+  <data name="History.ClipboardBusy" xml:space="preserve">
+    <value>Portapapeles ocupado</value>
+  </data>
+  <data name="History.Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="History.OpenFailedText" xml:space="preserve">
+    <value>Puede que el archivo se haya eliminado o que no haya ninguna aplicación asignada para abrir archivos PNG.</value>
+  </data>
+  <data name="History.DeleteTitle" xml:space="preserve">
+    <value>¿Eliminar la captura?</value>
+  </data>
+  <data name="History.DeleteText" xml:space="preserve">
+    <value>El archivo se elimina sin pasar por la Papelera de reciclaje y no se podrá recuperar.</value>
+  </data>
+  <data name="History.DeleteFailedTitle" xml:space="preserve">
+    <value>No se pudo eliminar la captura</value>
+  </data>
+  <data name="History.DeleteFailedText" xml:space="preserve">
+    <value>Otro programa está usando el archivo o no hay acceso a la carpeta.</value>
+  </data>
+  <data name="History.CreateFolderFailed" xml:space="preserve">
+    <value>No se pudo crear la carpeta del historial</value>
+  </data>
+  <data name="History.ExplorerFailedTitle" xml:space="preserve">
+    <value>No se pudo abrir el Explorador de archivos</value>
+  </data>
+  <data name="History.ExplorerFailedText" xml:space="preserve">
+    <value>Los detalles están en el registro de Screeny.</value>
+  </data>
+  <data name="History.ClearTitle" xml:space="preserve">
+    <value>¿Borrar el historial?</value>
+  </data>
+  <data name="History.ClearText" xml:space="preserve">
+    <value>Carpeta: {0}
+Se eliminarán las capturas ({1}) sin pasar por la Papelera de reciclaje. No se podrán recuperar.</value>
+  </data>
+  <data name="History.DeleteAll" xml:space="preserve">
+    <value>Eliminar todo</value>
+  </data>
+  <data name="Editor.Title" xml:space="preserve">
+    <value>Editor</value>
+  </data>
+  <data name="Editor.TitleShot" xml:space="preserve">
+    <value>Editor: captura del {0}</value>
+  </data>
+  <data name="Editor.TitleFile" xml:space="preserve">
+    <value>Editor: {0}</value>
+  </data>
+  <data name="Editor.Original" xml:space="preserve">
+    <value>Original</value>
+  </data>
+  <data name="Editor.OriginalTip" xml:space="preserve">
+    <value>La captura sin anotaciones: están ocultas, no eliminadas</value>
+  </data>
+  <data name="Editor.WithMarkup" xml:space="preserve">
+    <value>Con anotaciones</value>
+  </data>
+  <data name="Editor.Clear" xml:space="preserve">
+    <value>Borrar anotaciones</value>
+  </data>
+  <data name="Editor.ClearTip" xml:space="preserve">
+    <value>Eliminar todas las anotaciones de una vez (Ctrl+Z las recupera)</value>
+  </data>
+  <data name="Editor.Hide" xml:space="preserve">
+    <value>Ocultar</value>
+  </data>
+  <data name="Editor.Restart" xml:space="preserve">
+    <value>Empezar de nuevo desde el original</value>
+  </data>
+  <data name="Editor.ZoomTip" xml:space="preserve">
+    <value>Ajustar / 100 % (Ctrl+0, Ctrl+1) · Ctrl+rueda para hacer zoom · Espacio+arrastrar para desplazar</value>
+  </data>
+  <data name="Editor.Zoom" xml:space="preserve">
+    <value>{0} %</value>
+  </data>
+  <data name="Editor.ZoomFit" xml:space="preserve">
+    <value>Ajustar · {0} %</value>
+  </data>
+  <data name="Editor.NoticeOriginal" xml:space="preserve">
+    <value>Original sin anotaciones: están ocultas, no eliminadas, y en este modo no se puede dibujar.</value>
+  </data>
+  <data name="Editor.NoticeNoOriginal" xml:space="preserve">
+    <value>No se guardó el original: las anotaciones se dibujan sobre la captura terminada. Activa la opción de conservar los originales en la configuración.</value>
+  </data>
+  <data name="Editor.ComposeFailed" xml:space="preserve">
+    <value>No se pudo generar la imagen: {0}</value>
+  </data>
+  <data name="Editor.Saving" xml:space="preserve">
+    <value>Guardando…</value>
+  </data>
+  <data name="Editor.ToastNewEntry" xml:space="preserve">
+    <value>{0} · nueva entrada en el historial</value>
+  </data>
+  <data name="Editor.ToastHistoryFailed" xml:space="preserve">
+    <value>{0} · no se pudo guardar en el historial</value>
+  </data>
+  <data name="Editor.Saved" xml:space="preserve">
+    <value>Guardado</value>
+  </data>
+  <data name="Editor.Pinned" xml:space="preserve">
+    <value>Fijado</value>
+  </data>
+  <data name="Editor.Failed" xml:space="preserve">
+    <value>Error: {0}</value>
+  </data>
+  <data name="Editor.CloseTitle" xml:space="preserve">
+    <value>¿Cerrar sin guardar?</value>
+  </data>
+  <data name="Editor.CloseHistoryPins" xml:space="preserve">
+    <value>Las anotaciones no irán al historial: «Copiar», «Guardar como…» y «Fijar» añaden una entrada nueva.</value>
+  </data>
+  <data name="Editor.CloseHistory" xml:space="preserve">
+    <value>Las anotaciones no irán al historial: «Copiar» y «Guardar como…» añaden una entrada nueva.</value>
+  </data>
+  <data name="Editor.ClosePins" xml:space="preserve">
+    <value>Las anotaciones se perderán: puedes copiar la imagen con ellas, guardarla («Guardar como…») o fijarla.</value>
+  </data>
+  <data name="Editor.CloseLost" xml:space="preserve">
+    <value>Las anotaciones se perderán: puedes copiar la imagen con ellas o guardarla («Guardar como…»).</value>
+  </data>
+  <data name="Edit.NoDocument" xml:space="preserve">
+    <value>No se encontró el documento de anotaciones</value>
+  </data>
+  <data name="Edit.SizeMismatch" xml:space="preserve">
+    <value>El tamaño del documento de anotaciones ({0}×{1}) no coincide con el original ({2}×{3})</value>
+  </data>
+  <data name="Edit.UnknownMarks" xml:space="preserve">
+    <value>Anotaciones desconocidas: {0} (la captura es de una versión más reciente de Screeny)</value>
+  </data>
+  <data name="Edit.ReadOriginalFailed" xml:space="preserve">
+    <value>No se pudo leer el original</value>
+  </data>
+  <data name="Edit.DocumentDamaged" xml:space="preserve">
+    <value>El documento de anotaciones está dañado</value>
+  </data>
+  <data name="Edit.NewerDocument" xml:space="preserve">
+    <value>El documento de anotaciones tiene la versión {0}, de una versión más reciente de Screeny</value>
+  </data>
+  <data name="Edit.OpenedFlat" xml:space="preserve">
+    <value>{0}. La captura se abrió como imagen terminada: las anotaciones anteriores forman parte de ella.</value>
+  </data>
+  <data name="Pin.Save" xml:space="preserve">
+    <value>Guardar…</value>
+  </data>
+  <data name="Pin.ResetZoom" xml:space="preserve">
+    <value>Restablecer zoom</value>
+  </data>
+  <data name="Pin.Opacity" xml:space="preserve">
+    <value>Opacidad</value>
+  </data>
+  <data name="Pin.OpacityBadge" xml:space="preserve">
+    <value>Opacidad {0} %</value>
+  </data>
+  <data name="File.ReplaceTitle" xml:space="preserve">
+    <value>¿Reemplazar el archivo?</value>
+  </data>
+  <data name="File.ReplaceText" xml:space="preserve">
+    <value>El archivo ya existe:
+{0}
+¿Quieres reemplazarlo?</value>
+  </data>
+  <data name="File.Replace" xml:space="preserve">
+    <value>Reemplazar</value>
+  </data>
+</root>

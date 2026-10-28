@@ -1,0 +1,1279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Common.Cancel" xml:space="preserve">
+    <value>Отмена</value>
+  </data>
+  <data name="Common.Save" xml:space="preserve">
+    <value>Сохранить</value>
+  </data>
+  <data name="Common.OK" xml:space="preserve">
+    <value>ОК</value>
+  </data>
+  <data name="Common.Close" xml:space="preserve">
+    <value>Закрыть</value>
+  </data>
+  <data name="Common.Minimize" xml:space="preserve">
+    <value>Свернуть</value>
+  </data>
+  <data name="Common.Delete" xml:space="preserve">
+    <value>Удалить</value>
+  </data>
+  <data name="Common.Copy" xml:space="preserve">
+    <value>Копировать</value>
+  </data>
+  <data name="Common.Open" xml:space="preserve">
+    <value>Открыть</value>
+  </data>
+  <data name="Common.Copied" xml:space="preserve">
+    <value>Скопировано</value>
+  </data>
+  <data name="Common.ClipboardBusy" xml:space="preserve">
+    <value>Буфер обмена занят</value>
+  </data>
+  <data name="Common.SaveScreenshotTitle" xml:space="preserve">
+    <value>Сохранить снимок</value>
+  </data>
+  <data name="Common.CheckConflicts" xml:space="preserve">
+    <value>Проверить конфликты…</value>
+  </data>
+  <data name="Common.CheckUpdatesBox" xml:space="preserve">
+    <value>Проверять обновления</value>
+  </data>
+  <data name="Common.PrivacyNote" xml:space="preserve">
+    <value>Снимки никуда не отправляются. В сеть Screeny ходит только за проверкой новых версий на GitHub и — если вы сами попросите — за модулем точного распознавания текста. Его загрузку эта галочка не запрещает.</value>
+  </data>
+  <data name="Common.SeeLog" xml:space="preserve">
+    <value>Подробности — в журнале.</value>
+  </data>
+  <data name="Language.Section" xml:space="preserve">
+    <value>ЯЗЫК</value>
+  </data>
+  <data name="Language.System" xml:space="preserve">
+    <value>Как в системе ({0})</value>
+  </data>
+  <data name="Language.Name" xml:space="preserve">
+    <value>Язык интерфейса</value>
+  </data>
+  <data name="Tray.Capture" xml:space="preserve">
+    <value>Снимок</value>
+  </data>
+  <data name="Tray.History" xml:space="preserve">
+    <value>История…</value>
+  </data>
+  <data name="Tray.OpenHistoryFolder" xml:space="preserve">
+    <value>Открыть папку истории</value>
+  </data>
+  <data name="Tray.Settings" xml:space="preserve">
+    <value>Настройки…</value>
+  </data>
+  <data name="Tray.CheckUpdates" xml:space="preserve">
+    <value>Проверить обновления…</value>
+  </data>
+  <data name="Tray.Exit" xml:space="preserve">
+    <value>Выход</value>
+  </data>
+  <data name="Tray.TipClick" xml:space="preserve">
+    <value>Screeny — клик для снимка</value>
+  </data>
+  <data name="Tray.TipHotkeys" xml:space="preserve">
+    <value>Screeny — {0} для снимка</value>
+  </data>
+  <data name="App.StartFailed" xml:space="preserve">
+    <value>Screeny не удалось запустить.
+
+{0}</value>
+  </data>
+  <data name="App.HistoryFolderCreateFailed" xml:space="preserve">
+    <value>Не удалось создать папку истории: {0}</value>
+  </data>
+  <data name="App.StartupFailed" xml:space="preserve">
+    <value>Не удалось изменить автозапуск: нет доступа к реестру.</value>
+  </data>
+  <data name="App.HotkeyFailedChooseAnother" xml:space="preserve">
+    <value>{0} Выберите другое сочетание или выключите эту запись.</value>
+  </data>
+  <data name="App.SettingsSaveFailed" xml:space="preserve">
+    <value>Настройки применены до выхода из приложения, но сохранить их не удалось. Проверьте доступ к файлу настроек и повторите попытку.</value>
+  </data>
+  <data name="App.DeleteOriginalsTitle" xml:space="preserve">
+    <value>Удалить сохранённые оригиналы ({0} шт.)?</value>
+  </data>
+  <data name="App.DeleteOriginalsText" xml:space="preserve">
+    <value>Они содержат то, что было скрыто размытием. Снимки истории и пометки останутся; повторно открытые снимки будут редактироваться как готовые картинки.</value>
+  </data>
+  <data name="App.Keep" xml:space="preserve">
+    <value>Оставить</value>
+  </data>
+  <data name="App.OriginalsPartlyDeletedTitle" xml:space="preserve">
+    <value>Не все оригиналы удалены</value>
+  </data>
+  <data name="App.OriginalsPartlyDeletedText" xml:space="preserve">
+    <value>Удалено {0} из {1}. Подробности — в журнале.</value>
+  </data>
+  <data name="App.OpenHistoryFolderFailed" xml:space="preserve">
+    <value>Не удалось открыть папку истории: {0}</value>
+  </data>
+  <data name="App.DisplaysChanged" xml:space="preserve">
+    <value>Конфигурация экранов изменилась, снимок отменён.</value>
+  </data>
+  <data name="App.CaptureFailed" xml:space="preserve">
+    <value>Не удалось сделать снимок экрана.</value>
+  </data>
+  <data name="App.CopyTextFailed" xml:space="preserve">
+    <value>Не удалось скопировать текст: {0}</value>
+  </data>
+  <data name="App.SaveFailed" xml:space="preserve">
+    <value>Сохранение не удалось: {0}.</value>
+  </data>
+  <data name="App.PinFailed" xml:space="preserve">
+    <value>Закрепление не удалось: {0}.</value>
+  </data>
+  <data name="App.CopyFailed" xml:space="preserve">
+    <value>Копирование не удалось: {0}.</value>
+  </data>
+  <data name="App.FailedSavedToHistory" xml:space="preserve">
+    <value>{0} Снимок сохранён в истории.</value>
+  </data>
+  <data name="App.ClipboardBusyInHistory" xml:space="preserve">
+    <value>Буфер обмена занят другим приложением — снимок сохранён в историю.</value>
+  </data>
+  <data name="App.ClipboardBusyNotCopied" xml:space="preserve">
+    <value>Буфер обмена занят другим приложением, снимок не скопирован.</value>
+  </data>
+  <data name="App.ClipboardBusyText" xml:space="preserve">
+    <value>Буфер обмена занят другим приложением, текст не скопирован.</value>
+  </data>
+  <data name="App.TextCopied" xml:space="preserve">
+    <value>Текст скопирован: {0}</value>
+  </data>
+  <data name="App.OpenShotFailedTitle" xml:space="preserve">
+    <value>Не удалось открыть снимок</value>
+  </data>
+  <data name="App.OpenShotFailedText" xml:space="preserve">
+    <value>Файл мог быть удалён или повреждён.</value>
+  </data>
+  <data name="App.SaveShotFailed" xml:space="preserve">
+    <value>Не удалось сохранить снимок: {0}</value>
+  </data>
+  <data name="App.WizardScanFailed" xml:space="preserve">
+    <value>Не удалось проверить другие программы снимков. Подробности — в журнале.</value>
+  </data>
+  <data name="App.WizardSaveFailed" xml:space="preserve">
+    <value>Не удалось сохранить настройки мастера. Проверьте доступ к файлу настроек.</value>
+  </data>
+  <data name="Updates.AvailableBalloon" xml:space="preserve">
+    <value>Доступна версия {0}. Нажмите, чтобы посмотреть, что нового.</value>
+  </data>
+  <data name="Updates.UpToDateTitle" xml:space="preserve">
+    <value>У вас последняя версия</value>
+  </data>
+  <data name="Updates.NotUpdatableTitle" xml:space="preserve">
+    <value>Обновление недоступно</value>
+  </data>
+  <data name="Updates.NotUpdatableText" xml:space="preserve">
+    <value>Эта копия Screeny собрана не установщиком и не портативной сборкой, поэтому не умеет обновляться сама. Новую версию можно скачать на странице релизов GitHub.</value>
+  </data>
+  <data name="Updates.CheckFailedTitle" xml:space="preserve">
+    <value>Не удалось проверить обновления</value>
+  </data>
+  <data name="Updates.ApplyFailedTitle" xml:space="preserve">
+    <value>Не удалось обновить</value>
+  </data>
+  <data name="Updates.ApplyFailedText" xml:space="preserve">
+    <value>{0}
+
+Screeny закроется; запустите его снова и повторите обновление.</value>
+  </data>
+  <data name="Settings.Title" xml:space="preserve">
+    <value>Настройки</value>
+  </data>
+  <data name="Settings.SectionCapture" xml:space="preserve">
+    <value>СНИМОК</value>
+  </data>
+  <data name="Settings.PrintScreenReserved" xml:space="preserve">
+    <value>Сейчас PrintScreen открывает системный захват экрана Windows, и до Screeny нажатие не доходит.</value>
+  </data>
+  <data name="Settings.HowToTurnOff" xml:space="preserve">
+    <value>Как отключить</value>
+  </data>
+  <data name="Hotkeys.WinShiftS" xml:space="preserve">
+    <value>Win+Shift+S (заменяет системные «Ножницы»)</value>
+  </data>
+  <data name="Hotkeys.HookNote" xml:space="preserve">
+    <value>Используется системный перехват клавиатуры: Screeny видит нажатия клавиш, чтобы опознать это сочетание.</value>
+  </data>
+  <data name="Hotkeys.HookNoteAntivirus" xml:space="preserve">
+    <value>Используется системный перехват клавиатуры: Screeny видит нажатия клавиш, чтобы опознать это сочетание. Некоторые антивирусы могут на это реагировать.</value>
+  </data>
+  <data name="Settings.CustomShortcuts" xml:space="preserve">
+    <value>Свои сочетания</value>
+  </data>
+  <data name="Settings.AddShortcutTip" xml:space="preserve">
+    <value>Добавить ещё одно сочетание для снимка</value>
+  </data>
+  <data name="Settings.Add" xml:space="preserve">
+    <value>Добавить</value>
+  </data>
+  <data name="Settings.ConflictsTip" xml:space="preserve">
+    <value>Найти программы, которые перехватывают PrintScreen или Win+Shift+S (Lightshot, ShareX и другие)</value>
+  </data>
+  <data name="Settings.SectionFeatures" xml:space="preserve">
+    <value>ФУНКЦИИ</value>
+  </data>
+  <data name="Settings.SectionHistory" xml:space="preserve">
+    <value>ИСТОРИЯ</value>
+  </data>
+  <data name="Settings.Folder" xml:space="preserve">
+    <value>Папка</value>
+  </data>
+  <data name="Settings.Browse" xml:space="preserve">
+    <value>Обзор…</value>
+  </data>
+  <data name="Settings.KeepLast" xml:space="preserve">
+    <value>Хранить последние</value>
+  </data>
+  <data name="Settings.LimitRange" xml:space="preserve">
+    <value>От 1 до 500</value>
+  </data>
+  <data name="Settings.Screenshots" xml:space="preserve">
+    <value>снимков</value>
+  </data>
+  <data name="Settings.KeepOriginals" xml:space="preserve">
+    <value>Хранить оригиналы для повторного редактирования</value>
+  </data>
+  <data name="Settings.KeepOriginalsNote" xml:space="preserve">
+    <value>Рядом со снимком сохраняется версия без пометок. Она содержит всё, что скрыто размытием и пикселизацией. Если выключить, Screeny предложит удалить уже сохранённые оригиналы.</value>
+  </data>
+  <data name="Settings.SectionBehavior" xml:space="preserve">
+    <value>ПОВЕДЕНИЕ</value>
+  </data>
+  <data name="Settings.EnterCopies" xml:space="preserve">
+    <value>Enter копирует снимок в буфер обмена (иначе только сохраняет в историю)</value>
+  </data>
+  <data name="Settings.StartWithWindows" xml:space="preserve">
+    <value>Запускать вместе с Windows</value>
+  </data>
+  <data name="Settings.ExcludePins" xml:space="preserve">
+    <value>Не захватывать закреплённые снимки в новых снимках экрана</value>
+  </data>
+  <data name="Settings.Snap" xml:space="preserve">
+    <value>Прилипание рамки и направляющие</value>
+  </data>
+  <data name="Settings.SnapNote" xml:space="preserve">
+    <value>Рамка снимка прилипает к краям окон и контрастным границам, фигуры — к краям и центрам других фигур и области. Alt временно отключает.</value>
+  </data>
+  <data name="Settings.FallbackActive" xml:space="preserve">
+    <value>Сейчас работает запасной {0}: PrintScreen недоступен, а других хоткеев нет. Он отключится сам, как только заработает любой хоткей выше.</value>
+  </data>
+  <data name="Hotkeys.BoxTip" xml:space="preserve">
+    <value>Кликните и нажмите сочетание клавиш; Backspace — очистить</value>
+  </data>
+  <data name="Settings.RemoveShortcut" xml:space="preserve">
+    <value>Удалить сочетание</value>
+  </data>
+  <data name="Hotkeys.CustomName" xml:space="preserve">
+    <value>Своё сочетание</value>
+  </data>
+  <data name="Settings.OpenSettingsFailed" xml:space="preserve">
+    <value>Не удалось открыть Параметры. Откройте вручную: Специальные возможности → Клавиатура.</value>
+  </data>
+  <data name="Settings.HistoryFolderDialog" xml:space="preserve">
+    <value>Папка истории снимков</value>
+  </data>
+  <data name="Settings.FolderRequired" xml:space="preserve">
+    <value>Укажите полный путь к папке истории.</value>
+  </data>
+  <data name="Settings.LimitInvalid" xml:space="preserve">
+    <value>Количество снимков в истории — число от {0} до {1}.</value>
+  </data>
+  <data name="Hotkeys.PrintScreenUseBox" xml:space="preserve">
+    <value>PrintScreen включается галочкой выше.</value>
+  </data>
+  <data name="Settings.DuplicateShortcut" xml:space="preserve">
+    <value>Это сочетание уже есть в списке.</value>
+  </data>
+  <data name="Hotkeys.NeedOne" xml:space="preserve">
+    <value>Включите хотя бы один хоткей — иначе снимок можно будет сделать только из трея.</value>
+  </data>
+  <data name="Units.Megabytes" xml:space="preserve">
+    <value>{0} МБ</value>
+  </data>
+  <data name="PreciseOcr.Title" xml:space="preserve">
+    <value>Точное распознавание (PaddleOCR)</value>
+  </data>
+  <data name="PreciseOcr.Caption" xml:space="preserve">
+    <value>Намного лучше читает мелкий текст и ники. Модуль около {0} скачивается один раз и работает на этом компьютере: снимки никуда не отправляются. Скачивается только по этой кнопке — даже при выключенной проверке обновлений.</value>
+  </data>
+  <data name="PreciseOcr.Use" xml:space="preserve">
+    <value>Использовать точное распознавание</value>
+  </data>
+  <data name="PreciseOcr.Remove" xml:space="preserve">
+    <value>Удалить модуль</value>
+  </data>
+  <data name="PreciseOcr.Undo" xml:space="preserve">
+    <value>Не удалять</value>
+  </data>
+  <data name="PreciseOcr.Progress" xml:space="preserve">
+    <value>Загрузка модуля</value>
+  </data>
+  <data name="PreciseOcr.Update" xml:space="preserve">
+    <value>Обновить модуль ({0})</value>
+  </data>
+  <data name="PreciseOcr.Download" xml:space="preserve">
+    <value>Скачать ({0})</value>
+  </data>
+  <data name="PreciseOcr.Downloading" xml:space="preserve">
+    <value>Скачиваю модуль… {0} %</value>
+  </data>
+  <data name="PreciseOcr.RemovalPending" xml:space="preserve">
+    <value>Модуль удалён. Его файлы сотрутся после перезапуска Screeny.</value>
+  </data>
+  <data name="PreciseOcr.Outdated" xml:space="preserve">
+    <value>Установлен модуль версии {0}, а этой версии Screeny нужна {1}. Пока работает распознавание Windows.</value>
+  </data>
+  <data name="PreciseOcr.Ready" xml:space="preserve">
+    <value>Модуль установлен. Ctrl+T сразу показывает распознавание Windows и уточняет его в фоне.</value>
+  </data>
+  <data name="PreciseOcr.LoadFailed" xml:space="preserve">
+    <value>Модуль не загрузился: {0}</value>
+  </data>
+  <data name="PreciseOcr.Cancelled" xml:space="preserve">
+    <value>Загрузка отменена.</value>
+  </data>
+  <data name="PreciseOcr.NoAccess" xml:space="preserve">
+    <value>Нет доступа к папке модулей. Проверьте права на %LocalAppData%\Screeny и повторите.</value>
+  </data>
+  <data name="PreciseOcr.WriteFailed" xml:space="preserve">
+    <value>Не удалось записать файлы модуля (диск заполнен или файлы заняты другой программой). Повторите позже.</value>
+  </data>
+  <data name="PreciseOcr.ArchiveCorrupt" xml:space="preserve">
+    <value>Скачанный архив модуля повреждён. Повторите загрузку.</value>
+  </data>
+  <data name="PreciseOcr.InstallFailed" xml:space="preserve">
+    <value>Не удалось установить модуль. Подробности — в журнале Screeny.</value>
+  </data>
+  <data name="PreciseOcr.AlreadyDeleted" xml:space="preserve">
+    <value>Файлы модуля уже удалены: скачайте его заново после перезапуска Screeny.</value>
+  </data>
+  <data name="PreciseOcr.Installed" xml:space="preserve">
+    <value>Точное распознавание текста установлено: Ctrl+T в режиме текста теперь уточняет результат.</value>
+  </data>
+  <data name="PreciseOcr.DownloadFailed" xml:space="preserve">
+    <value>Не удалось скачать модуль точного распознавания: {0} Повторить можно в настройках.</value>
+  </data>
+  <data name="PreciseOcr.NeedsUpdate" xml:space="preserve">
+    <value>Точное распознавание пока выключено: этой версии Screeny нужен обновлённый модуль. Обновите его в настройках.</value>
+  </data>
+  <data name="Module.NotFound404" xml:space="preserve">
+    <value>Модуль не найден на сервере (404).</value>
+  </data>
+  <data name="Module.ServerStatus" xml:space="preserve">
+    <value>Сервер ответил {0}.</value>
+  </data>
+  <data name="Module.FileMissing" xml:space="preserve">
+    <value>В папке {0} нет {1}.</value>
+  </data>
+  <data name="Module.NoConnection" xml:space="preserve">
+    <value>Нет связи с сервером. Проверьте подключение к интернету и повторите.</value>
+  </data>
+  <data name="Module.HashMismatch" xml:space="preserve">
+    <value>Скачанный файл не совпадает с ожидаемым (SHA256). Модуль не установлен.</value>
+  </data>
+  <data name="Module.Corrupt" xml:space="preserve">
+    <value>Модуль повреждён: {0}.</value>
+  </data>
+  <data name="Module.OldFilesBusy" xml:space="preserve">
+    <value>Прежние файлы модуля заняты. Перезапустите Screeny и повторите.</value>
+  </data>
+  <data name="Module.TooLarge" xml:space="preserve">
+    <value>Файл модуля слишком большой.</value>
+  </data>
+  <data name="Module.FilesLocked" xml:space="preserve">
+    <value>Не удалось поставить файлы модуля на место: их держит другая программа (возможно, антивирус). Повторите через минуту.</value>
+  </data>
+  <data name="Module.BadPath" xml:space="preserve">
+    <value>Недопустимый путь в архиве модуля: {0}</value>
+  </data>
+  <data name="Module.UnpackTooLarge" xml:space="preserve">
+    <value>Архив модуля распаковывается в слишком большой объём.</value>
+  </data>
+  <data name="Manifest.Missing" xml:space="preserve">
+    <value>{0} не найден или повреждён</value>
+  </data>
+  <data name="Manifest.Changed" xml:space="preserve">
+    <value>{0} изменён</value>
+  </data>
+  <data name="Manifest.Unreadable" xml:space="preserve">
+    <value>{0} не читается</value>
+  </data>
+  <data name="Manifest.WrongModule" xml:space="preserve">
+    <value>в {0} модуль {1} версии {2}, ожидался {3} версии {4}</value>
+  </data>
+  <data name="Manifest.BadPath" xml:space="preserve">
+    <value>недопустимый путь в {0}: {1}</value>
+  </data>
+  <data name="Manifest.Duplicate" xml:space="preserve">
+    <value>файл указан дважды: {0}</value>
+  </data>
+  <data name="Manifest.NoFile" xml:space="preserve">
+    <value>нет файла {0}</value>
+  </data>
+  <data name="Manifest.SizeMismatch" xml:space="preserve">
+    <value>размер {0} не совпадает</value>
+  </data>
+  <data name="Manifest.HashMismatch" xml:space="preserve">
+    <value>SHA256 {0} не совпадает</value>
+  </data>
+  <data name="Manifest.ExtraFile" xml:space="preserve">
+    <value>лишний файл {0}</value>
+  </data>
+  <data name="PreciseOcr.FilesDamaged" xml:space="preserve">
+    <value>файлы модуля повреждены или изменены ({0}). Удалите модуль и скачайте снова.</value>
+  </data>
+  <data name="PreciseOcr.OnnxLoadFailed" xml:space="preserve">
+    <value>не загружается onnxruntime.dll (нужен 64-битный Windows; файл мог заблокировать антивирус).</value>
+  </data>
+  <data name="PreciseOcr.ModuleLoadFailed" xml:space="preserve">
+    <value>модуль не загрузился, подробности — в журнале Screeny.</value>
+  </data>
+  <data name="PreciseOcr.OldVcRuntime" xml:space="preserve">
+    <value>в Screeny уже загружена старая версия рантайма Visual C++ ({0} {1} из {2}), а модулю нужна {3} или новее. Установите свежий распространяемый пакет Visual C++ 2015–2022 (x64) и перезапустите Screeny; до тех пор работает распознавание Windows.</value>
+  </data>
+  <data name="Hotkeys.Busy" xml:space="preserve">
+    <value>Сочетание {0} уже занято другим приложением.</value>
+  </data>
+  <data name="Hotkeys.RegisterFailed" xml:space="preserve">
+    <value>Не удалось зарегистрировать сочетание {0} (ошибка Windows {1}).</value>
+  </data>
+  <data name="Hotkeys.FallbackInUse" xml:space="preserve">
+    <value>{0} Используется {1}. Сменить можно в настройках.</value>
+  </data>
+  <data name="Hotkeys.TrayOnly" xml:space="preserve">
+    <value>{0} Снимок — по клику на иконку в трее.</value>
+  </data>
+  <data name="Hotkeys.TrayOnlyWithError" xml:space="preserve">
+    <value>{0} {1} Снимок — по клику на иконку в трее.</value>
+  </data>
+  <data name="Hotkeys.PrintScreenReserved" xml:space="preserve">
+    <value>PrintScreen занят системным захватом экрана Windows (Параметры → Специальные возможности → Клавиатура).</value>
+  </data>
+  <data name="Hotkeys.Unrecognized" xml:space="preserve">
+    <value>Хоткей «{0}» не распознан.</value>
+  </data>
+  <data name="Hotkeys.HookFailed" xml:space="preserve">
+    <value>Не удалось включить перехват Win+Shift+S (ошибка Windows {0}).</value>
+  </data>
+  <data name="Hotkeys.WinShiftSSeparate" xml:space="preserve">
+    <value>Win+Shift+S включается отдельной галочкой выше: Windows не даёт назначить его как обычное сочетание.</value>
+  </data>
+  <data name="Hotkeys.NeedModifier" xml:space="preserve">
+    <value>Добавьте Ctrl, Alt или Win: без них клавиша перестанет работать при наборе текста.</value>
+  </data>
+  <data name="Wizard.Title" xml:space="preserve">
+    <value>Screeny — первый запуск</value>
+  </data>
+  <data name="Wizard.Skip" xml:space="preserve">
+    <value>Пропустить</value>
+  </data>
+  <data name="Wizard.SkipTip" xml:space="preserve">
+    <value>Ничего не менять. Мастер можно открыть позже: Настройки → «Проверить конфликты…»</value>
+  </data>
+  <data name="Wizard.Apply" xml:space="preserve">
+    <value>Применить</value>
+  </data>
+  <data name="Wizard.Done" xml:space="preserve">
+    <value>Готово</value>
+  </data>
+  <data name="Wizard.RescanTip" xml:space="preserve">
+    <value>Заново найти программы, которые мешают хоткеям</value>
+  </data>
+  <data name="Wizard.Rescan" xml:space="preserve">
+    <value>Проверить снова</value>
+  </data>
+  <data name="Wizard.SectionHotkeys" xml:space="preserve">
+    <value>ХОТКЕИ СНИМКА</value>
+  </data>
+  <data name="Wizard.CustomOptional" xml:space="preserve">
+    <value>Своё сочетание (необязательно)</value>
+  </data>
+  <data name="Wizard.FeaturesNote" xml:space="preserve">
+    <value>Ненужное можно выключить: его кнопки, клавиши и пункты меню исчезнут. Вернуть — в настройках.</value>
+  </data>
+  <data name="Wizard.SectionUpdates" xml:space="preserve">
+    <value>ОБНОВЛЕНИЯ</value>
+  </data>
+  <data name="Wizard.PrivacyNote" xml:space="preserve">
+    <value>Снимки никуда не отправляются; в сеть Screeny ходит только за проверкой новых версий на GitHub и — если вы сами попросите — за модулем точного распознавания.</value>
+  </data>
+  <data name="Wizard.FakeSuffix" xml:space="preserve">
+    <value>{0} (dev: подставная среда)</value>
+  </data>
+  <data name="Wizard.HeadingConflicts" xml:space="preserve">
+    <value>Эти программы мешают хоткеям Screeny</value>
+  </data>
+  <data name="Wizard.HeadingReady" xml:space="preserve">
+    <value>Screeny готов к работе</value>
+  </data>
+  <data name="Wizard.IntroConflicts" xml:space="preserve">
+    <value>Отметьте, что сделать, и нажмите «Применить». Без вашего согласия ничего не меняется; Screeny ничего не удаляет сам.</value>
+  </data>
+  <data name="Wizard.IntroReady" xml:space="preserve">
+    <value>Других программ, которые перехватывают PrintScreen или Win+Shift+S, не найдено. Выберите хоткеи снимка и нужные функции.</value>
+  </data>
+  <data name="Wizard.Blocks" xml:space="preserve">
+    <value>Мешает: {0}.</value>
+  </data>
+  <data name="Wizard.BlocksUsually" xml:space="preserve">
+    <value>Мешает: {0} (обычно занимает {1}).</value>
+  </data>
+  <data name="Wizard.UsuallyTakes" xml:space="preserve">
+    <value>Обычно занимает {0} — с хоткеями Screeny по умолчанию не пересекается, но это второй инструмент снимков.</value>
+  </data>
+  <data name="Wizard.PowerToysKeys" xml:space="preserve">
+    <value>переназначение клавиш в Keyboard Manager</value>
+  </data>
+  <data name="Wizard.CloseNow" xml:space="preserve">
+    <value>Закрыть сейчас</value>
+  </data>
+  <data name="Wizard.CloseNowTip" xml:space="preserve">
+    <value>Закрыть программу, чтобы освободить хоткей. Если она не закроется сама за 2 секунды — будет завершена.</value>
+  </data>
+  <data name="Wizard.RemoveAutostart" xml:space="preserve">
+    <value>Убрать из автозапуска</value>
+  </data>
+  <data name="Wizard.RemoveAutostartTip" xml:space="preserve">
+    <value>Как «Отключить» в Диспетчере задач → Автозагрузка: обратимо, сама программа не удаляется.</value>
+  </data>
+  <data name="Wizard.MachineAutostart" xml:space="preserve">
+    <value>Автозапуск прописан для всех пользователей. Отключить вручную: в настройках самой программы или Диспетчер задач → Автозагрузка. Или здесь — понадобятся права администратора.</value>
+  </data>
+  <data name="Wizard.DisableAsAdmin" xml:space="preserve">
+    <value>Отключить с правами администратора</value>
+  </data>
+  <data name="Wizard.PowerToysHint" xml:space="preserve">
+    <value>Уберите переназначение в PowerToys → Keyboard Manager. Автозапуск PowerToys отключается в его общих настройках.</value>
+  </data>
+  <data name="Wizard.Uninstall" xml:space="preserve">
+    <value>Удалить программу…</value>
+  </data>
+  <data name="Wizard.UninstallTip" xml:space="preserve">
+    <value>Запустить родной деинсталлятор программы. Screeny сам ничего не удаляет.</value>
+  </data>
+  <data name="Wizard.Resolved" xml:space="preserve">
+    <value>✓ Больше не мешает: не запущен и не стартует сам.</value>
+  </data>
+  <data name="Wizard.WindowsCapture" xml:space="preserve">
+    <value>Захват экрана Windows</value>
+  </data>
+  <data name="Wizard.SystemPrintScreen" xml:space="preserve">
+    <value>Сейчас PrintScreen открывает системные «Ножницы», и до Screeny нажатие не доходит.</value>
+  </data>
+  <data name="Wizard.GivePrintScreen" xml:space="preserve">
+    <value>Отдать PrintScreen Screeny</value>
+  </data>
+  <data name="Wizard.GivePrintScreenTip" xml:space="preserve">
+    <value>То же, что выключить «Использовать клавишу Print Screen для захвата экрана» в Параметрах. Права администратора не нужны.</value>
+  </data>
+  <data name="Wizard.SignOutNote" xml:space="preserve">
+    <value>Windows может применить это только после выхода из системы и повторного входа.</value>
+  </data>
+  <data name="Wizard.FoundRunning" xml:space="preserve">
+    <value>запущен</value>
+  </data>
+  <data name="Wizard.FoundRemap" xml:space="preserve">
+    <value>переназначены клавиши в Keyboard Manager</value>
+  </data>
+  <data name="Wizard.FoundNoInstaller" xml:space="preserve">
+    <value>установщик не найден (портативная версия?)</value>
+  </data>
+  <data name="Wizard.Found" xml:space="preserve">
+    <value>Найдено: {0}.</value>
+  </data>
+  <data name="Wizard.RescanFailed" xml:space="preserve">
+    <value>Не удалось заново проверить программы. Подробности — в журнале.</value>
+  </data>
+  <data name="Wizard.StillMachineAutostart" xml:space="preserve">
+    <value>Автозапуск {0} для всех пользователей всё ещё включён. Отключите вручную: Диспетчер задач → Автозагрузка.</value>
+  </data>
+  <data name="Wizard.UninstallTitle" xml:space="preserve">
+    <value>Удалить {0}?</value>
+  </data>
+  <data name="Wizard.UninstallText" xml:space="preserve">
+    <value>Откроется родной деинсталлятор программы — дальше решаете в нём. Screeny сам ничего не удаляет. Когда деинсталлятор закончит, нажмите «Проверить снова».</value>
+  </data>
+  <data name="Wizard.OpenUninstaller" xml:space="preserve">
+    <value>Открыть деинсталлятор</value>
+  </data>
+  <data name="Wizard.DownloadPreciseOcr" xml:space="preserve">
+    <value>Скачать точное распознавание текста ({0})</value>
+  </data>
+  <data name="Wizard.PreciseOcrHint" xml:space="preserve">
+    <value>PaddleOCR: намного лучше читает мелкий текст и ники. Работает на этом компьютере, снимки никуда не отправляются.</value>
+  </data>
+  <data name="Wizard.HotkeyFailed" xml:space="preserve">
+    <value>Хоткей не заработал.</value>
+  </data>
+  <data name="Wizard.ChooseAnother" xml:space="preserve">
+    <value>{0} Выберите другое сочетание или снимите галочку.</value>
+  </data>
+  <data name="Wizard.RegisteredSignOut" xml:space="preserve">
+    <value>Зарегистрирован. Если PrintScreen всё ещё открывает «Ножницы» — выйдите из системы и войдите снова.</value>
+  </data>
+  <data name="Wizard.RegisteredButBlocked" xml:space="preserve">
+    <value>Зарегистрирован, но {0} всё ещё запущен или стартует сам и может перехватывать клавишу.</value>
+  </data>
+  <data name="Wizard.Works" xml:space="preserve">
+    <value>✓ Работает.</value>
+  </data>
+  <data name="Wizard.NotWorking" xml:space="preserve">
+    <value>Не работает.</value>
+  </data>
+  <data name="Wizard.BlockedBy" xml:space="preserve">
+    <value>{0} Мешает: {1}.</value>
+  </data>
+  <data name="Wizard.NotifyOne" xml:space="preserve">
+    <value>{0} занят программой {1} — открыть мастер? Нажмите на уведомление или «Проверить конфликты…» в меню трея.</value>
+  </data>
+  <data name="Wizard.NotifyMany" xml:space="preserve">
+    <value>{0} занят программами {1} — открыть мастер? Нажмите на уведомление или «Проверить конфликты…» в меню трея.</value>
+  </data>
+  <data name="Wizard.HotkeyGeneric" xml:space="preserve">
+    <value>Хоткей</value>
+  </data>
+  <data name="Autostart.RunUser" xml:space="preserve">
+    <value>автозапуск текущего пользователя</value>
+  </data>
+  <data name="Autostart.StartupFolderUser" xml:space="preserve">
+    <value>папка «Автозагрузка» пользователя</value>
+  </data>
+  <data name="Autostart.StartupFolderCommon" xml:space="preserve">
+    <value>общая папка «Автозагрузка» (для всех пользователей)</value>
+  </data>
+  <data name="Autostart.Machine" xml:space="preserve">
+    <value>автозапуск для всех пользователей</value>
+  </data>
+  <data name="Action.NotClosed" xml:space="preserve">
+    <value>{0} не закрылся. Закройте его вручную через значок в трее.</value>
+  </data>
+  <data name="Action.Closed" xml:space="preserve">
+    <value>{0} закрыт.</value>
+  </data>
+  <data name="Action.CloseNoRights" xml:space="preserve">
+    <value>Не удалось закрыть {0}: похоже, он запущен с правами администратора. Закройте его вручную через значок в трее.</value>
+  </data>
+  <data name="Action.AutostartNeedsAdmin" xml:space="preserve">
+    <value>Автозапуск {0} прописан для всех пользователей — нужны права администратора.</value>
+  </data>
+  <data name="Action.AutostartAlreadyOff" xml:space="preserve">
+    <value>Автозапуск {0} уже отключён.</value>
+  </data>
+  <data name="Action.AutostartNoRegistry" xml:space="preserve">
+    <value>Не удалось отключить автозапуск {0}: нет доступа к реестру.</value>
+  </data>
+  <data name="Action.AutostartUserOffMachineNeedsAdmin" xml:space="preserve">
+    <value>Автозапуск {0} для текущего пользователя отключён; запись для всех пользователей требует прав администратора.</value>
+  </data>
+  <data name="Action.AutostartOff" xml:space="preserve">
+    <value>Автозапуск {0} отключён. Включить обратно: Диспетчер задач → Автозагрузка.</value>
+  </data>
+  <data name="Action.UnknownApp" xml:space="preserve">
+    <value>Неизвестная программа.</value>
+  </data>
+  <data name="Action.MachineAutostartOff" xml:space="preserve">
+    <value>Автозапуск {0} для всех пользователей отключён. Включить обратно: Диспетчер задач → Автозагрузка.</value>
+  </data>
+  <data name="Action.AutostartFailedCode" xml:space="preserve">
+    <value>Не удалось отключить автозапуск {0} (код {1}). Подробности — в журнале.</value>
+  </data>
+  <data name="Action.ElevationCancelled" xml:space="preserve">
+    <value>Запрос прав администратора отменён — автозапуск не изменён.</value>
+  </data>
+  <data name="Action.ElevationFailed" xml:space="preserve">
+    <value>Не удалось запросить права администратора: {0}</value>
+  </data>
+  <data name="Action.UninstallerNotFound" xml:space="preserve">
+    <value>Деинсталлятор {0} не найден. Удалите программу через Параметры → Приложения.</value>
+  </data>
+  <data name="Action.UninstallerStarted" xml:space="preserve">
+    <value>Запущен деинсталлятор {0}. Когда он закончит, нажмите «Проверить снова».</value>
+  </data>
+  <data name="Action.UninstallerCancelled" xml:space="preserve">
+    <value>Запуск деинсталлятора отменён.</value>
+  </data>
+  <data name="Action.UninstallerFailed" xml:space="preserve">
+    <value>Не удалось запустить деинсталлятор {0}. Удалите программу через Параметры → Приложения.</value>
+  </data>
+  <data name="Action.PrintScreenSettingFailed" xml:space="preserve">
+    <value>Не удалось изменить настройку. Отключите вручную: Параметры → Специальные возможности → Клавиатура.</value>
+  </data>
+  <data name="Action.PrintScreenDone" xml:space="preserve">
+    <value>Готово. Windows может применить это только после выхода из системы и повторного входа — до тех пор PrintScreen может открывать системный захват.</value>
+  </data>
+  <data name="Action.DevUninstaller" xml:space="preserve">
+    <value>(dev) Деинсталлятор {0} не запускается. Обычно: «запущен деинсталлятор, нажмите «Проверить снова»».</value>
+  </data>
+  <data name="Action.DevHotkeysNotRegistered" xml:space="preserve">
+    <value>(dev) В тестовом экземпляре хоткеи не регистрируются.</value>
+  </data>
+  <data name="Feature.Ocr.Title" xml:space="preserve">
+    <value>Распознавание текста и QR</value>
+  </data>
+  <data name="Feature.Ocr.Description" xml:space="preserve">
+    <value>Режим текста (Ctrl+T): выделение и копирование текста со снимка, QR и штрихкоды.</value>
+  </data>
+  <data name="Feature.History.Title" xml:space="preserve">
+    <value>История снимков</value>
+  </data>
+  <data name="Feature.History.Description" xml:space="preserve">
+    <value>Снимки сохраняются в папку, окно истории и повторное редактирование. Без истории снимок только копируется.</value>
+  </data>
+  <data name="Feature.Pins.Title" xml:space="preserve">
+    <value>Закрепление снимков</value>
+  </data>
+  <data name="Feature.Pins.Description" xml:space="preserve">
+    <value>Снимок поверх всех окон (F3), в том числе из истории.</value>
+  </data>
+  <data name="Feature.Beautify.Title" xml:space="preserve">
+    <value>Оформление снимка</value>
+  </data>
+  <data name="Feature.Beautify.Description" xml:space="preserve">
+    <value>Градиентный фон, отступ, скругление и тень (B).</value>
+  </data>
+  <data name="Feature.Pipette.Title" xml:space="preserve">
+    <value>Пипетка</value>
+  </data>
+  <data name="Feature.Pipette.Description" xml:space="preserve">
+    <value>Цвет пикселя со снимка (I), HEX под лупой до выделения (C).</value>
+  </data>
+  <data name="Feature.Ruler.Title" xml:space="preserve">
+    <value>Линейка</value>
+  </data>
+  <data name="Feature.Ruler.Description" xml:space="preserve">
+    <value>Расстояние и угол в пикселях (=).</value>
+  </data>
+  <data name="Update.Title" xml:space="preserve">
+    <value>Обновление Screeny</value>
+  </data>
+  <data name="Update.Later" xml:space="preserve">
+    <value>Позже</value>
+  </data>
+  <data name="Update.UpdateAndRestart" xml:space="preserve">
+    <value>Обновить и перезапустить</value>
+  </data>
+  <data name="Update.SkipVersion" xml:space="preserve">
+    <value>Пропустить эту версию</value>
+  </data>
+  <data name="Update.WhatsNew" xml:space="preserve">
+    <value>Что нового</value>
+  </data>
+  <data name="Update.Available" xml:space="preserve">
+    <value>Доступна версия {0}</value>
+  </data>
+  <data name="Update.Current" xml:space="preserve">
+    <value>Сейчас установлена {0}</value>
+  </data>
+  <data name="Update.OnlyDisabled" xml:space="preserve">
+    <value>Изменения касаются только выключенных функций.</value>
+  </data>
+  <data name="Update.NoNotes" xml:space="preserve">
+    <value>Список изменений не приложен.</value>
+  </data>
+  <data name="Update.Downloading" xml:space="preserve">
+    <value>Загрузка обновления…</value>
+  </data>
+  <data name="Update.DownloadingPercent" xml:space="preserve">
+    <value>Загрузка обновления… {0} %</value>
+  </data>
+  <data name="Update.Restarting" xml:space="preserve">
+    <value>Перезапуск…</value>
+  </data>
+  <data name="Update.Failed" xml:space="preserve">
+    <value>Не удалось обновить: {0}</value>
+  </data>
+  <data name="Update.SkipFailed" xml:space="preserve">
+    <value>Не удалось запомнить выбор. Подробности — в журнале.</value>
+  </data>
+  <data name="Tool.WithKey" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+  <data name="Tool.Select" xml:space="preserve">
+    <value>Выбор и перемещение</value>
+  </data>
+  <data name="Tool.Rect" xml:space="preserve">
+    <value>Прямоугольник</value>
+  </data>
+  <data name="Tool.Ellipse" xml:space="preserve">
+    <value>Эллипс</value>
+  </data>
+  <data name="Tool.Line" xml:space="preserve">
+    <value>Линия</value>
+  </data>
+  <data name="Tool.Arrow" xml:space="preserve">
+    <value>Стрелка</value>
+  </data>
+  <data name="Tool.Pen" xml:space="preserve">
+    <value>Карандаш</value>
+  </data>
+  <data name="Tool.Highlighter" xml:space="preserve">
+    <value>Маркер</value>
+  </data>
+  <data name="Tool.Text" xml:space="preserve">
+    <value>Текст</value>
+  </data>
+  <data name="Tool.Number" xml:space="preserve">
+    <value>Нумерованная метка</value>
+  </data>
+  <data name="Tool.Pixelate" xml:space="preserve">
+    <value>Пикселизация</value>
+  </data>
+  <data name="Tool.Blur" xml:space="preserve">
+    <value>Размытие</value>
+  </data>
+  <data name="Tool.Ruler" xml:space="preserve">
+    <value>Линейка: Δx, Δy и длина в пикселях, Shift — шаг 45°</value>
+  </data>
+  <data name="Toolbar.Pipette" xml:space="preserve">
+    <value>Пипетка: цвет со снимка (I)</value>
+  </data>
+  <data name="Toolbar.Thickness" xml:space="preserve">
+    <value>Толщина — колесо мыши</value>
+  </data>
+  <data name="Toolbar.Undo" xml:space="preserve">
+    <value>Отменить (Ctrl+Z)</value>
+  </data>
+  <data name="Toolbar.Redo" xml:space="preserve">
+    <value>Повторить (Ctrl+Y)</value>
+  </data>
+  <data name="Toolbar.Beautify" xml:space="preserve">
+    <value>Оформление: фон, отступ, скругление, тень (B)</value>
+  </data>
+  <data name="Toolbar.Ocr" xml:space="preserve">
+    <value>Выделить текст на снимке (Ctrl+T)</value>
+  </data>
+  <data name="Toolbar.OcrBack" xml:space="preserve">
+    <value>Вернуться к рисованию (Ctrl+T, Esc)</value>
+  </data>
+  <data name="Toolbar.Pin" xml:space="preserve">
+    <value>Закрепить поверх окон (F3)</value>
+  </data>
+  <data name="Toolbar.SaveAs" xml:space="preserve">
+    <value>Сохранить как… (Ctrl+S)</value>
+  </data>
+  <data name="Toolbar.Cancel" xml:space="preserve">
+    <value>Отмена (Esc)</value>
+  </data>
+  <data name="Toolbar.Close" xml:space="preserve">
+    <value>Закрыть (Esc)</value>
+  </data>
+  <data name="Toolbar.CopyEnter" xml:space="preserve">
+    <value>Копировать в буфер (Enter)</value>
+  </data>
+  <data name="Toolbar.CopyEditorHistory" xml:space="preserve">
+    <value>Копировать в буфер (Ctrl+C) и добавить новую запись в историю</value>
+  </data>
+  <data name="Toolbar.CopyEditor" xml:space="preserve">
+    <value>Копировать в буфер (Ctrl+C)</value>
+  </data>
+  <data name="Toolbar.CopyText" xml:space="preserve">
+    <value>Копировать текст</value>
+  </data>
+  <data name="Toolbar.CopyTextTip" xml:space="preserve">
+    <value>Копировать выделенный текст, без выделения — весь (Enter, Ctrl+C)</value>
+  </data>
+  <data name="Options.Stroke" xml:space="preserve">
+    <value>Обводка</value>
+  </data>
+  <data name="Options.StrokeSwatch" xml:space="preserve">
+    <value>Обводка — палитра красит её</value>
+  </data>
+  <data name="Options.NoStroke" xml:space="preserve">
+    <value>Без обводки</value>
+  </data>
+  <data name="Options.RestoreStroke" xml:space="preserve">
+    <value>Вернуть обводку</value>
+  </data>
+  <data name="Options.Fill" xml:space="preserve">
+    <value>Заливка</value>
+  </data>
+  <data name="Options.FillSwatch" xml:space="preserve">
+    <value>Заливка — палитра красит её</value>
+  </data>
+  <data name="Options.NoFill" xml:space="preserve">
+    <value>Без заливки</value>
+  </data>
+  <data name="Options.RestoreFill" xml:space="preserve">
+    <value>Вернуть заливку</value>
+  </data>
+  <data name="Options.NeedStrokeOrFill" xml:space="preserve">
+    <value>Нельзя убрать и обводку, и заливку</value>
+  </data>
+  <data name="Options.FillOpacity" xml:space="preserve">
+    <value>Прозрачность заливки — клик меняет</value>
+  </data>
+  <data name="Options.ArrowNormal" xml:space="preserve">
+    <value>Обычная</value>
+  </data>
+  <data name="Options.ArrowDouble" xml:space="preserve">
+    <value>Двусторонняя</value>
+  </data>
+  <data name="Options.ArrowDashed" xml:space="preserve">
+    <value>Пунктирная</value>
+  </data>
+  <data name="Options.ArrowThick" xml:space="preserve">
+    <value>Толстая (клин)</value>
+  </data>
+  <data name="Options.Text" xml:space="preserve">
+    <value>Текст</value>
+  </data>
+  <data name="Options.TextSwatch" xml:space="preserve">
+    <value>Цвет текста — палитра красит его</value>
+  </data>
+  <data name="Options.Background" xml:space="preserve">
+    <value>Фон</value>
+  </data>
+  <data name="Options.BackgroundSwatch" xml:space="preserve">
+    <value>Подложка — палитра красит её</value>
+  </data>
+  <data name="Options.NoBackground" xml:space="preserve">
+    <value>Без фона</value>
+  </data>
+  <data name="Options.AddBackground" xml:space="preserve">
+    <value>Добавить фон</value>
+  </data>
+  <data name="Options.Align" xml:space="preserve">
+    <value>Выравнивание</value>
+  </data>
+  <data name="Options.AlignLeft" xml:space="preserve">
+    <value>По левому краю</value>
+  </data>
+  <data name="Options.AlignCenter" xml:space="preserve">
+    <value>По центру</value>
+  </data>
+  <data name="Options.AlignRight" xml:space="preserve">
+    <value>По правому краю</value>
+  </data>
+  <data name="Beautify.Background" xml:space="preserve">
+    <value>Фон</value>
+  </data>
+  <data name="Beautify.BackgroundPreset" xml:space="preserve">
+    <value>Фон: {0}</value>
+  </data>
+  <data name="Beautify.Padding" xml:space="preserve">
+    <value>Отступ</value>
+  </data>
+  <data name="Beautify.PaddingPixels" xml:space="preserve">
+    <value>Отступ {0} px</value>
+  </data>
+  <data name="Beautify.Radius" xml:space="preserve">
+    <value>Скругление</value>
+  </data>
+  <data name="Beautify.NoRadius" xml:space="preserve">
+    <value>Без скругления</value>
+  </data>
+  <data name="Beautify.RadiusPixels" xml:space="preserve">
+    <value>Скругление {0} px</value>
+  </data>
+  <data name="Beautify.Shadow" xml:space="preserve">
+    <value>Тень</value>
+  </data>
+  <data name="Beautify.Soft" xml:space="preserve">
+    <value>Мягкая</value>
+  </data>
+  <data name="Beautify.SoftTip" xml:space="preserve">
+    <value>Мягкая тень под снимком</value>
+  </data>
+  <data name="Beautify.Sunset" xml:space="preserve">
+    <value>Закат</value>
+  </data>
+  <data name="Beautify.Mint" xml:space="preserve">
+    <value>Мята</value>
+  </data>
+  <data name="Beautify.Graphite" xml:space="preserve">
+    <value>Графит</value>
+  </data>
+  <data name="Beautify.Light" xml:space="preserve">
+    <value>Светлый</value>
+  </data>
+  <data name="Beautify.Warm" xml:space="preserve">
+    <value>Тёплый</value>
+  </data>
+  <data name="Beautify.Blue" xml:space="preserve">
+    <value>Синий</value>
+  </data>
+  <data name="Codes.FormatLink" xml:space="preserve">
+    <value>{0} · ссылка</value>
+  </data>
+  <data name="Codes.OpenInBrowser" xml:space="preserve">
+    <value>Открыть в браузере: {0}</value>
+  </data>
+  <data name="Codes.Copied" xml:space="preserve">
+    <value>Содержимое кода скопировано</value>
+  </data>
+  <data name="Codes.OpenFailed" xml:space="preserve">
+    <value>Не удалось открыть ссылку</value>
+  </data>
+  <data name="Codes.QrCode" xml:space="preserve">
+    <value>QR-код</value>
+  </data>
+  <data name="Pipette.Copied" xml:space="preserve">
+    <value>{0} скопирован</value>
+  </data>
+  <data name="TextMode.Recognizing" xml:space="preserve">
+    <value>Распознаю текст…</value>
+  </data>
+  <data name="TextMode.OcrUnavailable" xml:space="preserve">
+    <value>OCR недоступен: добавьте язык с распознаванием текста в Параметры → Время и язык → Язык.</value>
+  </data>
+  <data name="TextMode.Failed" xml:space="preserve">
+    <value>Не удалось распознать текст: {0}</value>
+  </data>
+  <data name="TextMode.NotFound" xml:space="preserve">
+    <value>Текст не найден</value>
+  </data>
+  <data name="TextMode.Refining" xml:space="preserve">
+    <value>Распознаю текст… уточняю</value>
+  </data>
+  <data name="TextMode.OneCode" xml:space="preserve">
+    <value>Найден код: щёлкните по нему · Enter копирует содержимое · Esc назад</value>
+  </data>
+  <data name="TextMode.ManyCodes" xml:space="preserve">
+    <value>Найдены коды: щёлкните по коду, чтобы увидеть содержимое · Esc назад</value>
+  </data>
+  <data name="TextMode.HintNoSelection" xml:space="preserve">
+    <value>Выделите текст мышью · Ctrl+A всё · Enter копирует весь текст · Esc назад</value>
+  </data>
+  <data name="TextMode.HintNoSelectionCodes" xml:space="preserve">
+    <value>Выделите текст мышью · щелчок по коду — содержимое · Ctrl+A всё · Enter копирует весь текст · Esc назад</value>
+  </data>
+  <data name="TextMode.HintSelection" xml:space="preserve">
+    <value>Enter или Ctrl+C копирует выделенное · Ctrl+A всё · Esc снять выделение</value>
+  </data>
+  <data name="TextMode.WithRefining" xml:space="preserve">
+    <value>{0} · уточняю…</value>
+  </data>
+  <data name="TextMode.CopyWhenReady" xml:space="preserve">
+    <value>Распознаю текст… скопирую сразу, как закончу</value>
+  </data>
+  <data name="TextMode.ClickCode" xml:space="preserve">
+    <value>Щёлкните по коду, чтобы увидеть и скопировать его содержимое</value>
+  </data>
+  <data name="TextMode.NoTextInSelection" xml:space="preserve">
+    <value>В выделении нет текста · Ctrl+A всё · Esc снять выделение</value>
+  </data>
+  <data name="History.Title" xml:space="preserve">
+    <value>История</value>
+  </data>
+  <data name="History.Edit" xml:space="preserve">
+    <value>Редактировать</value>
+  </data>
+  <data name="History.PinOnScreen" xml:space="preserve">
+    <value>Закрепить на экране</value>
+  </data>
+  <data name="History.ShowInFolder" xml:space="preserve">
+    <value>Показать в папке</value>
+  </data>
+  <data name="History.OpenFolder" xml:space="preserve">
+    <value>Открыть папку</value>
+  </data>
+  <data name="History.ClearAll" xml:space="preserve">
+    <value>Очистить всё</value>
+  </data>
+  <data name="History.CardTip" xml:space="preserve">
+    <value>Клик — копировать, двойной клик — открыть, E — редактировать, правый клик — действия</value>
+  </data>
+  <data name="History.Empty" xml:space="preserve">
+    <value>История пуста</value>
+  </data>
+  <data name="History.EmptyHintHotkey" xml:space="preserve">
+    <value>Нажмите {0}, чтобы сделать первый снимок.</value>
+  </data>
+  <data name="History.EmptyHintTray" xml:space="preserve">
+    <value>Кликните по иконке Screeny в трее, чтобы сделать первый снимок.</value>
+  </data>
+  <data name="History.FolderUnavailable" xml:space="preserve">
+    <value>Папка истории недоступна</value>
+  </data>
+  <data name="History.ReadFailed" xml:space="preserve">
+    <value>Не удалось прочитать папку истории</value>
+  </data>
+  <data name="History.Count" xml:space="preserve">
+    <value>{0} из {1} снимков</value>
+  </data>
+  <data name="History.ClipboardBusy" xml:space="preserve">
+    <value>Буфер занят</value>
+  </data>
+  <data name="History.Error" xml:space="preserve">
+    <value>Ошибка</value>
+  </data>
+  <data name="History.OpenFailedText" xml:space="preserve">
+    <value>Файл мог быть удалён или для PNG не назначена программа просмотра.</value>
+  </data>
+  <data name="History.DeleteTitle" xml:space="preserve">
+    <value>Удалить снимок?</value>
+  </data>
+  <data name="History.DeleteText" xml:space="preserve">
+    <value>Файл удаляется без корзины, восстановить его будет нельзя.</value>
+  </data>
+  <data name="History.DeleteFailedTitle" xml:space="preserve">
+    <value>Не удалось удалить снимок</value>
+  </data>
+  <data name="History.DeleteFailedText" xml:space="preserve">
+    <value>Файл занят другой программой или нет доступа к папке.</value>
+  </data>
+  <data name="History.CreateFolderFailed" xml:space="preserve">
+    <value>Не удалось создать папку истории</value>
+  </data>
+  <data name="History.ExplorerFailedTitle" xml:space="preserve">
+    <value>Не удалось открыть проводник</value>
+  </data>
+  <data name="History.ExplorerFailedText" xml:space="preserve">
+    <value>Подробности записаны в журнал Screeny.</value>
+  </data>
+  <data name="History.ClearTitle" xml:space="preserve">
+    <value>Очистить историю?</value>
+  </data>
+  <data name="History.ClearText" xml:space="preserve">
+    <value>Папка: {0}
+Будут удалены снимки ({1}) без корзины. Восстановить их будет нельзя.</value>
+  </data>
+  <data name="History.DeleteAll" xml:space="preserve">
+    <value>Удалить всё</value>
+  </data>
+  <data name="Editor.Title" xml:space="preserve">
+    <value>Редактор</value>
+  </data>
+  <data name="Editor.TitleShot" xml:space="preserve">
+    <value>Редактор — снимок {0}</value>
+  </data>
+  <data name="Editor.TitleFile" xml:space="preserve">
+    <value>Редактор — {0}</value>
+  </data>
+  <data name="Editor.Original" xml:space="preserve">
+    <value>Оригинал</value>
+  </data>
+  <data name="Editor.OriginalTip" xml:space="preserve">
+    <value>Снимок без пометок: пометки скрыты, но не удалены</value>
+  </data>
+  <data name="Editor.WithMarkup" xml:space="preserve">
+    <value>С пометками</value>
+  </data>
+  <data name="Editor.Clear" xml:space="preserve">
+    <value>Очистить пометки</value>
+  </data>
+  <data name="Editor.ClearTip" xml:space="preserve">
+    <value>Удалить все пометки одним шагом (Ctrl+Z вернёт)</value>
+  </data>
+  <data name="Editor.Hide" xml:space="preserve">
+    <value>Скрыть</value>
+  </data>
+  <data name="Editor.Restart" xml:space="preserve">
+    <value>Начать заново с оригинала</value>
+  </data>
+  <data name="Editor.ZoomTip" xml:space="preserve">
+    <value>Вписать / 100 % (Ctrl+0, Ctrl+1) · Ctrl+колесо — масштаб · пробел+перетаскивание — сдвиг</value>
+  </data>
+  <data name="Editor.Zoom" xml:space="preserve">
+    <value>{0} %</value>
+  </data>
+  <data name="Editor.ZoomFit" xml:space="preserve">
+    <value>Вписать · {0} %</value>
+  </data>
+  <data name="Editor.NoticeOriginal" xml:space="preserve">
+    <value>Оригинал без пометок: пометки скрыты и не удалены, рисовать в этом режиме нельзя.</value>
+  </data>
+  <data name="Editor.NoticeNoOriginal" xml:space="preserve">
+    <value>Оригинал не сохранён — пометки рисуются поверх готового снимка. Включите хранение оригиналов в настройках.</value>
+  </data>
+  <data name="Editor.ComposeFailed" xml:space="preserve">
+    <value>Не удалось собрать картинку: {0}</value>
+  </data>
+  <data name="Editor.Saving" xml:space="preserve">
+    <value>Сохранение…</value>
+  </data>
+  <data name="Editor.ToastNewEntry" xml:space="preserve">
+    <value>{0} · новая запись в истории</value>
+  </data>
+  <data name="Editor.ToastHistoryFailed" xml:space="preserve">
+    <value>{0} · в историю записать не удалось</value>
+  </data>
+  <data name="Editor.Saved" xml:space="preserve">
+    <value>Сохранено</value>
+  </data>
+  <data name="Editor.Pinned" xml:space="preserve">
+    <value>Закреплено</value>
+  </data>
+  <data name="Editor.Failed" xml:space="preserve">
+    <value>Не удалось: {0}</value>
+  </data>
+  <data name="Editor.CloseTitle" xml:space="preserve">
+    <value>Закрыть без сохранения?</value>
+  </data>
+  <data name="Editor.CloseHistoryPins" xml:space="preserve">
+    <value>Пометки не попадут в историю: новую запись добавляют «Копировать», «Сохранить как…» и «Закрепить».</value>
+  </data>
+  <data name="Editor.CloseHistory" xml:space="preserve">
+    <value>Пометки не попадут в историю: новую запись добавляют «Копировать» и «Сохранить как…».</value>
+  </data>
+  <data name="Editor.ClosePins" xml:space="preserve">
+    <value>Пометки пропадут: картинку с ними можно скопировать, сохранить («Сохранить как…») или закрепить.</value>
+  </data>
+  <data name="Editor.CloseLost" xml:space="preserve">
+    <value>Пометки пропадут: картинку с ними можно скопировать или сохранить («Сохранить как…»).</value>
+  </data>
+  <data name="Edit.NoDocument" xml:space="preserve">
+    <value>Документ пометок не найден</value>
+  </data>
+  <data name="Edit.SizeMismatch" xml:space="preserve">
+    <value>Размер в документе пометок ({0}×{1}) не совпадает с оригиналом ({2}×{3})</value>
+  </data>
+  <data name="Edit.UnknownMarks" xml:space="preserve">
+    <value>Неизвестных пометок: {0} (снимок из более новой версии Screeny)</value>
+  </data>
+  <data name="Edit.ReadOriginalFailed" xml:space="preserve">
+    <value>Не удалось прочитать оригинал</value>
+  </data>
+  <data name="Edit.DocumentDamaged" xml:space="preserve">
+    <value>Документ пометок повреждён</value>
+  </data>
+  <data name="Edit.NewerDocument" xml:space="preserve">
+    <value>Документ пометок версии {0} — из более новой версии Screeny</value>
+  </data>
+  <data name="Edit.OpenedFlat" xml:space="preserve">
+    <value>{0}. Снимок открыт как готовая картинка: прежние пометки — её часть.</value>
+  </data>
+  <data name="Pin.Save" xml:space="preserve">
+    <value>Сохранить…</value>
+  </data>
+  <data name="Pin.ResetZoom" xml:space="preserve">
+    <value>Сбросить масштаб</value>
+  </data>
+  <data name="Pin.Opacity" xml:space="preserve">
+    <value>Прозрачность</value>
+  </data>
+  <data name="Pin.OpacityBadge" xml:space="preserve">
+    <value>Прозрачность {0} %</value>
+  </data>
+  <data name="File.ReplaceTitle" xml:space="preserve">
+    <value>Заменить файл?</value>
+  </data>
+  <data name="File.ReplaceText" xml:space="preserve">
+    <value>Файл уже существует:
+{0}
+Заменить его?</value>
+  </data>
+  <data name="File.Replace" xml:space="preserve">
+    <value>Заменить</value>
+  </data>
+</root>

@@ -1,0 +1,106 @@
+<UserControl x:Class="Screeny.Overlay.ToolbarControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:Screeny.Localization"
+             Cursor="Arrow" Focusable="False">
+  <UserControl.Resources>
+    <FontFamily x:Key="IconFont">Segoe Fluent Icons, Segoe MDL2 Assets, Segoe UI Symbol</FontFamily>
+    <!-- Панель всегда тёмная (лежит на затемнённом экране), поэтому и подсказки тёмные независимо от темы приложения -->
+    <Style TargetType="ToolTip" BasedOn="{StaticResource {x:Type ToolTip}}">
+      <Setter Property="Background" Value="{DynamicResource Overlay.Tooltip}"/>
+      <Setter Property="Foreground" Value="{DynamicResource Overlay.Ink}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource Overlay.ShotRing}"/>
+    </Style>
+    <Style x:Key="BarButton" TargetType="ButtonBase">
+      <Setter Property="Focusable" Value="False"/>
+      <Setter Property="Foreground" Value="{DynamicResource Overlay.Ink}"/>
+      <Setter Property="FontFamily" Value="{DynamicResource Font.UI}"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Height" Value="30"/>
+      <Setter Property="MinWidth" Value="30"/>
+      <Setter Property="Padding" Value="7,0"/>
+      <Setter Property="Margin" Value="1,0"/>
+      <Setter Property="ToolTipService.InitialShowDelay" Value="300"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ButtonBase">
+            <Border x:Name="Bd" Background="Transparent" CornerRadius="7" Padding="{TemplateBinding Padding}">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource Overlay.Hover}"/></Trigger>
+              <Trigger Property="IsPressed" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource Overlay.Pressed}"/></Trigger>
+              <Trigger Property="ToggleButton.IsChecked" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource Brush.Accent}"/></Trigger>
+              <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.35"/></Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+    <Style x:Key="IconButton" TargetType="ButtonBase" BasedOn="{StaticResource BarButton}">
+      <Setter Property="FontFamily" Value="{StaticResource IconFont}"/>
+      <Setter Property="FontSize" Value="15"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Width" Value="32"/>
+    </Style>
+    <Style x:Key="AccentButton" TargetType="Button" BasedOn="{StaticResource BarButton}">
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="Bd" Background="{DynamicResource Brush.Accent}" CornerRadius="7" Padding="{TemplateBinding Padding}">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource Brush.AccentHover}"/></Trigger>
+              <Trigger Property="IsPressed" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource Brush.AccentPressed}"/></Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+    <Style x:Key="Separator" TargetType="Rectangle">
+      <Setter Property="Width" Value="1"/>
+      <Setter Property="Height" Value="20"/>
+      <Setter Property="Fill" Value="{DynamicResource Overlay.Divider}"/>
+      <Setter Property="Margin" Value="5,0"/>
+    </Style>
+  </UserControl.Resources>
+  <Border Background="{DynamicResource Overlay.Panel}" CornerRadius="12" Padding="5" BorderBrush="{DynamicResource Overlay.ShotRing}" BorderThickness="1">
+    <Border.Effect><DropShadowEffect BlurRadius="24" ShadowDepth="6" Direction="270" Opacity="0.55"/></Border.Effect>
+    <StackPanel Orientation="Horizontal">
+      <StackPanel x:Name="ToolPanel" Orientation="Horizontal"/>
+      <Rectangle Style="{StaticResource Separator}"/>
+      <StackPanel x:Name="ColorPanel" Orientation="Horizontal" VerticalAlignment="Center"/>
+      <ToggleButton x:Name="PipetteButton" Style="{StaticResource IconButton}" Content="&#xEF3C;" Margin="2,0,0,0"
+                    ToolTip="{l:Loc Toolbar.Pipette}" Click="OnPipette"/>
+      <Border x:Name="ThicknessBox" Width="30" Height="30" Margin="3,0" Background="Transparent"
+              ToolTip="{l:Loc Toolbar.Thickness}" MouseWheel="OnThicknessWheel">
+        <Grid>
+          <Ellipse x:Name="ThicknessDot" Fill="{DynamicResource Overlay.Ink}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          <TextBlock x:Name="ThicknessText" Foreground="{DynamicResource Overlay.Ink70}" FontFamily="{DynamicResource Font.Mono}" FontSize="9" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+        </Grid>
+      </Border>
+      <Rectangle Style="{StaticResource Separator}"/>
+      <Button x:Name="UndoButton" Style="{StaticResource IconButton}" Content="&#xE7A7;" ToolTip="{l:Loc Toolbar.Undo}" Click="OnUndo"/>
+      <Button x:Name="RedoButton" Style="{StaticResource IconButton}" Content="&#xE7A6;" ToolTip="{l:Loc Toolbar.Redo}" Click="OnRedo"/>
+      <Rectangle Style="{StaticResource Separator}"/>
+      <StackPanel x:Name="ActionPanel" Orientation="Horizontal">
+        <ToggleButton x:Name="BeautifyButton" Style="{StaticResource IconButton}" ToolTip="{l:Loc Toolbar.Beautify}" Click="OnBeautify">
+          <!-- ✨ векторно: глиф эмодзи в WPF монохромный и в разных шрифтах разный -->
+          <Path Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}" Width="16" Height="16" Stretch="None"
+                Data="M7,2 C7.5,6 9,7.5 13,8 C9,8.5 7.5,10 7,14 C6.5,10 5,8.5 1,8 C5,7.5 6.5,6 7,2 Z M13,0.5 C13.2,2 13.8,2.6 15.5,2.8 C13.8,3 13.2,3.6 13,5.1 C12.8,3.6 12.2,3 10.5,2.8 C12.2,2.6 12.8,2 13,0.5 Z"/>
+        </ToggleButton>
+        <ToggleButton x:Name="OcrButton" Style="{StaticResource BarButton}" Content="OCR" FontWeight="SemiBold" Click="OnOcr"/>
+        <Button x:Name="PinButton" Style="{StaticResource IconButton}" Content="&#xE718;" ToolTip="{l:Loc Toolbar.Pin}" Click="OnPin"/>
+        <Button Style="{StaticResource IconButton}" Content="&#xE74E;" ToolTip="{l:Loc Toolbar.SaveAs}" Click="OnSave"/>
+        <Button x:Name="CancelButton" Style="{StaticResource IconButton}" Content="&#xE711;" Click="OnCancel"/>
+        <Button x:Name="CopyButton" Style="{StaticResource AccentButton}" Margin="3,0,0,0" Click="OnCopy">
+          <StackPanel Orientation="Horizontal">
+            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE8C8;" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0"/>
+            <TextBlock x:Name="CopyLabel" VerticalAlignment="Center"/>
+          </StackPanel>
+        </Button>
+      </StackPanel>
+    </StackPanel>
+  </Border>
+</UserControl>

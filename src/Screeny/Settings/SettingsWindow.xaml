@@ -1,0 +1,106 @@
+<t:ChromeWindow x:Class="Screeny.Settings.SettingsWindow"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:l="clr-namespace:Screeny.Localization"
+                xmlns:s="clr-namespace:Screeny.Settings"
+                xmlns:t="clr-namespace:Screeny.Themes"
+                Title="{l:Loc Settings.Title}" Width="560" SizeToContent="Height" ResizeMode="NoResize"
+                WindowStartupLocation="CenterScreen" Icon="/Assets/screeny.ico">
+  <Window.Resources>
+    <Style x:Key="FieldLabel" TargetType="TextBlock" BasedOn="{StaticResource Body}">
+      <Setter Property="Margin" Value="0,0,0,6"/>
+    </Style>
+    <!-- HotkeyBox наследует TextBox: неявный стиль на него не распространяется -->
+    <Style TargetType="s:HotkeyBox" BasedOn="{StaticResource {x:Type TextBox}}">
+      <Setter Property="FontFamily" Value="{DynamicResource Font.Mono}"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+  </Window.Resources>
+
+  <DockPanel>
+    <!-- Нижняя панель кнопок -->
+    <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource Brush.Stroke}" BorderThickness="0,1,0,0" Padding="24,16,24,20">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+          <Button Content="{l:Loc Common.Cancel}" IsCancel="True" MinWidth="96" Click="OnCancel"/>
+          <Button Content="{l:Loc Common.Save}" IsDefault="True" MinWidth="112" Margin="8,0,0,0" Style="{StaticResource AccentButton}" Click="OnSave"/>
+        </StackPanel>
+        <TextBlock x:Name="GeneralError" Style="{StaticResource ErrorText}" Margin="0,0,16,0" VerticalAlignment="Center"/>
+      </DockPanel>
+    </Border>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="24,8,24,24">
+      <!-- Язык: первым, чтобы его нашёл и тот, кто не читает текущий язык -->
+      <TextBlock Text="{l:Loc Language.Section}" Style="{StaticResource SectionLabel}"/>
+      <ComboBox x:Name="LanguageInput" Width="260" HorizontalAlignment="Left" AutomationProperties.Name="{l:Loc Language.Name}"/>
+
+      <!-- Снимок: несколько хоткеев сразу -->
+      <TextBlock Text="{l:Loc Settings.SectionCapture}" Style="{StaticResource SectionLabel}" Margin="0,28,0,10"/>
+      <CheckBox x:Name="PrintScreenInput" Content="PrintScreen"/>
+      <TextBlock x:Name="PrintScreenWarning" Style="{StaticResource Caption}" Margin="28,4,0,0" TextWrapping="Wrap" LineHeight="17" Visibility="Collapsed">
+        <Run Text="{l:Loc Settings.PrintScreenReserved}"/>
+        <Hyperlink Click="OnOpenKeyboardSettings" Foreground="{DynamicResource Brush.Accent}"><Run Text="{l:Loc Settings.HowToTurnOff}"/></Hyperlink>
+      </TextBlock>
+      <TextBlock x:Name="PrintScreenError" Style="{StaticResource ErrorText}" Margin="28,6,0,0"/>
+
+      <CheckBox x:Name="WinShiftSInput" Margin="0,12,0,0" Content="{l:Loc Hotkeys.WinShiftS}"/>
+      <TextBlock Style="{StaticResource Caption}" Margin="28,4,0,0" TextWrapping="Wrap" LineHeight="17"
+                 Text="{l:Loc Hotkeys.HookNoteAntivirus}"/>
+      <TextBlock x:Name="WinShiftSError" Style="{StaticResource ErrorText}" Margin="28,6,0,0"/>
+
+      <TextBlock Text="{l:Loc Settings.CustomShortcuts}" Style="{StaticResource FieldLabel}" Margin="0,16,0,6"/>
+      <StackPanel x:Name="CustomRows"/>
+      <Button x:Name="AddCustomButton" HorizontalAlignment="Left" Margin="0,8,0,0" Click="OnAddCustom"
+              ToolTip="{l:Loc Settings.AddShortcutTip}">
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="&#xE710;" FontFamily="{DynamicResource Font.Icon}" FontSize="12" VerticalAlignment="Center" Margin="0,0,8,0"/>
+          <TextBlock Text="{l:Loc Settings.Add}" VerticalAlignment="Center"/>
+        </StackPanel>
+      </Button>
+      <TextBlock x:Name="HotkeysError" Style="{StaticResource ErrorText}"/>
+      <TextBlock x:Name="HotkeyHint" Style="{StaticResource Caption}" Margin="0,8,0,0" TextWrapping="Wrap" LineHeight="17" Visibility="Collapsed"/>
+      <Button x:Name="ConflictsButton" Content="{l:Loc Common.CheckConflicts}" HorizontalAlignment="Left" Margin="0,12,0,0" Click="OnCheckConflicts"
+              ToolTip="{l:Loc Settings.ConflictsTip}"/>
+
+      <!-- Функции: галочки из FeatureCatalog строит FeatureCheckList; выключенная прячет свои поля ниже сразу -->
+      <TextBlock Text="{l:Loc Settings.SectionFeatures}" Style="{StaticResource SectionLabel}" Margin="0,28,0,10"/>
+      <StackPanel x:Name="FeaturesPanel"/>
+
+      <!-- История -->
+      <StackPanel x:Name="HistorySection">
+      <TextBlock Text="{l:Loc Settings.SectionHistory}" Style="{StaticResource SectionLabel}" Margin="0,28,0,8"/>
+      <TextBlock Text="{l:Loc Settings.Folder}" Style="{StaticResource FieldLabel}"/>
+      <DockPanel>
+        <Button DockPanel.Dock="Right" Content="{l:Loc Settings.Browse}" Margin="8,0,0,0" Click="OnBrowse"/>
+        <TextBox x:Name="FolderInput"/>
+      </DockPanel>
+      <TextBlock x:Name="FolderError" Style="{StaticResource ErrorText}"/>
+
+      <TextBlock Text="{l:Loc Settings.KeepLast}" Style="{StaticResource FieldLabel}" Margin="0,16,0,6"/>
+      <StackPanel Orientation="Horizontal">
+        <TextBox x:Name="LimitInput" Width="72" ToolTip="{l:Loc Settings.LimitRange}" FontFamily="{DynamicResource Font.Mono}"/>
+        <TextBlock Text="{l:Loc Settings.Screenshots}" Style="{StaticResource Body}" Foreground="{DynamicResource Brush.Ink70}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+      </StackPanel>
+      <TextBlock x:Name="LimitError" Style="{StaticResource ErrorText}"/>
+
+      <CheckBox x:Name="KeepOriginalsInput" Margin="0,16,0,0" Content="{l:Loc Settings.KeepOriginals}"/>
+      <TextBlock Style="{StaticResource Caption}" Margin="28,4,0,0" TextWrapping="Wrap" LineHeight="17"
+                 Text="{l:Loc Settings.KeepOriginalsNote}"/>
+      </StackPanel>
+
+      <!-- Поведение -->
+      <TextBlock Text="{l:Loc Settings.SectionBehavior}" Style="{StaticResource SectionLabel}" Margin="0,28,0,10"/>
+      <CheckBox x:Name="CopyInput" Content="{l:Loc Settings.EnterCopies}"/>
+      <CheckBox x:Name="StartupInput" Margin="0,12,0,0" Content="{l:Loc Settings.StartWithWindows}"/>
+      <CheckBox x:Name="ExcludePinsInput" Margin="0,12,0,0" Content="{l:Loc Settings.ExcludePins}"/>
+      <CheckBox x:Name="SnapInput" Margin="0,12,0,0" Content="{l:Loc Settings.Snap}"/>
+      <TextBlock Style="{StaticResource Caption}" Margin="28,4,0,0" TextWrapping="Wrap" LineHeight="17"
+                 Text="{l:Loc Settings.SnapNote}"/>
+      <CheckBox x:Name="UpdatesInput" Margin="0,12,0,0" Content="{l:Loc Common.CheckUpdatesBox}"/>
+      <TextBlock Style="{StaticResource Caption}" Margin="28,4,0,0" TextWrapping="Wrap" LineHeight="17"
+                 Text="{l:Loc Common.PrivacyNote}"/>
+    </StackPanel>
+    </ScrollViewer>
+  </DockPanel>
+</t:ChromeWindow>

@@ -1,0 +1,22 @@
+<!-- Светлая палитра. Ключи совпадают с Dark.xaml. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Color x:Key="Color.WindowBorder">#FFE1D9D0</Color>
+
+  <SolidColorBrush x:Key="Brush.Bg" Color="#FFFFF7ED"/>
+  <SolidColorBrush x:Key="Brush.Ink" Color="#FF292524"/>
+  <SolidColorBrush x:Key="Brush.Ink70" Color="#B3292524"/>
+  <SolidColorBrush x:Key="Brush.Ink50" Color="#80292524"/>
+  <SolidColorBrush x:Key="Brush.Ink20" Color="#33292524"/>
+  <SolidColorBrush x:Key="Brush.Ink10" Color="#1A292524"/>
+  <SolidColorBrush x:Key="Brush.Ink05" Color="#0D292524"/>
+  <SolidColorBrush x:Key="Brush.Card" Color="#0D292524"/>
+  <SolidColorBrush x:Key="Brush.CardHover" Color="#1A292524"/>
+  <SolidColorBrush x:Key="Brush.CardPressed" Color="#24292524"/>
+  <SolidColorBrush x:Key="Brush.Stroke" Color="#1A292524"/>
+  <SolidColorBrush x:Key="Brush.StrokeStrong" Color="#33292524"/>
+  <SolidColorBrush x:Key="Brush.Popup" Color="#FFFFFCF8"/>
+  <SolidColorBrush x:Key="Brush.Thumb" Color="#FFF3EBE1"/>
+  <SolidColorBrush x:Key="Brush.DangerSubtle" Color="#1FFF3B30"/>
+  <SolidColorBrush x:Key="Brush.DangerText" Color="#FFD92D20"/>
+</ResourceDictionary>

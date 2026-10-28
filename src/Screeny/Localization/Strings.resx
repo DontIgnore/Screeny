@@ -1,0 +1,1279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Common.Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Common.Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Common.OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Common.Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Common.Minimize" xml:space="preserve">
+    <value>Minimize</value>
+  </data>
+  <data name="Common.Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Common.Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Common.Open" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="Common.Copied" xml:space="preserve">
+    <value>Copied</value>
+  </data>
+  <data name="Common.ClipboardBusy" xml:space="preserve">
+    <value>Clipboard is busy</value>
+  </data>
+  <data name="Common.SaveScreenshotTitle" xml:space="preserve">
+    <value>Save screenshot</value>
+  </data>
+  <data name="Common.CheckConflicts" xml:space="preserve">
+    <value>Check for conflicts…</value>
+  </data>
+  <data name="Common.CheckUpdatesBox" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="Common.PrivacyNote" xml:space="preserve">
+    <value>Screenshots are never sent anywhere. Screeny goes online only to check GitHub for new versions and, if you ask for it, to download the precise OCR module. This box doesn't block that download.</value>
+  </data>
+  <data name="Common.SeeLog" xml:space="preserve">
+    <value>See the log for details.</value>
+  </data>
+  <data name="Language.Section" xml:space="preserve">
+    <value>LANGUAGE</value>
+  </data>
+  <data name="Language.System" xml:space="preserve">
+    <value>Same as Windows ({0})</value>
+  </data>
+  <data name="Language.Name" xml:space="preserve">
+    <value>Interface language</value>
+  </data>
+  <data name="Tray.Capture" xml:space="preserve">
+    <value>Take screenshot</value>
+  </data>
+  <data name="Tray.History" xml:space="preserve">
+    <value>History…</value>
+  </data>
+  <data name="Tray.OpenHistoryFolder" xml:space="preserve">
+    <value>Open history folder</value>
+  </data>
+  <data name="Tray.Settings" xml:space="preserve">
+    <value>Settings…</value>
+  </data>
+  <data name="Tray.CheckUpdates" xml:space="preserve">
+    <value>Check for updates…</value>
+  </data>
+  <data name="Tray.Exit" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="Tray.TipClick" xml:space="preserve">
+    <value>Screeny: click to take a screenshot</value>
+  </data>
+  <data name="Tray.TipHotkeys" xml:space="preserve">
+    <value>Screeny: {0} to take a screenshot</value>
+  </data>
+  <data name="App.StartFailed" xml:space="preserve">
+    <value>Screeny couldn't start.
+
+{0}</value>
+  </data>
+  <data name="App.HistoryFolderCreateFailed" xml:space="preserve">
+    <value>Couldn't create the history folder: {0}</value>
+  </data>
+  <data name="App.StartupFailed" xml:space="preserve">
+    <value>Couldn't change the startup setting: no access to the registry.</value>
+  </data>
+  <data name="App.HotkeyFailedChooseAnother" xml:space="preserve">
+    <value>{0} Choose another shortcut or turn this entry off.</value>
+  </data>
+  <data name="App.SettingsSaveFailed" xml:space="preserve">
+    <value>The settings are applied until you exit, but they couldn't be saved. Check access to the settings file and try again.</value>
+  </data>
+  <data name="App.DeleteOriginalsTitle" xml:space="preserve">
+    <value>Delete saved originals ({0})?</value>
+  </data>
+  <data name="App.DeleteOriginalsText" xml:space="preserve">
+    <value>They contain what was hidden with blur. History screenshots and their markup stay; reopened screenshots will be edited as finished pictures.</value>
+  </data>
+  <data name="App.Keep" xml:space="preserve">
+    <value>Keep</value>
+  </data>
+  <data name="App.OriginalsPartlyDeletedTitle" xml:space="preserve">
+    <value>Not all originals were deleted</value>
+  </data>
+  <data name="App.OriginalsPartlyDeletedText" xml:space="preserve">
+    <value>Deleted {0} of {1}. See the log for details.</value>
+  </data>
+  <data name="App.OpenHistoryFolderFailed" xml:space="preserve">
+    <value>Couldn't open the history folder: {0}</value>
+  </data>
+  <data name="App.DisplaysChanged" xml:space="preserve">
+    <value>The display setup changed, so the screenshot was cancelled.</value>
+  </data>
+  <data name="App.CaptureFailed" xml:space="preserve">
+    <value>Couldn't take a screenshot.</value>
+  </data>
+  <data name="App.CopyTextFailed" xml:space="preserve">
+    <value>Couldn't copy the text: {0}</value>
+  </data>
+  <data name="App.SaveFailed" xml:space="preserve">
+    <value>Saving failed: {0}.</value>
+  </data>
+  <data name="App.PinFailed" xml:space="preserve">
+    <value>Pinning failed: {0}.</value>
+  </data>
+  <data name="App.CopyFailed" xml:space="preserve">
+    <value>Copying failed: {0}.</value>
+  </data>
+  <data name="App.FailedSavedToHistory" xml:space="preserve">
+    <value>{0} The screenshot is saved in history.</value>
+  </data>
+  <data name="App.ClipboardBusyInHistory" xml:space="preserve">
+    <value>Another app is using the clipboard. The screenshot is saved to history.</value>
+  </data>
+  <data name="App.ClipboardBusyNotCopied" xml:space="preserve">
+    <value>Another app is using the clipboard, so the screenshot wasn't copied.</value>
+  </data>
+  <data name="App.ClipboardBusyText" xml:space="preserve">
+    <value>Another app is using the clipboard, so the text wasn't copied.</value>
+  </data>
+  <data name="App.TextCopied" xml:space="preserve">
+    <value>Text copied: {0}</value>
+  </data>
+  <data name="App.OpenShotFailedTitle" xml:space="preserve">
+    <value>Couldn't open the screenshot</value>
+  </data>
+  <data name="App.OpenShotFailedText" xml:space="preserve">
+    <value>The file may have been deleted or damaged.</value>
+  </data>
+  <data name="App.SaveShotFailed" xml:space="preserve">
+    <value>Couldn't save the screenshot: {0}</value>
+  </data>
+  <data name="App.WizardScanFailed" xml:space="preserve">
+    <value>Couldn't check for other screenshot apps. See the log for details.</value>
+  </data>
+  <data name="App.WizardSaveFailed" xml:space="preserve">
+    <value>Couldn't save the wizard settings. Check access to the settings file.</value>
+  </data>
+  <data name="Updates.AvailableBalloon" xml:space="preserve">
+    <value>Version {0} is available. Click to see what's new.</value>
+  </data>
+  <data name="Updates.UpToDateTitle" xml:space="preserve">
+    <value>You have the latest version</value>
+  </data>
+  <data name="Updates.NotUpdatableTitle" xml:space="preserve">
+    <value>Updates aren't available</value>
+  </data>
+  <data name="Updates.NotUpdatableText" xml:space="preserve">
+    <value>This copy of Screeny wasn't built by the installer or as the portable version, so it can't update itself. You can download the new version from the GitHub releases page.</value>
+  </data>
+  <data name="Updates.CheckFailedTitle" xml:space="preserve">
+    <value>Couldn't check for updates</value>
+  </data>
+  <data name="Updates.ApplyFailedTitle" xml:space="preserve">
+    <value>Couldn't update</value>
+  </data>
+  <data name="Updates.ApplyFailedText" xml:space="preserve">
+    <value>{0}
+
+Screeny will close. Start it again and repeat the update.</value>
+  </data>
+  <data name="Settings.Title" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Settings.SectionCapture" xml:space="preserve">
+    <value>CAPTURE</value>
+  </data>
+  <data name="Settings.PrintScreenReserved" xml:space="preserve">
+    <value>PrintScreen currently opens the Windows screen capture, so Screeny never gets the key press.</value>
+  </data>
+  <data name="Settings.HowToTurnOff" xml:space="preserve">
+    <value>How to turn it off</value>
+  </data>
+  <data name="Hotkeys.WinShiftS" xml:space="preserve">
+    <value>Win+Shift+S (replaces the Windows Snipping Tool)</value>
+  </data>
+  <data name="Hotkeys.HookNote" xml:space="preserve">
+    <value>Uses a system keyboard hook: Screeny sees key presses so it can recognize this shortcut.</value>
+  </data>
+  <data name="Hotkeys.HookNoteAntivirus" xml:space="preserve">
+    <value>Uses a system keyboard hook: Screeny sees key presses so it can recognize this shortcut. Some antivirus tools may react to it.</value>
+  </data>
+  <data name="Settings.CustomShortcuts" xml:space="preserve">
+    <value>Custom shortcuts</value>
+  </data>
+  <data name="Settings.AddShortcutTip" xml:space="preserve">
+    <value>Add another capture shortcut</value>
+  </data>
+  <data name="Settings.Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Settings.ConflictsTip" xml:space="preserve">
+    <value>Find apps that intercept PrintScreen or Win+Shift+S (Lightshot, ShareX and others)</value>
+  </data>
+  <data name="Settings.SectionFeatures" xml:space="preserve">
+    <value>FEATURES</value>
+  </data>
+  <data name="Settings.SectionHistory" xml:space="preserve">
+    <value>HISTORY</value>
+  </data>
+  <data name="Settings.Folder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="Settings.Browse" xml:space="preserve">
+    <value>Browse…</value>
+  </data>
+  <data name="Settings.KeepLast" xml:space="preserve">
+    <value>Keep the last</value>
+  </data>
+  <data name="Settings.LimitRange" xml:space="preserve">
+    <value>From 1 to 500</value>
+  </data>
+  <data name="Settings.Screenshots" xml:space="preserve">
+    <value>screenshots</value>
+  </data>
+  <data name="Settings.KeepOriginals" xml:space="preserve">
+    <value>Keep originals for re-editing</value>
+  </data>
+  <data name="Settings.KeepOriginalsNote" xml:space="preserve">
+    <value>A copy without markup is saved next to each screenshot. It contains everything you hid with blur or pixelation. If you turn this off, Screeny offers to delete the originals it has already saved.</value>
+  </data>
+  <data name="Settings.SectionBehavior" xml:space="preserve">
+    <value>BEHAVIOR</value>
+  </data>
+  <data name="Settings.EnterCopies" xml:space="preserve">
+    <value>Enter copies the screenshot to the clipboard (otherwise it only saves to history)</value>
+  </data>
+  <data name="Settings.StartWithWindows" xml:space="preserve">
+    <value>Start with Windows</value>
+  </data>
+  <data name="Settings.ExcludePins" xml:space="preserve">
+    <value>Keep pinned screenshots out of new screenshots</value>
+  </data>
+  <data name="Settings.Snap" xml:space="preserve">
+    <value>Snapping and guides</value>
+  </data>
+  <data name="Settings.SnapNote" xml:space="preserve">
+    <value>The selection snaps to window edges and sharp edges in the image; shapes snap to the edges and centers of other shapes and of the selection. Hold Alt to turn it off for a moment.</value>
+  </data>
+  <data name="Settings.FallbackActive" xml:space="preserve">
+    <value>The backup shortcut {0} is on: PrintScreen is unavailable and no other shortcut works. It turns off by itself once any shortcut above works.</value>
+  </data>
+  <data name="Hotkeys.BoxTip" xml:space="preserve">
+    <value>Click and press a key combination; Backspace clears it</value>
+  </data>
+  <data name="Settings.RemoveShortcut" xml:space="preserve">
+    <value>Remove shortcut</value>
+  </data>
+  <data name="Hotkeys.CustomName" xml:space="preserve">
+    <value>Custom shortcut</value>
+  </data>
+  <data name="Settings.OpenSettingsFailed" xml:space="preserve">
+    <value>Couldn't open Windows Settings. Open it yourself: Accessibility &gt; Keyboard.</value>
+  </data>
+  <data name="Settings.HistoryFolderDialog" xml:space="preserve">
+    <value>Screenshot history folder</value>
+  </data>
+  <data name="Settings.FolderRequired" xml:space="preserve">
+    <value>Enter the full path to the history folder.</value>
+  </data>
+  <data name="Settings.LimitInvalid" xml:space="preserve">
+    <value>The number of screenshots in history must be from {0} to {1}.</value>
+  </data>
+  <data name="Hotkeys.PrintScreenUseBox" xml:space="preserve">
+    <value>PrintScreen is turned on with the box above.</value>
+  </data>
+  <data name="Settings.DuplicateShortcut" xml:space="preserve">
+    <value>This shortcut is already in the list.</value>
+  </data>
+  <data name="Hotkeys.NeedOne" xml:space="preserve">
+    <value>Turn on at least one shortcut. Otherwise screenshots can only be taken from the tray.</value>
+  </data>
+  <data name="Units.Megabytes" xml:space="preserve">
+    <value>{0} MB</value>
+  </data>
+  <data name="PreciseOcr.Title" xml:space="preserve">
+    <value>Precise OCR (PaddleOCR)</value>
+  </data>
+  <data name="PreciseOcr.Caption" xml:space="preserve">
+    <value>Reads small text and nicknames much better. The module, about {0}, is downloaded once and runs on this computer: screenshots are never sent anywhere. It downloads only when you click this button, even with update checks turned off.</value>
+  </data>
+  <data name="PreciseOcr.Use" xml:space="preserve">
+    <value>Use precise OCR</value>
+  </data>
+  <data name="PreciseOcr.Remove" xml:space="preserve">
+    <value>Remove module</value>
+  </data>
+  <data name="PreciseOcr.Undo" xml:space="preserve">
+    <value>Don't remove</value>
+  </data>
+  <data name="PreciseOcr.Progress" xml:space="preserve">
+    <value>Module download</value>
+  </data>
+  <data name="PreciseOcr.Update" xml:space="preserve">
+    <value>Update module ({0})</value>
+  </data>
+  <data name="PreciseOcr.Download" xml:space="preserve">
+    <value>Download ({0})</value>
+  </data>
+  <data name="PreciseOcr.Downloading" xml:space="preserve">
+    <value>Downloading the module… {0} %</value>
+  </data>
+  <data name="PreciseOcr.RemovalPending" xml:space="preserve">
+    <value>Module removed. Its files will be deleted after Screeny restarts.</value>
+  </data>
+  <data name="PreciseOcr.Outdated" xml:space="preserve">
+    <value>Module version {0} is installed, but this version of Screeny needs {1}. Windows OCR is used for now.</value>
+  </data>
+  <data name="PreciseOcr.Ready" xml:space="preserve">
+    <value>Module installed. Ctrl+T shows the Windows OCR result right away and refines it in the background.</value>
+  </data>
+  <data name="PreciseOcr.LoadFailed" xml:space="preserve">
+    <value>The module didn't load: {0}</value>
+  </data>
+  <data name="PreciseOcr.Cancelled" xml:space="preserve">
+    <value>Download cancelled.</value>
+  </data>
+  <data name="PreciseOcr.NoAccess" xml:space="preserve">
+    <value>No access to the modules folder. Check the permissions on %LocalAppData%\Screeny and try again.</value>
+  </data>
+  <data name="PreciseOcr.WriteFailed" xml:space="preserve">
+    <value>Couldn't write the module files (the disk is full or another program is using the files). Try again later.</value>
+  </data>
+  <data name="PreciseOcr.ArchiveCorrupt" xml:space="preserve">
+    <value>The downloaded module archive is damaged. Download it again.</value>
+  </data>
+  <data name="PreciseOcr.InstallFailed" xml:space="preserve">
+    <value>Couldn't install the module. See the Screeny log for details.</value>
+  </data>
+  <data name="PreciseOcr.AlreadyDeleted" xml:space="preserve">
+    <value>The module files are already deleted. Download it again after Screeny restarts.</value>
+  </data>
+  <data name="PreciseOcr.Installed" xml:space="preserve">
+    <value>Precise OCR installed: Ctrl+T in text mode now refines the result.</value>
+  </data>
+  <data name="PreciseOcr.DownloadFailed" xml:space="preserve">
+    <value>Couldn't download the precise OCR module: {0} You can try again in settings.</value>
+  </data>
+  <data name="PreciseOcr.NeedsUpdate" xml:space="preserve">
+    <value>Precise OCR is off for now: this version of Screeny needs an updated module. Update it in settings.</value>
+  </data>
+  <data name="Module.NotFound404" xml:space="preserve">
+    <value>Module not found on the server (404).</value>
+  </data>
+  <data name="Module.ServerStatus" xml:space="preserve">
+    <value>The server responded with {0}.</value>
+  </data>
+  <data name="Module.FileMissing" xml:space="preserve">
+    <value>{1} is missing from {0}.</value>
+  </data>
+  <data name="Module.NoConnection" xml:space="preserve">
+    <value>Can't reach the server. Check your internet connection and try again.</value>
+  </data>
+  <data name="Module.HashMismatch" xml:space="preserve">
+    <value>The downloaded file doesn't match the expected one (SHA256). The module wasn't installed.</value>
+  </data>
+  <data name="Module.Corrupt" xml:space="preserve">
+    <value>The module is damaged: {0}.</value>
+  </data>
+  <data name="Module.OldFilesBusy" xml:space="preserve">
+    <value>The previous module files are in use. Restart Screeny and try again.</value>
+  </data>
+  <data name="Module.TooLarge" xml:space="preserve">
+    <value>The module file is too large.</value>
+  </data>
+  <data name="Module.FilesLocked" xml:space="preserve">
+    <value>Couldn't put the module files in place: another program is holding them (perhaps an antivirus). Try again in a minute.</value>
+  </data>
+  <data name="Module.BadPath" xml:space="preserve">
+    <value>Invalid path in the module archive: {0}</value>
+  </data>
+  <data name="Module.UnpackTooLarge" xml:space="preserve">
+    <value>The module archive unpacks to too much data.</value>
+  </data>
+  <data name="Manifest.Missing" xml:space="preserve">
+    <value>{0} is missing or damaged</value>
+  </data>
+  <data name="Manifest.Changed" xml:space="preserve">
+    <value>{0} has been changed</value>
+  </data>
+  <data name="Manifest.Unreadable" xml:space="preserve">
+    <value>{0} can't be read</value>
+  </data>
+  <data name="Manifest.WrongModule" xml:space="preserve">
+    <value>{0} describes module {1} version {2}, expected {3} version {4}</value>
+  </data>
+  <data name="Manifest.BadPath" xml:space="preserve">
+    <value>invalid path in {0}: {1}</value>
+  </data>
+  <data name="Manifest.Duplicate" xml:space="preserve">
+    <value>file listed twice: {0}</value>
+  </data>
+  <data name="Manifest.NoFile" xml:space="preserve">
+    <value>file {0} is missing</value>
+  </data>
+  <data name="Manifest.SizeMismatch" xml:space="preserve">
+    <value>size of {0} doesn't match</value>
+  </data>
+  <data name="Manifest.HashMismatch" xml:space="preserve">
+    <value>SHA256 of {0} doesn't match</value>
+  </data>
+  <data name="Manifest.ExtraFile" xml:space="preserve">
+    <value>extra file {0}</value>
+  </data>
+  <data name="PreciseOcr.FilesDamaged" xml:space="preserve">
+    <value>the module files are damaged or changed ({0}). Remove the module and download it again.</value>
+  </data>
+  <data name="PreciseOcr.OnnxLoadFailed" xml:space="preserve">
+    <value>onnxruntime.dll doesn't load (64-bit Windows is required; an antivirus may have blocked the file).</value>
+  </data>
+  <data name="PreciseOcr.ModuleLoadFailed" xml:space="preserve">
+    <value>the module didn't load; see the Screeny log for details.</value>
+  </data>
+  <data name="PreciseOcr.OldVcRuntime" xml:space="preserve">
+    <value>Screeny already has an older Visual C++ runtime loaded ({0} {1} from {2}), but the module needs {3} or newer. Install the latest Visual C++ 2015–2022 Redistributable (x64) and restart Screeny; until then Windows OCR is used.</value>
+  </data>
+  <data name="Hotkeys.Busy" xml:space="preserve">
+    <value>The shortcut {0} is already taken by another app.</value>
+  </data>
+  <data name="Hotkeys.RegisterFailed" xml:space="preserve">
+    <value>Couldn't register the shortcut {0} (Windows error {1}).</value>
+  </data>
+  <data name="Hotkeys.FallbackInUse" xml:space="preserve">
+    <value>{0} Using {1} instead. You can change this in settings.</value>
+  </data>
+  <data name="Hotkeys.TrayOnly" xml:space="preserve">
+    <value>{0} Click the tray icon to take a screenshot.</value>
+  </data>
+  <data name="Hotkeys.TrayOnlyWithError" xml:space="preserve">
+    <value>{0} {1} Click the tray icon to take a screenshot.</value>
+  </data>
+  <data name="Hotkeys.PrintScreenReserved" xml:space="preserve">
+    <value>PrintScreen is taken by the Windows screen capture (Settings &gt; Accessibility &gt; Keyboard).</value>
+  </data>
+  <data name="Hotkeys.Unrecognized" xml:space="preserve">
+    <value>The shortcut “{0}” isn't recognized.</value>
+  </data>
+  <data name="Hotkeys.HookFailed" xml:space="preserve">
+    <value>Couldn't turn on the Win+Shift+S hook (Windows error {0}).</value>
+  </data>
+  <data name="Hotkeys.WinShiftSSeparate" xml:space="preserve">
+    <value>Win+Shift+S has its own box above: Windows doesn't let apps assign it as a regular shortcut.</value>
+  </data>
+  <data name="Hotkeys.NeedModifier" xml:space="preserve">
+    <value>Add Ctrl, Alt or Win: without them the key would stop working when you type.</value>
+  </data>
+  <data name="Wizard.Title" xml:space="preserve">
+    <value>Screeny: first run</value>
+  </data>
+  <data name="Wizard.Skip" xml:space="preserve">
+    <value>Skip</value>
+  </data>
+  <data name="Wizard.SkipTip" xml:space="preserve">
+    <value>Change nothing. You can open the wizard later: Settings &gt; “Check for conflicts…”</value>
+  </data>
+  <data name="Wizard.Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="Wizard.Done" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="Wizard.RescanTip" xml:space="preserve">
+    <value>Look again for apps that get in the way of the shortcuts</value>
+  </data>
+  <data name="Wizard.Rescan" xml:space="preserve">
+    <value>Check again</value>
+  </data>
+  <data name="Wizard.SectionHotkeys" xml:space="preserve">
+    <value>CAPTURE SHORTCUTS</value>
+  </data>
+  <data name="Wizard.CustomOptional" xml:space="preserve">
+    <value>Custom shortcut (optional)</value>
+  </data>
+  <data name="Wizard.FeaturesNote" xml:space="preserve">
+    <value>Turn off what you don't need: its buttons, keys and menu items disappear. You can bring it back in settings.</value>
+  </data>
+  <data name="Wizard.SectionUpdates" xml:space="preserve">
+    <value>UPDATES</value>
+  </data>
+  <data name="Wizard.PrivacyNote" xml:space="preserve">
+    <value>Screenshots are never sent anywhere. Screeny goes online only to check GitHub for new versions and, if you ask for it, to download the precise OCR module.</value>
+  </data>
+  <data name="Wizard.FakeSuffix" xml:space="preserve">
+    <value>{0} (dev: fake environment)</value>
+  </data>
+  <data name="Wizard.HeadingConflicts" xml:space="preserve">
+    <value>These apps get in the way of Screeny's shortcuts</value>
+  </data>
+  <data name="Wizard.HeadingReady" xml:space="preserve">
+    <value>Screeny is ready</value>
+  </data>
+  <data name="Wizard.IntroConflicts" xml:space="preserve">
+    <value>Choose what to do and click “Apply”. Nothing changes without your consent, and Screeny never uninstalls anything by itself.</value>
+  </data>
+  <data name="Wizard.IntroReady" xml:space="preserve">
+    <value>No other apps that intercept PrintScreen or Win+Shift+S were found. Choose your capture shortcuts and the features you want.</value>
+  </data>
+  <data name="Wizard.Blocks" xml:space="preserve">
+    <value>Gets in the way of: {0}.</value>
+  </data>
+  <data name="Wizard.BlocksUsually" xml:space="preserve">
+    <value>Gets in the way of: {0} (usually takes {1}).</value>
+  </data>
+  <data name="Wizard.UsuallyTakes" xml:space="preserve">
+    <value>Usually takes {0}. It doesn't overlap with Screeny's default shortcuts, but it's a second screenshot tool.</value>
+  </data>
+  <data name="Wizard.PowerToysKeys" xml:space="preserve">
+    <value>key remapping in Keyboard Manager</value>
+  </data>
+  <data name="Wizard.CloseNow" xml:space="preserve">
+    <value>Close now</value>
+  </data>
+  <data name="Wizard.CloseNowTip" xml:space="preserve">
+    <value>Close the app to free the shortcut. If it doesn't close by itself within 2 seconds, it will be ended.</value>
+  </data>
+  <data name="Wizard.RemoveAutostart" xml:space="preserve">
+    <value>Remove from startup</value>
+  </data>
+  <data name="Wizard.RemoveAutostartTip" xml:space="preserve">
+    <value>Like “Disable” in Task Manager &gt; Startup apps: reversible, and the app itself isn't uninstalled.</value>
+  </data>
+  <data name="Wizard.MachineAutostart" xml:space="preserve">
+    <value>Startup is set up for all users. To turn it off yourself, use the app's own settings or Task Manager &gt; Startup apps. Or do it here: it needs administrator rights.</value>
+  </data>
+  <data name="Wizard.DisableAsAdmin" xml:space="preserve">
+    <value>Turn off as administrator</value>
+  </data>
+  <data name="Wizard.PowerToysHint" xml:space="preserve">
+    <value>Remove the remapping in PowerToys &gt; Keyboard Manager. PowerToys startup is turned off in its General settings.</value>
+  </data>
+  <data name="Wizard.Uninstall" xml:space="preserve">
+    <value>Uninstall app…</value>
+  </data>
+  <data name="Wizard.UninstallTip" xml:space="preserve">
+    <value>Run the app's own uninstaller. Screeny never uninstalls anything by itself.</value>
+  </data>
+  <data name="Wizard.Resolved" xml:space="preserve">
+    <value>✓ No longer in the way: not running and doesn't start by itself.</value>
+  </data>
+  <data name="Wizard.WindowsCapture" xml:space="preserve">
+    <value>Windows screen capture</value>
+  </data>
+  <data name="Wizard.SystemPrintScreen" xml:space="preserve">
+    <value>PrintScreen currently opens the Windows Snipping Tool, so Screeny never gets the key press.</value>
+  </data>
+  <data name="Wizard.GivePrintScreen" xml:space="preserve">
+    <value>Give PrintScreen to Screeny</value>
+  </data>
+  <data name="Wizard.GivePrintScreenTip" xml:space="preserve">
+    <value>Same as turning off “Use the Print screen key to open screen capture” in Windows Settings. No administrator rights needed.</value>
+  </data>
+  <data name="Wizard.SignOutNote" xml:space="preserve">
+    <value>Windows may apply this only after you sign out and back in.</value>
+  </data>
+  <data name="Wizard.FoundRunning" xml:space="preserve">
+    <value>running</value>
+  </data>
+  <data name="Wizard.FoundRemap" xml:space="preserve">
+    <value>keys remapped in Keyboard Manager</value>
+  </data>
+  <data name="Wizard.FoundNoInstaller" xml:space="preserve">
+    <value>installer not found (portable version?)</value>
+  </data>
+  <data name="Wizard.Found" xml:space="preserve">
+    <value>Found: {0}.</value>
+  </data>
+  <data name="Wizard.RescanFailed" xml:space="preserve">
+    <value>Couldn't check the apps again. See the log for details.</value>
+  </data>
+  <data name="Wizard.StillMachineAutostart" xml:space="preserve">
+    <value>{0} still starts for all users. Turn it off yourself: Task Manager &gt; Startup apps.</value>
+  </data>
+  <data name="Wizard.UninstallTitle" xml:space="preserve">
+    <value>Uninstall {0}?</value>
+  </data>
+  <data name="Wizard.UninstallText" xml:space="preserve">
+    <value>The app's own uninstaller opens, and you decide there. Screeny never uninstalls anything by itself. When the uninstaller finishes, click “Check again”.</value>
+  </data>
+  <data name="Wizard.OpenUninstaller" xml:space="preserve">
+    <value>Open uninstaller</value>
+  </data>
+  <data name="Wizard.DownloadPreciseOcr" xml:space="preserve">
+    <value>Download precise OCR ({0})</value>
+  </data>
+  <data name="Wizard.PreciseOcrHint" xml:space="preserve">
+    <value>PaddleOCR reads small text and nicknames much better. It runs on this computer; screenshots are never sent anywhere.</value>
+  </data>
+  <data name="Wizard.HotkeyFailed" xml:space="preserve">
+    <value>The shortcut didn't work.</value>
+  </data>
+  <data name="Wizard.ChooseAnother" xml:space="preserve">
+    <value>{0} Choose another shortcut or clear the box.</value>
+  </data>
+  <data name="Wizard.RegisteredSignOut" xml:space="preserve">
+    <value>Registered. If PrintScreen still opens the Snipping Tool, sign out and back in.</value>
+  </data>
+  <data name="Wizard.RegisteredButBlocked" xml:space="preserve">
+    <value>Registered, but {0} is still running or starts by itself and may intercept the key.</value>
+  </data>
+  <data name="Wizard.Works" xml:space="preserve">
+    <value>✓ Works.</value>
+  </data>
+  <data name="Wizard.NotWorking" xml:space="preserve">
+    <value>Doesn't work.</value>
+  </data>
+  <data name="Wizard.BlockedBy" xml:space="preserve">
+    <value>{0} In the way: {1}.</value>
+  </data>
+  <data name="Wizard.NotifyOne" xml:space="preserve">
+    <value>{0} is taken by {1}. Open the wizard? Click this notification or “Check for conflicts…” in the tray menu.</value>
+  </data>
+  <data name="Wizard.NotifyMany" xml:space="preserve">
+    <value>{0} is taken by these apps: {1}. Open the wizard? Click this notification or “Check for conflicts…” in the tray menu.</value>
+  </data>
+  <data name="Wizard.HotkeyGeneric" xml:space="preserve">
+    <value>The shortcut</value>
+  </data>
+  <data name="Autostart.RunUser" xml:space="preserve">
+    <value>current user's startup</value>
+  </data>
+  <data name="Autostart.StartupFolderUser" xml:space="preserve">
+    <value>user's Startup folder</value>
+  </data>
+  <data name="Autostart.StartupFolderCommon" xml:space="preserve">
+    <value>shared Startup folder (all users)</value>
+  </data>
+  <data name="Autostart.Machine" xml:space="preserve">
+    <value>startup for all users</value>
+  </data>
+  <data name="Action.NotClosed" xml:space="preserve">
+    <value>{0} didn't close. Close it yourself from its tray icon.</value>
+  </data>
+  <data name="Action.Closed" xml:space="preserve">
+    <value>{0} closed.</value>
+  </data>
+  <data name="Action.CloseNoRights" xml:space="preserve">
+    <value>Couldn't close {0}: it seems to run as administrator. Close it yourself from its tray icon.</value>
+  </data>
+  <data name="Action.AutostartNeedsAdmin" xml:space="preserve">
+    <value>{0} starts for all users: administrator rights are needed.</value>
+  </data>
+  <data name="Action.AutostartAlreadyOff" xml:space="preserve">
+    <value>{0} startup is already off.</value>
+  </data>
+  <data name="Action.AutostartNoRegistry" xml:space="preserve">
+    <value>Couldn't turn off {0} startup: no access to the registry.</value>
+  </data>
+  <data name="Action.AutostartUserOffMachineNeedsAdmin" xml:space="preserve">
+    <value>{0} startup is off for the current user; the entry for all users needs administrator rights.</value>
+  </data>
+  <data name="Action.AutostartOff" xml:space="preserve">
+    <value>{0} startup is off. To turn it back on: Task Manager &gt; Startup apps.</value>
+  </data>
+  <data name="Action.UnknownApp" xml:space="preserve">
+    <value>Unknown app.</value>
+  </data>
+  <data name="Action.MachineAutostartOff" xml:space="preserve">
+    <value>{0} startup is off for all users. To turn it back on: Task Manager &gt; Startup apps.</value>
+  </data>
+  <data name="Action.AutostartFailedCode" xml:space="preserve">
+    <value>Couldn't turn off {0} startup (code {1}). See the log for details.</value>
+  </data>
+  <data name="Action.ElevationCancelled" xml:space="preserve">
+    <value>The administrator request was cancelled; startup wasn't changed.</value>
+  </data>
+  <data name="Action.ElevationFailed" xml:space="preserve">
+    <value>Couldn't request administrator rights: {0}</value>
+  </data>
+  <data name="Action.UninstallerNotFound" xml:space="preserve">
+    <value>The {0} uninstaller wasn't found. Uninstall the app from Settings &gt; Apps.</value>
+  </data>
+  <data name="Action.UninstallerStarted" xml:space="preserve">
+    <value>The {0} uninstaller is running. When it finishes, click “Check again”.</value>
+  </data>
+  <data name="Action.UninstallerCancelled" xml:space="preserve">
+    <value>The uninstaller launch was cancelled.</value>
+  </data>
+  <data name="Action.UninstallerFailed" xml:space="preserve">
+    <value>Couldn't start the {0} uninstaller. Uninstall the app from Settings &gt; Apps.</value>
+  </data>
+  <data name="Action.PrintScreenSettingFailed" xml:space="preserve">
+    <value>Couldn't change the setting. Turn it off yourself: Settings &gt; Accessibility &gt; Keyboard.</value>
+  </data>
+  <data name="Action.PrintScreenDone" xml:space="preserve">
+    <value>Done. Windows may apply this only after you sign out and back in; until then PrintScreen may still open the Windows screen capture.</value>
+  </data>
+  <data name="Action.DevUninstaller" xml:space="preserve">
+    <value>(dev) The {0} uninstaller isn't started. Normally: “the uninstaller is running, click Check again”.</value>
+  </data>
+  <data name="Action.DevHotkeysNotRegistered" xml:space="preserve">
+    <value>(dev) The test instance doesn't register shortcuts.</value>
+  </data>
+  <data name="Feature.Ocr.Title" xml:space="preserve">
+    <value>Text recognition and QR</value>
+  </data>
+  <data name="Feature.Ocr.Description" xml:space="preserve">
+    <value>Text mode (Ctrl+T): select and copy text from a screenshot, read QR codes and barcodes.</value>
+  </data>
+  <data name="Feature.History.Title" xml:space="preserve">
+    <value>Screenshot history</value>
+  </data>
+  <data name="Feature.History.Description" xml:space="preserve">
+    <value>Screenshots are saved to a folder, with a history window and re-editing. Without history a screenshot is only copied.</value>
+  </data>
+  <data name="Feature.Pins.Title" xml:space="preserve">
+    <value>Pinned screenshots</value>
+  </data>
+  <data name="Feature.Pins.Description" xml:space="preserve">
+    <value>A screenshot on top of all windows (F3), including from history.</value>
+  </data>
+  <data name="Feature.Beautify.Title" xml:space="preserve">
+    <value>Background frame</value>
+  </data>
+  <data name="Feature.Beautify.Description" xml:space="preserve">
+    <value>Gradient background, padding, rounded corners and shadow (B).</value>
+  </data>
+  <data name="Feature.Pipette.Title" xml:space="preserve">
+    <value>Eyedropper</value>
+  </data>
+  <data name="Feature.Pipette.Description" xml:space="preserve">
+    <value>Pixel color from the screenshot (I), HEX under the magnifier before selecting (C).</value>
+  </data>
+  <data name="Feature.Ruler.Title" xml:space="preserve">
+    <value>Ruler</value>
+  </data>
+  <data name="Feature.Ruler.Description" xml:space="preserve">
+    <value>Distance and angle in pixels (=).</value>
+  </data>
+  <data name="Update.Title" xml:space="preserve">
+    <value>Screeny update</value>
+  </data>
+  <data name="Update.Later" xml:space="preserve">
+    <value>Later</value>
+  </data>
+  <data name="Update.UpdateAndRestart" xml:space="preserve">
+    <value>Update and restart</value>
+  </data>
+  <data name="Update.SkipVersion" xml:space="preserve">
+    <value>Skip this version</value>
+  </data>
+  <data name="Update.WhatsNew" xml:space="preserve">
+    <value>What's new</value>
+  </data>
+  <data name="Update.Available" xml:space="preserve">
+    <value>Version {0} is available</value>
+  </data>
+  <data name="Update.Current" xml:space="preserve">
+    <value>Installed now: {0}</value>
+  </data>
+  <data name="Update.OnlyDisabled" xml:space="preserve">
+    <value>The changes only concern features you turned off.</value>
+  </data>
+  <data name="Update.NoNotes" xml:space="preserve">
+    <value>No list of changes is attached.</value>
+  </data>
+  <data name="Update.Downloading" xml:space="preserve">
+    <value>Downloading the update…</value>
+  </data>
+  <data name="Update.DownloadingPercent" xml:space="preserve">
+    <value>Downloading the update… {0} %</value>
+  </data>
+  <data name="Update.Restarting" xml:space="preserve">
+    <value>Restarting…</value>
+  </data>
+  <data name="Update.Failed" xml:space="preserve">
+    <value>Couldn't update: {0}</value>
+  </data>
+  <data name="Update.SkipFailed" xml:space="preserve">
+    <value>Couldn't remember your choice. See the log for details.</value>
+  </data>
+  <data name="Tool.WithKey" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+  <data name="Tool.Select" xml:space="preserve">
+    <value>Select and move</value>
+  </data>
+  <data name="Tool.Rect" xml:space="preserve">
+    <value>Rectangle</value>
+  </data>
+  <data name="Tool.Ellipse" xml:space="preserve">
+    <value>Ellipse</value>
+  </data>
+  <data name="Tool.Line" xml:space="preserve">
+    <value>Line</value>
+  </data>
+  <data name="Tool.Arrow" xml:space="preserve">
+    <value>Arrow</value>
+  </data>
+  <data name="Tool.Pen" xml:space="preserve">
+    <value>Pen</value>
+  </data>
+  <data name="Tool.Highlighter" xml:space="preserve">
+    <value>Highlighter</value>
+  </data>
+  <data name="Tool.Text" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="Tool.Number" xml:space="preserve">
+    <value>Number badge</value>
+  </data>
+  <data name="Tool.Pixelate" xml:space="preserve">
+    <value>Pixelate</value>
+  </data>
+  <data name="Tool.Blur" xml:space="preserve">
+    <value>Blur</value>
+  </data>
+  <data name="Tool.Ruler" xml:space="preserve">
+    <value>Ruler: Δx, Δy and length in pixels, Shift for 45° steps</value>
+  </data>
+  <data name="Toolbar.Pipette" xml:space="preserve">
+    <value>Eyedropper: pick a color from the screenshot (I)</value>
+  </data>
+  <data name="Toolbar.Thickness" xml:space="preserve">
+    <value>Thickness: mouse wheel</value>
+  </data>
+  <data name="Toolbar.Undo" xml:space="preserve">
+    <value>Undo (Ctrl+Z)</value>
+  </data>
+  <data name="Toolbar.Redo" xml:space="preserve">
+    <value>Redo (Ctrl+Y)</value>
+  </data>
+  <data name="Toolbar.Beautify" xml:space="preserve">
+    <value>Background frame: background, padding, corners, shadow (B)</value>
+  </data>
+  <data name="Toolbar.Ocr" xml:space="preserve">
+    <value>Select text in the screenshot (Ctrl+T)</value>
+  </data>
+  <data name="Toolbar.OcrBack" xml:space="preserve">
+    <value>Back to drawing (Ctrl+T, Esc)</value>
+  </data>
+  <data name="Toolbar.Pin" xml:space="preserve">
+    <value>Pin on top of other windows (F3)</value>
+  </data>
+  <data name="Toolbar.SaveAs" xml:space="preserve">
+    <value>Save as… (Ctrl+S)</value>
+  </data>
+  <data name="Toolbar.Cancel" xml:space="preserve">
+    <value>Cancel (Esc)</value>
+  </data>
+  <data name="Toolbar.Close" xml:space="preserve">
+    <value>Close (Esc)</value>
+  </data>
+  <data name="Toolbar.CopyEnter" xml:space="preserve">
+    <value>Copy to clipboard (Enter)</value>
+  </data>
+  <data name="Toolbar.CopyEditorHistory" xml:space="preserve">
+    <value>Copy to clipboard (Ctrl+C) and add a new history entry</value>
+  </data>
+  <data name="Toolbar.CopyEditor" xml:space="preserve">
+    <value>Copy to clipboard (Ctrl+C)</value>
+  </data>
+  <data name="Toolbar.CopyText" xml:space="preserve">
+    <value>Copy text</value>
+  </data>
+  <data name="Toolbar.CopyTextTip" xml:space="preserve">
+    <value>Copy the selected text, or all text if nothing is selected (Enter, Ctrl+C)</value>
+  </data>
+  <data name="Options.Stroke" xml:space="preserve">
+    <value>Stroke</value>
+  </data>
+  <data name="Options.StrokeSwatch" xml:space="preserve">
+    <value>Stroke: the palette colors it</value>
+  </data>
+  <data name="Options.NoStroke" xml:space="preserve">
+    <value>No stroke</value>
+  </data>
+  <data name="Options.RestoreStroke" xml:space="preserve">
+    <value>Restore stroke</value>
+  </data>
+  <data name="Options.Fill" xml:space="preserve">
+    <value>Fill</value>
+  </data>
+  <data name="Options.FillSwatch" xml:space="preserve">
+    <value>Fill: the palette colors it</value>
+  </data>
+  <data name="Options.NoFill" xml:space="preserve">
+    <value>No fill</value>
+  </data>
+  <data name="Options.RestoreFill" xml:space="preserve">
+    <value>Restore fill</value>
+  </data>
+  <data name="Options.NeedStrokeOrFill" xml:space="preserve">
+    <value>You can't remove both stroke and fill</value>
+  </data>
+  <data name="Options.FillOpacity" xml:space="preserve">
+    <value>Fill opacity: click to change</value>
+  </data>
+  <data name="Options.ArrowNormal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="Options.ArrowDouble" xml:space="preserve">
+    <value>Double-headed</value>
+  </data>
+  <data name="Options.ArrowDashed" xml:space="preserve">
+    <value>Dashed</value>
+  </data>
+  <data name="Options.ArrowThick" xml:space="preserve">
+    <value>Thick (wedge)</value>
+  </data>
+  <data name="Options.Text" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="Options.TextSwatch" xml:space="preserve">
+    <value>Text color: the palette colors it</value>
+  </data>
+  <data name="Options.Background" xml:space="preserve">
+    <value>Background</value>
+  </data>
+  <data name="Options.BackgroundSwatch" xml:space="preserve">
+    <value>Background: the palette colors it</value>
+  </data>
+  <data name="Options.NoBackground" xml:space="preserve">
+    <value>No background</value>
+  </data>
+  <data name="Options.AddBackground" xml:space="preserve">
+    <value>Add background</value>
+  </data>
+  <data name="Options.Align" xml:space="preserve">
+    <value>Alignment</value>
+  </data>
+  <data name="Options.AlignLeft" xml:space="preserve">
+    <value>Align left</value>
+  </data>
+  <data name="Options.AlignCenter" xml:space="preserve">
+    <value>Center</value>
+  </data>
+  <data name="Options.AlignRight" xml:space="preserve">
+    <value>Align right</value>
+  </data>
+  <data name="Beautify.Background" xml:space="preserve">
+    <value>Background</value>
+  </data>
+  <data name="Beautify.BackgroundPreset" xml:space="preserve">
+    <value>Background: {0}</value>
+  </data>
+  <data name="Beautify.Padding" xml:space="preserve">
+    <value>Padding</value>
+  </data>
+  <data name="Beautify.PaddingPixels" xml:space="preserve">
+    <value>Padding {0} px</value>
+  </data>
+  <data name="Beautify.Radius" xml:space="preserve">
+    <value>Corners</value>
+  </data>
+  <data name="Beautify.NoRadius" xml:space="preserve">
+    <value>Square corners</value>
+  </data>
+  <data name="Beautify.RadiusPixels" xml:space="preserve">
+    <value>Corner radius {0} px</value>
+  </data>
+  <data name="Beautify.Shadow" xml:space="preserve">
+    <value>Shadow</value>
+  </data>
+  <data name="Beautify.Soft" xml:space="preserve">
+    <value>Soft</value>
+  </data>
+  <data name="Beautify.SoftTip" xml:space="preserve">
+    <value>Soft shadow under the screenshot</value>
+  </data>
+  <data name="Beautify.Sunset" xml:space="preserve">
+    <value>Sunset</value>
+  </data>
+  <data name="Beautify.Mint" xml:space="preserve">
+    <value>Mint</value>
+  </data>
+  <data name="Beautify.Graphite" xml:space="preserve">
+    <value>Graphite</value>
+  </data>
+  <data name="Beautify.Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="Beautify.Warm" xml:space="preserve">
+    <value>Warm</value>
+  </data>
+  <data name="Beautify.Blue" xml:space="preserve">
+    <value>Blue</value>
+  </data>
+  <data name="Codes.FormatLink" xml:space="preserve">
+    <value>{0} · link</value>
+  </data>
+  <data name="Codes.OpenInBrowser" xml:space="preserve">
+    <value>Open in browser: {0}</value>
+  </data>
+  <data name="Codes.Copied" xml:space="preserve">
+    <value>Code contents copied</value>
+  </data>
+  <data name="Codes.OpenFailed" xml:space="preserve">
+    <value>Couldn't open the link</value>
+  </data>
+  <data name="Codes.QrCode" xml:space="preserve">
+    <value>QR code</value>
+  </data>
+  <data name="Pipette.Copied" xml:space="preserve">
+    <value>{0} copied</value>
+  </data>
+  <data name="TextMode.Recognizing" xml:space="preserve">
+    <value>Recognizing text…</value>
+  </data>
+  <data name="TextMode.OcrUnavailable" xml:space="preserve">
+    <value>OCR isn't available: add a language with text recognition in Settings &gt; Time &amp; language &gt; Language.</value>
+  </data>
+  <data name="TextMode.Failed" xml:space="preserve">
+    <value>Couldn't recognize text: {0}</value>
+  </data>
+  <data name="TextMode.NotFound" xml:space="preserve">
+    <value>No text found</value>
+  </data>
+  <data name="TextMode.Refining" xml:space="preserve">
+    <value>Recognizing text… refining</value>
+  </data>
+  <data name="TextMode.OneCode" xml:space="preserve">
+    <value>Code found: click it · Enter copies its contents · Esc back</value>
+  </data>
+  <data name="TextMode.ManyCodes" xml:space="preserve">
+    <value>Codes found: click a code to see its contents · Esc back</value>
+  </data>
+  <data name="TextMode.HintNoSelection" xml:space="preserve">
+    <value>Select text with the mouse · Ctrl+A all · Enter copies all text · Esc back</value>
+  </data>
+  <data name="TextMode.HintNoSelectionCodes" xml:space="preserve">
+    <value>Select text with the mouse · click a code to see its contents · Ctrl+A all · Enter copies all text · Esc back</value>
+  </data>
+  <data name="TextMode.HintSelection" xml:space="preserve">
+    <value>Enter or Ctrl+C copies the selection · Ctrl+A all · Esc clears the selection</value>
+  </data>
+  <data name="TextMode.WithRefining" xml:space="preserve">
+    <value>{0} · refining…</value>
+  </data>
+  <data name="TextMode.CopyWhenReady" xml:space="preserve">
+    <value>Recognizing text… it will be copied as soon as it's done</value>
+  </data>
+  <data name="TextMode.ClickCode" xml:space="preserve">
+    <value>Click a code to see and copy its contents</value>
+  </data>
+  <data name="TextMode.NoTextInSelection" xml:space="preserve">
+    <value>There's no text in the selection · Ctrl+A all · Esc clears the selection</value>
+  </data>
+  <data name="History.Title" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="History.Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="History.PinOnScreen" xml:space="preserve">
+    <value>Pin on screen</value>
+  </data>
+  <data name="History.ShowInFolder" xml:space="preserve">
+    <value>Show in folder</value>
+  </data>
+  <data name="History.OpenFolder" xml:space="preserve">
+    <value>Open folder</value>
+  </data>
+  <data name="History.ClearAll" xml:space="preserve">
+    <value>Clear all</value>
+  </data>
+  <data name="History.CardTip" xml:space="preserve">
+    <value>Click to copy, double-click to open, E to edit, right-click for actions</value>
+  </data>
+  <data name="History.Empty" xml:space="preserve">
+    <value>History is empty</value>
+  </data>
+  <data name="History.EmptyHintHotkey" xml:space="preserve">
+    <value>Press {0} to take your first screenshot.</value>
+  </data>
+  <data name="History.EmptyHintTray" xml:space="preserve">
+    <value>Click the Screeny tray icon to take your first screenshot.</value>
+  </data>
+  <data name="History.FolderUnavailable" xml:space="preserve">
+    <value>History folder unavailable</value>
+  </data>
+  <data name="History.ReadFailed" xml:space="preserve">
+    <value>Couldn't read the history folder</value>
+  </data>
+  <data name="History.Count" xml:space="preserve">
+    <value>{0} of {1} screenshots</value>
+  </data>
+  <data name="History.ClipboardBusy" xml:space="preserve">
+    <value>Clipboard busy</value>
+  </data>
+  <data name="History.Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="History.OpenFailedText" xml:space="preserve">
+    <value>The file may have been deleted, or no app is set to open PNG files.</value>
+  </data>
+  <data name="History.DeleteTitle" xml:space="preserve">
+    <value>Delete screenshot?</value>
+  </data>
+  <data name="History.DeleteText" xml:space="preserve">
+    <value>The file is deleted without going to the Recycle Bin and can't be restored.</value>
+  </data>
+  <data name="History.DeleteFailedTitle" xml:space="preserve">
+    <value>Couldn't delete the screenshot</value>
+  </data>
+  <data name="History.DeleteFailedText" xml:space="preserve">
+    <value>Another program is using the file, or there's no access to the folder.</value>
+  </data>
+  <data name="History.CreateFolderFailed" xml:space="preserve">
+    <value>Couldn't create the history folder</value>
+  </data>
+  <data name="History.ExplorerFailedTitle" xml:space="preserve">
+    <value>Couldn't open File Explorer</value>
+  </data>
+  <data name="History.ExplorerFailedText" xml:space="preserve">
+    <value>The details are in the Screeny log.</value>
+  </data>
+  <data name="History.ClearTitle" xml:space="preserve">
+    <value>Clear history?</value>
+  </data>
+  <data name="History.ClearText" xml:space="preserve">
+    <value>Folder: {0}
+Screenshots ({1}) will be deleted without going to the Recycle Bin. They can't be restored.</value>
+  </data>
+  <data name="History.DeleteAll" xml:space="preserve">
+    <value>Delete all</value>
+  </data>
+  <data name="Editor.Title" xml:space="preserve">
+    <value>Editor</value>
+  </data>
+  <data name="Editor.TitleShot" xml:space="preserve">
+    <value>Editor: screenshot from {0}</value>
+  </data>
+  <data name="Editor.TitleFile" xml:space="preserve">
+    <value>Editor: {0}</value>
+  </data>
+  <data name="Editor.Original" xml:space="preserve">
+    <value>Original</value>
+  </data>
+  <data name="Editor.OriginalTip" xml:space="preserve">
+    <value>The screenshot without markup: markup is hidden, not deleted</value>
+  </data>
+  <data name="Editor.WithMarkup" xml:space="preserve">
+    <value>With markup</value>
+  </data>
+  <data name="Editor.Clear" xml:space="preserve">
+    <value>Clear markup</value>
+  </data>
+  <data name="Editor.ClearTip" xml:space="preserve">
+    <value>Delete all markup in one step (Ctrl+Z brings it back)</value>
+  </data>
+  <data name="Editor.Hide" xml:space="preserve">
+    <value>Hide</value>
+  </data>
+  <data name="Editor.Restart" xml:space="preserve">
+    <value>Start over from the original</value>
+  </data>
+  <data name="Editor.ZoomTip" xml:space="preserve">
+    <value>Fit / 100 % (Ctrl+0, Ctrl+1) · Ctrl+wheel to zoom · Space+drag to pan</value>
+  </data>
+  <data name="Editor.Zoom" xml:space="preserve">
+    <value>{0} %</value>
+  </data>
+  <data name="Editor.ZoomFit" xml:space="preserve">
+    <value>Fit · {0} %</value>
+  </data>
+  <data name="Editor.NoticeOriginal" xml:space="preserve">
+    <value>Original without markup: markup is hidden, not deleted, and you can't draw in this mode.</value>
+  </data>
+  <data name="Editor.NoticeNoOriginal" xml:space="preserve">
+    <value>No original was saved: markup is drawn on top of the finished screenshot. Turn on keeping originals in settings.</value>
+  </data>
+  <data name="Editor.ComposeFailed" xml:space="preserve">
+    <value>Couldn't build the picture: {0}</value>
+  </data>
+  <data name="Editor.Saving" xml:space="preserve">
+    <value>Saving…</value>
+  </data>
+  <data name="Editor.ToastNewEntry" xml:space="preserve">
+    <value>{0} · new history entry</value>
+  </data>
+  <data name="Editor.ToastHistoryFailed" xml:space="preserve">
+    <value>{0} · couldn't write to history</value>
+  </data>
+  <data name="Editor.Saved" xml:space="preserve">
+    <value>Saved</value>
+  </data>
+  <data name="Editor.Pinned" xml:space="preserve">
+    <value>Pinned</value>
+  </data>
+  <data name="Editor.Failed" xml:space="preserve">
+    <value>Failed: {0}</value>
+  </data>
+  <data name="Editor.CloseTitle" xml:space="preserve">
+    <value>Close without saving?</value>
+  </data>
+  <data name="Editor.CloseHistoryPins" xml:space="preserve">
+    <value>Your markup won't go to history: a new entry is added by “Copy”, “Save as…” and “Pin”.</value>
+  </data>
+  <data name="Editor.CloseHistory" xml:space="preserve">
+    <value>Your markup won't go to history: a new entry is added by “Copy” and “Save as…”.</value>
+  </data>
+  <data name="Editor.ClosePins" xml:space="preserve">
+    <value>Your markup will be lost: you can copy the picture with it, save it (“Save as…”) or pin it.</value>
+  </data>
+  <data name="Editor.CloseLost" xml:space="preserve">
+    <value>Your markup will be lost: you can copy the picture with it or save it (“Save as…”).</value>
+  </data>
+  <data name="Edit.NoDocument" xml:space="preserve">
+    <value>The markup document wasn't found</value>
+  </data>
+  <data name="Edit.SizeMismatch" xml:space="preserve">
+    <value>The size in the markup document ({0}×{1}) doesn't match the original ({2}×{3})</value>
+  </data>
+  <data name="Edit.UnknownMarks" xml:space="preserve">
+    <value>Unknown markup items: {0} (the screenshot is from a newer version of Screeny)</value>
+  </data>
+  <data name="Edit.ReadOriginalFailed" xml:space="preserve">
+    <value>Couldn't read the original</value>
+  </data>
+  <data name="Edit.DocumentDamaged" xml:space="preserve">
+    <value>The markup document is damaged</value>
+  </data>
+  <data name="Edit.NewerDocument" xml:space="preserve">
+    <value>The markup document has version {0}, from a newer version of Screeny</value>
+  </data>
+  <data name="Edit.OpenedFlat" xml:space="preserve">
+    <value>{0}. The screenshot is opened as a finished picture: the earlier markup is part of it.</value>
+  </data>
+  <data name="Pin.Save" xml:space="preserve">
+    <value>Save…</value>
+  </data>
+  <data name="Pin.ResetZoom" xml:space="preserve">
+    <value>Reset zoom</value>
+  </data>
+  <data name="Pin.Opacity" xml:space="preserve">
+    <value>Opacity</value>
+  </data>
+  <data name="Pin.OpacityBadge" xml:space="preserve">
+    <value>Opacity {0} %</value>
+  </data>
+  <data name="File.ReplaceTitle" xml:space="preserve">
+    <value>Replace the file?</value>
+  </data>
+  <data name="File.ReplaceText" xml:space="preserve">
+    <value>The file already exists:
+{0}
+Replace it?</value>
+  </data>
+  <data name="File.Replace" xml:space="preserve">
+    <value>Replace</value>
+  </data>
+</root>

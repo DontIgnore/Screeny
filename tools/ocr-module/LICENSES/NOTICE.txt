@@ -1,0 +1,31 @@
+Screeny precise OCR module — third-party components
+====================================================
+
+This archive contains no Screeny code. All pre- and post-processing lives in the
+Screeny application (GPL-3.0). The module holds data and a native runtime only:
+
+1. PP-OCRv5 models (det.onnx, rec.onnx)
+   - det.onnx = ch_PP-OCRv5_det_mobile, rec.onnx = cyrillic_PP-OCRv5_rec_mobile
+   - Original models: PaddleOCR, Copyright (c) PaddlePaddle Authors,
+     https://github.com/PaddlePaddle/PaddleOCR
+   - ONNX conversion: RapidOCR (RapidAI), ModelScope RapidAI/RapidOCR v3.10.0,
+     https://www.modelscope.cn/models/RapidAI/RapidOCR
+   - License: Apache License 2.0, see Apache-2.0.txt. The files are unmodified;
+     only the file names were changed.
+
+2. ONNX Runtime 1.31.0 (onnxruntime.dll, onnxruntime_providers_shared.dll)
+   - Copyright (c) Microsoft Corporation, https://github.com/microsoft/onnxruntime
+   - Taken unmodified from the NuGet package Microsoft.ML.OnnxRuntime 1.31.0
+     (runtimes/win-x64/native).
+   - License: MIT, see onnxruntime-LICENSE.txt; third-party notices of ONNX Runtime
+     are in onnxruntime-ThirdPartyNotices.txt.
+
+3. Microsoft Visual C++ runtime (vcruntime140.dll, vcruntime140_1.dll,
+   msvcp140.dll, msvcp140_1.dll)
+   - Copyright (c) Microsoft Corporation.
+   - onnxruntime.dll depends on these libraries. They are redistributable files of
+     the Microsoft Visual C++ Redistributable (Visual Studio "Distributable Code",
+     see Redist.txt of Visual Studio) and are shipped here unmodified for
+     application-local use, so that the module also works on systems without the
+     Visual C++ Redistributable installed. Their use is subject to the Microsoft
+     Software License Terms for Visual Studio and the Visual C++ Redistributable.

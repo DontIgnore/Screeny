@@ -1,0 +1,19 @@
+bin/
+obj/
+*.user
+.vs/
+TestResults/
+publish/
+/releases/
+/artifacts/
+
+# Local files that are not part of the repository
+.omc/
+.claude/
+.impeccable/
+/DESIGN.md
+/PRODUCT.md
+/docs/internal/
+/tools/ocr-eval/
+/site/
+/tools/ocr-module/models/

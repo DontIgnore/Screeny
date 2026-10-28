@@ -1,0 +1,14 @@
+<UserControl x:Class="Screeny.Overlay.FlyoutPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Cursor="Arrow" Focusable="False" Visibility="Collapsed">
+  <!-- Всплывающая панель параметров: тёмная карточка как панель оверлея, вылетает из якоря (кнопки или фигуры) -->
+  <UserControl.Resources>
+    <ResourceDictionary Source="FlyoutStyles.xaml"/>
+  </UserControl.Resources>
+  <Border x:Name="Card" Background="{DynamicResource Overlay.Panel}" CornerRadius="11" Padding="6,5"
+          BorderBrush="{DynamicResource Overlay.ShotRing}" BorderThickness="1">
+    <Border.Effect><DropShadowEffect BlurRadius="20" ShadowDepth="5" Direction="270" Opacity="0.5"/></Border.Effect>
+    <ContentPresenter x:Name="Host"/>
+  </Border>
+</UserControl>

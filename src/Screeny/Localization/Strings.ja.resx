@@ -1,0 +1,1279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Common.Cancel" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="Common.Save" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="Common.OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Common.Close" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="Common.Minimize" xml:space="preserve">
+    <value>最小化</value>
+  </data>
+  <data name="Common.Delete" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="Common.Copy" xml:space="preserve">
+    <value>コピー</value>
+  </data>
+  <data name="Common.Open" xml:space="preserve">
+    <value>開く</value>
+  </data>
+  <data name="Common.Copied" xml:space="preserve">
+    <value>コピーしました</value>
+  </data>
+  <data name="Common.ClipboardBusy" xml:space="preserve">
+    <value>クリップボードが使用中です</value>
+  </data>
+  <data name="Common.SaveScreenshotTitle" xml:space="preserve">
+    <value>スクリーンショットを保存</value>
+  </data>
+  <data name="Common.CheckConflicts" xml:space="preserve">
+    <value>競合を確認…</value>
+  </data>
+  <data name="Common.CheckUpdatesBox" xml:space="preserve">
+    <value>更新を確認する</value>
+  </data>
+  <data name="Common.PrivacyNote" xml:space="preserve">
+    <value>スクリーンショットはどこにも送信されません。Screeny がネットに接続するのは、GitHub で新しいバージョンを確認するときと、依頼されたときに高精度 OCR モジュールをダウンロードするときだけです。このチェックはそのダウンロードを止めません。</value>
+  </data>
+  <data name="Common.SeeLog" xml:space="preserve">
+    <value>詳しくはログを確認してください。</value>
+  </data>
+  <data name="Language.Section" xml:space="preserve">
+    <value>言語</value>
+  </data>
+  <data name="Language.System" xml:space="preserve">
+    <value>システムと同じ（{0}）</value>
+  </data>
+  <data name="Language.Name" xml:space="preserve">
+    <value>表示言語</value>
+  </data>
+  <data name="Tray.Capture" xml:space="preserve">
+    <value>スクリーンショットを撮る</value>
+  </data>
+  <data name="Tray.History" xml:space="preserve">
+    <value>履歴…</value>
+  </data>
+  <data name="Tray.OpenHistoryFolder" xml:space="preserve">
+    <value>履歴フォルダーを開く</value>
+  </data>
+  <data name="Tray.Settings" xml:space="preserve">
+    <value>設定…</value>
+  </data>
+  <data name="Tray.CheckUpdates" xml:space="preserve">
+    <value>更新を確認…</value>
+  </data>
+  <data name="Tray.Exit" xml:space="preserve">
+    <value>終了</value>
+  </data>
+  <data name="Tray.TipClick" xml:space="preserve">
+    <value>Screeny: クリックでキャプチャ</value>
+  </data>
+  <data name="Tray.TipHotkeys" xml:space="preserve">
+    <value>Screeny: {0} でキャプチャ</value>
+  </data>
+  <data name="App.StartFailed" xml:space="preserve">
+    <value>Screeny を起動できませんでした。
+
+{0}</value>
+  </data>
+  <data name="App.HistoryFolderCreateFailed" xml:space="preserve">
+    <value>履歴フォルダーを作成できませんでした: {0}</value>
+  </data>
+  <data name="App.StartupFailed" xml:space="preserve">
+    <value>スタートアップの設定を変更できませんでした。レジストリにアクセスできません。</value>
+  </data>
+  <data name="App.HotkeyFailedChooseAnother" xml:space="preserve">
+    <value>{0} 別のショートカットを選ぶか、この項目をオフにしてください。</value>
+  </data>
+  <data name="App.SettingsSaveFailed" xml:space="preserve">
+    <value>設定は終了するまで適用されますが、保存できませんでした。設定ファイルへのアクセスを確認して、もう一度お試しください。</value>
+  </data>
+  <data name="App.DeleteOriginalsTitle" xml:space="preserve">
+    <value>保存済みの元画像（{0} 件）を削除しますか？</value>
+  </data>
+  <data name="App.DeleteOriginalsText" xml:space="preserve">
+    <value>元画像には、ぼかしで隠した内容が含まれています。履歴のスクリーンショットと注釈は残ります。再度開いたスクリーンショットは完成した画像として編集されます。</value>
+  </data>
+  <data name="App.Keep" xml:space="preserve">
+    <value>残す</value>
+  </data>
+  <data name="App.OriginalsPartlyDeletedTitle" xml:space="preserve">
+    <value>一部の元画像を削除できませんでした</value>
+  </data>
+  <data name="App.OriginalsPartlyDeletedText" xml:space="preserve">
+    <value>{1} 件中 {0} 件を削除しました。詳しくはログを確認してください。</value>
+  </data>
+  <data name="App.OpenHistoryFolderFailed" xml:space="preserve">
+    <value>履歴フォルダーを開けませんでした: {0}</value>
+  </data>
+  <data name="App.DisplaysChanged" xml:space="preserve">
+    <value>ディスプレイ構成が変わったため、スクリーンショットの撮影を取り消しました。</value>
+  </data>
+  <data name="App.CaptureFailed" xml:space="preserve">
+    <value>スクリーンショットを撮れませんでした。</value>
+  </data>
+  <data name="App.CopyTextFailed" xml:space="preserve">
+    <value>テキストをコピーできませんでした: {0}</value>
+  </data>
+  <data name="App.SaveFailed" xml:space="preserve">
+    <value>保存できませんでした: {0}。</value>
+  </data>
+  <data name="App.PinFailed" xml:space="preserve">
+    <value>固定できませんでした: {0}。</value>
+  </data>
+  <data name="App.CopyFailed" xml:space="preserve">
+    <value>コピーできませんでした: {0}。</value>
+  </data>
+  <data name="App.FailedSavedToHistory" xml:space="preserve">
+    <value>{0}スクリーンショットは履歴に保存されています。</value>
+  </data>
+  <data name="App.ClipboardBusyInHistory" xml:space="preserve">
+    <value>ほかのアプリがクリップボードを使用中です。スクリーンショットは履歴に保存しました。</value>
+  </data>
+  <data name="App.ClipboardBusyNotCopied" xml:space="preserve">
+    <value>ほかのアプリがクリップボードを使用中のため、スクリーンショットをコピーできませんでした。</value>
+  </data>
+  <data name="App.ClipboardBusyText" xml:space="preserve">
+    <value>ほかのアプリがクリップボードを使用中のため、テキストをコピーできませんでした。</value>
+  </data>
+  <data name="App.TextCopied" xml:space="preserve">
+    <value>テキストをコピーしました: {0}</value>
+  </data>
+  <data name="App.OpenShotFailedTitle" xml:space="preserve">
+    <value>スクリーンショットを開けませんでした</value>
+  </data>
+  <data name="App.OpenShotFailedText" xml:space="preserve">
+    <value>ファイルが削除されたか、壊れている可能性があります。</value>
+  </data>
+  <data name="App.SaveShotFailed" xml:space="preserve">
+    <value>スクリーンショットを保存できませんでした: {0}</value>
+  </data>
+  <data name="App.WizardScanFailed" xml:space="preserve">
+    <value>ほかのスクリーンショット アプリを確認できませんでした。詳しくはログを確認してください。</value>
+  </data>
+  <data name="App.WizardSaveFailed" xml:space="preserve">
+    <value>ウィザードの設定を保存できませんでした。設定ファイルへのアクセスを確認してください。</value>
+  </data>
+  <data name="Updates.AvailableBalloon" xml:space="preserve">
+    <value>バージョン {0} を利用できます。クリックすると新機能を確認できます。</value>
+  </data>
+  <data name="Updates.UpToDateTitle" xml:space="preserve">
+    <value>最新バージョンです</value>
+  </data>
+  <data name="Updates.NotUpdatableTitle" xml:space="preserve">
+    <value>更新できません</value>
+  </data>
+  <data name="Updates.NotUpdatableText" xml:space="preserve">
+    <value>この Screeny はインストーラー版でもポータブル版でもないため、自動更新できません。新しいバージョンは GitHub のリリース ページからダウンロードできます。</value>
+  </data>
+  <data name="Updates.CheckFailedTitle" xml:space="preserve">
+    <value>更新を確認できませんでした</value>
+  </data>
+  <data name="Updates.ApplyFailedTitle" xml:space="preserve">
+    <value>更新できませんでした</value>
+  </data>
+  <data name="Updates.ApplyFailedText" xml:space="preserve">
+    <value>{0}
+
+Screeny を終了します。もう一度起動して、更新をやり直してください。</value>
+  </data>
+  <data name="Settings.Title" xml:space="preserve">
+    <value>設定</value>
+  </data>
+  <data name="Settings.SectionCapture" xml:space="preserve">
+    <value>キャプチャ</value>
+  </data>
+  <data name="Settings.PrintScreenReserved" xml:space="preserve">
+    <value>現在 PrintScreen は Windows の画面キャプチャを開くため、キー入力が Screeny に届きません。</value>
+  </data>
+  <data name="Settings.HowToTurnOff" xml:space="preserve">
+    <value>無効にする方法</value>
+  </data>
+  <data name="Hotkeys.WinShiftS" xml:space="preserve">
+    <value>Win+Shift+S（Windows の Snipping Tool の代わりに使う）</value>
+  </data>
+  <data name="Hotkeys.HookNote" xml:space="preserve">
+    <value>システムのキーボード フックを使います。このショートカットを認識するため、Screeny はキー入力を受け取ります。</value>
+  </data>
+  <data name="Hotkeys.HookNoteAntivirus" xml:space="preserve">
+    <value>システムのキーボード フックを使います。このショートカットを認識するため、Screeny はキー入力を受け取ります。一部のウイルス対策ソフトが反応することがあります。</value>
+  </data>
+  <data name="Settings.CustomShortcuts" xml:space="preserve">
+    <value>カスタム ショートカット</value>
+  </data>
+  <data name="Settings.AddShortcutTip" xml:space="preserve">
+    <value>キャプチャ用のショートカットを追加します</value>
+  </data>
+  <data name="Settings.Add" xml:space="preserve">
+    <value>追加</value>
+  </data>
+  <data name="Settings.ConflictsTip" xml:space="preserve">
+    <value>PrintScreen や Win+Shift+S を横取りするアプリ（Lightshot、ShareX など）を探します</value>
+  </data>
+  <data name="Settings.SectionFeatures" xml:space="preserve">
+    <value>機能</value>
+  </data>
+  <data name="Settings.SectionHistory" xml:space="preserve">
+    <value>履歴</value>
+  </data>
+  <data name="Settings.Folder" xml:space="preserve">
+    <value>フォルダー</value>
+  </data>
+  <data name="Settings.Browse" xml:space="preserve">
+    <value>参照…</value>
+  </data>
+  <data name="Settings.KeepLast" xml:space="preserve">
+    <value>保存する件数</value>
+  </data>
+  <data name="Settings.LimitRange" xml:space="preserve">
+    <value>1～500</value>
+  </data>
+  <data name="Settings.Screenshots" xml:space="preserve">
+    <value>件</value>
+  </data>
+  <data name="Settings.KeepOriginals" xml:space="preserve">
+    <value>再編集用に元画像を保存する</value>
+  </data>
+  <data name="Settings.KeepOriginalsNote" xml:space="preserve">
+    <value>各スクリーンショットの横に、注釈のないコピーを保存します。ぼかしやモザイクで隠した内容もすべて含まれます。オフにすると、保存済みの元画像を削除するか確認します。</value>
+  </data>
+  <data name="Settings.SectionBehavior" xml:space="preserve">
+    <value>動作</value>
+  </data>
+  <data name="Settings.EnterCopies" xml:space="preserve">
+    <value>Enter でクリップボードにコピーする（オフにすると履歴への保存のみ）</value>
+  </data>
+  <data name="Settings.StartWithWindows" xml:space="preserve">
+    <value>Windows の起動時に開始する</value>
+  </data>
+  <data name="Settings.ExcludePins" xml:space="preserve">
+    <value>固定したスクリーンショットを新しいスクリーンショットに写さない</value>
+  </data>
+  <data name="Settings.Snap" xml:space="preserve">
+    <value>スナップとガイド</value>
+  </data>
+  <data name="Settings.SnapNote" xml:space="preserve">
+    <value>選択範囲はウィンドウの端やくっきりした境界に、図形はほかの図形や選択範囲の端と中心にスナップします。Alt を押している間はオフになります。</value>
+  </data>
+  <data name="Settings.FallbackActive" xml:space="preserve">
+    <value>予備のショートカット {0} を使用中です。PrintScreen が使えず、ほかに使えるショートカットもありません。上のいずれかが使えるようになると自動的にオフになります。</value>
+  </data>
+  <data name="Hotkeys.BoxTip" xml:space="preserve">
+    <value>クリックしてキーの組み合わせを押します。Backspace でクリア</value>
+  </data>
+  <data name="Settings.RemoveShortcut" xml:space="preserve">
+    <value>ショートカットを削除</value>
+  </data>
+  <data name="Hotkeys.CustomName" xml:space="preserve">
+    <value>カスタム ショートカット</value>
+  </data>
+  <data name="Settings.OpenSettingsFailed" xml:space="preserve">
+    <value>Windows の設定を開けませんでした。手動で開いてください: アクセシビリティ &gt; キーボード。</value>
+  </data>
+  <data name="Settings.HistoryFolderDialog" xml:space="preserve">
+    <value>スクリーンショット履歴のフォルダー</value>
+  </data>
+  <data name="Settings.FolderRequired" xml:space="preserve">
+    <value>履歴フォルダーのフル パスを入力してください。</value>
+  </data>
+  <data name="Settings.LimitInvalid" xml:space="preserve">
+    <value>履歴に保存する件数は {0}～{1} で指定してください。</value>
+  </data>
+  <data name="Hotkeys.PrintScreenUseBox" xml:space="preserve">
+    <value>PrintScreen は上のチェックボックスでオンにします。</value>
+  </data>
+  <data name="Settings.DuplicateShortcut" xml:space="preserve">
+    <value>このショートカットはすでに一覧にあります。</value>
+  </data>
+  <data name="Hotkeys.NeedOne" xml:space="preserve">
+    <value>ショートカットを 1 つ以上オンにしてください。オフのままでは、通知領域のアイコンからしかキャプチャできません。</value>
+  </data>
+  <data name="Units.Megabytes" xml:space="preserve">
+    <value>{0} MB</value>
+  </data>
+  <data name="PreciseOcr.Title" xml:space="preserve">
+    <value>高精度 OCR（PaddleOCR）</value>
+  </data>
+  <data name="PreciseOcr.Caption" xml:space="preserve">
+    <value>小さな文字やニックネームをはるかに正確に読み取ります。モジュール（約 {0}）は一度だけダウンロードされ、このコンピューター上で動作します。スクリーンショットはどこにも送信されません。ダウンロードはこのボタンを押したときだけで、更新の確認をオフにしていても同じです。</value>
+  </data>
+  <data name="PreciseOcr.Use" xml:space="preserve">
+    <value>高精度 OCR を使う</value>
+  </data>
+  <data name="PreciseOcr.Remove" xml:space="preserve">
+    <value>モジュールを削除</value>
+  </data>
+  <data name="PreciseOcr.Undo" xml:space="preserve">
+    <value>削除しない</value>
+  </data>
+  <data name="PreciseOcr.Progress" xml:space="preserve">
+    <value>モジュールのダウンロード</value>
+  </data>
+  <data name="PreciseOcr.Update" xml:space="preserve">
+    <value>モジュールを更新（{0}）</value>
+  </data>
+  <data name="PreciseOcr.Download" xml:space="preserve">
+    <value>ダウンロード（{0}）</value>
+  </data>
+  <data name="PreciseOcr.Downloading" xml:space="preserve">
+    <value>モジュールをダウンロード中… {0}%</value>
+  </data>
+  <data name="PreciseOcr.RemovalPending" xml:space="preserve">
+    <value>モジュールを削除しました。ファイルは Screeny の再起動後に消去されます。</value>
+  </data>
+  <data name="PreciseOcr.Outdated" xml:space="preserve">
+    <value>インストール済みのモジュールはバージョン {0} ですが、この Screeny にはバージョン {1} が必要です。それまでは Windows の OCR を使います。</value>
+  </data>
+  <data name="PreciseOcr.Ready" xml:space="preserve">
+    <value>モジュールはインストール済みです。Ctrl+T で Windows の OCR 結果をすぐに表示し、バックグラウンドで精度を高めます。</value>
+  </data>
+  <data name="PreciseOcr.LoadFailed" xml:space="preserve">
+    <value>モジュールを読み込めませんでした: {0}</value>
+  </data>
+  <data name="PreciseOcr.Cancelled" xml:space="preserve">
+    <value>ダウンロードをキャンセルしました。</value>
+  </data>
+  <data name="PreciseOcr.NoAccess" xml:space="preserve">
+    <value>モジュール フォルダーにアクセスできません。%LocalAppData%\Screeny のアクセス許可を確認して、もう一度お試しください。</value>
+  </data>
+  <data name="PreciseOcr.WriteFailed" xml:space="preserve">
+    <value>モジュールのファイルを書き込めませんでした（ディスクの空き不足、またはほかのプログラムが使用中）。しばらくしてからもう一度お試しください。</value>
+  </data>
+  <data name="PreciseOcr.ArchiveCorrupt" xml:space="preserve">
+    <value>ダウンロードしたモジュールのアーカイブが壊れています。もう一度ダウンロードしてください。</value>
+  </data>
+  <data name="PreciseOcr.InstallFailed" xml:space="preserve">
+    <value>モジュールをインストールできませんでした。詳しくは Screeny のログを確認してください。</value>
+  </data>
+  <data name="PreciseOcr.AlreadyDeleted" xml:space="preserve">
+    <value>モジュールのファイルはすでに削除されています。Screeny の再起動後にもう一度ダウンロードしてください。</value>
+  </data>
+  <data name="PreciseOcr.Installed" xml:space="preserve">
+    <value>高精度 OCR をインストールしました。テキスト モード（Ctrl+T）で結果がより正確になります。</value>
+  </data>
+  <data name="PreciseOcr.DownloadFailed" xml:space="preserve">
+    <value>高精度 OCR モジュールをダウンロードできませんでした: {0} 設定から再試行できます。</value>
+  </data>
+  <data name="PreciseOcr.NeedsUpdate" xml:space="preserve">
+    <value>高精度 OCR は現在オフです。この Screeny には新しいモジュールが必要です。設定から更新してください。</value>
+  </data>
+  <data name="Module.NotFound404" xml:space="preserve">
+    <value>サーバー上にモジュールが見つかりません（404）。</value>
+  </data>
+  <data name="Module.ServerStatus" xml:space="preserve">
+    <value>サーバーの応答: {0}。</value>
+  </data>
+  <data name="Module.FileMissing" xml:space="preserve">
+    <value>{0} に {1} がありません。</value>
+  </data>
+  <data name="Module.NoConnection" xml:space="preserve">
+    <value>サーバーに接続できません。インターネット接続を確認して、もう一度お試しください。</value>
+  </data>
+  <data name="Module.HashMismatch" xml:space="preserve">
+    <value>ダウンロードしたファイルが想定と一致しません（SHA256）。モジュールはインストールされませんでした。</value>
+  </data>
+  <data name="Module.Corrupt" xml:space="preserve">
+    <value>モジュールが壊れています: {0}。</value>
+  </data>
+  <data name="Module.OldFilesBusy" xml:space="preserve">
+    <value>以前のモジュール ファイルが使用中です。Screeny を再起動して、もう一度お試しください。</value>
+  </data>
+  <data name="Module.TooLarge" xml:space="preserve">
+    <value>モジュール ファイルが大きすぎます。</value>
+  </data>
+  <data name="Module.FilesLocked" xml:space="preserve">
+    <value>モジュールのファイルを配置できませんでした。ほかのプログラム（ウイルス対策ソフトなど）が使用しています。1 分ほどしてからもう一度お試しください。</value>
+  </data>
+  <data name="Module.BadPath" xml:space="preserve">
+    <value>モジュールのアーカイブに無効なパスがあります: {0}</value>
+  </data>
+  <data name="Module.UnpackTooLarge" xml:space="preserve">
+    <value>モジュールのアーカイブを展開するとサイズが大きすぎます。</value>
+  </data>
+  <data name="Manifest.Missing" xml:space="preserve">
+    <value>{0} が見つからないか壊れています</value>
+  </data>
+  <data name="Manifest.Changed" xml:space="preserve">
+    <value>{0} が変更されています</value>
+  </data>
+  <data name="Manifest.Unreadable" xml:space="preserve">
+    <value>{0} を読み取れません</value>
+  </data>
+  <data name="Manifest.WrongModule" xml:space="preserve">
+    <value>{0} のモジュールは {1} バージョン {2} ですが、{3} バージョン {4} が必要です</value>
+  </data>
+  <data name="Manifest.BadPath" xml:space="preserve">
+    <value>{0} に無効なパスがあります: {1}</value>
+  </data>
+  <data name="Manifest.Duplicate" xml:space="preserve">
+    <value>ファイルが二重に記載されています: {0}</value>
+  </data>
+  <data name="Manifest.NoFile" xml:space="preserve">
+    <value>ファイル {0} がありません</value>
+  </data>
+  <data name="Manifest.SizeMismatch" xml:space="preserve">
+    <value>{0} のサイズが一致しません</value>
+  </data>
+  <data name="Manifest.HashMismatch" xml:space="preserve">
+    <value>{0} の SHA256 が一致しません</value>
+  </data>
+  <data name="Manifest.ExtraFile" xml:space="preserve">
+    <value>余分なファイル {0}</value>
+  </data>
+  <data name="PreciseOcr.FilesDamaged" xml:space="preserve">
+    <value>モジュールのファイルが壊れているか変更されています（{0}）。モジュールを削除して、もう一度ダウンロードしてください。</value>
+  </data>
+  <data name="PreciseOcr.OnnxLoadFailed" xml:space="preserve">
+    <value>onnxruntime.dll を読み込めません（64 ビット版 Windows が必要です。ウイルス対策ソフトがファイルをブロックした可能性があります）。</value>
+  </data>
+  <data name="PreciseOcr.ModuleLoadFailed" xml:space="preserve">
+    <value>モジュールを読み込めませんでした。詳しくは Screeny のログを確認してください。</value>
+  </data>
+  <data name="PreciseOcr.OldVcRuntime" xml:space="preserve">
+    <value>Screeny には古い Visual C++ ランタイム（{2} の {0} {1}）が読み込まれていますが、モジュールには {3} 以降が必要です。最新の Visual C++ 2015–2022 再頒布可能パッケージ (x64) をインストールして Screeny を再起動してください。それまでは Windows の OCR を使います。</value>
+  </data>
+  <data name="Hotkeys.Busy" xml:space="preserve">
+    <value>ショートカット {0} はほかのアプリが使用しています。</value>
+  </data>
+  <data name="Hotkeys.RegisterFailed" xml:space="preserve">
+    <value>ショートカット {0} を登録できませんでした（Windows エラー {1}）。</value>
+  </data>
+  <data name="Hotkeys.FallbackInUse" xml:space="preserve">
+    <value>{0} 代わりに {1} を使用します。設定で変更できます。</value>
+  </data>
+  <data name="Hotkeys.TrayOnly" xml:space="preserve">
+    <value>{0} 通知領域のアイコンをクリックするとキャプチャできます。</value>
+  </data>
+  <data name="Hotkeys.TrayOnlyWithError" xml:space="preserve">
+    <value>{0} {1} 通知領域のアイコンをクリックするとキャプチャできます。</value>
+  </data>
+  <data name="Hotkeys.PrintScreenReserved" xml:space="preserve">
+    <value>PrintScreen は Windows の画面キャプチャが使用しています（設定 &gt; アクセシビリティ &gt; キーボード）。</value>
+  </data>
+  <data name="Hotkeys.Unrecognized" xml:space="preserve">
+    <value>ショートカット「{0}」を認識できません。</value>
+  </data>
+  <data name="Hotkeys.HookFailed" xml:space="preserve">
+    <value>Win+Shift+S のフックをオンにできませんでした（Windows エラー {0}）。</value>
+  </data>
+  <data name="Hotkeys.WinShiftSSeparate" xml:space="preserve">
+    <value>Win+Shift+S は上の専用チェックボックスでオンにします。Windows では通常のショートカットとして割り当てられません。</value>
+  </data>
+  <data name="Hotkeys.NeedModifier" xml:space="preserve">
+    <value>Ctrl、Alt、Win のいずれかを追加してください。追加しないと、文字入力でそのキーが使えなくなります。</value>
+  </data>
+  <data name="Wizard.Title" xml:space="preserve">
+    <value>Screeny: 初回起動</value>
+  </data>
+  <data name="Wizard.Skip" xml:space="preserve">
+    <value>スキップ</value>
+  </data>
+  <data name="Wizard.SkipTip" xml:space="preserve">
+    <value>何も変更しません。ウィザードは後から [設定] &gt; [競合を確認…] で開けます</value>
+  </data>
+  <data name="Wizard.Apply" xml:space="preserve">
+    <value>適用</value>
+  </data>
+  <data name="Wizard.Done" xml:space="preserve">
+    <value>完了</value>
+  </data>
+  <data name="Wizard.RescanTip" xml:space="preserve">
+    <value>ショートカットの邪魔をするアプリをもう一度探します</value>
+  </data>
+  <data name="Wizard.Rescan" xml:space="preserve">
+    <value>再確認</value>
+  </data>
+  <data name="Wizard.SectionHotkeys" xml:space="preserve">
+    <value>キャプチャのショートカット</value>
+  </data>
+  <data name="Wizard.CustomOptional" xml:space="preserve">
+    <value>カスタム ショートカット（省略可）</value>
+  </data>
+  <data name="Wizard.FeaturesNote" xml:space="preserve">
+    <value>不要な機能はオフにできます。そのボタン、キー、メニュー項目が消えます。設定から元に戻せます。</value>
+  </data>
+  <data name="Wizard.SectionUpdates" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="Wizard.PrivacyNote" xml:space="preserve">
+    <value>スクリーンショットはどこにも送信されません。Screeny がネットに接続するのは、GitHub で新しいバージョンを確認するときと、依頼されたときに高精度 OCR モジュールをダウンロードするときだけです。</value>
+  </data>
+  <data name="Wizard.FakeSuffix" xml:space="preserve">
+    <value>{0}（dev: 疑似環境）</value>
+  </data>
+  <data name="Wizard.HeadingConflicts" xml:space="preserve">
+    <value>これらのアプリが Screeny のショートカットの邪魔をしています</value>
+  </data>
+  <data name="Wizard.HeadingReady" xml:space="preserve">
+    <value>Screeny の準備ができました</value>
+  </data>
+  <data name="Wizard.IntroConflicts" xml:space="preserve">
+    <value>実行する操作を選んで [適用] をクリックしてください。同意なしに変更されることはなく、Screeny が勝手にアンインストールすることもありません。</value>
+  </data>
+  <data name="Wizard.IntroReady" xml:space="preserve">
+    <value>PrintScreen や Win+Shift+S を横取りするほかのアプリは見つかりませんでした。キャプチャのショートカットと使う機能を選んでください。</value>
+  </data>
+  <data name="Wizard.Blocks" xml:space="preserve">
+    <value>競合: {0}。</value>
+  </data>
+  <data name="Wizard.BlocksUsually" xml:space="preserve">
+    <value>競合: {0}（通常は {1} を使用）。</value>
+  </data>
+  <data name="Wizard.UsuallyTakes" xml:space="preserve">
+    <value>通常は {0} を使用します。Screeny の既定のショートカットとは重なりませんが、2 つ目のスクリーンショット ツールです。</value>
+  </data>
+  <data name="Wizard.PowerToysKeys" xml:space="preserve">
+    <value>Keyboard Manager のキーの再マップ</value>
+  </data>
+  <data name="Wizard.CloseNow" xml:space="preserve">
+    <value>今すぐ閉じる</value>
+  </data>
+  <data name="Wizard.CloseNowTip" xml:space="preserve">
+    <value>アプリを閉じてショートカットを空けます。2 秒以内に閉じない場合は強制終了します。</value>
+  </data>
+  <data name="Wizard.RemoveAutostart" xml:space="preserve">
+    <value>スタートアップから外す</value>
+  </data>
+  <data name="Wizard.RemoveAutostartTip" xml:space="preserve">
+    <value>タスク マネージャー &gt; スタートアップ アプリの [無効にする] と同じです。元に戻せ、アプリ自体は削除されません。</value>
+  </data>
+  <data name="Wizard.MachineAutostart" xml:space="preserve">
+    <value>すべてのユーザーのスタートアップに登録されています。アプリ自体の設定かタスク マネージャー &gt; スタートアップ アプリで手動でオフにするか、ここでオフにできます（管理者権限が必要）。</value>
+  </data>
+  <data name="Wizard.DisableAsAdmin" xml:space="preserve">
+    <value>管理者としてオフにする</value>
+  </data>
+  <data name="Wizard.PowerToysHint" xml:space="preserve">
+    <value>PowerToys &gt; Keyboard Manager で再マップを削除してください。PowerToys のスタートアップは、その全般設定でオフにします。</value>
+  </data>
+  <data name="Wizard.Uninstall" xml:space="preserve">
+    <value>アプリをアンインストール…</value>
+  </data>
+  <data name="Wizard.UninstallTip" xml:space="preserve">
+    <value>アプリ付属のアンインストーラーを実行します。Screeny が勝手にアンインストールすることはありません。</value>
+  </data>
+  <data name="Wizard.Resolved" xml:space="preserve">
+    <value>✓ 競合は解消しました。実行されておらず、自動でも起動しません。</value>
+  </data>
+  <data name="Wizard.WindowsCapture" xml:space="preserve">
+    <value>Windows の画面キャプチャ</value>
+  </data>
+  <data name="Wizard.SystemPrintScreen" xml:space="preserve">
+    <value>現在 PrintScreen は Windows の Snipping Tool を開くため、キー入力が Screeny に届きません。</value>
+  </data>
+  <data name="Wizard.GivePrintScreen" xml:space="preserve">
+    <value>PrintScreen を Screeny に割り当てる</value>
+  </data>
+  <data name="Wizard.GivePrintScreenTip" xml:space="preserve">
+    <value>Windows の設定で「PrintScreen キーを使用して画面キャプチャを開く」をオフにするのと同じです。管理者権限は不要です。</value>
+  </data>
+  <data name="Wizard.SignOutNote" xml:space="preserve">
+    <value>この変更は、サインアウトしてサインインし直すまで反映されないことがあります。</value>
+  </data>
+  <data name="Wizard.FoundRunning" xml:space="preserve">
+    <value>実行中</value>
+  </data>
+  <data name="Wizard.FoundRemap" xml:space="preserve">
+    <value>Keyboard Manager でキーが再マップされています</value>
+  </data>
+  <data name="Wizard.FoundNoInstaller" xml:space="preserve">
+    <value>インストーラーが見つかりません（ポータブル版？）</value>
+  </data>
+  <data name="Wizard.Found" xml:space="preserve">
+    <value>検出: {0}。</value>
+  </data>
+  <data name="Wizard.RescanFailed" xml:space="preserve">
+    <value>アプリを再確認できませんでした。詳しくはログを確認してください。</value>
+  </data>
+  <data name="Wizard.StillMachineAutostart" xml:space="preserve">
+    <value>{0} はまだすべてのユーザーのスタートアップで有効です。タスク マネージャー &gt; スタートアップ アプリで手動でオフにしてください。</value>
+  </data>
+  <data name="Wizard.UninstallTitle" xml:space="preserve">
+    <value>{0} をアンインストールしますか？</value>
+  </data>
+  <data name="Wizard.UninstallText" xml:space="preserve">
+    <value>アプリ付属のアンインストーラーが開きます。続きはそちらで決めてください。Screeny が勝手にアンインストールすることはありません。完了したら [再確認] をクリックしてください。</value>
+  </data>
+  <data name="Wizard.OpenUninstaller" xml:space="preserve">
+    <value>アンインストーラーを開く</value>
+  </data>
+  <data name="Wizard.DownloadPreciseOcr" xml:space="preserve">
+    <value>高精度 OCR をダウンロード（{0}）</value>
+  </data>
+  <data name="Wizard.PreciseOcrHint" xml:space="preserve">
+    <value>PaddleOCR は小さな文字やニックネームをはるかに正確に読み取ります。このコンピューター上で動作し、スクリーンショットはどこにも送信されません。</value>
+  </data>
+  <data name="Wizard.HotkeyFailed" xml:space="preserve">
+    <value>ショートカットが機能しませんでした。</value>
+  </data>
+  <data name="Wizard.ChooseAnother" xml:space="preserve">
+    <value>{0} 別のショートカットを選ぶか、チェックを外してください。</value>
+  </data>
+  <data name="Wizard.RegisteredSignOut" xml:space="preserve">
+    <value>登録しました。PrintScreen でまだ Snipping Tool が開く場合は、サインアウトしてサインインし直してください。</value>
+  </data>
+  <data name="Wizard.RegisteredButBlocked" xml:space="preserve">
+    <value>登録しましたが、{0} がまだ実行中か自動で起動するため、キーを横取りする可能性があります。</value>
+  </data>
+  <data name="Wizard.Works" xml:space="preserve">
+    <value>✓ 動作しています。</value>
+  </data>
+  <data name="Wizard.NotWorking" xml:space="preserve">
+    <value>動作していません。</value>
+  </data>
+  <data name="Wizard.BlockedBy" xml:space="preserve">
+    <value>{0} 競合しているアプリ: {1}。</value>
+  </data>
+  <data name="Wizard.NotifyOne" xml:space="preserve">
+    <value>{0} は {1} が使用しています。ウィザードを開きますか？この通知か、通知領域メニューの [競合を確認…] をクリックしてください。</value>
+  </data>
+  <data name="Wizard.NotifyMany" xml:space="preserve">
+    <value>{0} は次のアプリが使用しています: {1}。ウィザードを開きますか？この通知か、通知領域メニューの [競合を確認…] をクリックしてください。</value>
+  </data>
+  <data name="Wizard.HotkeyGeneric" xml:space="preserve">
+    <value>ショートカット</value>
+  </data>
+  <data name="Autostart.RunUser" xml:space="preserve">
+    <value>現在のユーザーのスタートアップ</value>
+  </data>
+  <data name="Autostart.StartupFolderUser" xml:space="preserve">
+    <value>ユーザーの「スタートアップ」フォルダー</value>
+  </data>
+  <data name="Autostart.StartupFolderCommon" xml:space="preserve">
+    <value>共通の「スタートアップ」フォルダー（全ユーザー）</value>
+  </data>
+  <data name="Autostart.Machine" xml:space="preserve">
+    <value>全ユーザーのスタートアップ</value>
+  </data>
+  <data name="Action.NotClosed" xml:space="preserve">
+    <value>{0} が終了しませんでした。通知領域のアイコンから手動で終了してください。</value>
+  </data>
+  <data name="Action.Closed" xml:space="preserve">
+    <value>{0} を終了しました。</value>
+  </data>
+  <data name="Action.CloseNoRights" xml:space="preserve">
+    <value>{0} を終了できませんでした。管理者として実行されているようです。通知領域のアイコンから手動で終了してください。</value>
+  </data>
+  <data name="Action.AutostartNeedsAdmin" xml:space="preserve">
+    <value>{0} はすべてのユーザーのスタートアップに登録されています。管理者権限が必要です。</value>
+  </data>
+  <data name="Action.AutostartAlreadyOff" xml:space="preserve">
+    <value>{0} のスタートアップはすでにオフです。</value>
+  </data>
+  <data name="Action.AutostartNoRegistry" xml:space="preserve">
+    <value>{0} のスタートアップをオフにできませんでした。レジストリにアクセスできません。</value>
+  </data>
+  <data name="Action.AutostartUserOffMachineNeedsAdmin" xml:space="preserve">
+    <value>現在のユーザーの {0} のスタートアップはオフにしました。全ユーザー用の登録には管理者権限が必要です。</value>
+  </data>
+  <data name="Action.AutostartOff" xml:space="preserve">
+    <value>{0} のスタートアップをオフにしました。元に戻すには: タスク マネージャー &gt; スタートアップ アプリ。</value>
+  </data>
+  <data name="Action.UnknownApp" xml:space="preserve">
+    <value>不明なアプリです。</value>
+  </data>
+  <data name="Action.MachineAutostartOff" xml:space="preserve">
+    <value>全ユーザーの {0} のスタートアップをオフにしました。元に戻すには: タスク マネージャー &gt; スタートアップ アプリ。</value>
+  </data>
+  <data name="Action.AutostartFailedCode" xml:space="preserve">
+    <value>{0} のスタートアップをオフにできませんでした（コード {1}）。詳しくはログを確認してください。</value>
+  </data>
+  <data name="Action.ElevationCancelled" xml:space="preserve">
+    <value>管理者権限の要求がキャンセルされました。スタートアップは変更されていません。</value>
+  </data>
+  <data name="Action.ElevationFailed" xml:space="preserve">
+    <value>管理者権限を要求できませんでした: {0}</value>
+  </data>
+  <data name="Action.UninstallerNotFound" xml:space="preserve">
+    <value>{0} のアンインストーラーが見つかりません。[設定] &gt; [アプリ] からアンインストールしてください。</value>
+  </data>
+  <data name="Action.UninstallerStarted" xml:space="preserve">
+    <value>{0} のアンインストーラーを起動しました。完了したら [再確認] をクリックしてください。</value>
+  </data>
+  <data name="Action.UninstallerCancelled" xml:space="preserve">
+    <value>アンインストーラーの起動はキャンセルされました。</value>
+  </data>
+  <data name="Action.UninstallerFailed" xml:space="preserve">
+    <value>{0} のアンインストーラーを起動できませんでした。[設定] &gt; [アプリ] からアンインストールしてください。</value>
+  </data>
+  <data name="Action.PrintScreenSettingFailed" xml:space="preserve">
+    <value>設定を変更できませんでした。手動でオフにしてください: 設定 &gt; アクセシビリティ &gt; キーボード。</value>
+  </data>
+  <data name="Action.PrintScreenDone" xml:space="preserve">
+    <value>完了しました。この変更はサインアウトしてサインインし直すまで反映されないことがあり、それまでは PrintScreen で Windows の画面キャプチャが開く場合があります。</value>
+  </data>
+  <data name="Action.DevUninstaller" xml:space="preserve">
+    <value>（dev）{0} のアンインストーラーは起動しません。通常は「アンインストーラーを起動しました。再確認をクリック」と表示されます。</value>
+  </data>
+  <data name="Action.DevHotkeysNotRegistered" xml:space="preserve">
+    <value>（dev）テスト インスタンスはショートカットを登録しません。</value>
+  </data>
+  <data name="Feature.Ocr.Title" xml:space="preserve">
+    <value>テキスト認識と QR コード</value>
+  </data>
+  <data name="Feature.Ocr.Description" xml:space="preserve">
+    <value>テキスト モード（Ctrl+T）: スクリーンショットの文字を選択してコピーし、QR コードやバーコードを読み取ります。</value>
+  </data>
+  <data name="Feature.History.Title" xml:space="preserve">
+    <value>スクリーンショットの履歴</value>
+  </data>
+  <data name="Feature.History.Description" xml:space="preserve">
+    <value>スクリーンショットをフォルダーに保存し、履歴ウィンドウと再編集を使えます。オフにするとコピーのみになります。</value>
+  </data>
+  <data name="Feature.Pins.Title" xml:space="preserve">
+    <value>スクリーンショットの固定</value>
+  </data>
+  <data name="Feature.Pins.Description" xml:space="preserve">
+    <value>スクリーンショットをすべてのウィンドウの前面に表示します（F3）。履歴からも使えます。</value>
+  </data>
+  <data name="Feature.Beautify.Title" xml:space="preserve">
+    <value>背景フレーム</value>
+  </data>
+  <data name="Feature.Beautify.Description" xml:space="preserve">
+    <value>グラデーション背景、余白、角の丸み、影（B）。</value>
+  </data>
+  <data name="Feature.Pipette.Title" xml:space="preserve">
+    <value>スポイト</value>
+  </data>
+  <data name="Feature.Pipette.Description" xml:space="preserve">
+    <value>スクリーンショットのピクセルの色（I）、選択前に拡大鏡の下の HEX 値（C）。</value>
+  </data>
+  <data name="Feature.Ruler.Title" xml:space="preserve">
+    <value>定規</value>
+  </data>
+  <data name="Feature.Ruler.Description" xml:space="preserve">
+    <value>ピクセル単位の距離と角度（=）。</value>
+  </data>
+  <data name="Update.Title" xml:space="preserve">
+    <value>Screeny の更新</value>
+  </data>
+  <data name="Update.Later" xml:space="preserve">
+    <value>後で</value>
+  </data>
+  <data name="Update.UpdateAndRestart" xml:space="preserve">
+    <value>更新して再起動</value>
+  </data>
+  <data name="Update.SkipVersion" xml:space="preserve">
+    <value>このバージョンをスキップ</value>
+  </data>
+  <data name="Update.WhatsNew" xml:space="preserve">
+    <value>更新内容</value>
+  </data>
+  <data name="Update.Available" xml:space="preserve">
+    <value>バージョン {0} を利用できます</value>
+  </data>
+  <data name="Update.Current" xml:space="preserve">
+    <value>現在のバージョン: {0}</value>
+  </data>
+  <data name="Update.OnlyDisabled" xml:space="preserve">
+    <value>変更点はオフにした機能に関するものだけです。</value>
+  </data>
+  <data name="Update.NoNotes" xml:space="preserve">
+    <value>変更点の一覧はありません。</value>
+  </data>
+  <data name="Update.Downloading" xml:space="preserve">
+    <value>更新をダウンロード中…</value>
+  </data>
+  <data name="Update.DownloadingPercent" xml:space="preserve">
+    <value>更新をダウンロード中… {0}%</value>
+  </data>
+  <data name="Update.Restarting" xml:space="preserve">
+    <value>再起動中…</value>
+  </data>
+  <data name="Update.Failed" xml:space="preserve">
+    <value>更新できませんでした: {0}</value>
+  </data>
+  <data name="Update.SkipFailed" xml:space="preserve">
+    <value>選択を保存できませんでした。詳しくはログを確認してください。</value>
+  </data>
+  <data name="Tool.WithKey" xml:space="preserve">
+    <value>{0}（{1}）</value>
+  </data>
+  <data name="Tool.Select" xml:space="preserve">
+    <value>選択と移動</value>
+  </data>
+  <data name="Tool.Rect" xml:space="preserve">
+    <value>四角形</value>
+  </data>
+  <data name="Tool.Ellipse" xml:space="preserve">
+    <value>楕円</value>
+  </data>
+  <data name="Tool.Line" xml:space="preserve">
+    <value>直線</value>
+  </data>
+  <data name="Tool.Arrow" xml:space="preserve">
+    <value>矢印</value>
+  </data>
+  <data name="Tool.Pen" xml:space="preserve">
+    <value>ペン</value>
+  </data>
+  <data name="Tool.Highlighter" xml:space="preserve">
+    <value>蛍光ペン</value>
+  </data>
+  <data name="Tool.Text" xml:space="preserve">
+    <value>テキスト</value>
+  </data>
+  <data name="Tool.Number" xml:space="preserve">
+    <value>番号マーカー</value>
+  </data>
+  <data name="Tool.Pixelate" xml:space="preserve">
+    <value>モザイク</value>
+  </data>
+  <data name="Tool.Blur" xml:space="preserve">
+    <value>ぼかし</value>
+  </data>
+  <data name="Tool.Ruler" xml:space="preserve">
+    <value>定規: Δx、Δy、長さをピクセルで表示。Shift で 45° 単位</value>
+  </data>
+  <data name="Toolbar.Pipette" xml:space="preserve">
+    <value>スポイト: スクリーンショットから色を取得（I）</value>
+  </data>
+  <data name="Toolbar.Thickness" xml:space="preserve">
+    <value>太さ: マウス ホイール</value>
+  </data>
+  <data name="Toolbar.Undo" xml:space="preserve">
+    <value>元に戻す（Ctrl+Z）</value>
+  </data>
+  <data name="Toolbar.Redo" xml:space="preserve">
+    <value>やり直し（Ctrl+Y）</value>
+  </data>
+  <data name="Toolbar.Beautify" xml:space="preserve">
+    <value>背景フレーム: 背景、余白、角の丸み、影（B）</value>
+  </data>
+  <data name="Toolbar.Ocr" xml:space="preserve">
+    <value>スクリーンショットの文字を選択（Ctrl+T）</value>
+  </data>
+  <data name="Toolbar.OcrBack" xml:space="preserve">
+    <value>描画に戻る（Ctrl+T、Esc）</value>
+  </data>
+  <data name="Toolbar.Pin" xml:space="preserve">
+    <value>ほかのウィンドウの前面に固定（F3）</value>
+  </data>
+  <data name="Toolbar.SaveAs" xml:space="preserve">
+    <value>名前を付けて保存…（Ctrl+S）</value>
+  </data>
+  <data name="Toolbar.Cancel" xml:space="preserve">
+    <value>キャンセル（Esc）</value>
+  </data>
+  <data name="Toolbar.Close" xml:space="preserve">
+    <value>閉じる（Esc）</value>
+  </data>
+  <data name="Toolbar.CopyEnter" xml:space="preserve">
+    <value>クリップボードにコピー（Enter）</value>
+  </data>
+  <data name="Toolbar.CopyEditorHistory" xml:space="preserve">
+    <value>クリップボードにコピー（Ctrl+C）して履歴に新しく追加</value>
+  </data>
+  <data name="Toolbar.CopyEditor" xml:space="preserve">
+    <value>クリップボードにコピー（Ctrl+C）</value>
+  </data>
+  <data name="Toolbar.CopyText" xml:space="preserve">
+    <value>テキストをコピー</value>
+  </data>
+  <data name="Toolbar.CopyTextTip" xml:space="preserve">
+    <value>選択したテキストをコピー。未選択ならすべて（Enter、Ctrl+C）</value>
+  </data>
+  <data name="Options.Stroke" xml:space="preserve">
+    <value>線</value>
+  </data>
+  <data name="Options.StrokeSwatch" xml:space="preserve">
+    <value>線: パレットで色を変更</value>
+  </data>
+  <data name="Options.NoStroke" xml:space="preserve">
+    <value>線なし</value>
+  </data>
+  <data name="Options.RestoreStroke" xml:space="preserve">
+    <value>線を戻す</value>
+  </data>
+  <data name="Options.Fill" xml:space="preserve">
+    <value>塗り</value>
+  </data>
+  <data name="Options.FillSwatch" xml:space="preserve">
+    <value>塗り: パレットで色を変更</value>
+  </data>
+  <data name="Options.NoFill" xml:space="preserve">
+    <value>塗りなし</value>
+  </data>
+  <data name="Options.RestoreFill" xml:space="preserve">
+    <value>塗りを戻す</value>
+  </data>
+  <data name="Options.NeedStrokeOrFill" xml:space="preserve">
+    <value>線と塗りの両方をなしにはできません</value>
+  </data>
+  <data name="Options.FillOpacity" xml:space="preserve">
+    <value>塗りの不透明度: クリックで変更</value>
+  </data>
+  <data name="Options.ArrowNormal" xml:space="preserve">
+    <value>標準</value>
+  </data>
+  <data name="Options.ArrowDouble" xml:space="preserve">
+    <value>両矢印</value>
+  </data>
+  <data name="Options.ArrowDashed" xml:space="preserve">
+    <value>破線</value>
+  </data>
+  <data name="Options.ArrowThick" xml:space="preserve">
+    <value>太い（くさび形）</value>
+  </data>
+  <data name="Options.Text" xml:space="preserve">
+    <value>文字</value>
+  </data>
+  <data name="Options.TextSwatch" xml:space="preserve">
+    <value>文字の色: パレットで色を変更</value>
+  </data>
+  <data name="Options.Background" xml:space="preserve">
+    <value>背景</value>
+  </data>
+  <data name="Options.BackgroundSwatch" xml:space="preserve">
+    <value>背景: パレットで色を変更</value>
+  </data>
+  <data name="Options.NoBackground" xml:space="preserve">
+    <value>背景なし</value>
+  </data>
+  <data name="Options.AddBackground" xml:space="preserve">
+    <value>背景を追加</value>
+  </data>
+  <data name="Options.Align" xml:space="preserve">
+    <value>配置</value>
+  </data>
+  <data name="Options.AlignLeft" xml:space="preserve">
+    <value>左揃え</value>
+  </data>
+  <data name="Options.AlignCenter" xml:space="preserve">
+    <value>中央揃え</value>
+  </data>
+  <data name="Options.AlignRight" xml:space="preserve">
+    <value>右揃え</value>
+  </data>
+  <data name="Beautify.Background" xml:space="preserve">
+    <value>背景</value>
+  </data>
+  <data name="Beautify.BackgroundPreset" xml:space="preserve">
+    <value>背景: {0}</value>
+  </data>
+  <data name="Beautify.Padding" xml:space="preserve">
+    <value>余白</value>
+  </data>
+  <data name="Beautify.PaddingPixels" xml:space="preserve">
+    <value>余白 {0} px</value>
+  </data>
+  <data name="Beautify.Radius" xml:space="preserve">
+    <value>角の丸み</value>
+  </data>
+  <data name="Beautify.NoRadius" xml:space="preserve">
+    <value>角丸なし</value>
+  </data>
+  <data name="Beautify.RadiusPixels" xml:space="preserve">
+    <value>角の丸み {0} px</value>
+  </data>
+  <data name="Beautify.Shadow" xml:space="preserve">
+    <value>影</value>
+  </data>
+  <data name="Beautify.Soft" xml:space="preserve">
+    <value>ソフト</value>
+  </data>
+  <data name="Beautify.SoftTip" xml:space="preserve">
+    <value>スクリーンショットの下にやわらかい影</value>
+  </data>
+  <data name="Beautify.Sunset" xml:space="preserve">
+    <value>夕焼け</value>
+  </data>
+  <data name="Beautify.Mint" xml:space="preserve">
+    <value>ミント</value>
+  </data>
+  <data name="Beautify.Graphite" xml:space="preserve">
+    <value>グラファイト</value>
+  </data>
+  <data name="Beautify.Light" xml:space="preserve">
+    <value>ライト</value>
+  </data>
+  <data name="Beautify.Warm" xml:space="preserve">
+    <value>ウォーム</value>
+  </data>
+  <data name="Beautify.Blue" xml:space="preserve">
+    <value>ブルー</value>
+  </data>
+  <data name="Codes.FormatLink" xml:space="preserve">
+    <value>{0} · リンク</value>
+  </data>
+  <data name="Codes.OpenInBrowser" xml:space="preserve">
+    <value>ブラウザーで開く: {0}</value>
+  </data>
+  <data name="Codes.Copied" xml:space="preserve">
+    <value>コードの内容をコピーしました</value>
+  </data>
+  <data name="Codes.OpenFailed" xml:space="preserve">
+    <value>リンクを開けませんでした</value>
+  </data>
+  <data name="Codes.QrCode" xml:space="preserve">
+    <value>QR コード</value>
+  </data>
+  <data name="Pipette.Copied" xml:space="preserve">
+    <value>{0} をコピーしました</value>
+  </data>
+  <data name="TextMode.Recognizing" xml:space="preserve">
+    <value>テキストを認識中…</value>
+  </data>
+  <data name="TextMode.OcrUnavailable" xml:space="preserve">
+    <value>OCR を使用できません。[設定] &gt; [時刻と言語] &gt; [言語] で文字認識に対応した言語を追加してください。</value>
+  </data>
+  <data name="TextMode.Failed" xml:space="preserve">
+    <value>テキストを認識できませんでした: {0}</value>
+  </data>
+  <data name="TextMode.NotFound" xml:space="preserve">
+    <value>テキストが見つかりません</value>
+  </data>
+  <data name="TextMode.Refining" xml:space="preserve">
+    <value>テキストを認識中… 精度を向上中</value>
+  </data>
+  <data name="TextMode.OneCode" xml:space="preserve">
+    <value>コードが見つかりました: クリック · Enter で内容をコピー · Esc で戻る</value>
+  </data>
+  <data name="TextMode.ManyCodes" xml:space="preserve">
+    <value>コードが見つかりました: クリックすると内容を表示 · Esc で戻る</value>
+  </data>
+  <data name="TextMode.HintNoSelection" xml:space="preserve">
+    <value>マウスで文字を選択 · Ctrl+A ですべて · Enter で全文をコピー · Esc で戻る</value>
+  </data>
+  <data name="TextMode.HintNoSelectionCodes" xml:space="preserve">
+    <value>マウスで文字を選択 · コードをクリックで内容を表示 · Ctrl+A ですべて · Enter で全文をコピー · Esc で戻る</value>
+  </data>
+  <data name="TextMode.HintSelection" xml:space="preserve">
+    <value>Enter か Ctrl+C で選択範囲をコピー · Ctrl+A ですべて · Esc で選択を解除</value>
+  </data>
+  <data name="TextMode.WithRefining" xml:space="preserve">
+    <value>{0} · 精度を向上中…</value>
+  </data>
+  <data name="TextMode.CopyWhenReady" xml:space="preserve">
+    <value>テキストを認識中… 完了したらすぐにコピーします</value>
+  </data>
+  <data name="TextMode.ClickCode" xml:space="preserve">
+    <value>コードをクリックすると内容を表示してコピーできます</value>
+  </data>
+  <data name="TextMode.NoTextInSelection" xml:space="preserve">
+    <value>選択範囲に文字がありません · Ctrl+A ですべて · Esc で選択を解除</value>
+  </data>
+  <data name="History.Title" xml:space="preserve">
+    <value>履歴</value>
+  </data>
+  <data name="History.Edit" xml:space="preserve">
+    <value>編集</value>
+  </data>
+  <data name="History.PinOnScreen" xml:space="preserve">
+    <value>画面に固定</value>
+  </data>
+  <data name="History.ShowInFolder" xml:space="preserve">
+    <value>フォルダーに表示</value>
+  </data>
+  <data name="History.OpenFolder" xml:space="preserve">
+    <value>フォルダーを開く</value>
+  </data>
+  <data name="History.ClearAll" xml:space="preserve">
+    <value>すべて消去</value>
+  </data>
+  <data name="History.CardTip" xml:space="preserve">
+    <value>クリックでコピー、ダブルクリックで開く、E で編集、右クリックでその他の操作</value>
+  </data>
+  <data name="History.Empty" xml:space="preserve">
+    <value>履歴はありません</value>
+  </data>
+  <data name="History.EmptyHintHotkey" xml:space="preserve">
+    <value>{0} を押して最初のスクリーンショットを撮りましょう。</value>
+  </data>
+  <data name="History.EmptyHintTray" xml:space="preserve">
+    <value>通知領域の Screeny アイコンをクリックして、最初のスクリーンショットを撮りましょう。</value>
+  </data>
+  <data name="History.FolderUnavailable" xml:space="preserve">
+    <value>履歴フォルダーを使用できません</value>
+  </data>
+  <data name="History.ReadFailed" xml:space="preserve">
+    <value>履歴フォルダーを読み取れませんでした</value>
+  </data>
+  <data name="History.Count" xml:space="preserve">
+    <value>{0} / {1} 件</value>
+  </data>
+  <data name="History.ClipboardBusy" xml:space="preserve">
+    <value>クリップボード使用中</value>
+  </data>
+  <data name="History.Error" xml:space="preserve">
+    <value>エラー</value>
+  </data>
+  <data name="History.OpenFailedText" xml:space="preserve">
+    <value>ファイルが削除されたか、PNG ファイルを開くアプリが設定されていない可能性があります。</value>
+  </data>
+  <data name="History.DeleteTitle" xml:space="preserve">
+    <value>スクリーンショットを削除しますか？</value>
+  </data>
+  <data name="History.DeleteText" xml:space="preserve">
+    <value>ファイルはごみ箱に移動せずに削除され、元に戻せません。</value>
+  </data>
+  <data name="History.DeleteFailedTitle" xml:space="preserve">
+    <value>スクリーンショットを削除できませんでした</value>
+  </data>
+  <data name="History.DeleteFailedText" xml:space="preserve">
+    <value>ほかのプログラムがファイルを使用しているか、フォルダーにアクセスできません。</value>
+  </data>
+  <data name="History.CreateFolderFailed" xml:space="preserve">
+    <value>履歴フォルダーを作成できませんでした</value>
+  </data>
+  <data name="History.ExplorerFailedTitle" xml:space="preserve">
+    <value>エクスプローラーを開けませんでした</value>
+  </data>
+  <data name="History.ExplorerFailedText" xml:space="preserve">
+    <value>詳細は Screeny のログに記録されています。</value>
+  </data>
+  <data name="History.ClearTitle" xml:space="preserve">
+    <value>履歴を消去しますか？</value>
+  </data>
+  <data name="History.ClearText" xml:space="preserve">
+    <value>フォルダー: {0}
+スクリーンショット（{1} 件）をごみ箱に移動せずに削除します。元に戻せません。</value>
+  </data>
+  <data name="History.DeleteAll" xml:space="preserve">
+    <value>すべて削除</value>
+  </data>
+  <data name="Editor.Title" xml:space="preserve">
+    <value>エディター</value>
+  </data>
+  <data name="Editor.TitleShot" xml:space="preserve">
+    <value>エディター: {0} のスクリーンショット</value>
+  </data>
+  <data name="Editor.TitleFile" xml:space="preserve">
+    <value>エディター: {0}</value>
+  </data>
+  <data name="Editor.Original" xml:space="preserve">
+    <value>元画像</value>
+  </data>
+  <data name="Editor.OriginalTip" xml:space="preserve">
+    <value>注釈なしのスクリーンショット。注釈は非表示になるだけで削除されません</value>
+  </data>
+  <data name="Editor.WithMarkup" xml:space="preserve">
+    <value>注釈あり</value>
+  </data>
+  <data name="Editor.Clear" xml:space="preserve">
+    <value>注釈を消去</value>
+  </data>
+  <data name="Editor.ClearTip" xml:space="preserve">
+    <value>すべての注釈を一度に削除します（Ctrl+Z で元に戻せます）</value>
+  </data>
+  <data name="Editor.Hide" xml:space="preserve">
+    <value>非表示</value>
+  </data>
+  <data name="Editor.Restart" xml:space="preserve">
+    <value>元画像からやり直す</value>
+  </data>
+  <data name="Editor.ZoomTip" xml:space="preserve">
+    <value>全体表示 / 100%（Ctrl+0、Ctrl+1）· Ctrl+ホイールでズーム · Space+ドラッグで移動</value>
+  </data>
+  <data name="Editor.Zoom" xml:space="preserve">
+    <value>{0}%</value>
+  </data>
+  <data name="Editor.ZoomFit" xml:space="preserve">
+    <value>全体表示 · {0}%</value>
+  </data>
+  <data name="Editor.NoticeOriginal" xml:space="preserve">
+    <value>注釈なしの元画像です。注釈は非表示で削除されておらず、このモードでは描画できません。</value>
+  </data>
+  <data name="Editor.NoticeNoOriginal" xml:space="preserve">
+    <value>元画像が保存されていないため、完成したスクリーンショットの上に注釈を描きます。設定で元画像の保存をオンにしてください。</value>
+  </data>
+  <data name="Editor.ComposeFailed" xml:space="preserve">
+    <value>画像を作成できませんでした: {0}</value>
+  </data>
+  <data name="Editor.Saving" xml:space="preserve">
+    <value>保存中…</value>
+  </data>
+  <data name="Editor.ToastNewEntry" xml:space="preserve">
+    <value>{0} · 履歴に追加しました</value>
+  </data>
+  <data name="Editor.ToastHistoryFailed" xml:space="preserve">
+    <value>{0} · 履歴に保存できませんでした</value>
+  </data>
+  <data name="Editor.Saved" xml:space="preserve">
+    <value>保存しました</value>
+  </data>
+  <data name="Editor.Pinned" xml:space="preserve">
+    <value>固定しました</value>
+  </data>
+  <data name="Editor.Failed" xml:space="preserve">
+    <value>失敗しました: {0}</value>
+  </data>
+  <data name="Editor.CloseTitle" xml:space="preserve">
+    <value>保存せずに閉じますか？</value>
+  </data>
+  <data name="Editor.CloseHistoryPins" xml:space="preserve">
+    <value>注釈は履歴に残りません。[コピー]、[名前を付けて保存…]、[固定] で新しく履歴に追加されます。</value>
+  </data>
+  <data name="Editor.CloseHistory" xml:space="preserve">
+    <value>注釈は履歴に残りません。[コピー] と [名前を付けて保存…] で新しく履歴に追加されます。</value>
+  </data>
+  <data name="Editor.ClosePins" xml:space="preserve">
+    <value>注釈は失われます。注釈付きの画像はコピー、保存（[名前を付けて保存…]）、固定ができます。</value>
+  </data>
+  <data name="Editor.CloseLost" xml:space="preserve">
+    <value>注釈は失われます。注釈付きの画像はコピーまたは保存（[名前を付けて保存…]）ができます。</value>
+  </data>
+  <data name="Edit.NoDocument" xml:space="preserve">
+    <value>注釈ファイルが見つかりません</value>
+  </data>
+  <data name="Edit.SizeMismatch" xml:space="preserve">
+    <value>注釈ファイルのサイズ（{0}×{1}）が元画像（{2}×{3}）と一致しません</value>
+  </data>
+  <data name="Edit.UnknownMarks" xml:space="preserve">
+    <value>不明な注釈: {0} 件（新しいバージョンの Screeny のスクリーンショットです）</value>
+  </data>
+  <data name="Edit.ReadOriginalFailed" xml:space="preserve">
+    <value>元画像を読み取れませんでした</value>
+  </data>
+  <data name="Edit.DocumentDamaged" xml:space="preserve">
+    <value>注釈ファイルが壊れています</value>
+  </data>
+  <data name="Edit.NewerDocument" xml:space="preserve">
+    <value>注釈ファイルはバージョン {0} で、新しいバージョンの Screeny で作成されています</value>
+  </data>
+  <data name="Edit.OpenedFlat" xml:space="preserve">
+    <value>{0}。スクリーンショットは完成した画像として開かれました。以前の注釈は画像の一部になっています。</value>
+  </data>
+  <data name="Pin.Save" xml:space="preserve">
+    <value>保存…</value>
+  </data>
+  <data name="Pin.ResetZoom" xml:space="preserve">
+    <value>ズームをリセット</value>
+  </data>
+  <data name="Pin.Opacity" xml:space="preserve">
+    <value>不透明度</value>
+  </data>
+  <data name="Pin.OpacityBadge" xml:space="preserve">
+    <value>不透明度 {0}%</value>
+  </data>
+  <data name="File.ReplaceTitle" xml:space="preserve">
+    <value>ファイルを置き換えますか？</value>
+  </data>
+  <data name="File.ReplaceText" xml:space="preserve">
+    <value>ファイルは既に存在します:
+{0}
+置き換えますか？</value>
+  </data>
+  <data name="File.Replace" xml:space="preserve">
+    <value>置き換える</value>
+  </data>
+</root>
