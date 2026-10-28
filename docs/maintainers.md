@@ -34,7 +34,8 @@ dotnet run --project src/Screeny -- --dev --feedback-endpoint http://localhost:5
 
 Feedback window scenarios fill in the fields and use a fake sender, with no network: `sending` (never finishes),
 `sent`, `offline`, `rate-limited`, `invalid`, `server`, `validation` (empty fields after "Send") and `details` (the
-technical details list open). The working copy always sends to `https://screeny.page/api/feedback`. `installId` in
+technical details list open). `not-configured` presses "Send" through the real sender instead: without
+`--feedback-endpoint` that shows the "endpoint not set" state and nothing is sent or saved. The working copy always sends to `https://screeny.page/api/feedback`. `installId` in
 the settings is created on the first real send. The technical details are the last 100 lines of `screeny.log` with
 the profile folder replaced by `%USERPROFILE%`, other `Users\` folders and the user name by `<user>`, and the
 recognized-text line of the dev text mode removed (`LogScrubber`).

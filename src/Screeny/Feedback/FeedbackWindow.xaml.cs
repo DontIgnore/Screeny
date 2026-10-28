@@ -235,7 +235,8 @@ public partial class FeedbackWindow : ChromeWindow
     /// <summary>
     /// Тестовый экземпляр: <c>--feedback bug|idea --scenario &lt;имя&gt;</c> — заполненные поля и подставная отправка без сети
     /// (<c>sending</c> не заканчивается никогда). <c>validation</c> — пустые поля после «Отправить», <c>details</c> — открытый
-    /// список подробностей.
+    /// список подробностей, <c>not-configured</c> — «Отправить» через настоящую отправку App (без <c>--feedback-endpoint</c>
+    /// это состояние «адрес не задан»).
     /// </summary>
     public void ApplyDevScenario(string? name)
     {
@@ -264,6 +265,8 @@ public partial class FeedbackWindow : ChromeWindow
             case "details":
                 Loaded += (_, _) => OnToggleDetails(this, new RoutedEventArgs());
                 return;
+            case "not-configured":
+                break; // настоящая отправка App: без --feedback-endpoint она не ходит в сеть и не создаёт installId
             case "sending":
                 _send = (_, ct) => Task.Delay(Timeout.Infinite, ct).ContinueWith<FeedbackResult>(_ => new FeedbackResult.Offline(), TaskScheduler.Default);
                 break;
