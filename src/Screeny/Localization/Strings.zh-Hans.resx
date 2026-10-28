@@ -52,7 +52,7 @@
     <value>检查更新</value>
   </data>
   <data name="Common.PrivacyNote" xml:space="preserve">
-    <value>截图不会发送到任何地方。Screeny 只会联网到 GitHub 检查新版本，以及在你要求时下载精确文字识别模块。此选项不会阻止该模块的下载。</value>
+    <value>截图不会上传到任何地方。Screeny 只在检查更新时联网，以及在你要求时下载精确文字识别。关闭此选项不会阻止这项下载。</value>
   </data>
   <data name="Common.SeeLog" xml:space="preserve">
     <value>详细信息请查看日志。</value>

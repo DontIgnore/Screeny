@@ -52,7 +52,7 @@
     <value>更新を確認する</value>
   </data>
   <data name="Common.PrivacyNote" xml:space="preserve">
-    <value>スクリーンショットはどこにも送信されません。Screeny がネットに接続するのは、GitHub で新しいバージョンを確認するときと、依頼されたときに高精度 OCR モジュールをダウンロードするときだけです。このチェックはそのダウンロードを止めません。</value>
+    <value>スクリーンショットはどこにも送信されません。Screeny がネットに接続するのは、更新を確認するときと、希望した場合に高精度なテキスト認識をダウンロードするときだけです。このチェックを外しても、そのダウンロードは止まりません。</value>
   </data>
   <data name="Common.SeeLog" xml:space="preserve">
     <value>詳しくはログを確認してください。</value>

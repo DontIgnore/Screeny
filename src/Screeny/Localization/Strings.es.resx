@@ -52,7 +52,7 @@
     <value>Buscar actualizaciones</value>
   </data>
   <data name="Common.PrivacyNote" xml:space="preserve">
-    <value>Las capturas nunca se envían a ningún sitio. Screeny solo se conecta para buscar versiones nuevas en GitHub y, si tú lo pides, para descargar el módulo de OCR preciso. Esta casilla no impide esa descarga.</value>
+    <value>Las capturas nunca se envían a ningún sitio. Screeny solo se conecta para buscar actualizaciones y, si tú lo pides, para descargar el reconocimiento de texto preciso. Esta casilla no impide esa descarga.</value>
   </data>
   <data name="Common.SeeLog" xml:space="preserve">
     <value>Encontrarás los detalles en el registro.</value>

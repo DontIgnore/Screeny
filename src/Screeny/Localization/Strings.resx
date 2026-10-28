@@ -52,7 +52,7 @@
     <value>Check for updates</value>
   </data>
   <data name="Common.PrivacyNote" xml:space="preserve">
-    <value>Screenshots are never sent anywhere. Screeny goes online only to check GitHub for new versions and, if you ask for it, to download the precise OCR module. This box doesn't block that download.</value>
+    <value>Screenshots are never sent anywhere. Screeny goes online only to check for updates and, if you ask for it, to download precise text recognition. Turning this box off doesn't block that download.</value>
   </data>
   <data name="Common.SeeLog" xml:space="preserve">
     <value>See the log for details.</value>
