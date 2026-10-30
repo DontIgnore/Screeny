@@ -655,6 +655,7 @@ public partial class OverlayWindow : Window
     protected override void OnPreviewKeyDown(KeyEventArgs e)
     {
         base.OnPreviewKeyDown(e);
+        if (IgnoreHeldKey(e)) { e.Handled = true; return; }
         // Пока вводится текст, горячие клавиши оверлея не работают: цифры, Enter, Delete уходят в поле ввода.
         if (_editor.IsTextEditing) return;
 

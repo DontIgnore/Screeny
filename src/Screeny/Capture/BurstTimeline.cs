@@ -28,13 +28,20 @@ public enum BurstStep
 /// </summary>
 public sealed class BurstTimeline
 {
-    public static readonly TimeSpan HoldThreshold = TimeSpan.FromMilliseconds(250);
+    /// <summary>Порог удержания: чуть медленное нажатие ещё не серия из двух кадров.</summary>
+    public static readonly TimeSpan HoldThreshold = TimeSpan.FromMilliseconds(350);
     /// <summary>Шаг серии: около 10 кадров в секунду.</summary>
     public static readonly TimeSpan FrameInterval = TimeSpan.FromMilliseconds(100);
     public static readonly TimeSpan MaxHold = TimeSpan.FromSeconds(10);
 
     private bool _bursting;
     private TimeSpan? _lastFrame;
+
+    /// <summary>
+    /// Кадр, с которым открывается оверлей серии из <paramref name="count"/> кадров. Короткая серия (меньше трёх кадров) —
+    /// почти наверняка затянутое нажатие: первый кадр, момент нажатия. Длинная — последний: обычно ради него и держали.
+    /// </summary>
+    public static int InitialFrame(int count) => count < 3 ? 0 : count - 1;
 
     /// <summary>Идёт серия (удержание уже признано).</summary>
     public bool IsBursting => _bursting;

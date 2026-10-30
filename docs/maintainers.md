@@ -12,14 +12,18 @@ renders the same vector shapes with the same code at 96 DPI, so the clipboard im
 
 **Burst.** When a shortcut registered with `RegisterHotKey` fires and the `burst` feature is on, the first frame is
 taken right away as above, and a background thread polls the shortcut's main key with `GetAsyncKeyState`
-(`BurstRecorder`, decisions in `BurstTimeline`). Released within 250 ms: the overlay opens with that frame. It is built
+(`BurstRecorder`, decisions in `BurstTimeline`). Released within 350 ms: the overlay opens with that frame. It is built
 while the key is still down, so a tap adds only the time the key is down plus one poll (5 to 16 ms). Held
 longer: a frame every 100 ms through the same GDI path, with one DC and bitmap for the whole burst, until the key is
 released; at most 60 frames, 600 MB or 10 s, and a frame identical to the previous one is dropped (exact byte compare).
 All frames keep the first frame's virtual-screen geometry; if the monitor layout changes, capturing stops. The overlay
 is shown only after the release: showing it earlier would take focus and close the menus and tooltips the burst is
-for. Hotkeys are registered with `MOD_NOREPEAT` and `_capturing` stays set for the whole hold, so key auto-repeat
-never starts a second capture. The `Win+Shift+S` hook swallows `S`, so its state can't be read and that path never
+for. It opens on the last frame, or on the first one when there are fewer than three: that is a slow tap rather than a
+hold (`BurstTimeline.InitialFrame`). Hotkeys are registered with `MOD_NOREPEAT` and `_capturing` stays set for the
+whole hold, so key auto-repeat never starts a second capture, and no capture starts while a recorder thread is still
+polling. If the 10 s limit opens the overlay with the key still down, the overlay ignores that key and auto-repeated
+keys until the key is up (`HeldKeyGuard`). If showing the overlay fails, it is closed, `_capturing` is reset and the
+burst memory released (`BurstHold`). The `Win+Shift+S` hook swallows `S`, so its state can't be read and that path never
 bursts; neither do the tray icon and the second-instance signal. A key whose state Windows doesn't report reads as
 released, so holding it works like a tap. Each capture logs `Capture latency: N ms … (plain|tap|burst)`, and a burst
 logs its frame count, duplicates and time per frame.
@@ -72,7 +76,7 @@ overlay window itself (`RenderTargetBitmap` of the window content, not a screen 
   matches are logged, never the recognized text: the log goes into bug reports.
 - `distances` (with `--select`) picks the ruler and shows the distances from a point at 10.6 % / 88.6 % of the
   selection.
-- `burst` (with `--burst-test`) saves the window on the last frame, switches to the first one, logs whether every
+- `burst` (with `--burst-test`) saves the window on the initial frame, switches to the first one, logs whether every
   cache of the frozen picture was reset, and writes the composed selection as `<folder>.burst-export.png`.
 Editor scenarios: `original`, `pin`, `select`, `guides`, `flyout-beautify`, `flyout-beautify-mid`, `flyout-tool`,
 `flyout-shape`, `pen-bounds`.

@@ -1,14 +1,16 @@
 using Screeny.Capture;
 using Screeny.Features;
 using Screeny.Hotkeys;
+using Screeny.Localization;
 using Screeny.Logging;
+using Screeny.Native;
 using Screeny.Overlay;
 
 namespace Screeny;
 
 // Серия снимков по удержанию клавиши снимка. Короткое нажатие — обычный снимок: кадр снят по WM_HOTKEY, как раньше, а
 // оверлей показывается, как только видно, что клавишу отпустили (опрос GetAsyncKeyState, BurstRecorder). Держат дольше
-// 250 мс — около 10 кадров в секунду до отпускания, затем оверлей с лентой кадров. Пока держат, оверлей не показывается:
+// 350 мс — около 10 кадров в секунду до отпускания, затем оверлей с лентой кадров. Пока держат, оверлей не показывается:
 // он забрал бы фокус и закрыл бы меню и подсказки, ради которых серию снимают. Серии нет у хука Win+Shift+S (его S
 // проглатывается и не читается), у клика в трее и сигнала второго экземпляра, в тестовом экземпляре (там --burst-test).
 public partial class App
@@ -20,19 +22,31 @@ public partial class App
     }
 
     /// <summary>
-    /// Решение по удержанию пришло (UI-поток): серия — кадры в оверлей (сначала последний: обычно ради него и держали),
-    /// затем показ. Оверлей уже закрыт (сменились мониторы) или идёт выход — не показываем. Возвращает, была ли серия.
+    /// Решение по удержанию пришло (UI-поток): серия — кадры в оверлей (начальный — <see cref="BurstTimeline.InitialFrame"/>),
+    /// затем показ. Оверлей уже закрыт (сменились мониторы) — не показываем, но память серии отпускаем; идёт выход —
+    /// закрываем. Ошибка показа закрывает оверлей и сбрасывает флаг снимка (<see cref="BurstHold"/>). Клавишу всё ещё
+    /// держат (серию открыл лимит времени) — оверлей не принимает её автоповтор за свои сочетания.
     /// </summary>
-    private bool OpenAfterHold(OverlayWindow overlay, BurstResult result, bool closed)
+    private void OpenAfterHold(OverlayWindow overlay, BurstResult result, bool closed, int holdKey, Action release)
     {
         if (result.IsBurst)
             Log.Error($"Burst: {result.Frames.Count} frame(s) kept, {result.Duplicates} duplicate(s) dropped, held {result.Held.TotalMilliseconds:0} ms, " +
                       $"{result.CaptureMs:0} ms per frame{(result.HitLimit ? ", frame or memory limit reached" : "")}{(result.Stopped is { } why ? ", stopped: " + why : "")}");
-        if (closed) return result.IsBurst;
-        if (IsShuttingDown) { overlay.Close(); return result.IsBurst; }
-        if (result.Frames.Count > 1) overlay.SetBurst(result.Frames, result.Frames.Count - 1);
-        overlay.Show();
-        return result.IsBurst;
+        BurstHold.Resolve(result, closed,
+            open: () =>
+            {
+                if (IsShuttingDown) { overlay.Close(); return; }
+                if (result.Frames.Count > 1) overlay.SetBurst(result.Frames, BurstTimeline.InitialFrame(result.Frames.Count));
+                if ((User32.GetAsyncKeyState(holdKey) & 0x8000) != 0) overlay.GuardHeldKey(holdKey);
+                overlay.Show();
+            },
+            close: overlay.Close,
+            release: release,
+            failed: _ =>
+            {
+                _capturing = false;
+                Notify(Loc.T("App.CaptureFailed"));
+            });
     }
 
     /// <summary>

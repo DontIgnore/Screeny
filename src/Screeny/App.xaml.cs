@@ -36,6 +36,8 @@ public partial class App : Application, INotifyPropertyChanged
     private TaskbarIcon? _tray;
     private HotkeyManager? _hotkeys;
     private bool _capturing;
+    /// <summary>Поток серии ещё опрашивает клавишу; снимается только в его обратном вызове (App.Burst.cs).</summary>
+    private bool _recorderActive;
     private readonly ImageSaveWorker _imageSaver = new();
     private readonly HashSet<Task> _pendingOperations = new();
     /// <summary>Номер последней операции, писавшей в буфер обмена: устаревший результат OCR его не перезаписывает.</summary>
@@ -550,7 +552,8 @@ public partial class App : Application, INotifyPropertyChanged
     /// </param>
     private void StartCapture(int? holdKey)
     {
-        if (_capturing || IsShuttingDown) return;
+        // Пока прежний поток серии опрашивает клавишу, новый снимок не начинается: два опроса сразу открыли бы два оверлея.
+        if (_capturing || _recorderActive || IsShuttingDown) return;
         // Тестовый экземпляр никогда не снимает экран: только картинки из --overlay-test или --burst-test.
         if (IsDev && Args.OverlayTest is null && Args.BurstTest is null)
         {
@@ -587,17 +590,25 @@ public partial class App : Application, INotifyPropertyChanged
                 windows = WindowFinder.Snapshot(shot.VirtualRect, exclude: OwnWindowHandles());
             }
             OverlayWindow? overlay = null;
-            bool closed = false, burst = devFrames is { Count: > 1 };
+            bool closed = false, burst = devFrames is { Count: > 1 }, released = false;
+            void Release()
+            {
+                if (released) return;
+                released = true;
+                ReleaseBurstMemory();
+            }
             // Опрос клавиши — до создания окна: окно строится, пока клавишу ещё держат, и к отпусканию уже готово.
             if (holdKey is { } key)
             {
                 mode = "tap";
                 BurstRecorder.Start(key, shot, windows, OwnWindowHandles(), latency, result => Dispatcher.BeginInvoke(() =>
                 {
+                    _recorderActive = false;
                     if (overlay is null) return; // окно не создалось: ошибка уже показана
-                    if (result.IsBurst) mode = "burst";
-                    burst = OpenAfterHold(overlay, result, closed);
+                    if (result.IsBurst) { mode = "burst"; burst = true; }
+                    OpenAfterHold(overlay, result, closed, key, Release);
                 }));
+                _recorderActive = true; // обратный вызов придёт в UI-поток не раньше, чем закончится этот метод
             }
             overlay = new OverlayWindow(shot, windows, Settings, dev, OcrRefiner);
             overlay.Completed += OnCaptureCompleted;
@@ -607,10 +618,10 @@ public partial class App : Application, INotifyPropertyChanged
                 closed = true;
                 _capturing = false;
                 SaveSettings(); // последний цвет и толщина
-                if (burst) ReleaseBurstMemory();
+                if (burst) Release();
             };
             overlay.ContentRendered += (_, _) => Log.Error($"Capture latency: {latency.ElapsedMilliseconds} ms from request to overlay on screen ({mode}, active: {overlay.IsActive})");
-            if (devFrames is not null) overlay.SetBurst(devFrames, devFrames.Count - 1);
+            if (devFrames is not null) overlay.SetBurst(devFrames, BurstTimeline.InitialFrame(devFrames.Count));
             if (holdKey is null) overlay.Show();
         }
         catch (Exception ex)

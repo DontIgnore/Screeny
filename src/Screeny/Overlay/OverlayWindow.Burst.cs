@@ -21,6 +21,7 @@ public partial class OverlayWindow
     private IReadOnlyList<BurstFrame> _frames = [];
     private int _frameIndex = -1;
     private Rect? _filmstripRect;   // место ленты в DIP: панель инструментов её не перекрывает
+    private int? _heldKey;          // клавиша снимка, которую ещё держали при показе (HeldKeyGuard)
 
     /// <summary>Оверлей показывает серию (больше одного кадра).</summary>
     public bool HasBurst => _frames.Count > 1;
@@ -38,6 +39,23 @@ public partial class OverlayWindow
         _frameIndex = -1;
         BuildFilmstrip();
         ShowFrame(initial);
+    }
+
+    /// <summary>
+    /// Оверлей показывается, а клавишу снимка <paramref name="virtualKey"/> ещё держат (серию открыл лимит времени): её
+    /// нажатия и автоповторы не должны срабатывать как сочетания оверлея, пока её не отпустят.
+    /// </summary>
+    public void GuardHeldKey(int virtualKey) => _heldKey = virtualKey;
+
+    /// <summary>Пропустить нажатие: это клавиша снимка или автоповтор, пока клавишу снимка держат с самой серии.</summary>
+    private bool IgnoreHeldKey(KeyEventArgs e)
+    {
+        if (_heldKey is not { } held) return false;
+        var key = e.Key == Key.System ? e.SystemKey : e.Key;
+        var (ignore, armed) = HeldKeyGuard.KeyDown(held, KeyInterop.VirtualKeyFromKey(key), e.IsRepeat,
+            (Native.User32.GetAsyncKeyState(held) & 0x8000) != 0);
+        if (!armed) _heldKey = null;
+        return ignore;
     }
 
     private void BuildFilmstrip()

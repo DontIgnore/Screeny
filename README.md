@@ -111,7 +111,7 @@ Windows holds PrintScreen and no other shortcut works, Screeny turns on `Ctrl+Al
 - Several capture shortcuts at once: PrintScreen, `Win+Shift+S` instead of the Windows snipping tool, and any
   shortcuts of your own.
 - Hold the capture key for a burst. Screeny takes about 10 screenshots per second until you let go, then opens the
-  last one with a strip of all frames at the bottom. Click a frame or press `PageUp`/`PageDown` to switch; your
+  last one (the first one if there are only two) with a strip of all frames at the bottom. Click a frame or press `PageUp`/`PageDown` to switch; your
   selection and markup stay. Only the frame you pick is copied and saved. Frames that didn't change are skipped, and
   a burst stops at 60 frames or 600 MB. A short press works as before. `Win+Shift+S` and a click on the tray icon
   always take a single screenshot.
