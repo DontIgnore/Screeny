@@ -33,6 +33,14 @@ public class FeatureGateTests
         Assert.All(Enum.GetValues<ToolKind>().Where(k => k != ToolKind.Ruler), k => Assert.True(s.ToolAllowed(k)));
     }
 
+    [Fact]
+    public void PrivacyCheck_NeedsItsFeatureAndOcr()
+    {
+        Assert.True(new AppSettings().PrivacyCheckAllowed());
+        Assert.False(Without(FeatureCatalog.Privacy).PrivacyCheckAllowed());
+        Assert.False(Without(FeatureCatalog.Ocr).PrivacyCheckAllowed());
+    }
+
     [Theory]
     [InlineData(FeatureCatalog.Pins, CaptureAction.Pin)]
     [InlineData(FeatureCatalog.Ocr, CaptureAction.CopyText)]

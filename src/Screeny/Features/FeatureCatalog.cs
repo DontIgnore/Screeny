@@ -23,6 +23,10 @@ public static class FeatureCatalog
     public const string Beautify = "beautify";
     public const string Pipette = "pipette";
     public const string Ruler = "ruler";
+    /// <summary>Предупреждение о личных данных в выделении; работает только вместе с <see cref="Ocr"/>.</summary>
+    public const string Privacy = "privacy";
+    /// <summary>Серия снимков по удержанию клавиши снимка.</summary>
+    public const string Burst = "burst";
 
     public static IReadOnlyList<FeatureInfo> All { get; } =
     [
@@ -32,6 +36,8 @@ public static class FeatureCatalog
         new(Beautify, "Feature.Beautify.Title", "Feature.Beautify.Description"),
         new(Pipette, "Feature.Pipette.Title", "Feature.Pipette.Description"),
         new(Ruler, "Feature.Ruler.Title", "Feature.Ruler.Description"),
+        new(Privacy, "Feature.Privacy.Title", "Feature.Privacy.Description"),
+        new(Burst, "Feature.Burst.Title", "Feature.Burst.Description"),
     ];
 
     public static bool IsKnown(string id) => All.Any(f => f.Id == id);

@@ -68,6 +68,26 @@ public class StartupArgsTests
         Assert.Null(StartupArgs.Parse(["--dev", "--select", "0,0,5,5"]).Select); // выделение — только с --overlay-test
     }
 
+    [Fact]
+    public void BurstTest_WithDev_KeepsFolderSelectionAndScenario()
+    {
+        var a = StartupArgs.Parse(["--dev", "--burst-test", @"C:	rames", "--select", "1,2,30,40", "--scenario", "burst"]);
+        Assert.Equal(@"C:	rames", a.BurstTest);
+        Assert.Null(a.OverlayTest);
+        Assert.Equal(new Screeny.Overlay.PixelRect(1, 2, 30, 40), a.Select);
+        Assert.Equal("burst", a.Scenario);
+    }
+
+    [Fact]
+    public void BurstTest_WithoutDev_IsIgnored()
+    {
+        var a = StartupArgs.Parse(["--burst-test", @"C:	rames", "--select", "1,2,30,40", "--scenario", "burst"]);
+        Assert.Null(a.BurstTest);
+        Assert.Null(a.Select);
+        Assert.Null(a.Scenario);
+        Assert.Null(StartupArgs.Parse(["--dev", "--burst-test", " "]).BurstTest);
+    }
+
     [Theory]
     [InlineData("1,2,3")]
     [InlineData("a,b,c,d")]

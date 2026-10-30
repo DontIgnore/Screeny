@@ -763,6 +763,18 @@ Screeny 将关闭。请重新启动并再次更新。</value>
   <data name="Feature.Ruler.Description" xml:space="preserve">
     <value>以像素为单位的距离和角度（=）。</value>
   </data>
+  <data name="Feature.Privacy.Title" xml:space="preserve">
+    <value>个人信息提醒</value>
+  </data>
+  <data name="Feature.Privacy.Description" xml:space="preserve">
+    <value>选取区域后，Screeny 会在本机读取其中的文字，发现邮箱、电话号码、银行卡号、密钥或 IP 地址时提醒你。需要开启文字识别。</value>
+  </data>
+  <data name="Feature.Burst.Title" xml:space="preserve">
+    <value>连拍截图</value>
+  </data>
+  <data name="Feature.Burst.Description" xml:space="preserve">
+    <value>按住截图键可连续截图，每秒约 10 张，然后挑选需要的那一张。短按和以前一样。</value>
+  </data>
   <data name="Update.Title" xml:space="preserve">
     <value>Screeny 更新</value>
   </data>
@@ -1452,5 +1464,22 @@ Screeny 将关闭。请重新启动并再次更新。</value>
   </data>
   <data name="History.NoMatchesPending" xml:space="preserve">
     <value>还有 {0} 张截图的文字尚未识别，Screeny 正在后台处理。</value>
+  <data name="Privacy.Warning" xml:space="preserve">
+    <value>这里可能有个人信息</value>
+  </data>
+  <data name="Privacy.Hide" xml:space="preserve">
+    <value>隐藏</value>
+  </data>
+  <data name="Privacy.HideTip" xml:space="preserve">
+    <value>给找到的内容全部打上马赛克。按 Ctrl+Z 可撤销。</value>
+  </data>
+  <data name="Privacy.Dismiss" xml:space="preserve">
+    <value>忽略</value>
+  </data>
+  <data name="Burst.Counter" xml:space="preserve">
+    <value>{0} / {1}</value>
+  </data>
+  <data name="Burst.FrameTip" xml:space="preserve">
+    <value>第 {0} 帧，共 {1} 帧。按 PageUp 和 PageDown 切换。</value>
   </data>
 </root>

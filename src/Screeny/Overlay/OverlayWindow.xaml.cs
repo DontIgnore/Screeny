@@ -36,8 +36,8 @@ public partial class OverlayWindow : Window
 {
     private const int DragThreshold = 3;
 
-    private readonly Screenshot _shot;
-    private readonly List<WindowInfo> _windows;
+    private Screenshot _shot;              // кадр серии меняет его (OverlayWindow.Burst.cs)
+    private IReadOnlyList<WindowInfo> _windows;
     private readonly AppSettings _settings;
     private readonly SelectionModel _selection;
     /// <summary>Рисование: инструменты, текст, выбор, параметры (flyout'ы), пипетка, линейка, undo, оформление.</summary>
@@ -116,7 +116,10 @@ public partial class OverlayWindow : Window
             _shownAt = DateTime.UtcNow;
             Activate();
             Focus();
-            User32.SetForegroundWindow(new WindowInteropHelper(this).Handle);
+            var hwnd = new WindowInteropHelper(this).Handle;
+            User32.SetForegroundWindow(hwnd);
+            if (_dev is null && User32.GetForegroundWindow() != hwnd) ForceForeground(hwnd); // тестовый экземпляр фокус силой не забирает
+            PlaceFilmstrip();
             UpdateHover(CurrentMousePixel(), Mouse.GetPosition(PixelCanvas));
             ApplyDevOptions();
         };
@@ -170,6 +173,7 @@ public partial class OverlayWindow : Window
         Dim.DpiScale = _map.DpiScale;
         TextOverlay.DpiScale = _map.DpiScale;
         RulerOverlay.DpiScale = _map.DpiScale;
+        if (IsLoaded) PlaceFilmstrip();
         RefreshSelectionVisuals();
     }
 
@@ -193,6 +197,8 @@ public partial class OverlayWindow : Window
     {
         SystemEvents.DisplaySettingsChanged -= OnDisplaySettingsChanged;
         CancelRefine();
+        CancelPrivacyCheck();
+        ReleaseFrames();
         base.OnClosed(e);
     }
 
@@ -231,7 +237,8 @@ public partial class OverlayWindow : Window
     private bool IsFromHud(object source)
     {
         for (var d = source as DependencyObject; d is not null; d = d is Visual ? VisualTreeHelper.GetParent(d) : LogicalTreeHelper.GetParent(d))
-            if (ReferenceEquals(d, Toolbar) || ReferenceEquals(d, TextEditor) || _editor.Flyouts.Contains(d) || ReferenceEquals(d, CodePopup)) return true;
+            if (ReferenceEquals(d, Toolbar) || ReferenceEquals(d, TextEditor) || _editor.Flyouts.Contains(d) || ReferenceEquals(d, CodePopup)
+                || ReferenceEquals(d, PrivacyChip) || ReferenceEquals(d, Filmstrip)) return true;
         return false;
     }
 
@@ -241,6 +248,7 @@ public partial class OverlayWindow : Window
     {
         base.OnMouseLeftButtonDown(e);
         if (IsFromHud(e.OriginalSource)) return;
+        ClearDistances(); // жест начинается: линии расстояний мешали бы видеть, что рисуешь
         if (_textMode) { e.Handled = true; TextMouseDown(e); return; }
         CommitTextEdit();
         var p = MousePixel(e);
@@ -315,7 +323,7 @@ public partial class OverlayWindow : Window
             UpdateMagnifier(p);
             return;
         }
-        if (IsFromHud(e.OriginalSource)) { Cursor = Cursors.Arrow; if (_editor.PipetteOn) Magnifier.Visibility = Visibility.Collapsed; return; }
+        if (IsFromHud(e.OriginalSource)) { Cursor = Cursors.Arrow; ClearDistances(); if (_editor.PipetteOn) Magnifier.Visibility = Visibility.Collapsed; return; }
         UpdateHover(p, e.GetPosition(PixelCanvas));
     }
 
@@ -379,6 +387,7 @@ public partial class OverlayWindow : Window
 
     private void UpdateHover(PixelPoint p, Point exact)
     {
+        UpdateDistances(p);
         if (_editor.PipetteOn)
         {
             UpdateMagnifier(p);
@@ -525,6 +534,25 @@ public partial class OverlayWindow : Window
         Cancel();
     }
 
+    /// <summary>
+    /// Запасной путь, когда Windows не отдала оверлею передний план (серия: окно показывается после отпускания клавиши,
+    /// и последним вводом может считаться отпускание, доставленное другому приложению). На время вызова очередь ввода
+    /// нашего потока связывается с потоком переднего окна. Обычный путь, при котором окно уже активно, не трогается.
+    /// </summary>
+    private static void ForceForeground(IntPtr hwnd)
+    {
+        uint ours = User32.GetCurrentThreadId();
+        uint theirs = User32.GetWindowThreadProcessId(User32.GetForegroundWindow(), out _);
+        bool attached = theirs != 0 && theirs != ours && User32.AttachThreadInput(ours, theirs, true);
+        try
+        {
+            User32.BringWindowToTop(hwnd);
+            User32.SetForegroundWindow(hwnd);
+        }
+        finally { if (attached) User32.AttachThreadInput(ours, theirs, false); }
+        if (User32.GetForegroundWindow() != hwnd) Screeny.Logging.Log.Error("Overlay could not take the foreground");
+    }
+
     private static readonly TimeSpan ActivationGrace = TimeSpan.FromMilliseconds(600);
     private DateTime _shownAt = DateTime.UtcNow;
 
@@ -550,6 +578,7 @@ public partial class OverlayWindow : Window
             Dim.ShowHandles = false;
             Annotations.Clip = null;
             SizeLabel.Visibility = Visibility.Collapsed;
+            UpdatePrivacyCheck();
             return;
         }
         var r = _selection.Rect;
@@ -571,6 +600,7 @@ public partial class OverlayWindow : Window
 
         if (Toolbar.Visibility == Visibility.Visible) PositionToolbar();
         if (TextHint.Visibility == Visibility.Visible) PositionTextHint();
+        UpdatePrivacyCheck();
     }
 
     /// <summary>
@@ -581,7 +611,7 @@ public partial class OverlayWindow : Window
     private void PositionToolbar()
     {
         Toolbar.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-        var placement = HudLayout.Place(_map.PixelToDip(_selection.Rect), SelectionWorkArea(), Toolbar.DesiredSize);
+        var placement = HudLayout.Place(_map.PixelToDip(_selection.Rect), ToolbarWorkArea(), Toolbar.DesiredSize);
         Canvas.SetLeft(Toolbar, placement.Toolbar.X);
         Canvas.SetTop(Toolbar, placement.Toolbar.Y);
         _toolbarBelow = placement.Below;
@@ -632,6 +662,12 @@ public partial class OverlayWindow : Window
         e.Handled = true;
         // Голый Alt: прилипание выключается сразу, посреди жеста; системе не отдаём (режим меню окна).
         if (key is Key.LeftAlt or Key.RightAlt) { RefreshSnapGestureSoon(); return; }
+        // Кадры серии: PageUp/PageDown (стрелки заняты сдвигом выделения и фигур); работают и в режиме текста.
+        if (key is Key.PageUp or Key.PageDown && HasBurst && mods == ModifierKeys.None)
+        {
+            if (!HasGesture) ShowFrame(_frameIndex + (key == Key.PageUp ? -1 : 1));
+            return;
+        }
         if (_textMode) { e.Handled = TextKeyDown(key, ctrl); return; }
         switch (key)
         {
@@ -708,6 +744,7 @@ public partial class OverlayWindow : Window
         Deselect();
         SetPipette(false);
         _editor.Ruler.Clear();
+        ClearDistances();
         _textMode = true;
         RefreshOptions(); // в режиме текста параметров нет: flyout'ы закрываются
         int generation = ++_ocrGeneration;

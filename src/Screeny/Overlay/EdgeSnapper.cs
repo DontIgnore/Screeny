@@ -96,8 +96,14 @@ public sealed class BitmapLuma : ILumaSource
 /// </para>
 /// Считается лениво и только в окрестности ±порог; результат по каждой границе кэшируется до <see cref="ResetCache"/>
 /// (вызывается в начале жеста).
+/// <para>
+/// <see cref="FindNext"/> — та же оценка границы, но первая граница в одну сторону от точки (расстояния до элементов у
+/// линейки). Для неё полосу берут уже (<paramref name="bandHalf"/>): кнопка высотой 24 px в полосе ±20 строк занимает
+/// меньше <see cref="MinAgreement"/> строк, и её край не нашёлся бы.
+/// </para>
 /// </summary>
-public sealed class EdgeSnapper(ILumaSource luma)
+/// <param name="bandHalf">Половина полосы устойчивости, пиксели; по умолчанию <see cref="BandHalf"/>.</param>
+public sealed class EdgeSnapper(ILumaSource luma, int bandHalf = EdgeSnapper.BandHalf)
 {
     /// <summary>Половина высоты (ширины) полосы, по которой проверяется устойчивость границы, пиксели.</summary>
     public const int BandHalf = 20;
@@ -109,6 +115,8 @@ public sealed class EdgeSnapper(ILumaSource luma)
     public const double MinAgreement = 0.8;
     /// <summary>Шаг сетки центра полосы вдоль края (для кэша), пиксели.</summary>
     private const int CrossStep = 4;
+    /// <summary>Больше оценок в кэше не держим: наведение мышью без жеста иначе копило бы их без конца.</summary>
+    private const int MaxCachedScores = 250_000;
 
     private readonly Dictionary<(EdgeAxis Axis, int Edge, int Cross), double> _scores = new();
 
@@ -144,6 +152,30 @@ public sealed class EdgeSnapper(ILumaSource luma)
         return best;
     }
 
+    /// <summary>
+    /// Первая контрастная граница от <paramref name="from"/> в сторону <paramref name="direction"/> (−1 — к меньшим
+    /// координатам, +1 — к большим) не дальше <paramref name="limit"/> включительно, устойчивая в полосе вокруг
+    /// <paramref name="cross"/>; null — такой нет. Граница — как в <see cref="Find"/>: прошла пороги и локальный максимум.
+    /// </summary>
+    public int? FindNext(EdgeAxis axis, int from, int cross, int direction, int limit)
+    {
+        int length = axis == EdgeAxis.Vertical ? luma.Width : luma.Height;
+        int crossLength = axis == EdgeAxis.Vertical ? luma.Height : luma.Width;
+        if (direction is not (-1 or 1) || length < 2 || crossLength < 1) return null;
+        cross = Math.Clamp(cross / CrossStep * CrossStep + CrossStep / 2, 0, crossLength - 1);
+        limit = Math.Clamp(limit, 1, length - 1);
+        if (direction < 0 ? from < limit : from > limit) return null; // начало уже за пределом
+        from = Math.Clamp(from, 1, length - 1);
+        for (int e = from; direction < 0 ? e >= limit : e <= limit; e += direction)
+        {
+            double s = Score(axis, e, cross);
+            if (s <= 0) continue;
+            if (s < Score(axis, e - 1, cross) || s <= Score(axis, e + 1, cross)) continue;
+            return e;
+        }
+        return null;
+    }
+
     /// <summary>Сила границы <paramref name="e"/> (средний |перепад|) или 0, если она не проходит пороги.</summary>
     private double Score(EdgeAxis axis, int e, int cross)
     {
@@ -151,9 +183,10 @@ public sealed class EdgeSnapper(ILumaSource luma)
         if (e < 1 || e > length - 1) return 0;
         var key = (axis, e, cross);
         if (_scores.TryGetValue(key, out var cached)) return cached;
+        if (_scores.Count >= MaxCachedScores) _scores.Clear();
 
         int crossLength = axis == EdgeAxis.Vertical ? luma.Height : luma.Width;
-        int c0 = Math.Max(0, cross - BandHalf), c1 = Math.Min(crossLength - 1, cross + BandHalf);
+        int c0 = Math.Max(0, cross - bandHalf), c1 = Math.Min(crossLength - 1, cross + bandHalf);
         int n = c1 - c0 + 1, sum = 0, up = 0, down = 0;
         for (int c = c0; c <= c1; c++)
         {

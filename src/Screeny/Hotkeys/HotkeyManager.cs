@@ -123,6 +123,12 @@ public sealed class HotkeyManager(IHotkeyBackend backend, bool allowRegisterHotK
     /// <summary>Нажат любой из хоткеев (в UI-потоке).</summary>
     public event Action? Pressed;
 
+    /// <summary>
+    /// То же, с сочетанием, которое сработало: по его основной клавише видно, держат ли её (серия снимков). null —
+    /// хук Win+Shift+S: его клавиша S проглатывается хуком, и её состояние не прочитать.
+    /// </summary>
+    public event Action<HotkeySpec?>? PressedKey;
+
     /// <summary>Отчёт последнего успешного <see cref="Apply"/>.</summary>
     public HotkeyReport Report { get; private set; } = HotkeyReport.Empty;
 
@@ -173,7 +179,7 @@ public sealed class HotkeyManager(IHotkeyBackend backend, bool allowRegisterHotK
         {
             if (keep.Contains(HotkeySpec.Fallback) || added.ContainsKey(HotkeySpec.Fallback)) fallback = HotkeySpec.Fallback;
             else if (_registered.ContainsKey(HotkeySpec.Fallback)) { keep.Add(HotkeySpec.Fallback); fallback = HotkeySpec.Fallback; }
-            else if (backend.TryRegister(HotkeySpec.Fallback, OnPressed, out var h, out int error) && h is not null)
+            else if (backend.TryRegister(HotkeySpec.Fallback, () => OnPressed(HotkeySpec.Fallback), out var h, out int error) && h is not null)
             { added[HotkeySpec.Fallback] = h; fallback = HotkeySpec.Fallback; }
             else fallbackError = error;
         }
@@ -196,7 +202,7 @@ public sealed class HotkeyManager(IHotkeyBackend backend, bool allowRegisterHotK
     private HotkeyState Register(HotkeyBinding b, HotkeySpec spec, Dictionary<HotkeySpec, IDisposable> added, HashSet<HotkeySpec> keep)
     {
         if (_registered.ContainsKey(spec) || added.ContainsKey(spec)) { keep.Add(spec); return new HotkeyState(b, HotkeyStatus.Active); }
-        if (backend.TryRegister(spec, OnPressed, out var handle, out int error) && handle is not null)
+        if (backend.TryRegister(spec, () => OnPressed(spec), out var handle, out int error) && handle is not null)
         {
             added[spec] = handle;
             return new HotkeyState(b, HotkeyStatus.Active);
@@ -208,7 +214,7 @@ public sealed class HotkeyManager(IHotkeyBackend backend, bool allowRegisterHotK
     {
         if (!allowHook) return new HotkeyState(b, HotkeyStatus.NotAllowed);
         if (_hook is not null || newHook is not null) { keepHook = _hook is not null; return new HotkeyState(b, HotkeyStatus.Active); }
-        if (backend.TryInstallWinShiftSHook(OnPressed, out var hook, out int error) && hook is not null)
+        if (backend.TryInstallWinShiftSHook(() => OnPressed(null), out var hook, out int error) && hook is not null)
         {
             newHook = hook;
             return new HotkeyState(b, HotkeyStatus.Active);
@@ -230,7 +236,11 @@ public sealed class HotkeyManager(IHotkeyBackend backend, bool allowRegisterHotK
                              && (s.Status is HotkeyStatus.ReservedBySystem or HotkeyStatus.Busy or HotkeyStatus.Failed))
            && !states.Any(s => s.IsActive);
 
-    private void OnPressed() => Pressed?.Invoke();
+    private void OnPressed(HotkeySpec? spec)
+    {
+        Pressed?.Invoke();
+        PressedKey?.Invoke(spec);
+    }
 
     public void Dispose()
     {

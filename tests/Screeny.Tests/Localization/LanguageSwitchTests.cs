@@ -97,11 +97,12 @@ public class LanguageSwitchTests : IDisposable
     {
         var panel = new StackPanel();
         _ = new FeatureCheckList(panel, []);
+        int ruler = FeatureCatalog.All.ToList().FindIndex(f => f.Id == FeatureCatalog.Ruler);
         Loc.Apply("en");
-        Assert.Equal("Ruler", (string)panel.Children.OfType<CheckBox>().Last().Content);
+        Assert.Equal("Ruler", (string)panel.Children.OfType<CheckBox>().ElementAt(ruler).Content);
         Loc.Apply("ja");
-        Assert.Equal("定規", (string)panel.Children.OfType<CheckBox>().Last().Content);
-        Assert.Equal(Loc.T("Feature.Ruler.Description"), panel.Children.OfType<TextBlock>().Last().Text);
+        Assert.Equal("定規", (string)panel.Children.OfType<CheckBox>().ElementAt(ruler).Content);
+        Assert.Equal(Loc.T("Feature.Ruler.Description"), panel.Children.OfType<TextBlock>().ElementAt(ruler).Text);
     });
 
     [Fact]

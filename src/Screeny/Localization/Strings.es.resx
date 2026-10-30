@@ -763,6 +763,18 @@ Screeny se cerrará. Vuelve a abrirlo y repite la actualización.</value>
   <data name="Feature.Ruler.Description" xml:space="preserve">
     <value>Distancia y ángulo en píxeles (=).</value>
   </data>
+  <data name="Feature.Privacy.Title" xml:space="preserve">
+    <value>Aviso de datos personales</value>
+  </data>
+  <data name="Feature.Privacy.Description" xml:space="preserve">
+    <value>Al seleccionar un área, Screeny lee su texto en tu equipo y avisa si hay correos, teléfonos, números de tarjeta, claves o direcciones IP. Necesita el reconocimiento de texto.</value>
+  </data>
+  <data name="Feature.Burst.Title" xml:space="preserve">
+    <value>Capturas en ráfaga</value>
+  </data>
+  <data name="Feature.Burst.Description" xml:space="preserve">
+    <value>Mantén pulsada la tecla de captura para tomar una serie, unas 10 capturas por segundo, y elige la que necesites. Una pulsación corta funciona como siempre.</value>
+  </data>
   <data name="Update.Title" xml:space="preserve">
     <value>Actualización de Screeny</value>
   </data>
@@ -1452,5 +1464,22 @@ Se eliminarán las capturas ({1}) sin pasar por la Papelera de reciclaje. No se 
   </data>
   <data name="History.NoMatchesPending" xml:space="preserve">
     <value>El texto de {0} capturas aún no se ha reconocido. Screeny lo lee en segundo plano.</value>
+  <data name="Privacy.Warning" xml:space="preserve">
+    <value>Puede contener datos personales</value>
+  </data>
+  <data name="Privacy.Hide" xml:space="preserve">
+    <value>Ocultar</value>
+  </data>
+  <data name="Privacy.HideTip" xml:space="preserve">
+    <value>Pixela todo lo encontrado. Ctrl+Z lo deshace.</value>
+  </data>
+  <data name="Privacy.Dismiss" xml:space="preserve">
+    <value>Descartar</value>
+  </data>
+  <data name="Burst.Counter" xml:space="preserve">
+    <value>{0} / {1}</value>
+  </data>
+  <data name="Burst.FrameTip" xml:space="preserve">
+    <value>Fotograma {0} de {1}. RePág y AvPág cambian de fotograma.</value>
   </data>
 </root>

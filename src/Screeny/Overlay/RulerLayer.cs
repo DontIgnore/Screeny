@@ -7,6 +7,8 @@ namespace Screeny.Overlay;
 /// <summary>
 /// Измерение линейки поверх снимка: линия с засечками и подпись Δx, Δy, длина. Рисуется в пикселях снимка
 /// (внутри PixelCanvas), толщины и шрифт домножаются на <see cref="DpiScale"/>, чтобы на экране они были постоянными.
+/// Здесь же расстояния до соседних границ при наведении (<see cref="Distances"/>): тонкие линии в четыре стороны
+/// с подписями в пикселях. Слой не входит в документ и в экспорт.
 /// </summary>
 public sealed class RulerLayer : FrameworkElement
 {
@@ -16,15 +18,18 @@ public sealed class RulerLayer : FrameworkElement
     private static readonly Typeface Face = new(new FontFamily("Segoe UI"), FontStyles.Normal, FontWeights.SemiBold, FontStretches.Normal);
 
     private RulerMeasurement? _measurement;
+    private EdgeDistances? _distances;
     private double _dpiScale = 1.0;
 
     public RulerLayer() => IsHitTestVisible = false;
 
     public RulerMeasurement? Measurement { get => _measurement; set { if (_measurement == value) return; _measurement = value; InvalidateVisual(); } }
+    public EdgeDistances? Distances { get => _distances; set { if (_distances == value) return; _distances = value; InvalidateVisual(); } }
     public double DpiScale { get => _dpiScale; set { if (_dpiScale == value) return; _dpiScale = value; InvalidateVisual(); } }
 
     protected override void OnRender(DrawingContext dc)
     {
+        if (_distances is { } d) RenderDistances(dc, d);
         if (_measurement is not { } m) return;
         double s = _dpiScale;
         var a = m.Start + new Vector(0.5, 0.5); // центр пикселя
@@ -57,6 +62,55 @@ public sealed class RulerLayer : FrameworkElement
         var box = new Rect(center.X - size.Width / 2, center.Y - size.Height / 2, size.Width, size.Height);
         dc.DrawRoundedRectangle(LabelBrush, null, box, 6 * s, 6 * s);
         dc.DrawText(text, new Point(box.X + padX, box.Y + padY));
+    }
+
+    /// <summary>
+    /// Линии от центра пикселя курсора до границ, засечка на границе, подпись у середины линии. Каждая подпись — в своей
+    /// четверти вокруг курсора (левая сверху, верхняя справа, правая снизу, нижняя слева) и не заходит за курсор:
+    /// у кнопки высотой в 30 px подписи не наезжают друг на друга.
+    /// </summary>
+    private void RenderDistances(DrawingContext dc, EdgeDistances d)
+    {
+        double s = _dpiScale;
+        var halo = new Pen(HaloBrush, 3 * s);
+        var line = new Pen(LineBrush, 1 * s);
+        var c = new Point(d.From.X + 0.5, d.From.Y + 0.5);
+        void Leg(Point end, int value, bool horizontal, int side)
+        {
+            if (value <= 0) return;
+            var tick = horizontal ? new Vector(0, 4 * s) : new Vector(4 * s, 0);
+            dc.DrawLine(halo, c, end);
+            dc.DrawLine(halo, end - tick, end + tick);
+            dc.DrawLine(line, c, end);
+            dc.DrawLine(line, end - tick, end + tick);
+            var text = new FormattedText(string.Create(CultureInfo.InvariantCulture, $"{value} px"), CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
+                Face, 11 * s, Brushes.White, pixelsPerDip: 1.0);
+            double padX = 6 * s, padY = 2 * s;
+            var size = new Size(text.Width + padX * 2, text.Height + padY * 2);
+            var mid = c + (end - c) / 2;
+            // side: −1 — левая/верхняя линия, +1 — правая/нижняя. Подпись сбоку от линии и целиком по свою сторону от курсора.
+            double gap = 4 * s;
+            Point at;
+            if (horizontal)
+            {
+                double x = mid.X - size.Width / 2;
+                x = side < 0 ? Math.Min(x, c.X - gap - size.Width) : Math.Max(x, c.X + gap);
+                at = new Point(x, side < 0 ? c.Y - gap - size.Height : c.Y + gap);
+            }
+            else
+            {
+                double y = mid.Y - size.Height / 2;
+                y = side < 0 ? Math.Min(y, c.Y - gap - size.Height) : Math.Max(y, c.Y + gap);
+                at = new Point(side < 0 ? c.X + gap : c.X - gap - size.Width, y);
+            }
+            var box = new Rect(at, size);
+            dc.DrawRoundedRectangle(LabelBrush, null, box, 5 * s, 5 * s);
+            dc.DrawText(text, new Point(box.X + padX, box.Y + padY));
+        }
+        Leg(new Point(d.Left, c.Y), d.ToLeft, horizontal: true, side: -1);
+        Leg(new Point(d.Right, c.Y), d.ToRight, horizontal: true, side: +1);
+        Leg(new Point(c.X, d.Top), d.ToTop, horizontal: false, side: -1);
+        Leg(new Point(c.X, d.Bottom), d.ToBottom, horizontal: false, side: +1);
     }
 
     private static T Freeze<T>(T f) where T : Freezable { f.Freeze(); return f; }

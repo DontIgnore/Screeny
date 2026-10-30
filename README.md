@@ -53,6 +53,7 @@ Windows holds PrintScreen and no other shortcut works, Screeny turns on `Ctrl+Al
 | Key | Action |
 |---|---|
 | `PrintScreen` | Take a screenshot (the default; you can add `Win+Shift+S` and your own shortcuts in settings) |
+| Hold `PrintScreen` | Burst: about 10 screenshots per second until you let go, then pick one (works with your own shortcuts too) |
 
 **While selecting and drawing**
 
@@ -64,6 +65,8 @@ Windows holds PrintScreen and no other shortcut works, Screeny turns on `Ctrl+Al
 | Mouse wheel | Line thickness |
 | `Shift` while drawing | Square or circle, lines at 45° steps |
 | `Alt` while dragging | Turn off snapping for this move |
+| `Alt` without dragging | Show distances from the cursor to the nearest edges (the ruler does this on hover) |
+| `PageUp` / `PageDown` | Previous / next frame of a burst |
 | `I` | Eyedropper: the next click picks a color from the screenshot |
 | `C` (before selecting) | Copy the pixel color under the magnifier as `#RRGGBB` |
 | `B` | Turn the background frame on or off |
@@ -107,6 +110,11 @@ Windows holds PrintScreen and no other shortcut works, Screeny turns on `Ctrl+Al
 - The selection edge snaps to window edges and to sharp edges inside the screenshot, like buttons and panels.
 - Several capture shortcuts at once: PrintScreen, `Win+Shift+S` instead of the Windows snipping tool, and any
   shortcuts of your own.
+- Hold the capture key for a burst. Screeny takes about 10 screenshots per second until you let go, then opens the
+  last one with a strip of all frames at the bottom. Click a frame or press `PageUp`/`PageDown` to switch; your
+  selection and markup stay. Only the frame you pick is copied and saved. Frames that didn't change are skipped, and
+  a burst stops at 60 frames or 600 MB. A short press works as before. `Win+Shift+S` and a click on the tray icon
+  always take a single screenshot.
 - The clipboard gets both PNG and DIB, so the picture pastes into chat apps and browsers as well as into Paint and
   Office.
 
@@ -117,7 +125,9 @@ Windows holds PrintScreen and no other shortcut works, Screeny turns on `Ctrl+Al
   left, center or right alignment.
 - Hover over the active tool's button to see its options. Selected shapes show their options right next to them.
 - Shapes snap to the edges and centers of other shapes, with thin guides while you drag.
-- A ruler measures distance in screenshot pixels. It is never part of the final picture.
+- A ruler measures distance in screenshot pixels. With the ruler picked, hovering shows how far the cursor is from
+  the nearest edge in each direction, like redlines in design tools. Hold `Alt` for the same while selecting an area
+  or with the Select tool. None of this is part of the final picture.
 - Shapes can be selected, moved, recolored and deleted until you close the screenshot. Undo and redo work for
   everything.
 
@@ -140,6 +150,14 @@ like Chinese or Japanese, Screeny keeps the Windows result. The models load on f
 minutes of idle time. On a full screen they can take up to about 1 GB of memory.
 
 ![Text mode with recognized words highlighted](docs/images/text-mode.png)
+
+### Personal data warning
+
+After you select an area, Screeny reads its text in the background, with the same Windows OCR, and looks for email
+addresses, phone numbers, card numbers, API keys and tokens, and IP addresses. If it finds any, a note appears next
+to the toolbar: "This may contain personal data". "Hide" pixelates everything it found in one step, so a single
+`Ctrl+Z` brings it all back. Nothing is hidden unless you click. The check runs on your computer and needs text
+recognition turned on. OCR can miss things, so take the note as a reminder, not a guarantee.
 
 ### History
 
@@ -176,8 +194,8 @@ to copying, saving, pinning and history alike. It is off by default and remember
 
 ## Optional features
 
-You can turn off text recognition, history, pins, the background frame, the eyedropper and the ruler, either in the
-first-run wizard or in settings under "Features". A feature you turn off disappears completely: its buttons, keys, menu
+You can turn off text recognition, history, pins, the background frame, the eyedropper, the ruler, the personal data
+warning and burst capture, either in the first-run wizard or in settings under "Features". A feature you turn off disappears completely: its buttons, keys, menu
 items and settings are gone, and its code doesn't run. Release notes about it are hidden too.
 
 Without history, a screenshot is only copied to the clipboard.
@@ -244,6 +262,9 @@ Screeny shows a notification instead of the whole wizard.
   both much better.
 - **A shortcut taken by another app can't be entered in settings**, because the key press never reaches Screeny.
   Pick a different one.
+- **Burst capture** uses the same capture as a single screenshot. On several large monitors it may take fewer than
+  10 frames per second. Windows has to report that the key is still held; if it doesn't for some key, holding it
+  works like a short press.
 
 ## Feedback and contributing
 

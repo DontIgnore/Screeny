@@ -14,7 +14,53 @@ public partial class OverlayWindow
     /// <summary>Имена сценариев для <c>--scenario</c>.</summary>
     public static readonly string[] DevScenarios = ["shape", "shape-tool", "arrow", "text", "ruler", "badge", "qr", "beautify", "beautify-sunset", "beautify-light",
         "guides", "textalign", "edgesnap", "flyout-beautify", "flyout-beautify-mid", "flyout-tool", "flyout-shape", "pen-bounds",
-        "ocr", "ocr-select", "readme-hero", "readme-text", "readme-beautify"];
+        "ocr", "ocr-select", "readme-hero", "readme-text", "readme-beautify", "privacy", "distances", "burst"];
+
+    /// <summary>Сценарий privacy: дождаться проверки на личные данные, снять кадры до и после «Скрыть» и закрыться.</summary>
+    private bool _devPrivacy;
+
+    /// <summary>
+    /// Кадр самого окна оверлея (RenderTargetBitmap корня, не снимок экрана) рядом с исходником:
+    /// <c>&lt;имя&gt;.&lt;tag&gt;.png</c>, для папки кадров серии — <c>&lt;папка&gt;.&lt;tag&gt;.png</c> рядом с ней (не в ней: иначе
+    /// следующий запуск взял бы кадр окна за кадр серии).
+    /// </summary>
+    private void DevRender(string tag)
+    {
+        if (_dev?.Source is not { } source) return;
+        UpdateLayout();
+        var dpi = VisualTreeHelper.GetDpi(this);
+        int w = (int)Math.Ceiling(Root.ActualWidth * dpi.DpiScaleX), h = (int)Math.Ceiling(Root.ActualHeight * dpi.DpiScaleY);
+        if (w <= 0 || h <= 0) return;
+        var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(w, h, dpi.PixelsPerInchX, dpi.PixelsPerInchY, PixelFormats.Pbgra32);
+        rtb.Render(Root);
+        rtb.Freeze();
+        var path = Directory.Exists(source) ? Path.TrimEndingDirectorySeparator(Path.GetFullPath(source)) + $".{tag}.png" : Path.ChangeExtension(source, $".{tag}.png");
+        FileSaver.Save(rtb, path);
+        Screeny.Logging.Log.Error($"Dev render saved to {path}");
+    }
+
+    /// <summary>
+    /// Проверка на личные данные закончилась (dev). Сценарий privacy: кадр с плашкой, «Скрыть», кадр после, повторная
+    /// проверка уже пикселизированной области (в журнал — сколько нашлось теперь), проверка, что Ctrl+Z убирает всё
+    /// одним шагом, и закрытие оверлея.
+    /// </summary>
+    private async void DevPrivacyChecked(IReadOnlyList<Screeny.Ocr.PersonalDataMatch> matches)
+    {
+        if (!_devPrivacy) return;
+        _devPrivacy = false;
+        await Dispatcher.InvokeAsync(() => DevRender("privacy"), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+        int before = Document.Items.Count;
+        HidePersonalData();
+        int added = Document.Items.Count - before;
+        await Dispatcher.InvokeAsync(() => DevRender("privacy-hidden"), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+        var image = ImageComposer.Compose(_shot.Bitmap, _selection.Rect, Document);
+        var layout = await Task.Run(() => Screeny.Ocr.OcrService.RecognizeLayoutAsync(image));
+        int after = layout is null ? -1 : Screeny.Ocr.PersonalDataDetector.Detect(layout).Count;
+        Document.Undo.Undo();
+        int afterUndo = Document.Items.Count;
+        Screeny.Logging.Log.Error($"Dev privacy: {matches.Count} found, Hide added {added} pixelate shape(s), {after} found after Hide, {afterUndo} shape(s) after one Ctrl+Z");
+        Cancel();
+    }
 
     /// <summary>
     /// Сценарии ocr-select и readme-text: как только показана первая раскладка (Windows OCR), выделить слова в этой части
@@ -248,6 +294,51 @@ public partial class OverlayWindow
                 }
                 break;
             }
+            case "distances":
+            {
+                // Линейка и курсор над точкой (для синтетического рабочего стола с --select 120,80,1040,560 — над синей
+                // кнопкой): линии до её краёв. Кадр окна — <имя>.distances.png, затем оверлей закрывается.
+                if (!Screeny.Features.FeatureGate.ToolAllowed(_settings, ToolKind.Ruler)) break;
+                SetTool(ToolKind.Ruler);
+                var p = new PixelPoint((int)At(0.106, 0.886).X, (int)At(0.106, 0.886).Y);
+                Dispatcher.BeginInvoke(() =>
+                {
+                    UpdateDistances(p);
+                    if (RulerOverlay.Distances is { } d)
+                        Screeny.Logging.Log.Error($"Dev distances at {p.X},{p.Y}: left {d.ToLeft}, right {d.ToRight}, up {d.ToTop}, down {d.ToBottom} px");
+                    DevRender("distances");
+                    Cancel();
+                }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                break;
+            }
+            case "burst":
+                // С --burst-test: кадр окна на последнем кадре серии, переход к первому (как PageUp до упора), проверка, что
+                // снимок, источник редактора и кэши яркости сменились, кадр окна и итоговая картинка выделения, закрытие.
+                Dispatcher.BeginInvoke(() =>
+                {
+                    if (!HasBurst) { Screeny.Logging.Log.Error("Dev burst: no burst frames (start with --burst-test <folder>)"); Cancel(); return; }
+                    DevRender("burst");
+                    int was = _frameIndex;
+                    _ = ShotLuma; // яркость прежнего кадра загружена: смена кадра обязана её сбросить
+                    ShowFrame(0);
+                    var bitmap = _frames[0].Bitmap;
+                    bool swapped = ReferenceEquals(_shot.Bitmap, bitmap) && ReferenceEquals(_editor.Source, bitmap) && ReferenceEquals(ShotImage.Source, bitmap)
+                                   && ReferenceEquals(Annotations.Source, bitmap) && _shotLuma is null && _edgeSnapper is null && _distanceEdges is null;
+                    Screeny.Logging.Log.Error($"Dev burst: frame {was + 1} -> {_frameIndex + 1} of {_frames.Count}, caches reset: {swapped}");
+                    DevRender("burst-first");
+                    if (_dev?.Source is { } folder && _selection.HasSelection)
+                    {
+                        var path = Path.TrimEndingDirectorySeparator(Path.GetFullPath(folder)) + ".burst-export.png";
+                        FileSaver.Save(ComposeResult(_selection.Rect).Image, path);
+                        Screeny.Logging.Log.Error($"Dev export saved to {path}");
+                    }
+                    Cancel();
+                }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                break;
+            case "privacy":
+                // Проверка запускается сама, как только выделение устоялось (--select); дальше — DevPrivacyChecked.
+                _devPrivacy = true;
+                break;
             case "qr":
                 // Режим текста по выделению; как только коды найдены, плашка открывается на первой ссылке
                 // (или первом коде). Ни «Открыть», ни «Копировать» сценарий не нажимает.

@@ -31,6 +31,13 @@ public sealed class AnnotationDocument
     };
 
     public void Add(Annotation a) => Undo.Execute(new AddAction(_items, a));
+
+    /// <summary>Добавляет несколько аннотаций одним шагом undo (Ctrl+Z убирает их все). Пустой список — без шага.</summary>
+    public void AddAll(IReadOnlyList<Annotation> annotations)
+    {
+        if (annotations.Count == 0) return;
+        Undo.Execute(new AddAllAction(_items, annotations.ToArray()));
+    }
     public void Remove(Annotation a) { if (Selected == a) Selected = null; Undo.Execute(new RemoveAction(_items, a)); }
     public void Move(Annotation a, Vector delta) => Undo.Execute(new MoveAction(a, delta));
 
@@ -96,6 +103,9 @@ public sealed class AnnotationDocument
 
     private sealed class AddAction(List<Annotation> list, Annotation a) : IUndoableAction
     { public void Do() => list.Add(a); public void Undo() => list.Remove(a); }
+
+    private sealed class AddAllAction(List<Annotation> list, Annotation[] added) : IUndoableAction
+    { public void Do() => list.AddRange(added); public void Undo() { foreach (var a in added) list.Remove(a); } }
 
     private sealed class RemoveAction(List<Annotation> list, Annotation a) : IUndoableAction
     { private int _index; public void Do() { _index = list.IndexOf(a); list.RemoveAt(_index); } public void Undo() => list.Insert(_index, a); }

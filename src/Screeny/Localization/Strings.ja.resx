@@ -763,6 +763,18 @@ Screeny を終了します。もう一度起動して、更新をやり直して
   <data name="Feature.Ruler.Description" xml:space="preserve">
     <value>ピクセル単位の距離と角度（=）。</value>
   </data>
+  <data name="Feature.Privacy.Title" xml:space="preserve">
+    <value>個人情報の警告</value>
+  </data>
+  <data name="Feature.Privacy.Description" xml:space="preserve">
+    <value>範囲を選ぶと、Screeny がその中の文字をこのパソコン上で読み取り、メールアドレス、電話番号、カード番号、キー、IP アドレスがあれば知らせます。文字認識が必要です。</value>
+  </data>
+  <data name="Feature.Burst.Title" xml:space="preserve">
+    <value>連続キャプチャ</value>
+  </data>
+  <data name="Feature.Burst.Description" xml:space="preserve">
+    <value>キャプチャキーを押し続けると 1 秒に約 10 枚ずつ連続で撮影し、必要な 1 枚を選べます。短く押したときは今までどおりです。</value>
+  </data>
   <data name="Update.Title" xml:space="preserve">
     <value>Screeny の更新</value>
   </data>
@@ -1452,5 +1464,22 @@ Screeny を終了します。もう一度起動して、更新をやり直して
   </data>
   <data name="History.NoMatchesPending" xml:space="preserve">
     <value>{0} 件のスクリーンショットの文字はまだ認識されていません。Screeny がバックグラウンドで読み取っています。</value>
+  <data name="Privacy.Warning" xml:space="preserve">
+    <value>個人情報が含まれている可能性があります</value>
+  </data>
+  <data name="Privacy.Hide" xml:space="preserve">
+    <value>隠す</value>
+  </data>
+  <data name="Privacy.HideTip" xml:space="preserve">
+    <value>見つかった部分をすべてモザイクにします。Ctrl+Z で元に戻せます。</value>
+  </data>
+  <data name="Privacy.Dismiss" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="Burst.Counter" xml:space="preserve">
+    <value>{0} / {1}</value>
+  </data>
+  <data name="Burst.FrameTip" xml:space="preserve">
+    <value>{1} 枚中 {0} 枚目。PageUp と PageDown で切り替えます。</value>
   </data>
 </root>

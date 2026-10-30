@@ -10,6 +10,20 @@ up in the picture. The overlay is a single window the size of the virtual screen
 pixels. The selection and all shapes are stored in screenshot pixels and drawn through `ScaleTransform(1/dpi)`. Export
 renders the same vector shapes with the same code at 96 DPI, so the clipboard image matches what was on screen.
 
+**Burst.** When a shortcut registered with `RegisterHotKey` fires and the `burst` feature is on, the first frame is
+taken right away as above, and a background thread polls the shortcut's main key with `GetAsyncKeyState`
+(`BurstRecorder`, decisions in `BurstTimeline`). Released within 250 ms: the overlay opens with that frame. It is built
+while the key is still down, so a tap adds only the time the key is down plus one poll (5 to 16 ms). Held
+longer: a frame every 100 ms through the same GDI path, with one DC and bitmap for the whole burst, until the key is
+released; at most 60 frames, 600 MB or 10 s, and a frame identical to the previous one is dropped (exact byte compare).
+All frames keep the first frame's virtual-screen geometry; if the monitor layout changes, capturing stops. The overlay
+is shown only after the release: showing it earlier would take focus and close the menus and tooltips the burst is
+for. Hotkeys are registered with `MOD_NOREPEAT` and `_capturing` stays set for the whole hold, so key auto-repeat
+never starts a second capture. The `Win+Shift+S` hook swallows `S`, so its state can't be read and that path never
+bursts; neither do the tray icon and the second-instance signal. A key whose state Windows doesn't report reads as
+released, so holding it works like a tap. Each capture logs `Capture latency: N ms … (plain|tap|burst)`, and a burst
+logs its frame count, duplicates and time per frame.
+
 ## Dev instance
 
 `--dev` (or the environment variable `SCREENY_DEV=1`) starts a test instance that can run next to your normal copy.
@@ -23,6 +37,7 @@ ideas ("Send" says the endpoint isn't set), so it makes no network requests.
 ```powershell
 dotnet run --project src/Screeny -- --settings          # open settings right away (or --history)
 dotnet run --project src/Screeny -- --dev --overlay-test shot.png [--select x,y,w,h] [--scenario <name>]
+dotnet run --project src/Screeny -- --dev --burst-test <folder of PNGs> [--select x,y,w,h] [--scenario burst]
 dotnet run --project src/Screeny -- --dev --edit <history shot.png> [--scenario <name>]
 dotnet run --project src/Screeny -- --dev --history [--scenario hover]
 dotnet run --project src/Screeny -- --dev --settings --scenario hotkey-problems
@@ -42,7 +57,23 @@ recognized-text line of the dev text mode removed (`LogScrubber`).
 
 Overlay scenarios: `shape`, `shape-tool`, `arrow`, `text`, `ruler`, `badge`, `guides`, `textalign`, `edgesnap`,
 `flyout-beautify`, `flyout-beautify-mid`, `flyout-tool`, `flyout-shape`, `pen-bounds`, `ocr`, `ocr-select`, `qr`,
-`beautify`, `beautify-sunset`, `beautify-light`, `readme-hero`, `readme-text`, `readme-beautify`.
+`beautify`, `beautify-sunset`, `beautify-light`, `readme-hero`, `readme-text`, `readme-beautify`, `privacy`,
+`distances`, `burst`.
+
+`--burst-test <folder>` opens the overlay as if the PNGs in the folder (sorted by file name) were frames of a burst:
+the filmstrip is at the bottom, and frames identical to the previous one are dropped by the same `BurstFrameBuffer` as
+in a real burst. Files of another size than the first are skipped. No key is polled and the screen is never captured.
+The last three scenarios check the new overlay features and then close the overlay. Each writes a picture of the
+overlay window itself (`RenderTargetBitmap` of the window content, not a screen grab) next to the source:
+`<name>.<scenario>.png`, or `<folder>.<scenario>.png` next to a burst folder.
+
+- `privacy` (with `--select`) waits for the personal data check, saves the window with the warning, presses "Hide",
+  saves it again and logs what the check finds after Hide and how many shapes one `Ctrl+Z` leaves. Only the kinds of
+  matches are logged, never the recognized text: the log goes into bug reports.
+- `distances` (with `--select`) picks the ruler and shows the distances from a point at 10.6 % / 88.6 % of the
+  selection.
+- `burst` (with `--burst-test`) saves the window on the last frame, switches to the first one, logs whether every
+  cache of the frozen picture was reset, and writes the composed selection as `<folder>.burst-export.png`.
 Editor scenarios: `original`, `pin`, `select`, `guides`, `flyout-beautify`, `flyout-beautify-mid`, `flyout-tool`,
 `flyout-shape`, `pen-bounds`.
 

@@ -763,6 +763,18 @@ Screeny закроется; запустите его снова и повтор
   <data name="Feature.Ruler.Description" xml:space="preserve">
     <value>Расстояние и угол в пикселях (=).</value>
   </data>
+  <data name="Feature.Privacy.Title" xml:space="preserve">
+    <value>Предупреждение о личных данных</value>
+  </data>
+  <data name="Feature.Privacy.Description" xml:space="preserve">
+    <value>После выделения Screeny читает текст области на вашем компьютере и предупреждает о почте, телефонах, номерах карт, ключах и IP-адресах. Нужно распознавание текста.</value>
+  </data>
+  <data name="Feature.Burst.Title" xml:space="preserve">
+    <value>Серия снимков</value>
+  </data>
+  <data name="Feature.Burst.Description" xml:space="preserve">
+    <value>Удерживайте клавишу снимка, чтобы снять серию, около 10 скриншотов в секунду, и выберите нужный. Короткое нажатие работает как раньше.</value>
+  </data>
   <data name="Update.Title" xml:space="preserve">
     <value>Обновление Screeny</value>
   </data>
@@ -1452,5 +1464,22 @@ Screeny закроется; запустите его снова и повтор
   </data>
   <data name="History.NoMatchesPending" xml:space="preserve">
     <value>На скриншотах ({0}) текст ещё не распознан. Screeny делает это в фоне.</value>
+  <data name="Privacy.Warning" xml:space="preserve">
+    <value>Здесь могут быть личные данные</value>
+  </data>
+  <data name="Privacy.Hide" xml:space="preserve">
+    <value>Скрыть</value>
+  </data>
+  <data name="Privacy.HideTip" xml:space="preserve">
+    <value>Пикселизировать всё найденное. Ctrl+Z вернёт как было.</value>
+  </data>
+  <data name="Privacy.Dismiss" xml:space="preserve">
+    <value>Закрыть</value>
+  </data>
+  <data name="Burst.Counter" xml:space="preserve">
+    <value>{0} / {1}</value>
+  </data>
+  <data name="Burst.FrameTip" xml:space="preserve">
+    <value>Кадр {0} из {1}. PageUp и PageDown переключают кадры.</value>
   </data>
 </root>
