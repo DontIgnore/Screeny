@@ -68,8 +68,8 @@ overlay window itself (`RenderTargetBitmap` of the window content, not a screen 
 `<name>.<scenario>.png`, or `<folder>.<scenario>.png` next to a burst folder.
 
 - `privacy` (with `--select`) waits for the personal data check, saves the window with the warning, presses "Hide",
-  saves it again and logs what the check finds after Hide and how many shapes one `Ctrl+Z` leaves. In a dev instance
-  the recognized text of the check is logged too, so use synthetic pictures only.
+  saves it again and logs what the check finds after Hide and how many shapes one `Ctrl+Z` leaves. Only the kinds of
+  matches are logged, never the recognized text: the log goes into bug reports.
 - `distances` (with `--select`) picks the ruler and shows the distances from a point at 10.6 % / 88.6 % of the
   selection.
 - `burst` (with `--burst-test`) saves the window on the last frame, switches to the first one, logs whether every

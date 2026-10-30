@@ -41,9 +41,13 @@ public partial class App
     /// </summary>
     private void ReleaseBurstMemory() => Dispatcher.BeginInvoke(() =>
     {
+        using var process = System.Diagnostics.Process.GetCurrentProcess();
+        long before = process.PrivateMemorySize64;
         GC.Collect();
         GC.WaitForPendingFinalizers();
         GC.Collect();
+        process.Refresh();
+        Log.Error($"Burst closed: private memory {before / (1024 * 1024)} MB -> {process.PrivateMemorySize64 / (1024 * 1024)} MB");
     }, System.Windows.Threading.DispatcherPriority.Background);
 
     /// <summary>

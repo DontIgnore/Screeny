@@ -116,7 +116,9 @@ public partial class OverlayWindow : Window
             _shownAt = DateTime.UtcNow;
             Activate();
             Focus();
-            User32.SetForegroundWindow(new WindowInteropHelper(this).Handle);
+            var hwnd = new WindowInteropHelper(this).Handle;
+            User32.SetForegroundWindow(hwnd);
+            if (_dev is null && User32.GetForegroundWindow() != hwnd) ForceForeground(hwnd); // тестовый экземпляр фокус силой не забирает
             PlaceFilmstrip();
             UpdateHover(CurrentMousePixel(), Mouse.GetPosition(PixelCanvas));
             ApplyDevOptions();
@@ -530,6 +532,25 @@ public partial class OverlayWindow : Window
         ResetInteraction();
         if (_editor.IsTextEditing) return;
         Cancel();
+    }
+
+    /// <summary>
+    /// Запасной путь, когда Windows не отдала оверлею передний план (серия: окно показывается после отпускания клавиши,
+    /// и последним вводом может считаться отпускание, доставленное другому приложению). На время вызова очередь ввода
+    /// нашего потока связывается с потоком переднего окна. Обычный путь, при котором окно уже активно, не трогается.
+    /// </summary>
+    private static void ForceForeground(IntPtr hwnd)
+    {
+        uint ours = User32.GetCurrentThreadId();
+        uint theirs = User32.GetWindowThreadProcessId(User32.GetForegroundWindow(), out _);
+        bool attached = theirs != 0 && theirs != ours && User32.AttachThreadInput(ours, theirs, true);
+        try
+        {
+            User32.BringWindowToTop(hwnd);
+            User32.SetForegroundWindow(hwnd);
+        }
+        finally { if (attached) User32.AttachThreadInput(ours, theirs, false); }
+        if (User32.GetForegroundWindow() != hwnd) Screeny.Logging.Log.Error("Overlay could not take the foreground");
     }
 
     private static readonly TimeSpan ActivationGrace = TimeSpan.FromMilliseconds(600);

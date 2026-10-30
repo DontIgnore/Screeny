@@ -535,7 +535,7 @@ public partial class App : Application, INotifyPropertyChanged
                 SaveSettings(); // последний цвет и толщина
                 if (burst) ReleaseBurstMemory();
             };
-            overlay.ContentRendered += (_, _) => Log.Error($"Capture latency: {latency.ElapsedMilliseconds} ms from request to overlay on screen ({mode})");
+            overlay.ContentRendered += (_, _) => Log.Error($"Capture latency: {latency.ElapsedMilliseconds} ms from request to overlay on screen ({mode}, active: {overlay.IsActive})");
             if (devFrames is not null) overlay.SetBurst(devFrames, devFrames.Count - 1);
             if (holdKey is null) overlay.Show();
         }

@@ -90,8 +90,6 @@ public partial class OverlayWindow
             var image = ImageComposer.Compose(_shot.Bitmap, region, Document);
             var layout = await Task.Run(() => OcrService.RecognizeLayoutAsync(image));
             if (layout is not null) matches = PersonalDataDetector.Detect(layout);
-            // Только тестовый экземпляр и только синтетические картинки: распознанный текст — в журнал для проверки.
-            if (_dev is not null && layout is not null) Screeny.Logging.Log.Error($"Dev privacy OCR: {layout.TextOf(null).ReplaceLineEndings(" | ")}");
         }
         catch (Exception ex) { Screeny.Logging.Log.Error("Personal data check failed", ex); }
         if (generation != _privacyGeneration || _closing || region != _privacyRect) return;
@@ -148,7 +146,7 @@ public partial class OverlayWindow
         var chip = PrivacyChip.DesiredSize;
         var bar = new Rect(Canvas.GetLeft(Toolbar), Canvas.GetTop(Toolbar), Toolbar.DesiredSize.Width, Toolbar.DesiredSize.Height);
         if (double.IsNaN(bar.X) || double.IsNaN(bar.Y)) return;
-        var work = SelectionWorkArea();
+        var work = ToolbarWorkArea(); // без ленты кадров серии
         const double gap = 8;
         double x = bar.Right + gap, y = bar.Top + (bar.Height - chip.Height) / 2;
         if (x + chip.Width > work.Right - gap)
