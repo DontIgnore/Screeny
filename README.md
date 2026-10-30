@@ -174,6 +174,15 @@ recognition turned on. OCR can miss things, so take the note as a reminder, not 
   Windows OCR in the background, a few seconds after each screenshot, and goes through older screenshots slowly while
   you're not taking new ones. The text is kept next to the screenshot as `<name>.text.json` and never leaves your
   computer. Search needs text recognition turned on.
+- **Search by meaning (optional).** With the semantic search module the same box also finds screenshots by what is in
+  them: "cat" finds a photo of a cat, «график» finds a chart, "error dialog" finds an error window, in any language.
+  Exact text matches come first, then the closest screenshots by meaning. The module is about 290 MB (the
+  EmbeddingGemma 2 model from Google DeepMind, plus ONNX Runtime if you don't have the precise OCR module). It
+  downloads only when you click "Download" in settings under "Screenshot history". After that Screeny indexes your
+  screenshots in the background, new ones first, a few seconds each (about 3 s on a fast desktop CPU), and settings
+  show how many are done. It pauses while you take a screenshot and uses about 0.5 GB of memory while indexing, which it
+  frees after three idle minutes. The index is kept next to each screenshot as `<name>.vec`, never leaves your
+  computer and is deleted when you remove the module. It needs text recognition turned on.
 
 ### Pins
 
@@ -211,14 +220,15 @@ Your screenshots never leave your computer. Screeny goes online for three things
   you. It downloads the update in the background and applies it quietly when you quit. You can check by hand from the
   tray menu ("Check for updates…") or turn checks off in settings ("Check for updates"). Turning checks off stops
   both the prompts and the quiet updates.
-- **The precise OCR module**, only when you click to download it. This works even with update checks turned off.
+- **The precise OCR module and the semantic search module**, only when you click to download them. This works even
+  with update checks turned off. Both share one ONNX Runtime download.
 - **A report you send yourself**, from "Report a bug…" or "Suggest an improvement…". It goes to screeny.page with
   what you typed and, for a bug, technical details: versions, interface language, display scaling, the number of
   monitors and the last lines of the error log with your user name taken out. You can see them before sending or
   turn them off. Screenshots are never attached.
 
-The module is accepted only if its SHA256 matches the hash built into the app, and every file is checked again before
-the models load. Recognition itself runs on your computer.
+A module is accepted only if its SHA256 matches the hash built into the app, and every file is checked again before
+the models load. Recognition and search run on your computer.
 
 ## Where your data lives
 
@@ -229,11 +239,11 @@ the models load. Recognition itself runs on your computer.
 | Markup and the clean original | next to each screenshot: `<name>.screeny.json`, `<name>.orig.png` (the original only if you turned it on) |
 | Error log | `%LocalAppData%\Screeny\screeny.log` |
 | Skipped update version | `%LocalAppData%\Screeny\update-state.json` |
-| Precise OCR module | `%LocalAppData%\Screeny\Modules\` |
+| Precise OCR and semantic search modules | `%LocalAppData%\Screeny\Modules\` |
 | The app (installer version) | `%LocalAppData%\DontIgnore.Screeny\` |
 | Start with Windows | `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Screeny` |
 
-Uninstalling removes the app, its autostart entry and the downloaded OCR module. Settings and history stay.
+Uninstalling removes the app, its autostart entry and the downloaded modules. Settings and history stay.
 
 ## Other screenshot tools
 
@@ -296,9 +306,10 @@ powershell -File tools/pack.ps1 -Version 0.2.0   # -> releases/
 For a plain `publish\Screeny.exe` without an installer, run `powershell -File tools/publish.ps1` (add
 `-SelfContained` to include the .NET runtime). That copy doesn't update itself.
 
-The precise OCR module is built separately with `tools/pack-ocr-module.ps1`. It needs the models, the native ONNX
-Runtime package and the Visual C++ runtime; [tools/ocr-module/README.md](tools/ocr-module/README.md) explains where to
-get them.
+The modules are built separately: `tools/pack-ort-runtime.ps1` (the shared ONNX Runtime and Visual C++ runtime),
+`tools/pack-ocr-module.ps1` (precise OCR models) and `tools/pack-semantic-module.ps1` (semantic search models).
+[tools/ocr-module/README.md](tools/ocr-module/README.md) and [docs/maintainers.md](docs/maintainers.md) explain where to
+get the files.
 
 Release steps, the dev instance and its test switches are described in [docs/maintainers.md](docs/maintainers.md).
 

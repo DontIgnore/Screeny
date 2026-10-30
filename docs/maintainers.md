@@ -35,7 +35,7 @@ It has its own mutex, settings (`settings.dev.json`), history (`%LocalAppData%\S
 (`update-state.dev.json`) and module folder (`%LocalAppData%\Screeny\Dev\Modules\`). It registers no regular capture hotkeys
 (only the Win+Shift+S hook, with `--enable-ll-hook` and if it's on in `settings.dev.json`) and never touches the real
 autostart entry. Without `--update-source` it doesn't look for updates, without
-`--module-source` it doesn't download the OCR module, and without `--feedback-endpoint` it doesn't send bug reports or
+`--module-source` it doesn't download modules, and without `--feedback-endpoint` it doesn't send bug reports or
 ideas ("Send" says the endpoint isn't set), so it makes no network requests.
 
 ```powershell
@@ -101,16 +101,21 @@ matches are skipped, so the walk resumes after a restart; bump `HistoryTextIndex
 everything. Only the saved PNG with markup is read, never `.orig.png`, and the text is never logged. Nothing runs
 without the `history` and `ocr` features. The search box goes through `IHistorySearchProvider`
 (`TextSearchProvider` today), which runs off the UI thread and is cancelled by the next keystroke; `HistorySearch`
-merges providers by the best score per screenshot.
+merges providers by the best score per screenshot. With the semantic module installed, `SemanticSearchProvider` is the
+second provider (see [Semantic search module](#semantic-search-module)).
 
-Testing updates and the OCR module without GitHub:
+Testing updates and modules without GitHub:
 
 ```powershell
 # a release folder made by tools/pack.ps1; --check-updates runs a manual check right away
 .\portable\Screeny.exe --dev --update-source C:\tmp\rel-0.2.1 --check-updates
-# a folder with a module zip made by tools/pack-ocr-module.ps1
-dotnet run --project src/Screeny -- --dev --settings --module-source releases\ocr-module
-dotnet run --project src/Screeny -- --dev --module-source releases\ocr-module --overlay-test shot.png --select x,y,w,h --scenario ocr
+# module zips made by the pack scripts; the folder and its subfolders are searched, so releases\ is enough
+dotnet run --project src/Screeny -- --dev --settings --module-source releases
+dotnet run --project src/Screeny -- --dev --module-source releases --overlay-test shot.png --select x,y,w,h --scenario ocr
+# semantic search end to end: installs the module if needed, seeds the spike test set into its own dev history
+# (%LocalAppData%\Screeny\Dev\HistorySemantic), waits for OCR text and vectors, renders history-semantic-*.png and
+# writes history-semantic.txt (hits per query, time, memory) to %LocalAppData%\Screeny\Dev
+dotnet run --project src/Screeny -- --dev --module-source releases --history --scenario semantic
 ```
 
 The `readme-*` scenarios stage the README screenshots. They expect a 1920×1080 synthetic desktop with a dashboard
@@ -158,7 +163,8 @@ For delta updates, put the previous release's files into `releases/` before buil
 (`gh release download v0.1.9 -D releases`) and attach the `*-delta.nupkg` as well. The update check reads
 `releases.win.json` from the latest release that isn't a pre-release, so every release must include it.
 
-The precise OCR module has its own releases and versions; see [tools/ocr-module/README.md](../tools/ocr-module/README.md).
+The modules have their own releases and versions: see [Modules](#modules) below and
+[tools/ocr-module/README.md](../tools/ocr-module/README.md).
 
 ## Release notes
 
@@ -320,7 +326,8 @@ glyph forms.
 
 `Screeny.exe` is about 29 MB. Most of that is the Windows SDK WinRT projections that the Windows OCR depends on. The
 managed part of ONNX Runtime adds about 0.7 MB together with `System.Numerics.Tensors`; the native `onnxruntime.dll`
-ships only in the module.
+ships only in the ONNX Runtime component. `Microsoft.ML.Tokenizers` (with `Google.Protobuf`) for the semantic module
+adds about 0.8 MB.
 
 ## Hotkeys
 
@@ -379,6 +386,44 @@ or hotkeys. "Uninstall" runs the app's own `UninstallString` without silent swit
 The wizard version the user went through and the conflicts still present after it are stored in `settings.json`
 (`SetupWizardVersion`, `KnownConflicts`).
 
+## Modules
+
+Three downloadable parts live in `%LocalAppData%\Screeny\Modules\<id>-<version>\`, each with a pinned zip:
+
+| Part | Script | Pinned in | Release tag | Size |
+|---|---|---|---|---:|
+| ONNX Runtime component `ort-runtime` (onnxruntime.dll 1.31.0, providers_shared, VC++ runtime, licenses) | `tools/pack-ort-runtime.ps1` | `Modules/OrtRuntimeModule.cs` | `ort-runtime-N` | 17.5 MB |
+| Precise OCR `ocr-paddle` v2 (det/rec models, licenses) | `tools/pack-ocr-module.ps1` | `Modules/OcrModule.cs` | `ocr-module-N` | 12.3 MB |
+| Semantic search `semantic-eg2` (EmbeddingGemma 2 q4 text model and vision encoder, tokenizer, licenses) | `tools/pack-semantic-module.ps1` | `Modules/SemanticModule.cs` | `semantic-module-N` | 275 MB |
+
+The runtime is a component, not a feature: `ModuleSpec.Requires` of the OCR and semantic specs lists it, and
+`module.json` of those zips records it as `"requires": { "ort-runtime": N }` (for information; the app trusts only its
+own specs). `ModuleController` installs a missing component before the module, under a per-folder lock so two downloads
+never unpack it at once, and reuses an installed copy. "Remove module" deletes the component only when no other
+installed module needs it. `OrtNative` loads `onnxruntime.dll` once per process from the component folder, after
+checking that folder against its pinned `module.json`; a second folder is refused. Its version follows
+`Microsoft.ML.OnnxRuntime.Managed` in `Screeny.csproj`: a new ORT means a new component version and new versions of the
+modules that require it.
+
+To publish a new version of any part:
+
+1. Run the script (`-Version N`; the model scripts take `-RuntimeVersion` too). Each one checks the SHA256 of every input
+   file and prints `Version`, `ZipSha256`, `ManifestSha256` and `ZipSize`. The zip is deterministic (same bytes in
+   Windows PowerShell and pwsh; the shared writer is `tools/module-zip.ps1`) and lands in `releases/<part>/`
+   (git-ignored).
+2. Copy the printed values into the class from the table.
+3. Create a GitHub release with the tag from the table and attach the zip. Upload the runtime first: a module whose
+   requirement isn't on GitHub can't be installed.
+
+OCR module v1 shipped its own ORT and VC++ DLLs. With v2 the app sees v1 as outdated, uses Windows OCR and offers
+"Update module", which downloads the component and the 12 MB module and removes v1.
+
+The semantic module's inputs come from Hugging Face (Apache-2.0, not gated): `onnx/model_q4.onnx`,
+`onnx/vision_encoder_q4.onnx` and their `*.onnx_data` from `onnx-community/embeddinggemma-2-ONNX@daa72c5`, and
+`tokenizer.model` from `google/embeddinggemma-2@f9972ac`. Put them in `tools/semantic-module/work/hf/` as described in
+[tools/semantic-module/README.md](../tools/semantic-module/README.md) (Reproduce), or pass `-ModelsDir`. File names stay
+as they are: each graph refers to its `_data` file by name.
+
 ## Precise OCR module
 
 The app accepts only an archive whose SHA256 is built into `src/Screeny/Modules/OcrModule.cs`, along with a
@@ -395,6 +440,36 @@ shows one tray hint. The module is never downloaded again without a click.
 "Remove module" in settings deletes the folder; if the module was already used in this session, that happens after a
 restart. Uninstalling Screeny removes the module folder too, even if a portable copy uses it; that copy then falls back
 to Windows OCR and offers to download the module again.
+
+## Semantic search module
+
+Code lives in `src/Screeny/Semantic/`; the spike that chose the model is in
+[tools/semantic-module/README.md](../tools/semantic-module/README.md).
+
+- **Index.** Every history item gets `<stamp>.vec` (`SemanticVectors`, about 3 KB): the EmbeddingGemma 2 embedding of
+  the image at 140 soft tokens and the embedding of its OCR text from `.text.json` (`title: none | text: ` prompt, at
+  most 512 tokens; text with fewer than 12 letters or digits is treated as recognition noise and skipped). Both are
+  768 fp16 values. The header holds the model id, module version, budget and a fingerprint of the text. A different
+  model or budget re-indexes the item; a changed text re-embeds only the text. `HistoryStore` treats `.vec` like
+  `.text.json` (delete, prune, clear, orphans, never attached to a new shot). Only the saved PNG with markup is read,
+  never `.orig.png`.
+- **Indexer** (`SemanticIndexer`). One item at a time on a lowest-priority thread, ORT with 2 intra-op threads
+  (`SemanticService.Threads`; ORT's own worker thread runs at normal priority), no spinning, no CPU memory arena. New
+  captures go first, as soon as the text indexer has written their text; then a backfill from newest to oldest. Items
+  without text wait for it while Windows OCR works at all; without OCR languages they are indexed by image only.
+  Nothing starts while the overlay is open. Sessions load on first use and are released after three idle minutes. It
+  runs only with the module ready and the `history` and `ocr` features on. Measured on an i7-13700K: 2.2 s for the
+  image and up to 0.75 s for 512 tokens of text per item; the dev process peaked at about 0.57 GB while indexing.
+- **Search** (`SemanticSearchProvider`). The query is embedded once (no prefix, about 30 ms, 0.7 s with the session
+  load) and scored as the larger of the image and text similarities. EmbeddingGemma 2 similarities are compressed
+  (relevant about 0.62–0.78, others 0.55–0.70), so there is no absolute threshold: hits within 0.06 of the best, at most
+  12, with scores below 1. `HistorySearch` keeps the best score per item, so literal text matches (1.0) come first and
+  semantic hits follow by similarity.
+- **Settings.** "Search by meaning" sits under "Screenshot history": consent with the download size (module plus the
+  runtime if it's missing), download/remove, "Indexed N of M". Removing the module stops indexing and deletes all
+  `.vec` files.
+- **Before a new module version**, re-check parity of the C# pipeline with Python (`SemanticProto parity eg2`) and run
+  the dev scenario above.
 
 ## Windows OCR details
 
