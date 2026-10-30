@@ -46,20 +46,26 @@ Overlay scenarios: `shape`, `shape-tool`, `arrow`, `text`, `ruler`, `badge`, `gu
 Editor scenarios: `original`, `pin`, `select`, `guides`, `flyout-beautify`, `flyout-beautify-mid`, `flyout-tool`,
 `flyout-shape`, `pen-bounds`.
 
-History scenarios: `hover` (the first card shows its action buttons) and `search`. `search` saves six synthetic
+History scenarios: `hover` (the first card shows its action buttons), `search` and `pin-clipboard`. `search` saves six synthetic
 screenshots with English and Russian text into the dev history through the normal save path (once; their paths are in
 `%LocalAppData%\Screeny\Dev\history-search-seeded.txt`), waits until their text is recognized, renders the history
 window for a few queries to `history-search-*.png` and writes the OCR time per screenshot to
-`history-search-timing.txt` in the same folder.
+`history-search-timing.txt` in the same folder (including a 2560×1440 test image that isn't saved to history).
+`pin-clipboard` runs "Pin from clipboard" with a fake clipboard (a synthetic PNG, then an empty one) and pins the first
+card of a filtered history; the pins are rendered to `pin-clipboard.png` and `pin-history.png` and the outcome goes to
+`pin-scenario.txt`. The real clipboard is never read or changed.
 
 **Search in history.** `HistoryTextIndexer` recognizes the text of each new history screenshot with Windows OCR a
 couple of seconds after it is saved, then walks older screenshots newest first, one every 2 seconds, on a
 low-priority thread, and never starts one while the overlay is open. It writes `<stamp>.text.json` (`HistoryText`:
-text plus an engine / index version / OCR languages marker) through the history file queue. Screenshots whose marker
+text, the separate reading of each OCR language as `alternates`, and an engine / index version / OCR languages
+marker) through the history file queue. The alternates are there because the merged result sometimes keeps a Cyrillic
+line read as Latin lookalikes; search looks at all of them. Screenshots whose marker
 matches are skipped, so the walk resumes after a restart; bump `HistoryTextIndexer.IndexVersion` to reindex
 everything. Only the saved PNG with markup is read, never `.orig.png`, and the text is never logged. Nothing runs
 without the `history` and `ocr` features. The search box goes through `IHistorySearchProvider`
-(`TextSearchProvider` today); `HistorySearch` merges providers by the best score per screenshot.
+(`TextSearchProvider` today), which runs off the UI thread and is cancelled by the next keystroke; `HistorySearch`
+merges providers by the best score per screenshot.
 
 Testing updates and the OCR module without GitHub:
 
