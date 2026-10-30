@@ -62,7 +62,31 @@ public partial class App : Application, INotifyPropertyChanged
     private HistoryTextIndexer? _textIndexer;
 
     /// <summary>Распознавать текст для поиска: только с функциями «История» и «Распознавание текста».</summary>
-    private bool TextIndexOn => !IsShuttingDown && History is not null && Settings.IsFeatureOn(FeatureCatalog.Ocr);
+    private bool TextIndexOn => !IsShuttingDown && History is not null && TextSearchOn;
+
+    /// <summary>
+    /// Поиск по тексту в истории: функция «Распознавание текста» включена и в Windows есть хотя бы один язык OCR. Без языков
+    /// индексатор ничего не распознает, и окно истории вечно показывало бы «ждут распознавания».
+    /// </summary>
+    private bool TextSearchOn => Settings.IsFeatureOn(FeatureCatalog.Ocr) && (_ocrHasLanguages ??= OcrHasLanguages());
+
+    /// <summary>Есть ли языки OCR; перепроверяется при каждом применении функций (языки могли доустановить).</summary>
+    private bool? _ocrHasLanguages;
+
+    private static bool OcrHasLanguages()
+    {
+        try
+        {
+            if (OcrService.LanguageTags().Count > 0) return true;
+            Log.Error("Windows has no OCR languages: history search is off");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            Log.Error("OCR languages check failed", ex);
+            return false;
+        }
+    }
 
     public ICommand CaptureCommand { get; private set; } = null!;
     public ICommand HistoryCommand { get; private set; } = null!;
@@ -376,12 +400,13 @@ public partial class App : Application, INotifyPropertyChanged
     {
         if (!HistoryFeatureOn) _historyWindow?.Close(); // до того, как хранилище станет null
         UpdateHistoryStore();
+        _ocrHasLanguages = null;
         bool pins = Settings.ActionAllowed(CaptureAction.Pin);
         if (!pins) foreach (var pin in Pins.ToList()) pin.Close();
         if (_historyWindow is not null)
         {
             _historyWindow.CanPin = pins;
-            _historyWindow.SearchEnabled = Settings.IsFeatureOn(FeatureCatalog.Ocr);
+            _historyWindow.SearchEnabled = TextSearchOn;
         }
         // Папка могла смениться, функции — выключиться: проход по папке начинается заново (готовые снимки пропускаются).
         _textIndexer?.Stop();
@@ -708,7 +733,7 @@ public partial class App : Application, INotifyPropertyChanged
             {
                 DevShowFirstCardActions = IsDev && Args.Scenario == "hover",
                 CanPin = Settings.ActionAllowed(CaptureAction.Pin),
-                SearchEnabled = Settings.IsFeatureOn(FeatureCatalog.Ocr),
+                SearchEnabled = TextSearchOn,
             };
             _historyWindow.Closed += (_, _) => _historyWindow = null;
         }
