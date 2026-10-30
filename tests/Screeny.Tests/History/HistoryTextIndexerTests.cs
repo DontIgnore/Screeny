@@ -18,10 +18,12 @@ public sealed class HistoryTextIndexerTests : IDisposable
 
         public HistoryTextMarker? CurrentMarker() => Marker;
 
-        public string Recognize(string pngPath)
+        public Func<string, IReadOnlyList<string>?> Alternates { get; set; } = _ => null;
+
+        public RecognizedText Recognize(string pngPath)
         {
             Calls.Enqueue(Path.GetFileName(pngPath));
-            return Text(pngPath);
+            return new RecognizedText(Text(pngPath), Alternates(pngPath));
         }
     }
 
@@ -63,6 +65,22 @@ public sealed class HistoryTextIndexerTests : IDisposable
         Assert.Equal("text of 20260101_000000_000.png", text.Text);
         Assert.Equal("fake", text.Marker.Engine);
         Assert.Equal((path, text.Text), Assert.Single(indexed));
+    }
+
+    [Fact]
+    public async Task Alternates_AreStored_AndSearchable()
+    {
+        var (indexer, store, recognizer) = Create();
+        recognizer.Text = _ => "CqeT Ha onnaTY";
+        recognizer.Alternates = _ => ["Счёт на оплату"];
+        string? raised = null;
+        indexer.Indexed += (_, t) => raised = t;
+        indexer.Add(Save(store, 0));
+        await Idle(indexer);
+        var text = HistoryText.TryRead(Assert.Single(store.List()).TextPath)!;
+        Assert.Equal("CqeT Ha onnaTY", text.Text);
+        Assert.Equal(["Счёт на оплату"], text.Alternates!);
+        Assert.Equal("CqeT Ha onnaTY\nСчёт на оплату", raised);
     }
 
     [Fact]

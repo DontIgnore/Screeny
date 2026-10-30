@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text;
 
 namespace Screeny.History;
@@ -16,8 +17,11 @@ public sealed record HistorySearchHit(string Path, double Score);
 /// </summary>
 public interface IHistorySearchProvider
 {
-    /// <summary>Подходящие снимки; запрос не пустой. Вызывается из UI-потока, поэтому должен быть быстрым.</summary>
-    IReadOnlyList<HistorySearchHit> Search(string query, IReadOnlyList<HistorySearchEntry> entries);
+    /// <summary>
+    /// Подходящие снимки; запрос не пустой. Вызывается вне UI-потока; каждый новый запрос отменяет прежний
+    /// (<paramref name="cancellationToken"/>), поэтому долгий поставщик должен его проверять.
+    /// </summary>
+    Task<IReadOnlyList<HistorySearchHit>> SearchAsync(string query, IReadOnlyList<HistorySearchEntry> entries, CancellationToken cancellationToken);
 }
 
 /// <summary>Приведение текста для сравнения: без регистра, без диакритики латиницы и кириллицы (é → e, ё → е), полноширинные знаки — обычные.</summary>
@@ -47,15 +51,19 @@ public static class SearchNormalizer
 /// </summary>
 public sealed class TextSearchProvider : IHistorySearchProvider
 {
-    private readonly Dictionary<string, (string? Text, string? Metadata, string Normalized)> _cache = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, (string? Text, string? Metadata, string Normalized)> _cache = new(StringComparer.OrdinalIgnoreCase);
 
-    public IReadOnlyList<HistorySearchHit> Search(string query, IReadOnlyList<HistorySearchEntry> entries)
+    public Task<IReadOnlyList<HistorySearchHit>> SearchAsync(string query, IReadOnlyList<HistorySearchEntry> entries, CancellationToken cancellationToken)
+        => Task.FromResult(Search(query, entries, cancellationToken));
+
+    public IReadOnlyList<HistorySearchHit> Search(string query, IReadOnlyList<HistorySearchEntry> entries, CancellationToken cancellationToken = default)
     {
         var terms = SearchNormalizer.Terms(query);
         var hits = new List<HistorySearchHit>();
         if (terms.Count == 0) return hits;
         foreach (var entry in entries)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var haystack = Normalized(entry);
             if (haystack.Length == 0) continue;
             bool all = true;
@@ -81,13 +89,16 @@ public sealed class TextSearchProvider : IHistorySearchProvider
 /// <summary>Объединение поставщиков: у снимка — наибольшая оценка, порядок — по оценке, затем от новых к старым.</summary>
 public sealed class HistorySearch(params IHistorySearchProvider[] providers)
 {
-    /// <summary>Найденные снимки в порядке показа; null — запрос пустой (показывать всё).</summary>
-    public IReadOnlyList<HistorySearchHit>? Search(string? query, IReadOnlyList<HistorySearchEntry> entries)
+    /// <summary>Найденные снимки в порядке показа; null — запрос пустой (показывать всё). Поставщики работают параллельно.</summary>
+    public async Task<IReadOnlyList<HistorySearchHit>?> SearchAsync(string? query, IReadOnlyList<HistorySearchEntry> entries,
+        CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(query)) return null;
+        var results = await Task.WhenAll(providers.Select(p => p.SearchAsync(query, entries, cancellationToken)));
+        cancellationToken.ThrowIfCancellationRequested();
         var best = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
-        foreach (var provider in providers)
-            foreach (var hit in provider.Search(query, entries))
+        foreach (var result in results)
+            foreach (var hit in result)
                 if (!best.TryGetValue(hit.Path, out var score) || hit.Score > score) best[hit.Path] = hit.Score;
         var created = entries.ToDictionary(e => e.Path, e => e.CreatedAt, StringComparer.OrdinalIgnoreCase);
         return best

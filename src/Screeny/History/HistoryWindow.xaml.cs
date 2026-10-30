@@ -45,9 +45,9 @@ public partial class HistoryWindow : ChromeWindow
         _queue = queue;
         _view = (ListCollectionView)CollectionViewSource.GetDefaultView(_items);
         Items.ItemsSource = _view;
-        _searchDelay.Tick += (_, _) => ApplySearch();
+        _searchDelay.Tick += (_, _) => _ = ApplySearchAsync();
         PreviewKeyDown += OnWindowKeyDown;
-        Closed += (_, _) => { _closed = true; _refreshGeneration++; _searchDelay.Stop(); Loc.Changed -= Refresh; };
+        Closed += (_, _) => { _closed = true; _refreshGeneration++; _searchDelay.Stop(); _searchCts?.Cancel(); Loc.Changed -= Refresh; };
         // Заголовок и пустое состояние собираются в коде: при смене языка — заново.
         Loc.Changed += Refresh;
     }
@@ -121,7 +121,7 @@ public partial class HistoryWindow : ChromeWindow
 
         // Тексты для поиска — только с включённым поиском; сотни маленьких файлов читаются в фоне.
         var texts = _searchEnabled
-            ? await Task.Run(() => list.Select(i => (i.Path, Text: HistoryText.TryRead(i.TextPath)?.Text)).ToList())
+            ? await Task.Run(() => list.Select(i => (i.Path, Text: HistoryText.TryRead(i.TextPath)?.SearchableText)).ToList())
             : [];
         if (_closed || generation != _refreshGeneration) return;
         _texts.Clear();
@@ -133,8 +133,8 @@ public partial class HistoryWindow : ChromeWindow
             _texts.TryAdd(item.Path, null);
         }
         if (DevShowFirstCardActions && _items.Count > 0) _items[0].ForceActions = true;
-        ApplySearch();
         _ = LoadThumbnailsAsync(_items.ToList(), generation);
+        await ApplySearchAsync();
     }
 
     private void UpdateHeader(int? found = null)
@@ -152,17 +152,29 @@ public partial class HistoryWindow : ChromeWindow
         else EmptyState.Visibility = Visibility.Collapsed;
     }
 
+    private CancellationTokenSource? _searchCts;
+
     /// <summary>
     /// Фильтрует карточки по запросу. Порядок — как вернул <see cref="HistorySearch"/> (по оценке, затем от новых к старым);
-    /// пустой запрос — все карточки в обычном порядке.
+    /// пустой запрос — все карточки в обычном порядке. Поставщики работают вне UI-потока; новый запрос отменяет прежний,
+    /// а опоздавший результат отбрасывается.
     /// </summary>
-    private void ApplySearch()
+    private async Task ApplySearchAsync()
     {
         _searchDelay.Stop();
+        _searchCts?.Cancel();
         if (_closed) return;
+        var cts = _searchCts = new CancellationTokenSource();
         var query = _searchEnabled ? Query : null;
-        var hits = query is null ? null
-            : _search.Search(query, _items.Select(vm => new HistorySearchEntry(vm.Path, vm.CreatedAt, _texts.GetValueOrDefault(vm.Path))).ToList());
+        IReadOnlyList<HistorySearchHit>? hits = null;
+        if (query is not null)
+        {
+            var entries = _items.Select(vm => new HistorySearchEntry(vm.Path, vm.CreatedAt, _texts.GetValueOrDefault(vm.Path))).ToList();
+            try { hits = await Task.Run(() => _search.SearchAsync(query, entries, cts.Token)); }
+            catch (OperationCanceledException) { return; }
+            catch (Exception ex) { Log.Error("History search failed", ex); hits = []; }
+            if (_closed || !ReferenceEquals(cts, _searchCts)) return;
+        }
         if (hits is null)
         {
             _view.Filter = null;
@@ -196,7 +208,7 @@ public partial class HistoryWindow : ChromeWindow
         bool empty = SearchBox.Text.Length == 0;
         SearchPlaceholder.Visibility = empty ? Visibility.Visible : Visibility.Collapsed;
         ClearSearch.Visibility = empty ? Visibility.Collapsed : Visibility.Visible;
-        if (empty) ApplySearch(); else RestartSearchDelay();
+        if (empty) _ = ApplySearchAsync(); else RestartSearchDelay();
     }
 
     private void OnClearSearch(object sender, RoutedEventArgs e)
@@ -206,15 +218,15 @@ public partial class HistoryWindow : ChromeWindow
     }
 
     /// <summary>Из поля поиска стрелка вниз или Enter переходят к первой найденной карточке.</summary>
-    private void OnSearchKeyDown(object sender, KeyEventArgs e)
+    private async void OnSearchKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key is not (Key.Down or Key.Enter)) return;
-        ApplySearch();
-        if (_view.IsEmpty) return;
+        e.Handled = true;
+        if (_searchDelay.IsEnabled) await ApplySearchAsync(); // запрос, ещё не применённый после ввода
+        if (_closed || _view.IsEmpty) return;
         _view.MoveCurrentToFirst();
         Items.SelectedItem = _view.CurrentItem;
         if (Items.ItemContainerGenerator.ContainerFromItem(_view.CurrentItem) is ListBoxItem item) item.Focus();
-        e.Handled = true;
     }
 
     /// <summary>Ctrl+F — к полю поиска; Esc сначала очищает запрос, затем закрывает окно.</summary>
@@ -329,10 +341,16 @@ public partial class HistoryWindow : ChromeWindow
     }
 
     /// <summary>Тестовый запуск (<c>--dev --history --scenario search</c>): запрос применяется сразу, без задержки ввода.</summary>
-    public void DevSearch(string query)
+    public Task DevSearch(string query)
     {
         SearchBox.Text = query;
-        ApplySearch();
+        return ApplySearchAsync();
+    }
+
+    /// <summary>Тестовый запуск: «Закрепить» первой видимой (после поиска) карточки.</summary>
+    public void DevPinFirst()
+    {
+        if (_view.Cast<HistoryItemViewModel>().FirstOrDefault() is { } vm && _canPin) _pin(vm.LoadFull());
     }
 
     /// <summary>Тестовый запуск: окно целиком (с подписью) рисуется в PNG — без снимка экрана.</summary>

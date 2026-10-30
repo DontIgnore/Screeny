@@ -10,9 +10,12 @@ public interface IHistoryTextRecognizer
     /// <summary>Чем сейчас распознавался бы текст; null — распознавание недоступно (в Windows нет языков с OCR).</summary>
     HistoryTextMarker? CurrentMarker();
 
-    /// <summary>Текст снимка (пустая строка — текста нет). Блокирующий вызов, выполняется в фоновом потоке.</summary>
-    string Recognize(string pngPath);
+    /// <summary>Текст снимка (пустой — текста нет). Блокирующий вызов, выполняется в фоновом потоке.</summary>
+    RecognizedText Recognize(string pngPath);
 }
+
+/// <summary>Итог распознавания и другие прочтения отдельными языками (только отличающиеся от итога).</summary>
+public sealed record RecognizedText(string Text, IReadOnlyList<string>? Alternates = null);
 
 /// <summary>Быстрое распознавание Windows (<see cref="OcrService"/>); точный модуль для индекса не нужен.</summary>
 public sealed class WindowsOcrTextRecognizer : IHistoryTextRecognizer
@@ -25,7 +28,7 @@ public sealed class WindowsOcrTextRecognizer : IHistoryTextRecognizer
         return tags.Count == 0 ? null : new HistoryTextMarker(Engine, HistoryTextIndexer.IndexVersion, tags);
     }
 
-    public string Recognize(string pngPath)
+    public RecognizedText Recognize(string pngPath)
     {
         BitmapSource image;
         using (var ms = new MemoryStream(File.ReadAllBytes(pngPath), writable: false))
@@ -39,7 +42,12 @@ public sealed class WindowsOcrTextRecognizer : IHistoryTextRecognizer
             image = bmp;
         }
         // Продолжения WinRT идут в пуле потоков, а не в этом: ожидание здесь не взаимоблокируется.
-        return OcrService.RecognizeAsync(image).GetAwaiter().GetResult() ?? "";
+        var text = OcrService.RecognizeAsync(image).GetAwaiter().GetResult() ?? "";
+        var alternates = OcrService.RecognizeEachLanguageAsync(image).GetAwaiter().GetResult()
+            .Where(t => !string.IsNullOrWhiteSpace(t) && t != text)
+            .Distinct()
+            .ToList();
+        return new RecognizedText(text, alternates);
     }
 }
 
@@ -54,7 +62,7 @@ public sealed class WindowsOcrTextRecognizer : IHistoryTextRecognizer
 public sealed class HistoryTextIndexer
 {
     /// <summary>Версия индексатора в отметке: поднять — и все снимки распознаются заново.</summary>
-    public const int IndexVersion = 1;
+    public const int IndexVersion = 2;
 
     private readonly Func<HistoryStore?> _store;
     private readonly Func<bool> _enabled, _paused;
@@ -88,7 +96,7 @@ public sealed class HistoryTextIndexer
         _pausePoll = pausePoll ?? TimeSpan.FromSeconds(1);
     }
 
-    /// <summary>Снимок распознан: путь и текст. Вызывается из фонового потока.</summary>
+    /// <summary>Снимок распознан: путь и текст для поиска (<see cref="HistoryText.SearchableText"/>). Вызывается из фонового потока.</summary>
     public event Action<string, string>? Indexed;
 
     /// <summary>Догоняющий проход по папке (после задержки). Повторный вызов во время прохода ничего не ломает.</summary>
@@ -221,8 +229,8 @@ public sealed class HistoryTextIndexer
     {
         var store = _store();
         if (store is null || !File.Exists(path)) return;
-        string text;
-        try { text = await _ocr.Enqueue(() => RecognizeAtLowPriority(path)); }
+        RecognizedText recognized;
+        try { recognized = await _ocr.Enqueue(() => RecognizeAtLowPriority(path)); }
         catch (Exception ex)
         {
             // Битый или занятый файл: в этом сеансе больше не пробуем; текст снимка в журнал не пишется.
@@ -231,18 +239,19 @@ public sealed class HistoryTextIndexer
             return;
         }
         if (token.IsCancellationRequested || !_enabled()) return;
+        var text = new HistoryText(recognized.Text, marker, recognized.Alternates is { Count: > 0 } alt ? alt : null);
         bool written;
-        try { written = await _files.Enqueue(() => store.WriteText(path, new HistoryText(text, marker))); }
+        try { written = await _files.Enqueue(() => store.WriteText(path, text)); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             Log.Error($"History text write failed: {path}", ex);
             lock (_gate) _failed.Add(path);
             return;
         }
-        if (written) Indexed?.Invoke(path, text);
+        if (written) Indexed?.Invoke(path, text.SearchableText);
     }
 
-    private string RecognizeAtLowPriority(string path)
+    private RecognizedText RecognizeAtLowPriority(string path)
     {
         var thread = Thread.CurrentThread;
         var priority = thread.Priority;

@@ -11,7 +11,7 @@ public class HistorySearchTests
         => new(@"C:\h\" + name + ".png", T0.AddMinutes(minutes), text, metadata);
 
     private static List<string> Find(string query, params HistorySearchEntry[] entries)
-        => new HistorySearch(new TextSearchProvider()).Search(query, entries)!.Select(h => Path.GetFileNameWithoutExtension(h.Path)).ToList();
+        => new HistorySearch(new TextSearchProvider()).SearchAsync(query, entries).Result!.Select(h => Path.GetFileNameWithoutExtension(h.Path)).ToList();
 
     [Theory]
     [InlineData("Café", "cafe")]
@@ -58,16 +58,24 @@ public class HistorySearchTests
         => Assert.Equal(["shot"], Find("notepad", E("shot", "", metadata: "Untitled - Notepad")));
 
     [Fact]
-    public void EmptyQuery_MeansNoFilter()
+    public async Task EmptyQuery_MeansNoFilter()
     {
         var search = new HistorySearch(new TextSearchProvider());
-        Assert.Null(search.Search("", [E("a", "x")]));
-        Assert.Null(search.Search("   ", [E("a", "x")]));
+        Assert.Null(await search.SearchAsync("", [E("a", "x")]));
+        Assert.Null(await search.SearchAsync("   ", [E("a", "x")]));
     }
 
     [Fact]
     public void Results_AreNewestFirst()
         => Assert.Equal(["new", "old"], Find("report", E("old", "Q3 report", 0), E("new", "Q4 report", 5)));
+
+    [Fact]
+    public void Cancelled_Throws()
+    {
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        Assert.Throws<OperationCanceledException>(() => new TextSearchProvider().Search("x", [E("a", "x")], cts.Token));
+    }
 
     [Fact]
     public void ChangedText_IsReNormalized()
@@ -79,11 +87,12 @@ public class HistorySearchTests
 
     private sealed class FixedProvider(params HistorySearchHit[] hits) : IHistorySearchProvider
     {
-        public IReadOnlyList<HistorySearchHit> Search(string query, IReadOnlyList<HistorySearchEntry> entries) => hits;
+        public Task<IReadOnlyList<HistorySearchHit>> SearchAsync(string query, IReadOnlyList<HistorySearchEntry> entries, CancellationToken cancellationToken)
+            => Task.FromResult<IReadOnlyList<HistorySearchHit>>(hits);
     }
 
     [Fact]
-    public void Providers_AreMerged_ByBestScore()
+    public async Task Providers_AreMerged_ByBestScore()
     {
         var a = E("a", "alpha", 0);
         var b = E("b", "beta", 1);
@@ -91,22 +100,22 @@ public class HistorySearchTests
         // Второй поставщик (например, смысловой) находит «a» с высокой оценкой и «c» с низкой.
         var semantic = new FixedProvider(new(a.Path, 0.9), new(c.Path, 0.2), new(@"C:\h\gone.png", 1.0));
         var search = new HistorySearch(new TextSearchProvider(), semantic);
-        var hits = search.Search("et", [a, b, c])!; // по тексту — только «beta»
+        var hits = (await search.SearchAsync("et", [a, b, c]))!; // по тексту — только «beta»
         Assert.Equal([b.Path, a.Path, c.Path], hits.Select(h => h.Path));
         Assert.Equal([1.0, 0.9, 0.2], hits.Select(h => h.Score));
         Assert.DoesNotContain(hits, h => h.Path.EndsWith("gone.png")); // снимка уже нет в истории
     }
 
     [Fact]
-    public void ThousandsOfEntries_SearchStaysFast()
+    public async Task ThousandsOfEntries_SearchStaysFast()
     {
         var entries = Enumerable.Range(0, 5000)
             .Select(i => E($"s{i}", $"Build {i} failed at step {i % 7}. Пользователь получил ошибку доступа к файлу report_{i}.xlsx", i))
             .ToArray();
         var search = new HistorySearch(new TextSearchProvider());
-        search.Search("warmup", entries);
+        await search.SearchAsync("warmup", entries);
         var watch = System.Diagnostics.Stopwatch.StartNew();
-        var hits = search.Search("ошибку report_4999", entries)!;
+        var hits = (await search.SearchAsync("ошибку report_4999", entries))!;
         watch.Stop();
         Assert.Equal(@"C:\h\s4999.png", Assert.Single(hits).Path);
         Assert.True(watch.ElapsedMilliseconds < 200, $"{watch.ElapsedMilliseconds} ms");

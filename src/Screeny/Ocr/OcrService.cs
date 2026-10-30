@@ -19,6 +19,20 @@ public static class OcrService
     public static async Task<string?> RecognizeAsync(BitmapSource image, bool adaptive = true)
         => (await RecognizeLayoutAsync(image, adaptive))?.TextOf(null);
 
+    /// <summary>
+    /// Сырой текст каждого языка профиля, один проход без увеличения (для поиска в истории: выбор лучшей строки в
+    /// <see cref="RecognizeAsync"/> иногда оставляет кириллическую строку прочитанной латиницей, «Счёт» → «CqéT»).
+    /// Пусто — в системе нет языков с OCR.
+    /// </summary>
+    public static async Task<IReadOnlyList<string>> RecognizeEachLanguageAsync(BitmapSource image)
+    {
+        var engines = Engines();
+        if (engines.Count == 0) return [];
+        var bitmap = ToSoftwareBitmap(image, 1, out _);
+        try { return (await Task.WhenAll(engines.Select(async e => (await e.RecognizeAsync(bitmap)).Text))).ToList(); }
+        finally { bitmap.Dispose(); }
+    }
+
     /// <summary>Текст с медианной высотой слова ниже порога (в пикселях) считается мелким и распознаётся ещё и с увеличением.</summary>
     public const double SmallWordHeight = 18;
 

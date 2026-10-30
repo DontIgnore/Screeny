@@ -19,6 +19,16 @@ public class HistoryTextTests
     }
 
     [Fact]
+    public void Alternates_RoundTrip_AndAreSearchable()
+    {
+        var parsed = HistoryText.TryParse(new HistoryText("main", Marker, ["other", "третье"]).Serialize())!;
+        Assert.Equal(["other", "третье"], parsed.Alternates!);
+        Assert.Equal("main\nother\nтретье", parsed.SearchableText);
+        Assert.Null(HistoryText.TryParse(new HistoryText("main", Marker).Serialize())!.Alternates);
+        Assert.Equal("main", new HistoryText("main", Marker).SearchableText);
+    }
+
+    [Fact]
     public void EmptyText_IsAValidRecord()
         => Assert.Equal("", HistoryText.TryParse(new HistoryText("", Marker).Serialize())!.Text);
 

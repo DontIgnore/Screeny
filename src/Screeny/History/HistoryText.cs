@@ -21,15 +21,20 @@ public sealed record HistoryTextMarker(string Engine, int Version, IReadOnlyList
 /// <summary>
 /// Распознанный текст снимка истории — sidecar <c>&lt;stamp&gt;.text.json</c>:
 /// <code>
-/// { "version": 1, "engine": "windows-ocr", "indexVersion": 1, "languages": [ "en-US", "ru" ], "text": "…" }
+/// { "version": 1, "engine": "windows-ocr", "indexVersion": 2, "languages": [ "en-US", "ru" ], "text": "…", "alternates": [ "…" ] }
 /// </code>
+/// <c>text</c> — итог распознавания (лучшая строка из всех языков), <c>alternates</c> (необязательно) — другие прочтения
+/// того же снимка отдельными языками: выбор лучшей строки иногда ошибается, а поиску лишнее прочтение не мешает.
 /// Файл необязателен: у старых снимков его нет, их текст распознаётся в фоне. Пустой <c>text</c> — снимок уже
 /// распознан, текста в нём нет (иначе пустые снимки распознавались бы при каждом запуске). Текст берётся только из
 /// сохранённого снимка с пометками, никогда из <c>.orig.png</c>: размытое пользователем не должно попасть в файл.
 /// </summary>
-public sealed record HistoryText(string Text, HistoryTextMarker Marker)
+public sealed record HistoryText(string Text, HistoryTextMarker Marker, IReadOnlyList<string>? Alternates = null)
 {
     public const int FormatVersion = 1;
+
+    /// <summary>Всё, по чему ищется снимок: итог и другие прочтения.</summary>
+    public string SearchableText => Alternates is { Count: > 0 } alt ? string.Join("\n", alt.Prepend(Text)) : Text;
 
     public string Serialize()
     {
@@ -44,6 +49,12 @@ public sealed record HistoryText(string Text, HistoryTextMarker Marker)
             foreach (var language in Marker.Languages) w.WriteStringValue(language);
             w.WriteEndArray();
             w.WriteString("text", Text);
+            if (Alternates is { Count: > 0 })
+            {
+                w.WriteStartArray("alternates");
+                foreach (var alternate in Alternates) w.WriteStringValue(alternate);
+                w.WriteEndArray();
+            }
             w.WriteEndObject();
         }
         return Encoding.UTF8.GetString(ms.ToArray());
@@ -65,7 +76,11 @@ public sealed record HistoryText(string Text, HistoryTextMarker Marker)
             if (root.TryGetProperty("languages", out var langs) && langs.ValueKind == JsonValueKind.Array)
                 foreach (var l in langs.EnumerateArray())
                     if (l.ValueKind == JsonValueKind.String) languages.Add(l.GetString()!);
-            return new HistoryText(text.GetString()!, new HistoryTextMarker(engine, indexVersion, languages));
+            var alternates = new List<string>();
+            if (root.TryGetProperty("alternates", out var alts) && alts.ValueKind == JsonValueKind.Array)
+                foreach (var a in alts.EnumerateArray())
+                    if (a.ValueKind == JsonValueKind.String) alternates.Add(a.GetString()!);
+            return new HistoryText(text.GetString()!, new HistoryTextMarker(engine, indexVersion, languages), alternates.Count > 0 ? alternates : null);
         }
         catch (Exception ex) when (ex is JsonException or FormatException or InvalidOperationException) { return null; }
     }

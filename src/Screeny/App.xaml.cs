@@ -195,6 +195,7 @@ public partial class App : Application, INotifyPropertyChanged
     {
         if (Args.OpenSettings) ShowSettings();
         if (Args.OpenHistory && Args.Scenario == "search") RunDevSearchScenario(); // App.DevHistory.cs, только dev
+        else if (Args.OpenHistory && Args.Scenario == "pin-clipboard") RunDevPinScenario();
         else if (Args.OpenHistory) ShowHistory();
         if (Args.Feedback is { } feedback) ShowFeedback(feedback == "idea" ? Feedback.FeedbackKind.Idea : Feedback.FeedbackKind.Bug, Args.Scenario);
         if (Args.OverlayTest is not null) StartCapture();
