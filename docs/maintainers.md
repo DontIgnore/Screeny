@@ -76,8 +76,9 @@ overlay window itself (`RenderTargetBitmap` of the window content, not a screen 
   matches are logged, never the recognized text: the log goes into bug reports.
 - `distances` (with `--select`) picks the ruler and shows the distances from a point at 10.6 % / 88.6 % of the
   selection.
-- `burst` (with `--burst-test`) saves the window on the initial frame, switches to the first one, logs whether every
-  cache of the frozen picture was reset, and writes the composed selection as `<folder>.burst-export.png`.
+- `burst` (with `--burst-test`) saves the window on the initial frame, switches to the first one (to the last one if
+  it opened on the first), logs whether every cache of the frozen picture was reset, and writes the composed
+  selection as `<folder>.burst-export.png`.
 Editor scenarios: `original`, `pin`, `select`, `guides`, `flyout-beautify`, `flyout-beautify-mid`, `flyout-tool`,
 `flyout-shape`, `pen-bounds`.
 

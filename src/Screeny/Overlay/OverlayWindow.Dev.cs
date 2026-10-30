@@ -312,7 +312,8 @@ public partial class OverlayWindow
                 break;
             }
             case "burst":
-                // С --burst-test: кадр окна на начальном кадре серии, переход к первому (как PageUp до упора), проверка, что
+                // С --burst-test: кадр окна на начальном кадре серии, переход к другому краю (к первому, как PageUp до упора, или к
+                // последнему, если серия открылась на первом), проверка, что
                 // снимок, источник редактора и кэши яркости сменились, кадр окна и итоговая картинка выделения, закрытие.
                 Dispatcher.BeginInvoke(() =>
                 {
@@ -320,12 +321,13 @@ public partial class OverlayWindow
                     DevRender("burst");
                     int was = _frameIndex;
                     _ = ShotLuma; // яркость прежнего кадра загружена: смена кадра обязана её сбросить
-                    ShowFrame(0);
-                    var bitmap = _frames[0].Bitmap;
+                    int target = _frameIndex == 0 ? _frames.Count - 1 : 0;
+                    ShowFrame(target);
+                    var bitmap = _frames[target].Bitmap;
                     bool swapped = ReferenceEquals(_shot.Bitmap, bitmap) && ReferenceEquals(_editor.Source, bitmap) && ReferenceEquals(ShotImage.Source, bitmap)
                                    && ReferenceEquals(Annotations.Source, bitmap) && _shotLuma is null && _edgeSnapper is null && _distanceEdges is null;
                     Screeny.Logging.Log.Error($"Dev burst: frame {was + 1} -> {_frameIndex + 1} of {_frames.Count}, caches reset: {swapped}");
-                    DevRender("burst-first");
+                    DevRender(target == 0 ? "burst-first" : "burst-last");
                     if (_dev?.Source is { } folder && _selection.HasSelection)
                     {
                         var path = Path.TrimEndingDirectorySeparator(Path.GetFullPath(folder)) + ".burst-export.png";
