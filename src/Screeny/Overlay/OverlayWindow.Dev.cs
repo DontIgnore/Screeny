@@ -14,7 +14,7 @@ public partial class OverlayWindow
     /// <summary>Имена сценариев для <c>--scenario</c>.</summary>
     public static readonly string[] DevScenarios = ["shape", "shape-tool", "arrow", "text", "ruler", "badge", "qr", "beautify", "beautify-sunset", "beautify-light",
         "guides", "textalign", "edgesnap", "flyout-beautify", "flyout-beautify-mid", "flyout-tool", "flyout-shape", "pen-bounds",
-        "ocr", "ocr-select", "readme-hero", "readme-text", "readme-beautify", "privacy"];
+        "ocr", "ocr-select", "readme-hero", "readme-text", "readme-beautify", "privacy", "distances"];
 
     /// <summary>Сценарий privacy: дождаться проверки на личные данные, снять кадры до и после «Скрыть» и закрыться.</summary>
     private bool _devPrivacy;
@@ -291,6 +291,23 @@ public partial class OverlayWindow
                     FileSaver.Save(ComposeResult(_selection.Rect).Image, path);
                     Screeny.Logging.Log.Error($"Dev export saved to {path}");
                 }
+                break;
+            }
+            case "distances":
+            {
+                // Линейка и курсор над точкой (для синтетического рабочего стола с --select 120,80,1040,560 — над синей
+                // кнопкой): линии до её краёв. Кадр окна — <имя>.distances.png, затем оверлей закрывается.
+                if (!Screeny.Features.FeatureGate.ToolAllowed(_settings, ToolKind.Ruler)) break;
+                SetTool(ToolKind.Ruler);
+                var p = new PixelPoint((int)At(0.106, 0.886).X, (int)At(0.106, 0.886).Y);
+                Dispatcher.BeginInvoke(() =>
+                {
+                    UpdateDistances(p);
+                    if (RulerOverlay.Distances is { } d)
+                        Screeny.Logging.Log.Error($"Dev distances at {p.X},{p.Y}: left {d.ToLeft}, right {d.ToRight}, up {d.ToTop}, down {d.ToBottom} px");
+                    DevRender("distances");
+                    Cancel();
+                }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
                 break;
             }
             case "privacy":

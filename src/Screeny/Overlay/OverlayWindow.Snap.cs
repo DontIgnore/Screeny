@@ -64,7 +64,7 @@ public partial class OverlayWindow
 
         foreach (var e in WindowFinder.VisibleEdges(_windows, axis, cross)) Consider(e);
 
-        _edgeSnapper ??= new EdgeSnapper(new BitmapLuma(_shot.Bitmap));
+        _edgeSnapper ??= new EdgeSnapper(ShotLuma);
         if (_edgeSnapper.Find(axis, edge, cross, threshold) is { } found) Consider(found);
 
         if (best is { } b)
@@ -99,6 +99,8 @@ public partial class OverlayWindow
     private void RefreshSnapGesture()
     {
         if (_closing || _textMode) return;
+        // Без нажатия Alt показывает или убирает расстояния до соседних границ (OverlayWindow.Distances.cs).
+        if (Mouse.LeftButton != MouseButtonState.Pressed && !HasGesture) UpdateDistances(CurrentMousePixel());
         if (_editor.ToolGestureActive)
         {
             var p = Mouse.GetPosition(PixelCanvas);

@@ -243,6 +243,7 @@ public partial class OverlayWindow : Window
     {
         base.OnMouseLeftButtonDown(e);
         if (IsFromHud(e.OriginalSource)) return;
+        ClearDistances(); // жест начинается: линии расстояний мешали бы видеть, что рисуешь
         if (_textMode) { e.Handled = true; TextMouseDown(e); return; }
         CommitTextEdit();
         var p = MousePixel(e);
@@ -317,7 +318,7 @@ public partial class OverlayWindow : Window
             UpdateMagnifier(p);
             return;
         }
-        if (IsFromHud(e.OriginalSource)) { Cursor = Cursors.Arrow; if (_editor.PipetteOn) Magnifier.Visibility = Visibility.Collapsed; return; }
+        if (IsFromHud(e.OriginalSource)) { Cursor = Cursors.Arrow; ClearDistances(); if (_editor.PipetteOn) Magnifier.Visibility = Visibility.Collapsed; return; }
         UpdateHover(p, e.GetPosition(PixelCanvas));
     }
 
@@ -381,6 +382,7 @@ public partial class OverlayWindow : Window
 
     private void UpdateHover(PixelPoint p, Point exact)
     {
+        UpdateDistances(p);
         if (_editor.PipetteOn)
         {
             UpdateMagnifier(p);
@@ -712,6 +714,7 @@ public partial class OverlayWindow : Window
         Deselect();
         SetPipette(false);
         _editor.Ruler.Clear();
+        ClearDistances();
         _textMode = true;
         RefreshOptions(); // в режиме текста параметров нет: flyout'ы закрываются
         int generation = ++_ocrGeneration;
