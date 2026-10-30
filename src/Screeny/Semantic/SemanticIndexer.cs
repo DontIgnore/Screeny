@@ -72,6 +72,9 @@ public sealed class SemanticIndexer
     private readonly object _gate = new();
     private readonly LinkedList<string> _fresh = new();
     private readonly HashSet<string> _failed = new(StringComparer.OrdinalIgnoreCase);
+    // По последнему проходу по папке: все снимки и те, что ещё без актуальных векторов (для счёта без нового прохода).
+    private readonly HashSet<string> _counted = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> _pending = new(StringComparer.OrdinalIgnoreCase);
     private CancellationTokenSource? _cts;
     private Task _run = Task.CompletedTask;
     private bool _running, _backfillRequested;
@@ -191,8 +194,11 @@ public sealed class SemanticIndexer
                 if (path is null && backlog is { Count: > 0 }) path = backlog.Dequeue();
                 if (path is null)
                 {
-                    // Конец прохода: счёт «N из M» — заново по папке (новые снимки, удалённые, дождавшиеся текста).
-                    if (indexed) { indexed = false; await BacklogAsync(); }
+                    // Конец догоняющего прохода: счёт «N из M» — заново по папке (удалённые снимки, дождавшиеся текста).
+                    // После одних новых снимков папка заново не читается: счётчики уже прибавлены.
+                    if (backlog is not null && indexed) await BacklogAsync();
+                    backlog = null;
+                    indexed = false;
                     if (TryFinish(token, onlyIfIdle: true)) return;
                     continue;
                 }
@@ -236,15 +242,25 @@ public sealed class SemanticIndexer
         var queue = await Task.Run(() =>
         {
             var q = new Queue<string>();
+            var pending = new List<string>();
             int done = 0;
             foreach (var item in items)
             {
                 var need = Check(item, _encoder.Marker, textExpected, out _, out _);
                 if (need == Need.None) { done++; continue; }
+                pending.Add(item.Path);
                 lock (_gate) if (_failed.Contains(item.Path)) continue;
                 if (need != Need.WaitText) q.Enqueue(item.Path);
             }
-            lock (_gate) { _done = done; _total = items.Count; }
+            lock (_gate)
+            {
+                _done = done;
+                _total = items.Count;
+                _counted.Clear();
+                _counted.UnionWith(items.Select(i => i.Path));
+                _pending.Clear();
+                _pending.UnionWith(pending);
+            }
             return q;
         });
         ProgressChanged?.Invoke();
@@ -278,7 +294,8 @@ public sealed class SemanticIndexer
         if (vectors is null) return null;
         if (token.IsCancellationRequested || !_enabled()) return false;
         bool written;
-        try { written = await _files.Enqueue(() => store.WriteVectors(path, vectors)); }
+        // Пока снимок ждал очереди, индексацию могли остановить или выключить (удаление текста и векторов идёт той же очередью).
+        try { written = await _files.Enqueue(() => !token.IsCancellationRequested && _enabled() && store.WriteVectors(path, vectors)); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             Log.Error($"Semantic vectors write failed: {path}", ex);
@@ -288,8 +305,8 @@ public sealed class SemanticIndexer
         if (!written) return false;
         lock (_gate)
         {
-            _done++;
-            _total = Math.Max(_total, _done);
+            if (_counted.Add(path)) { _total++; _done++; }
+            else if (_pending.Remove(path)) _done++;
         }
         Indexed?.Invoke(path, vectors);
         ProgressChanged?.Invoke();

@@ -8,7 +8,8 @@ namespace Screeny.Semantic;
 /// обращении и освобождаются через <see cref="IdleTimeout"/> без работы (при индексации до ≈0,8 ГБ — фоновому приложению в
 /// трее это ни к чему). <c>InferenceSession.Run</c> потокобезопасен, поэтому запрос не ждёт индексацию снимка: замок
 /// охраняет только создание и освобождение сессий, а освобождение не трогает сессии, пока ими кто-то пользуется.
-/// Каждый раз перед созданием сессий файлы модуля сверяются с <c>module.json</c>, а сам он — с SHA256 из приложения.
+/// Перед первым созданием сессий файлы модуля сверяются с <c>module.json</c>, а сам он — с SHA256 из приложения (заново — после
+/// установки, «Не удалять» или удаления: <see cref="Reset"/>).
 /// Ошибка загрузки выключает смысловой поиск до перезапуска или переустановки (текстовый поиск работает как прежде).
 /// </summary>
 public sealed class SemanticService : IDisposable
@@ -23,6 +24,8 @@ public sealed class SemanticService : IDisposable
     private readonly Timer _idle;
     private EmbeddingGemmaEncoder? _encoder;
     private string? _encoderFolder;
+    // Папки, файлы которых уже сверены в этом процессе: заново — только после установки, «Не удалять» или удаления (Reset).
+    private readonly HashSet<string> _verified = new(StringComparer.OrdinalIgnoreCase);
     private int _users;
     private volatile string? _loadError;
     private volatile bool _disposed;
@@ -48,6 +51,7 @@ public sealed class SemanticService : IDisposable
     public void Reset()
     {
         _loadError = null;
+        lock (_sync) _verified.Clear();
         ReleaseIdle();
     }
 
@@ -91,10 +95,14 @@ public sealed class SemanticService : IDisposable
         try
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
-            if (ModuleManifest.Verify(folder, _spec.Id, _spec.Version, _spec.ManifestSha256) is { } error)
+            if (!_verified.Contains(folder))
             {
-                Fail(Localization.Loc.F("PreciseOcr.FilesDamaged", error), null);
-                return null;
+                if (ModuleManifest.Verify(folder, _spec.Id, _spec.Version, _spec.ManifestSha256) is { } error)
+                {
+                    Fail(Localization.Loc.F("PreciseOcr.FilesDamaged", error), null);
+                    return null;
+                }
+                _verified.Add(folder);
             }
             long verified = sw.ElapsedMilliseconds;
             _encoder = EmbeddingGemmaEncoder.Load(folder, Threads);
@@ -132,8 +140,11 @@ public sealed class SemanticService : IDisposable
 
     public void Dispose()
     {
-        _disposed = true;
-        _idle.Dispose();
-        ReleaseIdle();
+        lock (_sync)
+        {
+            _disposed = true;
+            _idle.Dispose();
+            ReleaseIdle();
+        }
     }
 }

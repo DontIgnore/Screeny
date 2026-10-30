@@ -195,12 +195,13 @@ public sealed class SemanticIndexTests : IDisposable
         }
     }
 
-    private (SemanticIndexer Indexer, HistoryStore Store, FakeEncoder Encoder) Create(bool textExpected = true, Func<bool>? paused = null)
+    private (SemanticIndexer Indexer, HistoryStore Store, FakeEncoder Encoder) Create(bool textExpected = true, Func<bool>? paused = null,
+        Func<bool>? enabled = null, BackgroundQueue? files = null)
     {
         var store = new HistoryStore(_dir, 50);
         var encoder = new FakeEncoder();
-        var indexer = new SemanticIndexer(() => store, () => true, paused ?? (() => false), () => textExpected, encoder,
-            new BackgroundQueue(), TimeSpan.Zero, TimeSpan.FromMilliseconds(10));
+        var indexer = new SemanticIndexer(() => store, enabled ?? (() => true), paused ?? (() => false), () => textExpected, encoder,
+            files ?? new BackgroundQueue(), TimeSpan.Zero, TimeSpan.FromMilliseconds(10));
         return (indexer, store, encoder);
     }
 
@@ -238,6 +239,44 @@ public sealed class SemanticIndexTests : IDisposable
         Assert.Null(items[1].VectorPath);
         Assert.Null(SemanticVectors.TryRead(items[0].VectorPath)!.Text);
         Assert.NotNull(SemanticVectors.TryRead(items[2].VectorPath)!.Text);
+    }
+
+    [Fact]
+    public async Task FreshShots_AfterBackfill_CountWithoutRescan()
+    {
+        var (indexer, store, _) = Create();
+        Save(store, 0, "old screenshot text");
+        var waiting = Save(store, 1, null);
+        indexer.Start();
+        await Idle(indexer);
+        Assert.Equal((1, 2), indexer.Progress);
+        store.WriteText(waiting, new HistoryText("text arrived later", TextMarker));
+        indexer.Add(waiting);
+        await Idle(indexer);
+        Assert.Equal((2, 2), indexer.Progress);
+        indexer.Add(Save(store, 2, "a new capture"));
+        await Idle(indexer);
+        Assert.Equal((3, 3), indexer.Progress);
+    }
+
+    [Fact]
+    public async Task DisabledWhileWaitingToWrite_WritesNothing()
+    {
+        bool enabled = true;
+        var files = new BackgroundQueue();
+        var (indexer, store, encoder) = Create(enabled: () => enabled, files: files);
+        var path = Save(store, 0, "some text");
+        using var gate = new ManualResetEventSlim();
+        var blocker = files.Enqueue(() => gate.Wait(Timeout));
+        indexer.Add(path);
+        for (int i = 0; i < 200 && encoder.Calls.IsEmpty; i++) await Task.Delay(10);
+        Assert.Single(encoder.Calls);
+        await Task.Delay(100); // векторы посчитаны и ждут очереди файлов
+        enabled = false;
+        gate.Set();
+        await blocker;
+        await Idle(indexer);
+        Assert.False(File.Exists(HistoryStore.VectorPath(path)));
     }
 
     [Fact]
