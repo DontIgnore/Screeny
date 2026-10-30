@@ -438,11 +438,15 @@ public partial class App : Application, INotifyPropertyChanged
     {
         if (originalsStore is not null)
             await OfferDelete(originalsStore, originalsStore.ListOriginals, "App.DeleteOriginalsTitle", "App.DeleteOriginalsText", "App.OriginalsPartlyDeletedTitle");
+        // Векторы смыслового поиска содержат распознанный текст: удаляются вместе с ним (без распознавания они не нужны).
         if (textsStore is not null)
-            await OfferDelete(textsStore, textsStore.ListTexts, "App.DeleteTextsTitle", "App.DeleteTextsText", "App.TextsPartlyDeletedTitle");
+            await OfferDelete(textsStore, textsStore.ListTexts, "App.DeleteTextsTitle", "App.DeleteTextsText", "App.TextsPartlyDeletedTitle",
+                alongWith: textsStore.ListVectors);
     }
 
-    private async Task OfferDelete(HistoryStore store, Func<IReadOnlyList<string>> list, string titleKey, string textKey, string partlyKey)
+    /// <param name="alongWith">Что удалить вместе с файлами из <paramref name="list"/>, если пользователь согласился.</param>
+    private async Task OfferDelete(HistoryStore store, Func<IReadOnlyList<string>> list, string titleKey, string textKey, string partlyKey,
+        Func<IReadOnlyList<string>>? alongWith = null)
     {
         var files = await _imageSaver.Queue.Enqueue(list);
         if (IsShuttingDown) return;
@@ -451,7 +455,12 @@ public partial class App : Application, INotifyPropertyChanged
         if (!Dialogs.Confirm(_settingsWindow, Loc.F(titleKey, count), Loc.T(textKey),
                 Loc.T("Common.Delete"), danger: true, cancelLabel: Loc.T("App.Keep")))
             return;
-        int deleted = await _imageSaver.Queue.Enqueue(() => store.DeleteFiles(files));
+        int deleted = await _imageSaver.Queue.Enqueue(() =>
+        {
+            if (alongWith is not null) Log.Error($"History sidecars deleted with the others: {store.DeleteFiles(alongWith())}");
+            return store.DeleteFiles(files);
+        });
+        if (alongWith is not null) _semanticSearch?.Clear();
         if (deleted < count) Dialogs.Info(_settingsWindow, Loc.T(partlyKey), Loc.F("App.OriginalsPartlyDeletedText", deleted, count));
         _historyWindow?.Refresh();
     }
