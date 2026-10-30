@@ -542,7 +542,9 @@ public partial class OverlayWindow : Window
     private static void ForceForeground(IntPtr hwnd)
     {
         uint ours = User32.GetCurrentThreadId();
-        uint theirs = User32.GetWindowThreadProcessId(User32.GetForegroundWindow(), out _);
+        var foreground = User32.GetForegroundWindow();
+        // К зависшему окну не присоединяемся: общая очередь ввода с ним подвесила бы и оверлей.
+        uint theirs = foreground == IntPtr.Zero || User32.IsHungAppWindow(foreground) ? 0 : User32.GetWindowThreadProcessId(foreground, out _);
         bool attached = theirs != 0 && theirs != ours && User32.AttachThreadInput(ours, theirs, true);
         try
         {
