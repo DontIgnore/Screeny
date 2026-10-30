@@ -24,6 +24,12 @@ public static class FeatureGate
     };
 
     /// <summary>
+    /// Проверка выделения на личные данные: своя функция и распознавание текста, без которого читать нечем.
+    /// </summary>
+    public static bool PrivacyCheckAllowed(this AppSettings settings)
+        => settings.IsFeatureOn(FeatureCatalog.Privacy) && settings.IsFeatureOn(FeatureCatalog.Ocr);
+
+    /// <summary>
     /// Enter копирует снимок: по настройке или всегда, если истории нет (иначе снимок пропал бы бесследно).
     /// Сохранённое значение <see cref="AppSettings.CopyOnCapture"/> не меняется — включили историю, и оно снова в силе.
     /// </summary>

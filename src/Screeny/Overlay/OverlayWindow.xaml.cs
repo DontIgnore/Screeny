@@ -193,6 +193,7 @@ public partial class OverlayWindow : Window
     {
         SystemEvents.DisplaySettingsChanged -= OnDisplaySettingsChanged;
         CancelRefine();
+        CancelPrivacyCheck();
         base.OnClosed(e);
     }
 
@@ -231,7 +232,8 @@ public partial class OverlayWindow : Window
     private bool IsFromHud(object source)
     {
         for (var d = source as DependencyObject; d is not null; d = d is Visual ? VisualTreeHelper.GetParent(d) : LogicalTreeHelper.GetParent(d))
-            if (ReferenceEquals(d, Toolbar) || ReferenceEquals(d, TextEditor) || _editor.Flyouts.Contains(d) || ReferenceEquals(d, CodePopup)) return true;
+            if (ReferenceEquals(d, Toolbar) || ReferenceEquals(d, TextEditor) || _editor.Flyouts.Contains(d) || ReferenceEquals(d, CodePopup)
+                || ReferenceEquals(d, PrivacyChip)) return true;
         return false;
     }
 
@@ -550,6 +552,7 @@ public partial class OverlayWindow : Window
             Dim.ShowHandles = false;
             Annotations.Clip = null;
             SizeLabel.Visibility = Visibility.Collapsed;
+            UpdatePrivacyCheck();
             return;
         }
         var r = _selection.Rect;
@@ -571,6 +574,7 @@ public partial class OverlayWindow : Window
 
         if (Toolbar.Visibility == Visibility.Visible) PositionToolbar();
         if (TextHint.Visibility == Visibility.Visible) PositionTextHint();
+        UpdatePrivacyCheck();
     }
 
     /// <summary>

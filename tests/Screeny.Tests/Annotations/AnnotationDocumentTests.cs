@@ -21,6 +21,29 @@ public class AnnotationDocumentTests
     }
 
     [Fact]
+    public void AddAll_IsOneUndoStep()
+    {
+        var doc = new AnnotationDocument();
+        var first = new RectAnnotation(new Rect(0, 0, 10, 10), Style);
+        doc.Add(first);
+        var hidden = new Annotation[] { new PixelateAnnotation(new Rect(0, 0, 5, 5), Style), new PixelateAnnotation(new Rect(10, 0, 5, 5), Style) };
+        doc.AddAll(hidden);
+        Assert.Equal(3, doc.Items.Count);
+        doc.Undo.Undo();
+        Assert.Equal([first], doc.Items);
+        doc.Undo.Redo();
+        Assert.Equal([first, .. hidden], doc.Items);
+    }
+
+    [Fact]
+    public void AddAll_Empty_RecordsNoStep()
+    {
+        var doc = new AnnotationDocument();
+        doc.AddAll([]);
+        Assert.False(doc.Undo.CanUndo);
+    }
+
+    [Fact]
     public void HitTest_ReturnsTopmost()
     {
         // Прямоугольник ловит клик только по рамке, поэтому точка лежит на рамках обоих.

@@ -763,6 +763,12 @@ Screeny を終了します。もう一度起動して、更新をやり直して
   <data name="Feature.Ruler.Description" xml:space="preserve">
     <value>ピクセル単位の距離と角度（=）。</value>
   </data>
+  <data name="Feature.Privacy.Title" xml:space="preserve">
+    <value>個人情報の警告</value>
+  </data>
+  <data name="Feature.Privacy.Description" xml:space="preserve">
+    <value>範囲を選ぶと、Screeny がその中の文字をこのパソコン上で読み取り、メールアドレス、電話番号、カード番号、キー、IP アドレスがあれば知らせます。文字認識が必要です。</value>
+  </data>
   <data name="Update.Title" xml:space="preserve">
     <value>Screeny の更新</value>
   </data>
@@ -1428,5 +1434,17 @@ Screeny を終了します。もう一度起動して、更新をやり直して
   </data>
   <data name="Feedback.DiagLog" xml:space="preserve">
     <value>Screeny のログ (最後の {0} 行、ユーザー名は置き換え済み):</value>
+  </data>
+  <data name="Privacy.Warning" xml:space="preserve">
+    <value>個人情報が含まれている可能性があります</value>
+  </data>
+  <data name="Privacy.Hide" xml:space="preserve">
+    <value>隠す</value>
+  </data>
+  <data name="Privacy.HideTip" xml:space="preserve">
+    <value>見つかった部分をすべてモザイクにします。Ctrl+Z で元に戻せます。</value>
+  </data>
+  <data name="Privacy.Dismiss" xml:space="preserve">
+    <value>閉じる</value>
   </data>
 </root>

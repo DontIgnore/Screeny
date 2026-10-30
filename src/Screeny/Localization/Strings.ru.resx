@@ -763,6 +763,12 @@ Screeny закроется; запустите его снова и повтор
   <data name="Feature.Ruler.Description" xml:space="preserve">
     <value>Расстояние и угол в пикселях (=).</value>
   </data>
+  <data name="Feature.Privacy.Title" xml:space="preserve">
+    <value>Предупреждение о личных данных</value>
+  </data>
+  <data name="Feature.Privacy.Description" xml:space="preserve">
+    <value>После выделения Screeny читает текст области на вашем компьютере и предупреждает о почте, телефонах, номерах карт, ключах и IP-адресах. Нужно распознавание текста.</value>
+  </data>
   <data name="Update.Title" xml:space="preserve">
     <value>Обновление Screeny</value>
   </data>
@@ -1428,5 +1434,17 @@ Screeny закроется; запустите его снова и повтор
   </data>
   <data name="Feedback.DiagLog" xml:space="preserve">
     <value>Последние строки журнала Screeny ({0}), имя пользователя заменено:</value>
+  </data>
+  <data name="Privacy.Warning" xml:space="preserve">
+    <value>Здесь могут быть личные данные</value>
+  </data>
+  <data name="Privacy.Hide" xml:space="preserve">
+    <value>Скрыть</value>
+  </data>
+  <data name="Privacy.HideTip" xml:space="preserve">
+    <value>Пикселизировать всё найденное. Ctrl+Z вернёт как было.</value>
+  </data>
+  <data name="Privacy.Dismiss" xml:space="preserve">
+    <value>Закрыть</value>
   </data>
 </root>

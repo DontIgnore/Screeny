@@ -93,6 +93,18 @@
         </StackPanel>
       </Border>
       <local:ToolbarControl x:Name="Toolbar" Visibility="Collapsed"/>
+      <!-- Предупреждение о личных данных рядом с панелью. «Скрыть» пикселизирует найденное одним шагом undo; само ничего не скрывается -->
+      <Border x:Name="PrivacyChip" Background="{DynamicResource Overlay.Panel}" CornerRadius="8" Padding="10,4,4,4" Visibility="Collapsed"
+              BorderBrush="{DynamicResource Overlay.ShotRing}" BorderThickness="1" Cursor="Arrow">
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="{l:Loc Privacy.Warning}" Foreground="{DynamicResource Overlay.Ink}" FontFamily="{DynamicResource Font.UI}" FontSize="12"
+                     VerticalAlignment="Center"/>
+          <Button x:Name="PrivacyHideButton" Style="{StaticResource HudButton}" Height="24" Margin="10,0,0,0" Tag="Accent"
+                  Content="{l:Loc Privacy.Hide}" ToolTip="{l:Loc Privacy.HideTip}" Click="OnPrivacyHide"/>
+          <Button Style="{StaticResource HudButton}" Height="24" Padding="8,0" Margin="4,0,0,0"
+                  Content="✕" ToolTip="{l:Loc Privacy.Dismiss}" AutomationProperties.Name="{l:Loc Privacy.Dismiss}" Click="OnPrivacyDismiss"/>
+        </StackPanel>
+      </Border>
       <!-- Сюда добавляются flyout'ы параметров (OptionsFlyouts.Attach): поверх панели -->
     </Canvas>
   </Grid>

@@ -763,6 +763,12 @@ Screeny will close. Start it again and repeat the update.</value>
   <data name="Feature.Ruler.Description" xml:space="preserve">
     <value>Distance and angle in pixels (=).</value>
   </data>
+  <data name="Feature.Privacy.Title" xml:space="preserve">
+    <value>Personal data warning</value>
+  </data>
+  <data name="Feature.Privacy.Description" xml:space="preserve">
+    <value>After you select an area, Screeny reads its text on your computer and warns about emails, phone numbers, card numbers, keys and IP addresses. Needs text recognition.</value>
+  </data>
   <data name="Update.Title" xml:space="preserve">
     <value>Screeny update</value>
   </data>
@@ -1428,5 +1434,17 @@ Replace it?</value>
   </data>
   <data name="Feedback.DiagLog" xml:space="preserve">
     <value>Screeny's log, last {0} lines (user name replaced):</value>
+  </data>
+  <data name="Privacy.Warning" xml:space="preserve">
+    <value>This may contain personal data</value>
+  </data>
+  <data name="Privacy.Hide" xml:space="preserve">
+    <value>Hide</value>
+  </data>
+  <data name="Privacy.HideTip" xml:space="preserve">
+    <value>Pixelate everything found. Ctrl+Z brings it back.</value>
+  </data>
+  <data name="Privacy.Dismiss" xml:space="preserve">
+    <value>Dismiss</value>
   </data>
 </root>

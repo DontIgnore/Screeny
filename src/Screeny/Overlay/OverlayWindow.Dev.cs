@@ -14,7 +14,52 @@ public partial class OverlayWindow
     /// <summary>Имена сценариев для <c>--scenario</c>.</summary>
     public static readonly string[] DevScenarios = ["shape", "shape-tool", "arrow", "text", "ruler", "badge", "qr", "beautify", "beautify-sunset", "beautify-light",
         "guides", "textalign", "edgesnap", "flyout-beautify", "flyout-beautify-mid", "flyout-tool", "flyout-shape", "pen-bounds",
-        "ocr", "ocr-select", "readme-hero", "readme-text", "readme-beautify"];
+        "ocr", "ocr-select", "readme-hero", "readme-text", "readme-beautify", "privacy"];
+
+    /// <summary>Сценарий privacy: дождаться проверки на личные данные, снять кадры до и после «Скрыть» и закрыться.</summary>
+    private bool _devPrivacy;
+
+    /// <summary>
+    /// Кадр самого окна оверлея (RenderTargetBitmap корня, не снимок экрана) рядом с исходником:
+    /// <c>&lt;имя&gt;.&lt;tag&gt;.png</c>, для папки кадров серии — <c>overlay.&lt;tag&gt;.png</c> в ней.
+    /// </summary>
+    private void DevRender(string tag)
+    {
+        if (_dev?.Source is not { } source) return;
+        UpdateLayout();
+        var dpi = VisualTreeHelper.GetDpi(this);
+        int w = (int)Math.Ceiling(Root.ActualWidth * dpi.DpiScaleX), h = (int)Math.Ceiling(Root.ActualHeight * dpi.DpiScaleY);
+        if (w <= 0 || h <= 0) return;
+        var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(w, h, dpi.PixelsPerInchX, dpi.PixelsPerInchY, PixelFormats.Pbgra32);
+        rtb.Render(Root);
+        rtb.Freeze();
+        var path = Directory.Exists(source) ? Path.Combine(source, $"overlay.{tag}.png") : Path.ChangeExtension(source, $".{tag}.png");
+        FileSaver.Save(rtb, path);
+        Screeny.Logging.Log.Error($"Dev render saved to {path}");
+    }
+
+    /// <summary>
+    /// Проверка на личные данные закончилась (dev). Сценарий privacy: кадр с плашкой, «Скрыть», кадр после, повторная
+    /// проверка уже пикселизированной области (в журнал — сколько нашлось теперь), проверка, что Ctrl+Z убирает всё
+    /// одним шагом, и закрытие оверлея.
+    /// </summary>
+    private async void DevPrivacyChecked(IReadOnlyList<Screeny.Ocr.PersonalDataMatch> matches)
+    {
+        if (!_devPrivacy) return;
+        _devPrivacy = false;
+        await Dispatcher.InvokeAsync(() => DevRender("privacy"), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+        int before = Document.Items.Count;
+        HidePersonalData();
+        int added = Document.Items.Count - before;
+        await Dispatcher.InvokeAsync(() => DevRender("privacy-hidden"), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+        var image = ImageComposer.Compose(_shot.Bitmap, _selection.Rect, Document);
+        var layout = await Task.Run(() => Screeny.Ocr.OcrService.RecognizeLayoutAsync(image));
+        int after = layout is null ? -1 : Screeny.Ocr.PersonalDataDetector.Detect(layout).Count;
+        Document.Undo.Undo();
+        int afterUndo = Document.Items.Count;
+        Screeny.Logging.Log.Error($"Dev privacy: {matches.Count} found, Hide added {added} pixelate shape(s), {after} found after Hide, {afterUndo} shape(s) after one Ctrl+Z");
+        Cancel();
+    }
 
     /// <summary>
     /// Сценарии ocr-select и readme-text: как только показана первая раскладка (Windows OCR), выделить слова в этой части
@@ -248,6 +293,10 @@ public partial class OverlayWindow
                 }
                 break;
             }
+            case "privacy":
+                // Проверка запускается сама, как только выделение устоялось (--select); дальше — DevPrivacyChecked.
+                _devPrivacy = true;
+                break;
             case "qr":
                 // Режим текста по выделению; как только коды найдены, плашка открывается на первой ссылке
                 // (или первом коде). Ни «Открыть», ни «Копировать» сценарий не нажимает.
