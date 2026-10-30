@@ -1464,6 +1464,7 @@ Replace it?</value>
   </data>
   <data name="History.NoMatchesPending" xml:space="preserve">
     <value>Text in {0} screenshots isn't recognized yet. Screeny reads it in the background.</value>
+  </data>
   <data name="Privacy.Warning" xml:space="preserve">
     <value>This may contain personal data</value>
   </data>

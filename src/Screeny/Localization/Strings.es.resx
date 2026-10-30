@@ -1464,6 +1464,7 @@ Se eliminarán las capturas ({1}) sin pasar por la Papelera de reciclaje. No se 
   </data>
   <data name="History.NoMatchesPending" xml:space="preserve">
     <value>El texto de {0} capturas aún no se ha reconocido. Screeny lo lee en segundo plano.</value>
+  </data>
   <data name="Privacy.Warning" xml:space="preserve">
     <value>Puede contener datos personales</value>
   </data>

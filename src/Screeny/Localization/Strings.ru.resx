@@ -1464,6 +1464,7 @@ Screeny закроется; запустите его снова и повтор
   </data>
   <data name="History.NoMatchesPending" xml:space="preserve">
     <value>На скриншотах ({0}) текст ещё не распознан. Screeny делает это в фоне.</value>
+  </data>
   <data name="Privacy.Warning" xml:space="preserve">
     <value>Здесь могут быть личные данные</value>
   </data>

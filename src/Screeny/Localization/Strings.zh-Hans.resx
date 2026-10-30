@@ -1464,6 +1464,7 @@ Screeny 将关闭。请重新启动并再次更新。</value>
   </data>
   <data name="History.NoMatchesPending" xml:space="preserve">
     <value>还有 {0} 张截图的文字尚未识别，Screeny 正在后台处理。</value>
+  </data>
   <data name="Privacy.Warning" xml:space="preserve">
     <value>这里可能有个人信息</value>
   </data>
