@@ -151,11 +151,20 @@ minutes of idle time. On a full screen they can take up to about 1 GB of memory.
   old shapes can be moved and changed later. This copy contains everything you blurred or pixelated, so it is off by
   default.
 - Deleting from history skips the Recycle Bin, so Screeny asks first.
+- The search box at the top (`Ctrl+F`) finds screenshots by the text in them: type a few words, and only screenshots
+  that contain all of them stay. Case and accents don't matter. `Esc` clears the search. Screeny reads the text with
+  Windows OCR in the background, a few seconds after each screenshot, and goes through older screenshots slowly while
+  you're not taking new ones. The text is kept next to the screenshot as `<name>.text.json` and never leaves your
+  computer. Search needs text recognition turned on.
 
 ### Pins
 
 Press `F3` to pin a screenshot on top of all windows. Drag it around, zoom with the wheel, change its opacity with
 `Ctrl`+wheel. A setting keeps pinned screenshots out of new captures.
+
+You can also pin a screenshot from the history window (the pin button on a card or the right-click menu), or pin
+whatever picture is in the clipboard: tray icon > "Pin from clipboard". That works for images copied from a browser
+or another app and for a single image file copied in File Explorer.
 
 ### Background frame
 
