@@ -68,11 +68,29 @@ public sealed class TextSearchProvider : IHistorySearchProvider
             if (haystack.Length == 0) continue;
             bool all = true;
             foreach (var term in terms)
-                if (!haystack.Contains(term, StringComparison.Ordinal)) { all = false; break; }
+                if (!ContainsWordStart(haystack, term)) { all = false; break; }
             if (all) hits.Add(new HistorySearchHit(entry.Path, 1.0));
         }
         return hits;
     }
+
+    /// <summary>
+    /// Слово запроса совпадает с началом слова в тексте: «cat» находит «cats», но не «application». Числа и письмо без
+    /// пробелов (китайский, японский) ищутся в любом месте: «8007» находит «0x80070005».
+    /// </summary>
+    public static bool ContainsWordStart(string haystack, string term)
+    {
+        for (int i = haystack.IndexOf(term, StringComparison.Ordinal); i >= 0; i = haystack.IndexOf(term, i + 1, StringComparison.Ordinal))
+        {
+            if (i == 0 || char.IsDigit(term[0]) || IsNoSpaceScript(term[0])) return true;
+            char before = haystack[i - 1];
+            if (!char.IsLetterOrDigit(before) || IsNoSpaceScript(before)) return true;
+        }
+        return false;
+    }
+
+    private static bool IsNoSpaceScript(char c)
+        => c is >= '぀' and <= 'ヿ' or >= '㐀' and <= '䶿' or >= '一' and <= '鿿' or >= '豈' and <= '﫿';
 
     private string Normalized(HistorySearchEntry entry)
     {

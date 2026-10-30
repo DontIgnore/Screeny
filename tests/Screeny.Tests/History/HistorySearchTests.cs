@@ -100,7 +100,7 @@ public class HistorySearchTests
         // Второй поставщик (например, смысловой) находит «a» с высокой оценкой и «c» с низкой.
         var semantic = new FixedProvider(new(a.Path, 0.9), new(c.Path, 0.2), new(@"C:\h\gone.png", 1.0));
         var search = new HistorySearch(new TextSearchProvider(), semantic);
-        var hits = (await search.SearchAsync("et", [a, b, c]))!; // по тексту — только «beta»
+        var hits = (await search.SearchAsync("bet", [a, b, c]))!; // по тексту — только «beta»
         Assert.Equal([b.Path, a.Path, c.Path], hits.Select(h => h.Path));
         Assert.Equal([1.0, 0.9, 0.2], hits.Select(h => h.Score));
         Assert.DoesNotContain(hits, h => h.Path.EndsWith("gone.png")); // снимка уже нет в истории
@@ -120,4 +120,14 @@ public class HistorySearchTests
         Assert.Equal(@"C:\h\s4999.png", Assert.Single(hits).Path);
         Assert.True(watch.ElapsedMilliseconds < 200, $"{watch.ElapsedMilliseconds} ms");
     }
+
+    [Theory]
+    [InlineData("application error", "cat", false)]
+    [InlineData("two cats here", "cat", true)]
+    [InlineData("счёта на оплату", "сч", true)]
+    [InlineData("(invoice)", "invoice", true)]
+    [InlineData("请求错误", "错误", true)]
+    [InlineData("ファイルを保存", "保存", true)]
+    public void WordStart_Matching(string text, string term, bool expected)
+        => Assert.Equal(expected, TextSearchProvider.ContainsWordStart(text, term));
 }
