@@ -160,9 +160,11 @@ public partial class App : Application, INotifyPropertyChanged
             InitHotkeys();
             ListenForSecondInstance();
             InitPreciseOcr(); // App.PreciseOcr.cs; до окон из ключей: настройкам нужно состояние модуля
+            InitSemantic(); // App.Semantic.cs
             OpenWindowsFromArgs();
             // Догоняющее распознавание старых снимков — не сразу: запуск и первые действия важнее.
             if (TextIndexOn) _textIndexer!.Start(TimeSpan.FromSeconds(IsDev ? 3 : 30));
+            StartSemanticIndex(TimeSpan.FromSeconds(IsDev ? 5 : 60));
             InitUpdates(); // App.Updates.cs
             CheckSetupWizardOnStartup(); // App.SetupWizard.cs
         }
@@ -188,6 +190,7 @@ public partial class App : Application, INotifyPropertyChanged
         if (IsShuttingDown) return false;
         IsShuttingDown = true;
         _textIndexer?.Stop(); // распознавание не держит выход; недописанный текст распознается в следующий раз
+        _semanticIndexer?.Stop();
         if (_historyWindow is not null) _historyWindow.IsEnabled = false;
         if (_settingsWindow is not null) _settingsWindow.IsEnabled = false;
         foreach (Window window in Windows)
@@ -222,6 +225,7 @@ public partial class App : Application, INotifyPropertyChanged
         if (Args.OpenSettings) ShowSettings();
         if (Args.OpenHistory && Args.Scenario == "search") RunDevSearchScenario(); // App.DevHistory.cs, только dev
         else if (Args.OpenHistory && Args.Scenario == "pin-clipboard") RunDevPinScenario();
+        else if (Args.OpenHistory && Args.Scenario == "semantic") RunDevSemanticScenario(); // App.DevSemantic.cs
         else if (Args.OpenHistory) ShowHistory();
         if (Args.Feedback is { } feedback) ShowFeedback(feedback == "idea" ? Feedback.FeedbackKind.Idea : Feedback.FeedbackKind.Bug, Args.Scenario);
         if (Args.OverlayTest is not null || Args.BurstTest is not null) StartCapture();
@@ -288,7 +292,7 @@ public partial class App : Application, INotifyPropertyChanged
         var report = HotkeyReport;
         bool printScreenReserved = PrintScreenPolicy.IsReservedBySystem(HotkeySpec.PrintScreen);
         if (IsDev && Args.Scenario == "hotkey-problems") (report, printScreenReserved) = (DevHotkeyProblems(), true);
-        _settingsWindow = new SettingsWindow(Settings, report, printScreenReserved, SafeIsStartupEnabled(), ApplySettings, OcrModuleHost);
+        _settingsWindow = new SettingsWindow(Settings, report, printScreenReserved, SafeIsStartupEnabled(), ApplySettings, OcrModuleHost, SemanticModuleHost, () => SemanticProgress);
         _settingsWindow.Closed += (_, _) => _settingsWindow = null;
         _settingsWindow.Show();
         _settingsWindow.Activate();
@@ -413,11 +417,12 @@ public partial class App : Application, INotifyPropertyChanged
         if (_historyWindow is not null)
         {
             _historyWindow.CanPin = pins;
-            _historyWindow.SearchEnabled = TextSearchOn;
+            _historyWindow.SearchEnabled = HistorySearchOn;
         }
         // Папка могла смениться, функции — выключиться: проход по папке начинается заново (готовые снимки пропускаются).
         _textIndexer?.Stop();
         if (TextIndexOn) _textIndexer?.Start(TimeSpan.FromSeconds(5));
+        StartSemanticIndex(TimeSpan.FromSeconds(5));
         foreach (Window window in Windows)
             if (window is EditorWindow editor) editor.ApplyFeatures();
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HistoryFeatureOn)));
@@ -754,11 +759,11 @@ public partial class App : Application, INotifyPropertyChanged
         if (_historyWindow is null)
         {
             // Окно закрывается раньше, чем хранилище убирается (ApplyFeatures), поэтому History здесь не null.
-            _historyWindow = new HistoryWindow(() => History!, PinAtCursor, path => OpenEditor(path), _imageSaver.Queue)
+            _historyWindow = new HistoryWindow(() => History!, PinAtCursor, path => OpenEditor(path), _imageSaver.Queue, _semanticSearch)
             {
                 DevShowFirstCardActions = IsDev && Args.Scenario == "hover",
                 CanPin = Settings.ActionAllowed(CaptureAction.Pin),
-                SearchEnabled = TextSearchOn,
+                SearchEnabled = HistorySearchOn,
             };
             _historyWindow.Closed += (_, _) => _historyWindow = null;
         }
@@ -799,6 +804,7 @@ public partial class App : Application, INotifyPropertyChanged
         if (result.HistoryError is { } error) Log.Error("History save failed", error);
         if (result.InHistory && ReferenceEquals(store, History)) _historyWindow?.Refresh();
         if (result.HistoryPath is { } saved && TextIndexOn) _textIndexer?.Add(saved);
+        if (result.HistoryPath is { } added) OnSemanticSnapshotSaved(added);
         return result;
     }
 
@@ -878,6 +884,7 @@ public partial class App : Application, INotifyPropertyChanged
         DisposeFeedback();
         DisposeUpdates();
         DisposePreciseOcr();
+        DisposeSemantic();
         _hotkeys?.Dispose(); // снимает RegisterHotKey и низкоуровневый хук
         _tray?.Dispose();
         try { if (_ownsMutex) _mutex?.ReleaseMutex(); }

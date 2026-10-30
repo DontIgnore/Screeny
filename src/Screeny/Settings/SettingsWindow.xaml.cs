@@ -31,8 +31,11 @@ public partial class SettingsWindow : ChromeWindow
     /// <param name="printScreenReserved">PrintScreen забирает системный захват экрана Windows.</param>
     /// <param name="apply">Применить и сохранить; возвращает ошибку или null.</param>
     /// <param name="preciseOcr">Модуль точного распознавания; null — блока нет.</param>
+    /// <param name="semantic">Модуль смыслового поиска; null — блока нет.</param>
+    /// <param name="semanticProgress">Сколько снимков проиндексировано для смыслового поиска из скольких.</param>
     public SettingsWindow(AppSettings current, HotkeyReport hotkeys, bool printScreenReserved, bool startupEnabled,
-        Func<AppSettings, SettingsApplyError?> apply, Modules.IModuleHost? preciseOcr = null)
+        Func<AppSettings, SettingsApplyError?> apply, Modules.IModuleHost? preciseOcr = null, Modules.IModuleHost? semantic = null,
+        Func<(int Done, int Total)>? semanticProgress = null)
     {
         InitializeComponent();
         _apply = apply;
@@ -57,6 +60,11 @@ public partial class SettingsWindow : ChromeWindow
             _preciseOcr = new PreciseOcrPanel(preciseOcr, current.PreciseOcr);
             _features.AddBelow(FeatureCatalog.Ocr, _preciseOcr.Root);
         }
+        if (semantic is not null)
+        {
+            _semantic = new SemanticPanel(semantic, semanticProgress ?? (() => (0, 0)));
+            _features.AddBelow(FeatureCatalog.History, _semantic.Root);
+        }
         _features.Changed += ShowFeatureFields;
         ShowFeatureFields();
         // Содержимое прокручивается, кнопки внизу всегда видны: окно не выше 780 DIP и рабочей области своего монитора
@@ -77,6 +85,7 @@ public partial class SettingsWindow : ChromeWindow
         LanguagePicker.Relabel(LanguageInput);
         ShowCurrentProblems(_report); // тексты проблем хоткеев собираются заново на новом языке
         _preciseOcr?.Refresh();
+        _semantic?.Refresh();
         ShowAboutStatus();
     }
 
@@ -92,6 +101,10 @@ public partial class SettingsWindow : ChromeWindow
     private readonly AppSettings _current;
     private readonly FeatureCheckList _features;
     private readonly PreciseOcrPanel? _preciseOcr;
+    private readonly SemanticPanel? _semantic;
+
+    /// <summary>Поменялся счёт проиндексированных снимков или состояние модуля смыслового поиска.</summary>
+    public void RefreshSemantic() => _semantic?.Refresh();
 
     /// <summary>Модуль скачан, и App уже записал согласие в настройки: галочка «Использовать» — по ним.</summary>
     public void RefreshPreciseOcr(bool use) => _preciseOcr?.SetUse(use);
@@ -132,6 +145,11 @@ public partial class SettingsWindow : ChromeWindow
         StartupInput.Margin = new Thickness(0, history ? 12 : 0, 0, 0); // первая галочка раздела — без отступа сверху
         ExcludePinsInput.Visibility = _features.IsOn(FeatureCatalog.Pins) ? Visibility.Visible : Visibility.Collapsed;
         if (_preciseOcr is not null) _preciseOcr.Root.Visibility = _features.IsOn(FeatureCatalog.Ocr) ? Visibility.Visible : Visibility.Collapsed;
+        if (_semantic is not null)
+        {
+            _semantic.Root.Visibility = history ? Visibility.Visible : Visibility.Collapsed;
+            _semantic.SetOcrOn(_features.IsOn(FeatureCatalog.Ocr));
+        }
     }
 
     /// <summary>Записи, которые сейчас не работают (заняты, хук не поставился), и запасной хоткей — подсказками.</summary>

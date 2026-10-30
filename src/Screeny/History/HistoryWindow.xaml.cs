@@ -30,15 +30,18 @@ public partial class HistoryWindow : ChromeWindow
     private readonly ListCollectionView _view;
     /// <summary>Распознанный текст по пути снимка; null — ещё не распознан. Читается из sidecar-файлов при обновлении.</summary>
     private readonly Dictionary<string, string?> _texts = new(StringComparer.OrdinalIgnoreCase);
-    private readonly HistorySearch _search = new(new TextSearchProvider());
+    private readonly HistorySearch _search;
     private readonly DispatcherTimer _searchDelay = new() { Interval = TimeSpan.FromMilliseconds(200) };
 
     /// <param name="store">Текущее хранилище (может смениться после изменения настроек).</param>
     /// <param name="pin">Закрепить картинку на экране.</param>
     /// <param name="edit">Открыть снимок в окне повторного редактирования.</param>
-    public HistoryWindow(Func<HistoryStore> store, Action<BitmapSource> pin, Action<string> edit, BackgroundQueue queue)
+    /// <param name="semantic">Смысловой поиск (модуль), если он есть: его результаты идут после точных совпадений текста.</param>
+    public HistoryWindow(Func<HistoryStore> store, Action<BitmapSource> pin, Action<string> edit, BackgroundQueue queue,
+        IHistorySearchProvider? semantic = null)
     {
         InitializeComponent();
+        _search = semantic is null ? new HistorySearch(new TextSearchProvider()) : new HistorySearch(new TextSearchProvider(), semantic);
         _store = store;
         _pin = pin;
         _edit = edit;
@@ -85,6 +88,12 @@ public partial class HistoryWindow : ChromeWindow
         if (_closed || !_searchEnabled || !_texts.ContainsKey(path)) return;
         _texts[path] = text;
         if (Query is not null) RestartSearchDelay();
+    }
+
+    /// <summary>Смысловой индекс снимка обновился: идущий поиск пересчитывается. Вызывать из UI-потока.</summary>
+    public void OnSemanticIndexed()
+    {
+        if (!_closed && _searchEnabled && Query is not null) RestartSearchDelay();
     }
 
     private string? Query => string.IsNullOrWhiteSpace(SearchBox.Text) ? null : SearchBox.Text.Trim();

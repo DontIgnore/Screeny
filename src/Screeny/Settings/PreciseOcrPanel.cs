@@ -82,8 +82,10 @@ public sealed class PreciseOcrPanel
 
     private void Show()
     {
-        _caption.Text = Loc.F("PreciseOcr.Caption", OcrModule.SizeText);
         var s = _host.Status;
+        // Сколько качать сейчас: модуль и общий ORT, если его ещё нет (поставил смысловой поиск — только модуль).
+        var size = OcrModule.MegabytesText(s.DownloadBytes > 0 ? s.DownloadBytes : OcrModule.ZipSize);
+        _caption.Text = Loc.F("PreciseOcr.Caption", size);
         void Visible(UIElement e, bool on) => e.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
         Visible(_use, s.Ready && !s.Downloading);
         Visible(_bar, s.Downloading);
@@ -91,7 +93,7 @@ public sealed class PreciseOcrPanel
         Visible(_download, !s.Downloading && !s.Ready && !s.RemovalPending);
         Visible(_remove, !s.Downloading && (s.Ready || s.Outdated));
         Visible(_undo, !s.Downloading && s.RemovalPending);
-        _download.Content = Loc.F(s.Outdated ? "PreciseOcr.Update" : "PreciseOcr.Download", OcrModule.SizeText);
+        _download.Content = Loc.F(s.Outdated ? "PreciseOcr.Update" : "PreciseOcr.Download", size);
         _download.IsEnabled = s.SourceAvailable;
         _done.Width = new GridLength(Math.Clamp(s.Progress, 0, 100), GridUnitType.Star);
         _rest.Width = new GridLength(100 - Math.Clamp(s.Progress, 0, 100), GridUnitType.Star);
