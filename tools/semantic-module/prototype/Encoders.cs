@@ -181,6 +181,14 @@ public sealed class EmbeddingGemmaEmbedder : IEmbedder
 
     public float[] EmbedQuery(string query) => RunModel(Tokenizer.GemmaIds(Prefix + query), Empty);
 
+    /// <summary>Text as is (no prefix), at most 512 tokens.</summary>
+    public float[] EmbedText(string text)
+    {
+        var ids = Tokenizer.GemmaIds(text);
+        if (ids.Length > 512) { ids = ids[..512]; ids[^1] = GemmaTokenizer.Eos; }
+        return RunModel(ids, Empty);
+    }
+
     private float[] RunModel(long[] ids, DenseTensor<float> imageFeatures)
     {
         var mask = new long[ids.Length];

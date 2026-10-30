@@ -31,6 +31,7 @@ switch (cmd)
     case "parity": Parity(); break;
     case "bench": Bench(); break;
     case "search": Search(); break;
+    case "hybrid": Hybrid(); break;
     default: Console.WriteLine("commands: tokens | parity | bench | search  <siglip2|eg2>  (see Program.cs)"); break;
 }
 
@@ -131,6 +132,91 @@ void Search()
     var q = set.queries.Keys.ToDictionary(x => x, x => e.EmbedQuery(x));
     Console.WriteLine($"== {model} {variant} soft={softTokens} prefix={(prefix.Length > 0 ? "search" : "none")}");
     Console.WriteLine(Retrieval.Report(set, img, q));
+}
+
+// Step 0 of the app integration: OCR-text embedding (Windows OCR, every profile language) + image embedding at a low
+// budget, scored with one query embedding, vs image-only at 280. 2 threads, q4.
+void Hybrid()
+{
+    var set = LoadSet();
+    int threads = int.Parse(opt.GetValueOrDefault("threads", "2"));
+    var ocr = set.images.ToDictionary(n => n, n => OcrText(Path.Combine(testset, n)));
+    foreach (var n in set.images) Console.WriteLine($"  ocr {n,-24} {ocr[n].Length,5} chars");
+    var budgets = new[] { 70, 140, 280 };
+    var img = new Dictionary<int, Dictionary<string, float[]>>();
+    var ms = new Dictionary<int, double>();
+    Dictionary<string, float[]>? txt = null, txtRaw = null; double txtMs = 0;
+    Dictionary<string, float[]> q = new();
+    foreach (var b in budgets)
+    {
+        softTokens = b;
+        using var e = (EmbeddingGemmaEmbedder)Create(threads, "q4");
+        e.EmbedImage(RgbImage.Load(Path.Combine(testset, set.images[0]))); // warm-up
+        var sw = Stopwatch.StartNew();
+        img[b] = set.images.ToDictionary(n => n, n => e.EmbedImage(RgbImage.Load(Path.Combine(testset, n))));
+        ms[b] = sw.Elapsed.TotalMilliseconds / set.images.Length;
+        if (txt is null)
+        {
+            sw.Restart();
+            txt = set.images.Where(n => ocr[n].Length > 0).ToDictionary(n => n, n => e.EmbedText("title: none | text: " + Cap(ocr[n])));
+            txtMs = sw.Elapsed.TotalMilliseconds / Math.Max(1, txt.Count);
+            txtRaw = set.images.Where(n => ocr[n].Length > 0).ToDictionary(n => n, n => e.EmbedText(Cap(ocr[n])));
+            q = set.queries.Keys.ToDictionary(x => x, x => e.EmbedText(x));
+        }
+    }
+    Console.WriteLine($"q4, {threads} threads: image ms 70={ms[70]:F0} 140={ms[140]:F0} 280={ms[280]:F0}; OCR-text embedding {txtMs:F0} ms");
+    Report("image-only 280", n => img[280][n], null);
+    Report("image-only 140", n => img[140][n], null);
+    Report("image-only 70", n => img[70][n], null);
+    Report("ocr-text only (title prompt)", null, txt);
+    foreach (var b in new[] { 70, 140 })
+    {
+        Report($"hybrid max, text(title)+img{b}", n => img[b][n], txt);
+        Report($"hybrid max, text(raw)+img{b}", n => img[b][n], txtRaw);
+    }
+
+    void Report(string name, Func<string, float[]>? image, Dictionary<string, float[]>? text)
+    {
+        var scored = new Dictionary<string, float[]>();
+        int top1 = 0, hit3 = 0, dTop1 = 0, dHit3 = 0, dN = 0;
+        var sb = new System.Text.StringBuilder();
+        foreach (var (query, rel) in set.queries)
+        {
+            var ranked = set.images.Select(n =>
+            {
+                double s = double.MinValue;
+                if (image is not null) s = Vec.Dot(image(n), q[query]);
+                if (text is not null && text.TryGetValue(n, out var t)) s = Math.Max(s, Vec.Dot(t, q[query]));
+                return (n, s);
+            }).OrderByDescending(x => x.s).ToList();
+            bool t1 = rel.Contains(ranked[0].n), h3 = ranked.Take(3).Any(x => rel.Contains(x.n));
+            top1 += t1 ? 1 : 0; hit3 += h3 ? 1 : 0;
+            if (rel.All(r => r.StartsWith("desk_"))) { dN++; dTop1 += t1 ? 1 : 0; dHit3 += h3 ? 1 : 0; }
+            if (query is "котик" or "cat" or "график" or "счёт" or "error dialog")
+                sb.AppendLine($"    {query,-14} " + string.Join(", ", ranked.Take(3).Select(x => $"{x.n}:{x.s:F3}")));
+        }
+        Console.WriteLine($"{name,-34} top1 {top1}/{set.queries.Count} hit@3 {hit3}/{set.queries.Count} desktop {dTop1}/{dN} {dHit3}/{dN}");
+        Console.Write(sb);
+    }
+}
+
+static string Cap(string s) => s.Length > 2000 ? s[..2000] : s;
+
+static string OcrText(string path)
+{
+    var file = Windows.Storage.StorageFile.GetFileFromPathAsync(Path.GetFullPath(path)).AsTask().GetAwaiter().GetResult();
+    using var stream = file.OpenReadAsync().AsTask().GetAwaiter().GetResult();
+    var decoder = Windows.Graphics.Imaging.BitmapDecoder.CreateAsync(stream).AsTask().GetAwaiter().GetResult();
+    using var bmp = decoder.GetSoftwareBitmapAsync(Windows.Graphics.Imaging.BitmapPixelFormat.Bgra8, Windows.Graphics.Imaging.BitmapAlphaMode.Premultiplied).AsTask().GetAwaiter().GetResult();
+    var parts = new List<string>();
+    foreach (var lang in Windows.Media.Ocr.OcrEngine.AvailableRecognizerLanguages)
+    {
+        var engine = Windows.Media.Ocr.OcrEngine.TryCreateFromLanguage(lang);
+        if (engine is null) continue;
+        var text = engine.RecognizeAsync(bmp).AsTask().GetAwaiter().GetResult().Text;
+        if (!string.IsNullOrWhiteSpace(text) && !parts.Contains(text)) parts.Add(text);
+    }
+    return string.Join('\n', parts);
 }
 
 void Bench()

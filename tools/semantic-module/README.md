@@ -163,7 +163,20 @@ cheapest square-squash variant (the NaFlex / 384–512 px variants would read mo
   (±1 query) and hurt at 280 (fp32 30 vs 35 top-1; C# q4 31 vs 33). Use no prefix; re-check on real data.
 - EG2 is also a strong multilingual *text* embedder in the same space: embedding the OCR text
   (`title: none | text: <ocr>`, ~20–60 ms) gives cross-lingual semantic text search and could let the image side run at
-  a lower budget (70–140) for visuals while OCR covers small text. Not measured here; worth one experiment.
+  a lower budget (70–140) for visuals while OCR covers small text. Measured afterwards (`SemanticProto hybrid eg2`,
+  q4, 2 threads, Windows OCR text capped at 512 tokens, one query embedding without prefix, score = max of the two):
+
+  | Setting | top-1 (35) | hit@3 (35) | desktop top-1 / hit@3 | ms per item |
+  |---|---:|---:|---:|---:|
+  | image only, 280 | 33 | 35 | 8 / 8 | 4970 |
+  | image only, 140 | 33 | 33 | 6 / 6 | 2140 |
+  | OCR text only (`title: none \| text: `) | 27 | 28 | 6 / 6 | 385 |
+  | **hybrid, text (title prompt) + image 140** | **31** | **34** | **8 / 8** | **≈ 2520** |
+  | hybrid, text (title prompt) + image 70 | 30 | 32 | 5 / 6 | ≈ 1410 |
+  | hybrid, raw text + image 140 | 25 | 34 | 7 / 8 | ≈ 2520 |
+
+  The app uses the hybrid at budget 140 (half the cost of 280, desktop subset kept). Text cosines run a few hundredths
+  above image cosines, so text-heavy screenshots (`chat_with_cat`) creep into the top 3 of «график» / «счёт»; not tuned.
 - SigLIP 2 gives calibrated sigmoid scores (`sigmoid(cos·exp(4.72) − 16.77)`) if it is ever used; EG2 has no such head.
 
 ## 6. Cost (i7-13700K, 24 threads, C# + ORT 1.31.0, PNG test images, fresh process per row)
