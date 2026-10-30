@@ -15,7 +15,8 @@ public sealed record HistorySidecar(string? Json, byte[]? OriginalPng);
 /// <summary>
 /// Папка снимков истории. Своими считаются только файлы с именем <c>yyyyMMdd_HHmmss_fff[_N].png</c>:
 /// пользователь может выбрать папку с другими картинками, и ротация/очистка не должны их трогать.
-/// У снимка могут быть sidecar-файлы <c>&lt;имя&gt;.screeny.json</c> и <c>&lt;имя&gt;.orig.png</c> (повторное редактирование):
+/// У снимка могут быть sidecar-файлы <c>&lt;имя&gt;.screeny.json</c> и <c>&lt;имя&gt;.orig.png</c> (повторное редактирование)
+/// и <c>&lt;имя&gt;.text.json</c> (распознанный текст для поиска, <see cref="HistoryText"/>):
 /// List() их не показывает, Delete/Prune/Clear удаляют вместе со снимком.
 /// </summary>
 public sealed class HistoryStore
@@ -25,12 +26,12 @@ public sealed class HistoryStore
     private static readonly Regex NamePattern =
         new(@"^(?<stamp>\d{8}_\d{6}_\d{3})(?:_(?<n>[1-9]\d{0,8}))?\.png$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
-    /// <summary>Суффиксы sidecar-файлов: документ аннотаций и оригинал без пометок.</summary>
-    public const string JsonSuffix = ".screeny.json", OriginalSuffix = ".orig.png";
+    /// <summary>Суффиксы sidecar-файлов: документ аннотаций, оригинал без пометок и распознанный текст.</summary>
+    public const string JsonSuffix = ".screeny.json", OriginalSuffix = ".orig.png", TextSuffix = ".text.json";
 
     /// <summary>Строгое имя sidecar-файла: штамп снимка истории + суффикс. Чужие foo.screeny.json сюда не попадают.</summary>
     private static readonly Regex SidecarPattern =
-        new(@"^(?<base>\d{8}_\d{6}_\d{3}(?:_[1-9]\d{0,8})?)\.(?:screeny\.json|orig\.png)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        new(@"^(?<base>\d{8}_\d{6}_\d{3}(?:_[1-9]\d{0,8})?)\.(?:screeny\.json|orig\.png|text\.json)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     public string Folder { get; }
     public int Limit { get; }
@@ -107,6 +108,32 @@ public sealed class HistoryStore
         return (stem + JsonSuffix, stem + OriginalSuffix);
     }
 
+    /// <summary>Путь sidecar-файла распознанного текста снимка (в той же папке).</summary>
+    public static string TextPath(string pngPath)
+        => Path.Combine(Path.GetDirectoryName(pngPath) ?? "", Path.GetFileNameWithoutExtension(pngPath)) + TextSuffix;
+
+    /// <summary>
+    /// Записывает распознанный текст снимка атомарно (временный файл, затем замена). Ничего не пишет и возвращает false,
+    /// если это не снимок истории или его уже нет (удалён, пока шло распознавание): осиротевший файл не появляется.
+    /// </summary>
+    public bool WriteText(string pngPath, HistoryText text)
+    {
+        if (!TryParseName(Path.GetFileName(pngPath), out _, out _) || !File.Exists(pngPath)) return false;
+        var final = TextPath(pngPath);
+        var temp = final + TempSuffix;
+        try
+        {
+            File.WriteAllBytes(temp, Encoding.UTF8.GetBytes(text.Serialize()));
+            File.Move(temp, final, overwrite: true);
+        }
+        catch
+        {
+            TryDelete(temp);
+            throw;
+        }
+        return true;
+    }
+
     /// <summary>
     /// Имя для нового снимка с этим штампом. Суффикс — больше максимального существующего, а не первый свободный:
     /// после ротации младшие номера освобождаются, и повторно занятый «_1» оказался бы старше уцелевших «_10».
@@ -122,7 +149,7 @@ public sealed class HistoryStore
             var path = Path.Combine(Folder, i == 0 ? stamp + ".png" : $"{stamp}_{i}.png");
             var (json, original) = SidecarPaths(path);
             // Осиротевший sidecar с этим именем не должен приклеиться к новому снимку.
-            if (!File.Exists(path) && !File.Exists(json) && !File.Exists(original)) return path;
+            if (!File.Exists(path) && !File.Exists(json) && !File.Exists(original) && !File.Exists(TextPath(path))) return path;
         }
     }
 
@@ -161,10 +188,12 @@ public sealed class HistoryStore
             .Select(s =>
             {
                 var (json, original) = SidecarPaths(s.Path);
+                var text = TextPath(s.Path);
                 return new HistoryItem(s.Path, s.Time)
                 {
                     JsonPath = names.Contains(Path.GetFileName(json)) ? json : null,
                     OriginalPath = names.Contains(Path.GetFileName(original)) ? original : null,
+                    TextPath = names.Contains(Path.GetFileName(text)) ? text : null,
                 };
             })
             .ToList();
@@ -182,7 +211,7 @@ public sealed class HistoryStore
         if (File.Exists(path)) File.Delete(path);
         if (!TryParseName(Path.GetFileName(path), out _, out _)) return;
         var (json, original) = SidecarPaths(path);
-        foreach (var sidecar in new[] { json, original })
+        foreach (var sidecar in new[] { json, original, TextPath(path) })
         {
             try { if (File.Exists(sidecar)) File.Delete(sidecar); }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Log.Error($"History sidecar delete failed: {sidecar}", ex); }

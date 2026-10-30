@@ -14,7 +14,9 @@ public class HistorySidecarTests : IDisposable
 
     private static readonly string[] ForeignSidecars =
         ["foo.screeny.json", "bar.orig.png", "20260101_000000_000_copy.screeny.json", "2026.orig.png", "20260101_000000_000.orig.png.bak",
-         "20261301_000000_000.screeny.json", "20260230_000000_000.orig.png"];
+         "20261301_000000_000.screeny.json", "20260230_000000_000.orig.png", "foo.text.json", "20260101_000000_000.text.json.bak"];
+
+    private static readonly HistoryTextMarker Marker = new("windows-ocr", 1, ["en-US", "ru"]);
 
     private string P(string name) => Path.Combine(_dir, name);
 
@@ -233,6 +235,84 @@ public class HistorySidecarTests : IDisposable
         var path = new HistoryStore(_dir, 10).Save(bmp, new DateTime(2026, 5, 5));
         Assert.Equal("20260505_000000_000.png", Path.GetFileName(path));
     }
+
+    [Fact]
+    public void WriteText_ListReportsTextPath_AndItRoundTrips()
+    {
+        var store = new HistoryStore(_dir, 10);
+        var path = store.Save(Png, Both, new DateTime(2026, 4, 4));
+        Assert.Null(Assert.Single(store.List()).TextPath); // старый снимок без текста загружается как раньше
+
+        Assert.True(store.WriteText(path, new HistoryText("Invoice № 42\nСчёт", Marker)));
+
+        var item = Assert.Single(store.List()); // текст — не отдельная запись
+        Assert.Equal(P("20260404_000000_000.text.json"), item.TextPath);
+        var text = HistoryText.TryRead(item.TextPath)!;
+        Assert.Equal("Invoice № 42\nСчёт", text.Text);
+        Assert.True(text.Marker.SameAs(Marker));
+        Assert.Equal(P("20260404_000000_000.screeny.json"), item.JsonPath); // остальные sidecar-файлы на месте
+        Assert.DoesNotContain(Directory.GetFiles(_dir), f => f.EndsWith(".tmp"));
+    }
+
+    [Fact]
+    public void WriteText_Overwrites()
+    {
+        var store = new HistoryStore(_dir, 10);
+        var path = store.Save(Png);
+        store.WriteText(path, new HistoryText("old", Marker));
+        store.WriteText(path, new HistoryText("new", Marker with { Version = 2 }));
+        var text = HistoryText.TryRead(HistoryStore.TextPath(path))!;
+        Assert.Equal("new", text.Text);
+        Assert.Equal(2, text.Marker.Version);
+    }
+
+    [Fact]
+    public void WriteText_DeletedOrForeignSnapshot_WritesNothing()
+    {
+        var store = new HistoryStore(_dir, 10);
+        var path = store.Save(Png);
+        store.Delete(path);
+        Assert.False(store.WriteText(path, new HistoryText("x", Marker)));
+        File.WriteAllText(P("vacation.png"), "foreign");
+        Assert.False(store.WriteText(P("vacation.png"), new HistoryText("x", Marker)));
+        Assert.Equal(["vacation.png"], Directory.GetFiles(_dir).Select(Path.GetFileName));
+    }
+
+    [Fact]
+    public void Delete_RemovesTextSidecar()
+    {
+        var store = new HistoryStore(_dir, 10);
+        var path = store.Save(Png, Both);
+        store.WriteText(path, new HistoryText("x", Marker));
+        store.Delete(path);
+        Assert.Empty(Directory.GetFiles(_dir));
+    }
+
+    [Fact]
+    public void Prune_RemovesTextOfPrunedSnapshots_AndOrphanText()
+    {
+        Directory.CreateDirectory(_dir);
+        File.WriteAllText(P("20250101_000000_000.text.json"), "orphan");
+        var store = new HistoryStore(_dir, limit: 1);
+        var first = store.Save(Png, null, new DateTime(2026, 1, 1));
+        store.WriteText(first, new HistoryText("x", Marker));
+        store.Save(Png, null, new DateTime(2026, 1, 2));
+        Assert.Equal(["20260102_000000_000.png"], Directory.GetFiles(_dir).Select(Path.GetFileName));
+    }
+
+    [Fact]
+    public void Save_SkipsNameWhoseOrphanTextExists()
+    {
+        Directory.CreateDirectory(_dir);
+        File.WriteAllText(P("20260303_000000_000.text.json"), "stale");
+        var path = new HistoryStore(_dir, 10).Save(Png, null, new DateTime(2026, 3, 3));
+        Assert.Equal("20260303_000000_000_1.png", Path.GetFileName(path));
+        Assert.Null(Assert.Single(new HistoryStore(_dir, 10).List()).TextPath);
+    }
+
+    [Fact]
+    public void TextPath_StripsPngExtension()
+        => Assert.Equal(@"C:\h\20260101_000000_000_2.text.json", HistoryStore.TextPath(@"C:\h\20260101_000000_000_2.png"));
 
     public void Dispose() { if (Directory.Exists(_dir)) Directory.Delete(_dir, true); }
 }

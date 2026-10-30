@@ -3,7 +3,8 @@ using Screeny.History;
 
 namespace Screeny.Export;
 
-public sealed record ImageSaveResult(byte[] Png, bool InHistory, Exception? HistoryError, Exception? SaveError);
+/// <param name="HistoryPath">Путь новой записи истории; null — в историю не сохранено.</param>
+public sealed record ImageSaveResult(byte[] Png, bool InHistory, Exception? HistoryError, Exception? SaveError, string? HistoryPath = null);
 
 /// <summary>
 /// Кодирует снимки и последовательно выполняет файловые операции вне UI-потока. Без хранилища (функция «История»
@@ -26,13 +27,14 @@ public sealed class ImageSaveWorker
     {
         var png = ClipboardService.EncodePng(image);
         Exception? historyError = null, saveError = null;
+        string? historyPath = null;
         if (store is not null)
         {
             try
             {
                 var originalBytes = original is null ? originalPng : ClipboardService.EncodePng(original);
                 var sidecar = json is null && originalBytes is null ? null : new HistorySidecar(json, originalBytes);
-                store.Save(png, sidecar, timestamp);
+                historyPath = store.Save(png, sidecar, timestamp);
             }
             catch (Exception ex) { historyError = ex; }
         }
@@ -41,6 +43,6 @@ public sealed class ImageSaveWorker
             try { FileSaver.Save(image, savePath); }
             catch (Exception ex) { saveError = ex; }
         }
-        return new ImageSaveResult(png, store is not null && historyError is null, historyError, saveError);
+        return new ImageSaveResult(png, store is not null && historyError is null, historyError, saveError, historyPath);
     }
 }

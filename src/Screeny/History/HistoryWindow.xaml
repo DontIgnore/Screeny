@@ -42,6 +42,19 @@
       </StackPanel>
     </DockPanel>
 
+    <!-- Поиск по распознанному тексту (Ctrl+F); без функции «Распознавание текста» его нет -->
+    <Grid x:Name="SearchBar" DockPanel.Dock="Top" Margin="24,0,24,10" Width="360" HorizontalAlignment="Left" Visibility="Collapsed">
+      <TextBox x:Name="SearchBox" Padding="30,0,32,0" TextChanged="OnSearchChanged" PreviewKeyDown="OnSearchKeyDown"
+               AutomationProperties.Name="{l:Loc History.SearchPlaceholder}"/>
+      <TextBlock Text="&#xE721;" FontFamily="{DynamicResource Font.Icon}" FontSize="13" Margin="11,0,0,0"
+                 HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource Brush.Ink50}" IsHitTestVisible="False"/>
+      <TextBlock x:Name="SearchPlaceholder" Text="{l:Loc History.SearchPlaceholder}" Style="{StaticResource Body}" Margin="31,0,32,0"
+                 VerticalAlignment="Center" Foreground="{DynamicResource Brush.Ink50}" TextTrimming="CharacterEllipsis" IsHitTestVisible="False"/>
+      <Button x:Name="ClearSearch" Style="{StaticResource IconButton}" Content="&#xE711;" FontSize="10" Width="24" Height="24"
+              MinWidth="24" MinHeight="24" Margin="0,0,4,0" HorizontalAlignment="Right" VerticalAlignment="Center" Focusable="False"
+              ToolTip="{l:Loc History.ClearSearch}" Click="OnClearSearch" Visibility="Collapsed"/>
+    </Grid>
+
     <Grid>
       <StackPanel x:Name="EmptyState" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="24" Visibility="Collapsed">
         <TextBlock x:Name="EmptyText" Style="{StaticResource Body}" FontSize="15" Foreground="{DynamicResource Brush.Ink50}"

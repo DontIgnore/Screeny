@@ -116,6 +116,9 @@ public static class OcrService
     public static bool IsNoSpaceLanguage(string languageTag)
         => languageTag.StartsWith("ja", StringComparison.OrdinalIgnoreCase) || languageTag.StartsWith("zh", StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>Теги языков, которыми распознаёт <see cref="RecognizeAsync"/> (отметка индекса поиска в истории); пусто — OCR нет.</summary>
+    public static IReadOnlyList<string> LanguageTags() => Engines().Select(e => e.RecognizerLanguage.LanguageTag).ToList();
+
     /// <summary>Движки для языков профиля, у которых есть OCR, в порядке предпочтения пользователя.</summary>
     private static List<OcrEngine> Engines()
     {

@@ -1438,4 +1438,19 @@ Screeny 将关闭。请重新启动并再次更新。</value>
   <data name="App.ClipboardBusyPin" xml:space="preserve">
     <value>剪贴板正被其他应用占用，请稍后再试。</value>
   </data>
+  <data name="History.SearchPlaceholder" xml:space="preserve">
+    <value>搜索截图中的文字</value>
+  </data>
+  <data name="History.ClearSearch" xml:space="preserve">
+    <value>清除搜索 (Esc)</value>
+  </data>
+  <data name="History.NoMatches" xml:space="preserve">
+    <value>未找到“{0}”</value>
+  </data>
+  <data name="History.NoMatchesHint" xml:space="preserve">
+    <value>搜索范围是 Screeny 在截图中识别出的文字。</value>
+  </data>
+  <data name="History.NoMatchesPending" xml:space="preserve">
+    <value>还有 {0} 张截图的文字尚未识别，Screeny 正在后台处理。</value>
+  </data>
 </root>

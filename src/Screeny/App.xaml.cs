@@ -58,6 +58,12 @@ public partial class App : Application, INotifyPropertyChanged
     /// <summary>Пункт трея «Закрепить из буфера обмена».</summary>
     public bool PinsFeatureOn => Settings.ActionAllowed(CaptureAction.Pin);
 
+    /// <summary>Фоновое распознавание текста снимков для поиска в истории (<see cref="HistoryTextIndexer"/>).</summary>
+    private HistoryTextIndexer? _textIndexer;
+
+    /// <summary>Распознавать текст для поиска: только с функциями «История» и «Распознавание текста».</summary>
+    private bool TextIndexOn => !IsShuttingDown && History is not null && Settings.IsFeatureOn(FeatureCatalog.Ocr);
+
     public ICommand CaptureCommand { get; private set; } = null!;
     public ICommand HistoryCommand { get; private set; } = null!;
     public ICommand OpenFolderCommand { get; private set; } = null!;
@@ -112,6 +118,7 @@ public partial class App : Application, INotifyPropertyChanged
             // Тестовый экземпляр не пишет в историю пользователя: своя папка по умолчанию.
             if (firstDevRun) Settings.HistoryFolder = SettingsStore.DevHistoryFolder();
             UpdateHistoryStore();
+            InitTextIndexer();
 
             CaptureCommand = new RelayCommand(StartCapture);
             HistoryCommand = new RelayCommand(ShowHistory);
@@ -128,6 +135,8 @@ public partial class App : Application, INotifyPropertyChanged
             ListenForSecondInstance();
             InitPreciseOcr(); // App.PreciseOcr.cs; до окон из ключей: настройкам нужно состояние модуля
             OpenWindowsFromArgs();
+            // Догоняющее распознавание старых снимков — не сразу: запуск и первые действия важнее.
+            if (TextIndexOn) _textIndexer!.Start(TimeSpan.FromSeconds(IsDev ? 3 : 30));
             InitUpdates(); // App.Updates.cs
             CheckSetupWizardOnStartup(); // App.SetupWizard.cs
         }
@@ -152,6 +161,7 @@ public partial class App : Application, INotifyPropertyChanged
     {
         if (IsShuttingDown) return false;
         IsShuttingDown = true;
+        _textIndexer?.Stop(); // распознавание не держит выход; недописанный текст распознается в следующий раз
         if (_historyWindow is not null) _historyWindow.IsEnabled = false;
         if (_settingsWindow is not null) _settingsWindow.IsEnabled = false;
         foreach (Window window in Windows)
@@ -184,7 +194,8 @@ public partial class App : Application, INotifyPropertyChanged
     private void OpenWindowsFromArgs()
     {
         if (Args.OpenSettings) ShowSettings();
-        if (Args.OpenHistory) ShowHistory();
+        if (Args.OpenHistory && Args.Scenario == "search") RunDevSearchScenario(); // App.DevHistory.cs, только dev
+        else if (Args.OpenHistory) ShowHistory();
         if (Args.Feedback is { } feedback) ShowFeedback(feedback == "idea" ? Feedback.FeedbackKind.Idea : Feedback.FeedbackKind.Bug, Args.Scenario);
         if (Args.OverlayTest is not null) StartCapture();
         if (Args.Edit is not null) OpenEditor(Args.Edit)?.ApplyDevScenario(Args.Scenario);
@@ -366,7 +377,14 @@ public partial class App : Application, INotifyPropertyChanged
         UpdateHistoryStore();
         bool pins = Settings.ActionAllowed(CaptureAction.Pin);
         if (!pins) foreach (var pin in Pins.ToList()) pin.Close();
-        if (_historyWindow is not null) _historyWindow.CanPin = pins;
+        if (_historyWindow is not null)
+        {
+            _historyWindow.CanPin = pins;
+            _historyWindow.SearchEnabled = Settings.IsFeatureOn(FeatureCatalog.Ocr);
+        }
+        // Папка могла смениться, функции — выключиться: проход по папке начинается заново (готовые снимки пропускаются).
+        _textIndexer?.Stop();
+        if (TextIndexOn) _textIndexer?.Start(TimeSpan.FromSeconds(5));
         foreach (Window window in Windows)
             if (window is EditorWindow editor) editor.ApplyFeatures();
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HistoryFeatureOn)));
@@ -449,6 +467,17 @@ public partial class App : Application, INotifyPropertyChanged
             Log.Error("Open history folder failed", ex);
             Notify(Loc.F("App.OpenHistoryFolderFailed", ex.Message));
         }
+    }
+
+    /// <summary>
+    /// Индексатор текста для поиска. Распознаёт быстрым OCR Windows с паузами и не начинает, пока открыт оверлей;
+    /// запись файла идёт через общую очередь истории, чтобы не пересекаться с удалением и ротацией.
+    /// </summary>
+    private void InitTextIndexer()
+    {
+        _textIndexer = new HistoryTextIndexer(() => History, () => TextIndexOn, () => _capturing, new WindowsOcrTextRecognizer(),
+            _imageSaver.Queue, throttle: TimeSpan.FromSeconds(2), freshDelay: TimeSpan.FromSeconds(2));
+        _textIndexer.Indexed += (path, text) => Dispatcher.BeginInvoke(() => _historyWindow?.OnTextIndexed(path, text));
     }
 
     /// <summary>Сигнал от второго экземпляра. Поток завершается по _stopListening при выходе; ошибки не роняют процесс.</summary>
@@ -634,6 +663,7 @@ public partial class App : Application, INotifyPropertyChanged
             {
                 DevShowFirstCardActions = IsDev && Args.Scenario == "hover",
                 CanPin = Settings.ActionAllowed(CaptureAction.Pin),
+                SearchEnabled = Settings.IsFeatureOn(FeatureCatalog.Ocr),
             };
             _historyWindow.Closed += (_, _) => _historyWindow = null;
         }
@@ -673,6 +703,7 @@ public partial class App : Application, INotifyPropertyChanged
         var result = await _imageSaver.SaveAsync(store, image, json, original, originalPng, path, DateTime.Now);
         if (result.HistoryError is { } error) Log.Error("History save failed", error);
         if (result.InHistory && ReferenceEquals(store, History)) _historyWindow?.Refresh();
+        if (result.HistoryPath is { } saved && TextIndexOn) _textIndexer?.Add(saved);
         return result;
     }
 

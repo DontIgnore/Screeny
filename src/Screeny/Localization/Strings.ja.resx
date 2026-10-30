@@ -1438,4 +1438,19 @@ Screeny を終了します。もう一度起動して、更新をやり直して
   <data name="App.ClipboardBusyPin" xml:space="preserve">
     <value>ほかのアプリがクリップボードを使用中です。少し待ってからもう一度お試しください。</value>
   </data>
+  <data name="History.SearchPlaceholder" xml:space="preserve">
+    <value>スクリーンショット内の文字を検索</value>
+  </data>
+  <data name="History.ClearSearch" xml:space="preserve">
+    <value>検索をクリア (Esc)</value>
+  </data>
+  <data name="History.NoMatches" xml:space="preserve">
+    <value>「{0}」は見つかりませんでした</value>
+  </data>
+  <data name="History.NoMatchesHint" xml:space="preserve">
+    <value>Screeny がスクリーンショットから認識した文字を検索します。</value>
+  </data>
+  <data name="History.NoMatchesPending" xml:space="preserve">
+    <value>{0} 件のスクリーンショットの文字はまだ認識されていません。Screeny がバックグラウンドで読み取っています。</value>
+  </data>
 </root>

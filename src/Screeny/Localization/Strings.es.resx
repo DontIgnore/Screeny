@@ -1438,4 +1438,19 @@ Se eliminarán las capturas ({1}) sin pasar por la Papelera de reciclaje. No se 
   <data name="App.ClipboardBusyPin" xml:space="preserve">
     <value>Otra aplicación está usando el portapapeles. Inténtalo de nuevo en un momento.</value>
   </data>
+  <data name="History.SearchPlaceholder" xml:space="preserve">
+    <value>Buscar texto en las capturas</value>
+  </data>
+  <data name="History.ClearSearch" xml:space="preserve">
+    <value>Borrar búsqueda (Esc)</value>
+  </data>
+  <data name="History.NoMatches" xml:space="preserve">
+    <value>No se encontró nada para «{0}»</value>
+  </data>
+  <data name="History.NoMatchesHint" xml:space="preserve">
+    <value>La búsqueda usa el texto que Screeny reconoció en tus capturas.</value>
+  </data>
+  <data name="History.NoMatchesPending" xml:space="preserve">
+    <value>El texto de {0} capturas aún no se ha reconocido. Screeny lo lee en segundo plano.</value>
+  </data>
 </root>

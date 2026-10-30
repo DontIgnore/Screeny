@@ -1438,4 +1438,19 @@ Screeny закроется; запустите его снова и повтор
   <data name="App.ClipboardBusyPin" xml:space="preserve">
     <value>Буфер обмена занят другим приложением. Попробуйте ещё раз чуть позже.</value>
   </data>
+  <data name="History.SearchPlaceholder" xml:space="preserve">
+    <value>Поиск по тексту на скриншотах</value>
+  </data>
+  <data name="History.ClearSearch" xml:space="preserve">
+    <value>Очистить поиск (Esc)</value>
+  </data>
+  <data name="History.NoMatches" xml:space="preserve">
+    <value>По запросу «{0}» ничего не найдено</value>
+  </data>
+  <data name="History.NoMatchesHint" xml:space="preserve">
+    <value>Поиск идёт по тексту, который Screeny распознала на скриншотах.</value>
+  </data>
+  <data name="History.NoMatchesPending" xml:space="preserve">
+    <value>На скриншотах ({0}) текст ещё не распознан. Screeny делает это в фоне.</value>
+  </data>
 </root>

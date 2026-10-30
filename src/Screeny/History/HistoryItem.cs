@@ -8,4 +8,7 @@ public sealed record HistoryItem(string Path, DateTime CreatedAt)
 
     /// <summary>Оригинал региона без пометок <c>&lt;stamp&gt;.orig.png</c>, если он есть (настройка «Хранить оригиналы»).</summary>
     public string? OriginalPath { get; init; }
+
+    /// <summary>Распознанный текст <c>&lt;stamp&gt;.text.json</c> (<see cref="HistoryText"/>), если снимок уже распознан.</summary>
+    public string? TextPath { get; init; }
 }

@@ -1,7 +1,9 @@
+using System.Collections;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -13,7 +15,10 @@ using Screeny.Themes;
 
 namespace Screeny.History;
 
-/// <summary>Сетка миниатюр последних снимков: копировать, закрепить, открыть, показать в папке, удалить.</summary>
+/// <summary>
+/// Сетка миниатюр последних снимков: копировать, закрепить, открыть, показать в папке, удалить. Поиск (Ctrl+F) — по
+/// распознанному тексту снимков (<see cref="HistoryText"/>): карточки фильтруются по мере ввода.
+/// </summary>
 public partial class HistoryWindow : ChromeWindow
 {
     private readonly Func<HistoryStore> _store;
@@ -22,6 +27,11 @@ public partial class HistoryWindow : ChromeWindow
     private readonly BackgroundQueue _queue;
     private bool _closed;
     private readonly ObservableCollection<HistoryItemViewModel> _items = new();
+    private readonly ListCollectionView _view;
+    /// <summary>Распознанный текст по пути снимка; null — ещё не распознан. Читается из sidecar-файлов при обновлении.</summary>
+    private readonly Dictionary<string, string?> _texts = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HistorySearch _search = new(new TextSearchProvider());
+    private readonly DispatcherTimer _searchDelay = new() { Interval = TimeSpan.FromMilliseconds(200) };
 
     /// <param name="store">Текущее хранилище (может смениться после изменения настроек).</param>
     /// <param name="pin">Закрепить картинку на экране.</param>
@@ -33,9 +43,11 @@ public partial class HistoryWindow : ChromeWindow
         _pin = pin;
         _edit = edit;
         _queue = queue;
-        Items.ItemsSource = _items;
-        PreviewKeyDown += (_, e) => { if (e.Key == Key.Escape) Close(); };
-        Closed += (_, _) => { _closed = true; _refreshGeneration++; Loc.Changed -= Refresh; };
+        _view = (ListCollectionView)CollectionViewSource.GetDefaultView(_items);
+        Items.ItemsSource = _view;
+        _searchDelay.Tick += (_, _) => ApplySearch();
+        PreviewKeyDown += OnWindowKeyDown;
+        Closed += (_, _) => { _closed = true; _refreshGeneration++; _searchDelay.Stop(); Loc.Changed -= Refresh; };
         // Заголовок и пустое состояние собираются в коде: при смене языка — заново.
         Loc.Changed += Refresh;
     }
@@ -52,6 +64,30 @@ public partial class HistoryWindow : ChromeWindow
             foreach (var vm in _items) vm.CanPin = value;
         }
     }
+
+    private bool _searchEnabled;
+
+    /// <summary>Поиск по тексту: только с функцией «Распознавание текста» (без неё текст не распознаётся).</summary>
+    public bool SearchEnabled
+    {
+        get => _searchEnabled;
+        set
+        {
+            _searchEnabled = value;
+            SearchBar.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+            if (!value && SearchBox.Text.Length > 0) SearchBox.Text = ""; // TextChanged применит пустой запрос
+        }
+    }
+
+    /// <summary>Индексатор распознал снимок: текст попадает в поиск сразу, без перечитывания папки. Вызывать из UI-потока.</summary>
+    public void OnTextIndexed(string path, string text)
+    {
+        if (_closed || !_searchEnabled || !_texts.ContainsKey(path)) return;
+        _texts[path] = text;
+        if (Query is not null) RestartSearchDelay();
+    }
+
+    private string? Query => string.IsNullOrWhiteSpace(SearchBox.Text) ? null : SearchBox.Text.Trim();
 
     private static string EmptyHintText()
         => (Application.Current as App)?.HotkeyText is { } hotkey and not "—"
@@ -83,18 +119,119 @@ public partial class HistoryWindow : ChromeWindow
         }
         if (_closed || generation != _refreshGeneration) return;
 
-        foreach (var item in list) _items.Add(new HistoryItemViewModel(item) { CanPin = _canPin });
+        // Тексты для поиска — только с включённым поиском; сотни маленьких файлов читаются в фоне.
+        var texts = _searchEnabled
+            ? await Task.Run(() => list.Select(i => (i.Path, Text: HistoryText.TryRead(i.TextPath)?.Text)).ToList())
+            : [];
+        if (_closed || generation != _refreshGeneration) return;
+        _texts.Clear();
+        foreach (var (path, text) in texts) _texts[path] = text;
+
+        foreach (var item in list)
+        {
+            _items.Add(new HistoryItemViewModel(item) { CanPin = _canPin });
+            _texts.TryAdd(item.Path, null);
+        }
         if (DevShowFirstCardActions && _items.Count > 0) _items[0].ForceActions = true;
-        UpdateHeader();
+        ApplySearch();
         _ = LoadThumbnailsAsync(_items.ToList(), generation);
     }
 
-    private void UpdateHeader()
+    private void UpdateHeader(int? found = null)
     {
         var store = _store();
         Header.Text = Loc.F("History.Count", _items.Count, store.Limit);
         FolderText.Text = store.Folder;
-        if (_items.Count == 0) ShowEmpty(Loc.T("History.Empty"), EmptyHintText()); else EmptyState.Visibility = Visibility.Collapsed;
+        if (_items.Count == 0) ShowEmpty(Loc.T("History.Empty"), EmptyHintText());
+        else if (found == 0)
+        {
+            int pending = _items.Count(vm => _texts.GetValueOrDefault(vm.Path) is null);
+            ShowEmpty(Loc.F("History.NoMatches", Query ?? ""),
+                pending > 0 ? Loc.F("History.NoMatchesPending", pending) : Loc.T("History.NoMatchesHint"));
+        }
+        else EmptyState.Visibility = Visibility.Collapsed;
+    }
+
+    /// <summary>
+    /// Фильтрует карточки по запросу. Порядок — как вернул <see cref="HistorySearch"/> (по оценке, затем от новых к старым);
+    /// пустой запрос — все карточки в обычном порядке.
+    /// </summary>
+    private void ApplySearch()
+    {
+        _searchDelay.Stop();
+        if (_closed) return;
+        var query = _searchEnabled ? Query : null;
+        var hits = query is null ? null
+            : _search.Search(query, _items.Select(vm => new HistorySearchEntry(vm.Path, vm.CreatedAt, _texts.GetValueOrDefault(vm.Path))).ToList());
+        if (hits is null)
+        {
+            _view.Filter = null;
+            _view.CustomSort = null;
+        }
+        else
+        {
+            var rank = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            for (int i = 0; i < hits.Count; i++) rank[hits[i].Path] = i;
+            _view.Filter = o => o is HistoryItemViewModel vm && rank.ContainsKey(vm.Path);
+            _view.CustomSort = new RankComparer(rank);
+        }
+        UpdateHeader(hits?.Count);
+    }
+
+    private sealed class RankComparer(Dictionary<string, int> rank) : IComparer
+    {
+        public int Compare(object? x, object? y) => Rank(x).CompareTo(Rank(y));
+
+        private int Rank(object? o) => o is HistoryItemViewModel vm && rank.TryGetValue(vm.Path, out var r) ? r : int.MaxValue;
+    }
+
+    private void RestartSearchDelay()
+    {
+        _searchDelay.Stop();
+        _searchDelay.Start();
+    }
+
+    private void OnSearchChanged(object sender, TextChangedEventArgs e)
+    {
+        bool empty = SearchBox.Text.Length == 0;
+        SearchPlaceholder.Visibility = empty ? Visibility.Visible : Visibility.Collapsed;
+        ClearSearch.Visibility = empty ? Visibility.Collapsed : Visibility.Visible;
+        if (empty) ApplySearch(); else RestartSearchDelay();
+    }
+
+    private void OnClearSearch(object sender, RoutedEventArgs e)
+    {
+        SearchBox.Text = "";
+        SearchBox.Focus();
+    }
+
+    /// <summary>Из поля поиска стрелка вниз или Enter переходят к первой найденной карточке.</summary>
+    private void OnSearchKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key is not (Key.Down or Key.Enter)) return;
+        ApplySearch();
+        if (_view.IsEmpty) return;
+        _view.MoveCurrentToFirst();
+        Items.SelectedItem = _view.CurrentItem;
+        if (Items.ItemContainerGenerator.ContainerFromItem(_view.CurrentItem) is ListBoxItem item) item.Focus();
+        e.Handled = true;
+    }
+
+    /// <summary>Ctrl+F — к полю поиска; Esc сначала очищает запрос, затем закрывает окно.</summary>
+    private void OnWindowKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control && _searchEnabled)
+        {
+            SearchBox.Focus();
+            SearchBox.SelectAll();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Escape)
+        {
+            if (_searchEnabled && SearchBox.Text.Length > 0) SearchBox.Text = "";
+            else Close();
+            e.Handled = true;
+        }
     }
 
     private void ShowEmpty(string message, string hint)
@@ -189,6 +326,27 @@ public partial class HistoryWindow : ChromeWindow
         else if (e.Key == Key.Delete) { Delete(vm); e.Handled = true; }
         else if (e.Key == Key.Enter) { Open(vm); e.Handled = true; }
         else if (e.Key == Key.E && Keyboard.Modifiers == ModifierKeys.None) { _edit(vm.Path); e.Handled = true; }
+    }
+
+    /// <summary>Тестовый запуск (<c>--dev --history --scenario search</c>): запрос применяется сразу, без задержки ввода.</summary>
+    public void DevSearch(string query)
+    {
+        SearchBox.Text = query;
+        ApplySearch();
+    }
+
+    /// <summary>Тестовый запуск: окно целиком (с подписью) рисуется в PNG — без снимка экрана.</summary>
+    public void DevRenderTo(string path)
+    {
+        UpdateLayout();
+        var dpi = VisualTreeHelper.GetDpi(this);
+        int width = (int)Math.Ceiling(ActualWidth * dpi.DpiScaleX), height = (int)Math.Ceiling(ActualHeight * dpi.DpiScaleY);
+        var rtb = new RenderTargetBitmap(width, height, dpi.PixelsPerInchX, dpi.PixelsPerInchY, PixelFormats.Pbgra32);
+        rtb.Render(this);
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(rtb));
+        using var fs = File.Create(path);
+        encoder.Save(fs);
     }
 
     /// <summary>Тестовый запуск (<c>--dev --history --scenario hover</c>): кнопки действий первой карточки видны без наведения.</summary>

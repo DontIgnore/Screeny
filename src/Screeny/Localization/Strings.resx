@@ -1438,4 +1438,19 @@ Replace it?</value>
   <data name="App.ClipboardBusyPin" xml:space="preserve">
     <value>Another app is using the clipboard. Try again in a moment.</value>
   </data>
+  <data name="History.SearchPlaceholder" xml:space="preserve">
+    <value>Search text in screenshots</value>
+  </data>
+  <data name="History.ClearSearch" xml:space="preserve">
+    <value>Clear search (Esc)</value>
+  </data>
+  <data name="History.NoMatches" xml:space="preserve">
+    <value>Nothing found for “{0}”</value>
+  </data>
+  <data name="History.NoMatchesHint" xml:space="preserve">
+    <value>Search looks at the text Screeny recognized in your screenshots.</value>
+  </data>
+  <data name="History.NoMatchesPending" xml:space="preserve">
+    <value>Text in {0} screenshots isn't recognized yet. Screeny reads it in the background.</value>
+  </data>
 </root>
