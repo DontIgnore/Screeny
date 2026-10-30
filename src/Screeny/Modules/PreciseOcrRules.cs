@@ -31,7 +31,7 @@ public static class PreciseOcrRules
     /// Мастер предлагает «Скачать точное распознавание»: модуля нужной версии нет, удаление не ждёт перезапуска (загрузка
     /// упёрлась бы в занятые файлы), загрузка ещё не идёт и скачать есть откуда (dev без <c>--module-source</c> — нет).
     /// </summary>
-    public static bool WizardOffersDownload(PreciseOcrStatus? status)
+    public static bool WizardOffersDownload(ModuleStatus? status)
         => status is { Ready: false, RemovalPending: false, Downloading: false, SourceAvailable: true };
 
     /// <summary>

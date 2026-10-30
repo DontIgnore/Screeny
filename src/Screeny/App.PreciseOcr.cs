@@ -12,7 +12,7 @@ namespace Screeny;
 /// </summary>
 public partial class App
 {
-    private PreciseOcrController? _ocrModule;
+    private ModuleController? _ocrModule;
     private PreciseOcrService? _preciseOcr;
     private bool _moduleUpdateHinted;
     // Без общего таймаута: на медленной сети 30 МБ качаются дольше любого разумного предела. Зависание ловит таймаут
@@ -20,7 +20,7 @@ public partial class App
     private static readonly Lazy<HttpClient> ModuleHttp = new(() => new HttpClient { Timeout = Timeout.InfiniteTimeSpan });
 
     /// <summary>Модуль для окна настроек и мастера.</summary>
-    internal IPreciseOcrHost? OcrModuleHost => _ocrModule;
+    internal IModuleHost? OcrModuleHost => _ocrModule;
 
     /// <summary>Уточнение для режима текста (оверлей).</summary>
     internal IOcrRefiner? OcrRefiner => _preciseOcr;
@@ -34,18 +34,10 @@ public partial class App
     private void InitPreciseOcr()
     {
         var installer = new ModuleInstaller(OcrModule.ModulesRoot(IsDev), OcrModule.Spec);
-        var kind = ModuleInstaller.ChooseSource(IsDev, Args.ModuleSource);
         _preciseOcr = new PreciseOcrService(
             () => PreciseOcrRules.IsActive(Settings, _ocrModule?.InstalledVersion) ? _ocrModule?.ReadyFolder : null,
             OnTextModeUsed);
-        _ocrModule = new PreciseOcrController(installer,
-            () => kind switch
-            {
-                ModuleSourceKind.Folder => new FolderModuleSource(Args.ModuleSource!, OcrModule.ZipName(OcrModule.Version)),
-                ModuleSourceKind.Github => new HttpModuleSource(ModuleHttp.Value, OcrModule.DownloadUrl(OcrModule.Version)),
-                _ => null, // dev без --module-source: никакой сети
-            },
-            dir => OrtNative.LoadedFrom is { } loaded && string.Equals(Path.GetFullPath(loaded), Path.GetFullPath(dir), StringComparison.OrdinalIgnoreCase))
+        _ocrModule = new ModuleController(installer, ModuleSource, ModuleFolderInUse, [SemanticModule.Spec])
         {
             LoadError = () => _preciseOcr?.LoadError,
         };
@@ -54,6 +46,18 @@ public partial class App
         _ocrModule.Restored += OnOcrModuleRestored;
         _ = _ocrModule.CleanupAsync();
     }
+
+    /// <summary>Откуда брать архив модуля или общего компонента: <c>--module-source</c> (dev) — папка, обычный запуск — GitHub.</summary>
+    private IModuleSource? ModuleSource(ModuleSpec spec) => ModuleInstaller.ChooseSource(IsDev, Args.ModuleSource) switch
+    {
+        ModuleSourceKind.Folder => new FolderModuleSource(Args.ModuleSource!, spec.ZipName),
+        ModuleSourceKind.Github when spec.DownloadUrl is { } url => new HttpModuleSource(ModuleHttp.Value, url),
+        _ => null, // dev без --module-source: никакой сети
+    };
+
+    /// <summary>Папку держит загруженный в процесс нативный ORT (общий компонент): удаляется после перезапуска.</summary>
+    private static bool ModuleFolderInUse(string dir)
+        => OrtNative.LoadedFrom is { } loaded && string.Equals(Path.GetFullPath(loaded), Path.GetFullPath(dir), StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Загрузка закончилась. Успех — это и согласие: «Использовать» включается и сохраняется сразу (кнопку нажали ради этого).

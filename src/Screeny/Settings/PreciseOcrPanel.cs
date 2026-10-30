@@ -13,7 +13,7 @@ namespace Screeny.Settings;
 /// </summary>
 public sealed class PreciseOcrPanel
 {
-    private readonly IPreciseOcrHost _host;
+    private readonly IModuleHost _host;
     private readonly StackPanel _actions = new() { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 10, 0, 0) };
     private readonly TextBlock _state = new() { TextWrapping = TextWrapping.Wrap, LineHeight = 17, Margin = new Thickness(0, 8, 0, 0) };
     private readonly TextBlock _error = new() { TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 6, 0, 0) };
@@ -30,7 +30,7 @@ public sealed class PreciseOcrPanel
     public StackPanel Root { get; } = new() { Margin = new Thickness(28, 12, 0, 0) };
 
     /// <param name="use">Текущее значение <see cref="AppSettings.PreciseOcr"/>.</param>
-    public PreciseOcrPanel(IPreciseOcrHost host, bool use)
+    public PreciseOcrPanel(IModuleHost host, bool use)
     {
         _host = host;
         var title = new TextBlock();

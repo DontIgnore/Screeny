@@ -13,15 +13,15 @@ public class PreciseOcrControllerTests : IDisposable
 
     private sealed record FinishedArgs(bool Ok, string? Error, bool Tray);
 
-    private static Task<FinishedArgs> NextFinished(PreciseOcrController c)
+    private static Task<FinishedArgs> NextFinished(ModuleController c)
     {
         var tcs = new TaskCompletionSource<FinishedArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
         c.Finished += (ok, error, tray) => tcs.TrySetResult(new(ok, error, tray));
         return tcs.Task;
     }
 
-    private PreciseOcrController Controller(ModuleSpec spec, IModuleSource? source, Func<string, bool>? inUse = null)
-        => new(new ModuleInstaller(Root, spec), () => source, inUse ?? (_ => false));
+    private ModuleController Controller(ModuleSpec spec, IModuleSource? source, Func<string, bool>? inUse = null)
+        => new(new ModuleInstaller(Root, spec), _ => source, inUse ?? (_ => false));
 
     [Fact]
     public async Task Download_FromFolder_InstallsAndReportsSuccess()
@@ -152,14 +152,14 @@ public class PreciseOcrControllerTests : IDisposable
     public void FriendlyError_NeverShowsRawExceptionText(Type type, string expected)
     {
         var ex = (Exception)Activator.CreateInstance(type, "raw .NET message")!;
-        var text = PreciseOcrController.FriendlyError(ex);
+        var text = ModuleController.FriendlyError(ex);
         Assert.Contains(expected, text);
         Assert.DoesNotContain("raw .NET message", text);
     }
 
     [Fact]
     public void FriendlyError_KeepsOwnMessages()
-        => Assert.Equal("Модуль не найден на сервере (404).", PreciseOcrController.FriendlyError(new ModuleInstallException("Модуль не найден на сервере (404).")));
+        => Assert.Equal("Модуль не найден на сервере (404).", ModuleController.FriendlyError(new ModuleInstallException("Модуль не найден на сервере (404).")));
 
     [Fact]
     public async Task Service_TamperedFiles_DoNotLoadAndReportReason()
@@ -185,5 +185,108 @@ public class PreciseOcrControllerTests : IDisposable
         Assert.False(service.IsActive);
         Assert.False(await service.PrepareAsync(CancellationToken.None));
         Assert.Null(service.LoadError);
+    }
+
+    private static readonly Dictionary<string, byte[]> RuntimeFiles = new() { ["onnxruntime.dll"] = "native"u8.ToArray() };
+
+    /// <summary>Архивы общего компонента и двух модулей, которым он нужен, в подпапках <c>rel</c> (как в <c>releases\</c>).</summary>
+    private (ModuleSpec Runtime, ModuleSpec A, ModuleSpec B, string Source) TwoModulesWithRuntime()
+    {
+        var src = Path.Combine(_files.Dir, "rel");
+        byte[] Put(string sub, string name, byte[] zip)
+        {
+            Directory.CreateDirectory(Path.Combine(src, sub));
+            File.WriteAllBytes(Path.Combine(src, sub, name), zip);
+            return zip;
+        }
+        var rt = Put("ort-runtime", "rt.zip", ModuleTestFiles.Zip(RuntimeFiles, id: "ort-runtime", version: 1));
+        var a = Put("a", "a.zip", ModuleTestFiles.Zip(ModuleTestFiles.DefaultFiles, id: "mod-a", version: 1));
+        var b = Put("b", "b.zip", ModuleTestFiles.Zip(ModuleTestFiles.DefaultFiles, id: "mod-b", version: 1));
+        var runtime = new ModuleSpec("ort-runtime", 1, ModuleTestFiles.Sha(rt)) { ZipName = "rt.zip", ZipSize = rt.Length };
+        return (runtime,
+            new ModuleSpec("mod-a", 1, ModuleTestFiles.Sha(a)) { ZipName = "a.zip", ZipSize = a.Length, Requires = [runtime] },
+            new ModuleSpec("mod-b", 1, ModuleTestFiles.Sha(b)) { ZipName = "b.zip", ZipSize = b.Length, Requires = [runtime] },
+            src);
+    }
+
+    private ModuleController Controller(ModuleSpec spec, string source, ModuleSpec other, Func<string, bool>? inUse = null)
+        => new(new ModuleInstaller(Root, spec), s => new FolderModuleSource(source, s.ZipName), inUse ?? (_ => false), [other]);
+
+    [Fact]
+    public async Task Download_InstallsMissingRuntimeFirst_ThenModule()
+    {
+        var (runtime, a, b, src) = TwoModulesWithRuntime();
+        var c = Controller(a, src, b);
+        Assert.False(c.Status.Ready);
+        Assert.Equal(a.ZipSize + runtime.ZipSize, c.Status.DownloadBytes);
+        var finished = NextFinished(c);
+        c.StartDownload();
+        Assert.True((await finished.WaitAsync(TimeSpan.FromSeconds(10))).Ok);
+        Assert.True(c.Status.Ready);
+        Assert.Equal(0, c.Status.DownloadBytes);
+        Assert.True(Directory.Exists(Path.Combine(Root, "ort-runtime-1")));
+        Assert.True(Directory.Exists(Path.Combine(Root, "mod-a-1")));
+    }
+
+    [Fact]
+    public void RuntimeMissing_ModuleIsNotReady()
+    {
+        var (_, a, b, src) = TwoModulesWithRuntime();
+        _files.Installed(Root, 1, id: "mod-a");
+        var c = Controller(a, src, b);
+        Assert.Equal(1, c.Status.Installed);
+        Assert.False(c.Status.Ready);
+        Assert.Null(c.ReadyFolder);
+    }
+
+    [Fact]
+    public async Task SecondModule_ReusesInstalledRuntime()
+    {
+        var (runtime, a, b, src) = TwoModulesWithRuntime();
+        var ca = Controller(a, src, b);
+        var done = NextFinished(ca);
+        ca.StartDownload();
+        Assert.True((await done.WaitAsync(TimeSpan.FromSeconds(10))).Ok);
+        // Архива компонента больше нет: если бы его качали снова, установка упала бы.
+        File.Delete(Path.Combine(src, "ort-runtime", "rt.zip"));
+        var cb = Controller(b, src, a);
+        Assert.Equal(b.ZipSize, cb.Status.DownloadBytes);
+        done = NextFinished(cb);
+        cb.StartDownload();
+        Assert.True((await done.WaitAsync(TimeSpan.FromSeconds(10))).Ok);
+        Assert.True(cb.Status.Ready);
+    }
+
+    [Fact]
+    public void Remove_KeepsRuntimeWhileAnotherModuleNeedsIt()
+    {
+        var (_, a, b, src) = TwoModulesWithRuntime();
+        _files.Installed(Root, 1, RuntimeFiles, "ort-runtime");
+        _files.Installed(Root, 1, id: "mod-a");
+        _files.Installed(Root, 1, id: "mod-b");
+        var ca = Controller(a, src, b);
+        Assert.True(ca.Status.Ready);
+        ca.Remove();
+        Assert.False(Directory.Exists(Path.Combine(Root, "mod-a-1")));
+        Assert.True(Directory.Exists(Path.Combine(Root, "ort-runtime-1")));
+
+        var cb = Controller(b, src, a);
+        cb.Remove();
+        Assert.False(Directory.Exists(Path.Combine(Root, "ort-runtime-1")));
+    }
+
+    [Fact]
+    public void Remove_RuntimeLoadedInProcess_IsMarkedAndUndoRestoresIt()
+    {
+        var (_, a, b, src) = TwoModulesWithRuntime();
+        var runtimeDir = _files.Installed(Root, 1, RuntimeFiles, "ort-runtime");
+        _files.Installed(Root, 1, id: "mod-a");
+        var c = Controller(a, src, b, inUse: d => d == runtimeDir);
+        c.Remove();
+        Assert.True(File.Exists(Path.Combine(runtimeDir, ModuleInstaller.RemovedMarker)));
+        Assert.False(c.Status.Ready);
+        // Модуль удалился сразу (его файлы не держат), «Не удалять» его не вернёт; компонент же снова на месте.
+        c.UndoRemove();
+        Assert.False(File.Exists(Path.Combine(runtimeDir, ModuleInstaller.RemovedMarker)));
     }
 }

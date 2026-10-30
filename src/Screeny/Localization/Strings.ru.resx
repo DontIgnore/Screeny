@@ -1492,4 +1492,34 @@ Screeny закроется; запустите его снова и повтор
   <data name="Burst.FrameTip" xml:space="preserve">
     <value>Кадр {0} из {1}. PageUp и PageDown переключают кадры.</value>
   </data>
+  <data name="Module.RuntimeRestart" xml:space="preserve">
+    <value>ONNX Runtime обновился: перезапустите Screeny, чтобы он заработал.</value>
+  </data>
+  <data name="Semantic.Title" xml:space="preserve">
+    <value>Поиск по смыслу</value>
+  </data>
+  <data name="Semantic.Caption" xml:space="preserve">
+    <value>Находит снимки в истории по тому, что на них, а не только по точным словам: «котик», «график», «окно с ошибкой» — на любом языке. Модуль, около {0}, скачивается один раз и работает на этом компьютере: снимки никуда не отправляются. Снимки индексируются в фоне, по несколько секунд на каждый.</value>
+  </data>
+  <data name="Semantic.Ready" xml:space="preserve">
+    <value>Модуль установлен. Пишите в поиске истории: результаты по смыслу идут после точных совпадений текста.</value>
+  </data>
+  <data name="Semantic.Indexing" xml:space="preserve">
+    <value>Проиндексировано снимков: {0} из {1}.</value>
+  </data>
+  <data name="Semantic.Indexed" xml:space="preserve">
+    <value>Все снимки проиндексированы ({0}).</value>
+  </data>
+  <data name="Semantic.Outdated" xml:space="preserve">
+    <value>Установлен модуль версии {0}, а этой версии Screeny нужна {1}. Поиск по смыслу пока выключен.</value>
+  </data>
+  <data name="Semantic.NeedsOcr" xml:space="preserve">
+    <value>Работает только при включённом «Распознавании текста и QR»: текст на снимках входит в индекс.</value>
+  </data>
+  <data name="Semantic.Installed" xml:space="preserve">
+    <value>Поиск по смыслу установлен. Снимки индексируются в фоне.</value>
+  </data>
+  <data name="Semantic.LoadFailed" xml:space="preserve">
+    <value>Поиск по смыслу не загрузился: {0}</value>
+  </data>
 </root>

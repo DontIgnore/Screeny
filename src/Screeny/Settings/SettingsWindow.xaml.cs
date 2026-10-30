@@ -32,7 +32,7 @@ public partial class SettingsWindow : ChromeWindow
     /// <param name="apply">Применить и сохранить; возвращает ошибку или null.</param>
     /// <param name="preciseOcr">Модуль точного распознавания; null — блока нет.</param>
     public SettingsWindow(AppSettings current, HotkeyReport hotkeys, bool printScreenReserved, bool startupEnabled,
-        Func<AppSettings, SettingsApplyError?> apply, Modules.IPreciseOcrHost? preciseOcr = null)
+        Func<AppSettings, SettingsApplyError?> apply, Modules.IModuleHost? preciseOcr = null)
     {
         InitializeComponent();
         _apply = apply;

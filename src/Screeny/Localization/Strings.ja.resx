@@ -1492,4 +1492,34 @@ Screeny を終了します。もう一度起動して、更新をやり直して
   <data name="Burst.FrameTip" xml:space="preserve">
     <value>{1} 枚中 {0} 枚目。PageUp と PageDown で切り替えます。</value>
   </data>
+  <data name="Module.RuntimeRestart" xml:space="preserve">
+    <value>ONNX Runtime が更新されました。使うには Screeny を再起動してください。</value>
+  </data>
+  <data name="Semantic.Title" xml:space="preserve">
+    <value>意味で検索</value>
+  </data>
+  <data name="Semantic.Caption" xml:space="preserve">
+    <value>履歴のスクリーンショットを、正確な語句だけでなく写っている内容で探せます（「猫」「グラフ」「エラーダイアログ」など、どの言語でも）。モジュール（約 {0}）は一度だけダウンロードされ、このコンピューターで動作します。スクリーンショットがどこかへ送信されることはありません。インデックス作成はバックグラウンドで行われ、1 枚あたり数秒かかります。</value>
+  </data>
+  <data name="Semantic.Ready" xml:space="preserve">
+    <value>モジュールはインストール済みです。履歴の検索ボックスに入力すると、テキストが完全に一致した結果の後に、意味で見つかった結果が表示されます。</value>
+  </data>
+  <data name="Semantic.Indexing" xml:space="preserve">
+    <value>{1} 枚中 {0} 枚のスクリーンショットをインデックス済みです。</value>
+  </data>
+  <data name="Semantic.Indexed" xml:space="preserve">
+    <value>すべてのスクリーンショットをインデックス済みです（{0} 枚）。</value>
+  </data>
+  <data name="Semantic.Outdated" xml:space="preserve">
+    <value>モジュールのバージョン {0} がインストールされていますが、このバージョンの Screeny には {1} が必要です。意味で検索は一時的にオフです。</value>
+  </data>
+  <data name="Semantic.NeedsOcr" xml:space="preserve">
+    <value>「テキスト認識と QR コード」がオンのときだけ動作します。スクリーンショット内のテキストもインデックスに含まれます。</value>
+  </data>
+  <data name="Semantic.Installed" xml:space="preserve">
+    <value>意味で検索をインストールしました。スクリーンショットのインデックスをバックグラウンドで作成しています。</value>
+  </data>
+  <data name="Semantic.LoadFailed" xml:space="preserve">
+    <value>意味で検索を読み込めませんでした: {0}</value>
+  </data>
 </root>

@@ -145,7 +145,7 @@ public class PreciseOcrRulesTests
     [InlineData(null, false, true, true, false)]           // уже качается
     [InlineData(null, false, false, false, false)]         // dev без --module-source
     public void WizardOffersDownload(int? installed, bool removalPending, bool downloading, bool source, bool offered)
-        => Assert.Equal(offered, PreciseOcrRules.WizardOffersDownload(new PreciseOcrStatus(installed, downloading, 0, removalPending, null, source)));
+        => Assert.Equal(offered, PreciseOcrRules.WizardOffersDownload(new ModuleStatus(installed, downloading, 0, removalPending, null, source)));
 
     [Fact]
     public void WizardOffersDownload_NoController_False() => Assert.False(PreciseOcrRules.WizardOffersDownload(null));
@@ -160,7 +160,7 @@ public class PreciseOcrRulesTests
     [InlineData(@"C:\Windows\System32\msvcp140.dll", null, "14.50.35710.0", false)]               // версия неизвестна
     public void CrtConflict(string loaded, string? loadedVersion, string ourVersion, bool conflict)
     {
-        var text = Screeny.Ocr.Paddle.OrtNative.CrtConflict("msvcp140.dll", loaded, loadedVersion is null ? null : Version.Parse(loadedVersion), Ours, Version.Parse(ourVersion));
+        var text = Screeny.Modules.OrtNative.CrtConflict("msvcp140.dll", loaded, loadedVersion is null ? null : Version.Parse(loadedVersion), Ours, Version.Parse(ourVersion));
         Assert.Equal(conflict, text is not null);
         if (text is not null)
         {

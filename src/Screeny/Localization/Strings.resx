@@ -1492,4 +1492,34 @@ Replace it?</value>
   <data name="Burst.FrameTip" xml:space="preserve">
     <value>Frame {0} of {1}. PageUp and PageDown switch frames.</value>
   </data>
+  <data name="Module.RuntimeRestart" xml:space="preserve">
+    <value>ONNX Runtime was updated; restart Screeny to use it.</value>
+  </data>
+  <data name="Semantic.Title" xml:space="preserve">
+    <value>Search by meaning</value>
+  </data>
+  <data name="Semantic.Caption" xml:space="preserve">
+    <value>Finds screenshots in the history by what is in them, not only by exact words: “cat”, “chart”, “error dialog”, in any language. The module, about {0}, is downloaded once and runs on this computer: screenshots are never sent anywhere. Screenshots are indexed in the background, a few seconds each.</value>
+  </data>
+  <data name="Semantic.Ready" xml:space="preserve">
+    <value>Module installed. Type in the history search box: results by meaning come after exact text matches.</value>
+  </data>
+  <data name="Semantic.Indexing" xml:space="preserve">
+    <value>Indexed {0} of {1} screenshots.</value>
+  </data>
+  <data name="Semantic.Indexed" xml:space="preserve">
+    <value>All screenshots are indexed ({0}).</value>
+  </data>
+  <data name="Semantic.Outdated" xml:space="preserve">
+    <value>Module version {0} is installed, but this version of Screeny needs {1}. Search by meaning is off for now.</value>
+  </data>
+  <data name="Semantic.NeedsOcr" xml:space="preserve">
+    <value>Works only with “Text recognition and QR” turned on: the text in screenshots is part of the index.</value>
+  </data>
+  <data name="Semantic.Installed" xml:space="preserve">
+    <value>Search by meaning is installed. Screenshots are being indexed in the background.</value>
+  </data>
+  <data name="Semantic.LoadFailed" xml:space="preserve">
+    <value>Search by meaning didn't load: {0}</value>
+  </data>
 </root>

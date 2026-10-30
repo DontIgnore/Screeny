@@ -3,16 +3,17 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Screeny.Logging;
 
-namespace Screeny.Ocr.Paddle;
+namespace Screeny.Modules;
 
 /// <summary>Нативный рантайм модуля загружать нельзя; текст — для пользователя (настройки).</summary>
 public sealed class OrtLoadException(string message) : Exception(message);
 
 /// <summary>
-/// Нативный ONNX Runtime из папки модуля. В приложении только управляемая сборка
-/// (<c>Microsoft.ML.OnnxRuntime.Managed</c>), а <c>onnxruntime.dll</c> лежит в скачанном модуле: перед первым обращением
-/// к типам ORT её DllImport перенаправляется туда. Загруженная библиотека остаётся в процессе до выхода, поэтому
-/// удалить или заменить файлы модуля после первого распознавания можно только после перезапуска.
+/// Нативный ONNX Runtime из папки общего компонента (<see cref="OrtRuntimeModule"/>). В приложении только управляемая
+/// сборка (<c>Microsoft.ML.OnnxRuntime.Managed</c>), а <c>onnxruntime.dll</c> лежит в скачанном компоненте: перед первым
+/// обращением к типам ORT её DllImport перенаправляется туда. Одна копия на процесс для всех модулей (точное
+/// распознавание, смысловой поиск). Загруженная библиотека остаётся в процессе до выхода, поэтому удалить или заменить
+/// файлы компонента после первого использования можно только после перезапуска.
 /// </summary>
 public static class OrtNative
 {
@@ -34,13 +35,19 @@ public static class OrtNative
 
     /// <summary>
     /// Грузит рантайм из <paramref name="folder"/> (один раз за процесс). Бросает <see cref="OrtLoadException"/>, если в
-    /// процессе уже есть более старый рантайм VC++, и исключения загрузчика, если библиотека не загружается.
+    /// процессе уже есть более старый рантайм VC++ или ORT уже загружен из другой папки (вторая копия в процессе не
+    /// нужна: DllImport всё равно смотрит на первую), и исключения загрузчика, если библиотека не загружается.
     /// </summary>
     public static void EnsureLoaded(string folder)
     {
         lock (Gate)
         {
-            if (_handle != IntPtr.Zero) return;
+            if (_handle != IntPtr.Zero)
+            {
+                if (string.Equals(Path.GetFullPath(folder), Path.GetFullPath(_loadedFrom!), StringComparison.OrdinalIgnoreCase)) return;
+                Log.Error($"ONNX Runtime is already loaded from {_loadedFrom}; refusing a second copy from {folder}");
+                throw new OrtLoadException(Localization.Loc.T("Module.RuntimeRestart"));
+            }
             CheckLoadedCrt(folder);
             foreach (var crt in CrtLibraries)
             {

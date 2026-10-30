@@ -1492,4 +1492,34 @@ Se eliminarán las capturas ({1}) sin pasar por la Papelera de reciclaje. No se 
   <data name="Burst.FrameTip" xml:space="preserve">
     <value>Fotograma {0} de {1}. RePág y AvPág cambian de fotograma.</value>
   </data>
+  <data name="Module.RuntimeRestart" xml:space="preserve">
+    <value>ONNX Runtime se ha actualizado; reinicia Screeny para usarlo.</value>
+  </data>
+  <data name="Semantic.Title" xml:space="preserve">
+    <value>Búsqueda por significado</value>
+  </data>
+  <data name="Semantic.Caption" xml:space="preserve">
+    <value>Encuentra capturas del historial por lo que muestran, no solo por palabras exactas: «gato», «gráfico», «diálogo de error», en cualquier idioma. El módulo, de unos {0}, se descarga una vez y funciona en este equipo: las capturas nunca se envían a ninguna parte. Las capturas se indexan en segundo plano, unos segundos cada una.</value>
+  </data>
+  <data name="Semantic.Ready" xml:space="preserve">
+    <value>Módulo instalado. Escribe en la búsqueda del historial: los resultados por significado aparecen después de las coincidencias exactas de texto.</value>
+  </data>
+  <data name="Semantic.Indexing" xml:space="preserve">
+    <value>Capturas indexadas: {0} de {1}.</value>
+  </data>
+  <data name="Semantic.Indexed" xml:space="preserve">
+    <value>Todas las capturas están indexadas ({0}).</value>
+  </data>
+  <data name="Semantic.Outdated" xml:space="preserve">
+    <value>Está instalada la versión {0} del módulo, pero esta versión de Screeny necesita la {1}. La búsqueda por significado está desactivada por ahora.</value>
+  </data>
+  <data name="Semantic.NeedsOcr" xml:space="preserve">
+    <value>Solo funciona con «Reconocimiento de texto y QR» activado: el texto de las capturas forma parte del índice.</value>
+  </data>
+  <data name="Semantic.Installed" xml:space="preserve">
+    <value>La búsqueda por significado está instalada. Las capturas se indexan en segundo plano.</value>
+  </data>
+  <data name="Semantic.LoadFailed" xml:space="preserve">
+    <value>La búsqueda por significado no se cargó: {0}</value>
+  </data>
 </root>

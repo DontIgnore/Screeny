@@ -31,12 +31,18 @@ public sealed class HttpModuleSource(HttpClient http, Uri url) : IModuleSource
     }
 }
 
-/// <summary>Архив из локальной папки (<c>--dev --module-source &lt;папка&gt;</c>): в сеть не ходит.</summary>
+/// <summary>
+/// Архив из локальной папки (<c>--dev --module-source &lt;папка&gt;</c>): в сеть не ходит. Архив ищется в самой папке и
+/// в её подпапках первого уровня: скрипты сборки кладут каждый модуль в свою (<c>releases\ocr-module</c>,
+/// <c>releases\ort-runtime</c>…), и хватает одного <c>--module-source releases</c>.
+/// </summary>
 public sealed class FolderModuleSource(string folder, string fileName) : IModuleSource
 {
     public Task<(Stream Body, long? Length)> OpenAsync(CancellationToken ct)
     {
         var path = Path.Combine(folder, fileName);
+        if (!File.Exists(path) && Directory.Exists(folder))
+            path = Directory.EnumerateDirectories(folder).Select(d => Path.Combine(d, fileName)).FirstOrDefault(File.Exists) ?? path;
         if (!File.Exists(path)) throw new ModuleInstallException(Loc.F("Module.FileMissing", folder, fileName));
         var s = File.OpenRead(path);
         return Task.FromResult<(Stream, long?)>((s, s.Length));
@@ -54,6 +60,19 @@ public sealed record ModuleSpec(string Id, int Version, string ZipSha256, string
     long MaxZipBytes = 200_000_000, long MaxUnpackedBytes = 400_000_000)
 {
     public string FolderName => $"{Id}-{Version}";
+
+    /// <summary>Имя архива (для <see cref="FolderModuleSource"/>) и его адрес в релизе GitHub.</summary>
+    public string ZipName { get; init; } = $"{Id}-{Version}.zip";
+    public Uri? DownloadUrl { get; init; }
+    /// <summary>Размер архива в байтах: для подписи «Скачать (N МБ)».</summary>
+    public long ZipSize { get; init; }
+
+    /// <summary>
+    /// Компоненты, без которых модуль не работает (общий ONNX Runtime, <see cref="OrtRuntimeModule"/>): ставятся раньше
+    /// модуля и удаляются, только когда ни одному установленному модулю больше не нужны. Берутся из приложения, а не из
+    /// <c>module.json</c> на диске.
+    /// </summary>
+    public IReadOnlyList<ModuleSpec> Requires { get; init; } = [];
 
     /// <summary>Сколько ждать ответа сервера и каждого следующего куска данных. Сервер замолчал дольше — «нет связи»,
     /// а не вечное ожидание (у ответа с <c>ResponseHeadersRead</c> своего таймаута на чтение нет).</summary>
@@ -121,6 +140,37 @@ public sealed class ModuleInstaller(string root, ModuleSpec spec)
     }
 
     public static string NoConnection => Loc.T("Module.NoConnection");
+
+    // Общий компонент могут ставить два модуля сразу (точное распознавание и смысловой поиск): установка одной папки —
+    // по очереди.
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, SemaphoreSlim> FolderLocks = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Нужная версия уже стоит (и её файлы сходятся с <c>module.json</c>) — ничего не качает; помечена к удалению, но
+    /// файлы целы — снимает метку; иначе ставит, как <see cref="InstallAsync"/>. Под замком папки: два модуля с общим
+    /// компонентом не ставят его одновременно. Возвращает папку.
+    /// </summary>
+    public async Task<string> EnsureInstalledAsync(Func<IModuleSource?> source, Action<int>? progress, CancellationToken ct)
+    {
+        var gate = FolderLocks.GetOrAdd(Path.GetFullPath(TargetFolder), _ => new SemaphoreSlim(1, 1));
+        await gate.WaitAsync(ct);
+        try
+        {
+            if (IsInstalled || (RemovalPending && Restore()))
+            {
+                progress?.Invoke(100);
+                return TargetFolder;
+            }
+            var src = source() ?? throw new ModuleInstallException(ModuleController.DevNoSource);
+            return await InstallAsync(src, progress, ct);
+        }
+        finally { gate.Release(); }
+    }
+
+    /// <summary>Нужная версия стоит, не помечена к удалению и сходится с <c>module.json</c> (файлы хешируются).</summary>
+    public bool IsInstalled
+        => !RemovalPending && InstalledVersions(root, spec.Id).Contains(spec.Version)
+           && ModuleManifest.Verify(TargetFolder, spec.Id, spec.Version, spec.ManifestSha256) is null;
 
     /// <summary>
     /// Скачать и поставить. <paramref name="progress"/> — проценты загрузки (0–100). Возвращает папку модуля.

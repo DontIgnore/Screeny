@@ -46,17 +46,17 @@ public sealed class ModuleTestFiles : IDisposable
     public static ModuleSpec SpecFor(byte[] zip, int version = 1) => new("ocr-paddle", version, Sha(zip));
 
     /// <summary>Папка модуля как после установки.</summary>
-    public string Installed(string root, int version, IReadOnlyDictionary<string, byte[]>? files = null)
+    public string Installed(string root, int version, IReadOnlyDictionary<string, byte[]>? files = null, string id = "ocr-paddle")
     {
         files ??= DefaultFiles;
-        var dir = Path.Combine(root, $"ocr-paddle-{version}");
+        var dir = Path.Combine(root, $"{id}-{version}");
         foreach (var (name, data) in files)
         {
             var path = Path.Combine(dir, name.Replace('/', Path.DirectorySeparatorChar));
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             File.WriteAllBytes(path, data);
         }
-        File.WriteAllBytes(Path.Combine(dir, ModuleManifest.FileName), Manifest("ocr-paddle", version, files));
+        File.WriteAllBytes(Path.Combine(dir, ModuleManifest.FileName), Manifest(id, version, files));
         return dir;
     }
 }

@@ -1,6 +1,7 @@
 using System.Windows;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
+using Screeny.Modules;
 
 namespace Screeny.Ocr.Paddle;
 
@@ -29,7 +30,7 @@ public sealed class PaddleEngine : IDisposable
     /// <paramref name="threads"/> потоков ORT (<see cref="PaddlePipeline.ThreadSplit"/>).</summary>
     public static PaddleEngine Load(string folder, int par, int threads)
     {
-        OrtNative.EnsureLoaded(folder);
+        OrtRuntimeModule.EnsureLoaded(folder);
         // Параметры сессии — нативный объект: нужен только при создании сессий.
         using var options = Options(threads);
         InferenceSession? det = null, rec = null;
