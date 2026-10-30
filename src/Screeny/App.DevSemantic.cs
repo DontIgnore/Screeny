@@ -107,6 +107,12 @@ public partial class App
                 await Task.Delay(800);
                 window.DevRenderTo(Path.Combine(devRoot, $"history-semantic-{file}.png"));
             }
+            // Блок «Поиск по смыслу» в настройках (после прохода по папке: счёт «N из M» уже есть).
+            ShowSettings();
+            await Task.Delay(1500);
+            _settingsWindow?.DevRenderSemantic(Path.Combine(devRoot, "settings-semantic.png"));
+            await Task.Delay(500);
+            _settingsWindow?.DevRenderSemantic(Path.Combine(devRoot, "settings-semantic.png"));
         }
         catch (Exception ex)
         {

@@ -106,6 +106,21 @@ public partial class SettingsWindow : ChromeWindow
     /// <summary>Поменялся счёт проиндексированных снимков или состояние модуля смыслового поиска.</summary>
     public void RefreshSemantic() => _semantic?.Refresh();
 
+    /// <summary>Тестовый запуск: прокрутить к блоку «Поиск по смыслу» и нарисовать окно в PNG — без снимка экрана.</summary>
+    public void DevRenderSemantic(string path)
+    {
+        _semantic?.Root.BringIntoView();
+        UpdateLayout();
+        var dpi = System.Windows.Media.VisualTreeHelper.GetDpi(this);
+        var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap((int)Math.Ceiling(ActualWidth * dpi.DpiScaleX),
+            (int)Math.Ceiling(ActualHeight * dpi.DpiScaleY), dpi.PixelsPerInchX, dpi.PixelsPerInchY, System.Windows.Media.PixelFormats.Pbgra32);
+        rtb.Render(this);
+        var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+        encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(rtb));
+        using var fs = File.Create(path);
+        encoder.Save(fs);
+    }
+
     /// <summary>Модуль скачан, и App уже записал согласие в настройки: галочка «Использовать» — по ним.</summary>
     public void RefreshPreciseOcr(bool use) => _preciseOcr?.SetUse(use);
 

@@ -17,9 +17,14 @@ public interface ISemanticItemEncoder
     SemanticVectors? Encode(string pngPath, string? text, float[]? reuseImage);
 }
 
-/// <summary>Векторы через <see cref="SemanticService"/>: время и память каждого снимка — в журнал (для оценки стоимости).</summary>
+/// <summary>
+/// Векторы через <see cref="SemanticService"/>. Время и память — в журнал для первого снимка и затем для каждого 50-го:
+/// догоняющий проход по тысячам снимков не должен вытеснить из журнала всё остальное.
+/// </summary>
 public sealed class ServiceItemEncoder(SemanticService service) : ISemanticItemEncoder
 {
+    private int _count;
+
     public SemanticMarker Marker => SemanticService.CurrentMarker;
 
     public SemanticVectors? Encode(string pngPath, string? text, float[]? reuseImage)
@@ -36,9 +41,12 @@ public sealed class ServiceItemEncoder(SemanticService service) : ISemanticItemE
             }
             long imageMs = sw.ElapsedMilliseconds;
             var textVector = string.IsNullOrWhiteSpace(text) ? null : e.EmbedDocument(text);
-            using var process = Process.GetCurrentProcess();
-            Log.Error($"Semantic index {size}{(reuseImage is null ? $"image {imageMs} ms" : "image reused")}, text {sw.ElapsedMilliseconds - imageMs} ms" +
-                      $"{(textVector is null ? " (none)" : "")}, working set {process.WorkingSet64 / 1048576} MB");
+            if (Interlocked.Increment(ref _count) % 50 == 1)
+            {
+                using var process = Process.GetCurrentProcess();
+                Log.Error($"Semantic index #{_count} {size}{(reuseImage is null ? $"image {imageMs} ms" : "image reused")}, text {sw.ElapsedMilliseconds - imageMs} ms" +
+                          $"{(textVector is null ? " (none)" : "")}, working set {process.WorkingSet64 / 1048576} MB");
+            }
             return new SemanticVectors(Marker, SemanticVectors.HashText(text), image, textVector);
         });
 }

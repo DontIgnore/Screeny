@@ -289,4 +289,32 @@ public class PreciseOcrControllerTests : IDisposable
         c.UndoRemove();
         Assert.False(File.Exists(Path.Combine(runtimeDir, ModuleInstaller.RemovedMarker)));
     }
+    [Fact]
+    public async Task OcrV1WithOwnRuntime_IsOutdated_UpdateInstallsRuntimeAndV2_AndRemovesV1()
+    {
+        var src = Path.Combine(_files.Dir, "rel");
+        Directory.CreateDirectory(Path.Combine(src, "ort-runtime"));
+        Directory.CreateDirectory(Path.Combine(src, "ocr-module"));
+        var rt = ModuleTestFiles.Zip(RuntimeFiles, id: "ort-runtime", version: 1);
+        var v2 = ModuleTestFiles.Zip(ModuleTestFiles.DefaultFiles, id: "ocr-paddle", version: 2);
+        File.WriteAllBytes(Path.Combine(src, "ort-runtime", "rt.zip"), rt);
+        File.WriteAllBytes(Path.Combine(src, "ocr-module", "ocr2.zip"), v2);
+        var runtime = new ModuleSpec("ort-runtime", 1, ModuleTestFiles.Sha(rt)) { ZipName = "rt.zip", ZipSize = rt.Length };
+        var spec = new ModuleSpec("ocr-paddle", 2, ModuleTestFiles.Sha(v2)) { ZipName = "ocr2.zip", ZipSize = v2.Length, Requires = [runtime] };
+        // Версия 1 везла свой onnxruntime.dll.
+        var v1Files = new Dictionary<string, byte[]>(ModuleTestFiles.DefaultFiles) { ["onnxruntime.dll"] = "old native"u8.ToArray() };
+        var v1 = _files.Installed(Root, 1, v1Files);
+
+        var c = new ModuleController(new ModuleInstaller(Root, spec), s => new FolderModuleSource(src, s.ZipName), _ => false);
+        Assert.True(c.Status.Outdated);
+        Assert.False(c.Status.Ready);
+        Assert.Equal(rt.Length + v2.Length, c.Status.DownloadBytes);
+        var finished = NextFinished(c);
+        c.StartDownload();
+        Assert.True((await finished.WaitAsync(TimeSpan.FromSeconds(10))).Ok);
+        Assert.True(c.Status.Ready);
+        Assert.Equal(Path.Combine(Root, "ocr-paddle-2"), c.ReadyFolder);
+        Assert.True(Directory.Exists(Path.Combine(Root, "ort-runtime-1")));
+        Assert.False(Directory.Exists(v1));
+    }
 }

@@ -28,10 +28,14 @@ public sealed class SemanticSearchProvider(SemanticService service) : IHistorySe
     public async Task<IReadOnlyList<HistorySearchHit>> SearchAsync(string query, IReadOnlyList<HistorySearchEntry> entries, CancellationToken cancellationToken)
     {
         if (!service.IsActive || entries.Count == 0) return [];
+        var items = entries.Select(e => (e.Path, Vectors: Vectors(e.Path))).ToList();
+        // Ещё ничего не проиндексировано: модель для запроса (≈0,3 ГБ) не загружается зря.
+        var marker = SemanticService.CurrentMarker;
+        if (!items.Any(i => i.Vectors?.Marker == marker)) return [];
         var q = await service.EmbedQueryAsync(query, cancellationToken);
         if (q is null) return [];
         cancellationToken.ThrowIfCancellationRequested();
-        return Rank(q, entries.Select(e => (e.Path, Vectors(e.Path))), cancellationToken);
+        return Rank(q, items, cancellationToken);
     }
 
     /// <summary>Отбор и порядок: не хуже лучшего на <see cref="Window"/>, не больше <see cref="MaxHits"/>, оценка в (0; 0,99].</summary>
