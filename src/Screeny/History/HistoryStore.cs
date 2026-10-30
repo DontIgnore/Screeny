@@ -16,7 +16,8 @@ public sealed record HistorySidecar(string? Json, byte[]? OriginalPng);
 /// Папка снимков истории. Своими считаются только файлы с именем <c>yyyyMMdd_HHmmss_fff[_N].png</c>:
 /// пользователь может выбрать папку с другими картинками, и ротация/очистка не должны их трогать.
 /// У снимка могут быть sidecar-файлы <c>&lt;имя&gt;.screeny.json</c> и <c>&lt;имя&gt;.orig.png</c> (повторное редактирование)
-/// и <c>&lt;имя&gt;.text.json</c> (распознанный текст для поиска, <see cref="HistoryText"/>):
+/// и <c>&lt;имя&gt;.text.json</c> (распознанный текст для поиска, <see cref="HistoryText"/>), <c>&lt;имя&gt;.vec</c> (векторы
+/// смыслового поиска, <see cref="Semantic.SemanticVectors"/>):
 /// List() их не показывает, Delete/Prune/Clear удаляют вместе со снимком.
 /// </summary>
 public sealed class HistoryStore
@@ -26,12 +27,12 @@ public sealed class HistoryStore
     private static readonly Regex NamePattern =
         new(@"^(?<stamp>\d{8}_\d{6}_\d{3})(?:_(?<n>[1-9]\d{0,8}))?\.png$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
-    /// <summary>Суффиксы sidecar-файлов: документ аннотаций, оригинал без пометок и распознанный текст.</summary>
-    public const string JsonSuffix = ".screeny.json", OriginalSuffix = ".orig.png", TextSuffix = ".text.json";
+    /// <summary>Суффиксы sidecar-файлов: документ аннотаций, оригинал без пометок, распознанный текст и векторы смыслового поиска.</summary>
+    public const string JsonSuffix = ".screeny.json", OriginalSuffix = ".orig.png", TextSuffix = ".text.json", VectorSuffix = ".vec";
 
     /// <summary>Строгое имя sidecar-файла: штамп снимка истории + суффикс. Чужие foo.screeny.json сюда не попадают.</summary>
     private static readonly Regex SidecarPattern =
-        new(@"^(?<base>\d{8}_\d{6}_\d{3}(?:_[1-9]\d{0,8})?)\.(?:screeny\.json|orig\.png|text\.json)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        new(@"^(?<base>\d{8}_\d{6}_\d{3}(?:_[1-9]\d{0,8})?)\.(?:screeny\.json|orig\.png|text\.json|vec)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     public string Folder { get; }
     public int Limit { get; }
@@ -112,18 +113,26 @@ public sealed class HistoryStore
     public static string TextPath(string pngPath)
         => Path.Combine(Path.GetDirectoryName(pngPath) ?? "", Path.GetFileNameWithoutExtension(pngPath)) + TextSuffix;
 
+    /// <summary>Путь sidecar-файла векторов смыслового поиска (в той же папке).</summary>
+    public static string VectorPath(string pngPath)
+        => Path.Combine(Path.GetDirectoryName(pngPath) ?? "", Path.GetFileNameWithoutExtension(pngPath)) + VectorSuffix;
+
     /// <summary>
     /// Записывает распознанный текст снимка атомарно (временный файл, затем замена). Ничего не пишет и возвращает false,
     /// если это не снимок истории или его уже нет (удалён, пока шло распознавание): осиротевший файл не появляется.
     /// </summary>
-    public bool WriteText(string pngPath, HistoryText text)
+    public bool WriteText(string pngPath, HistoryText text) => WriteSidecar(pngPath, TextPath(pngPath), Encoding.UTF8.GetBytes(text.Serialize()));
+
+    /// <summary>Записывает векторы смыслового поиска снимка, как <see cref="WriteText"/>.</summary>
+    public bool WriteVectors(string pngPath, Semantic.SemanticVectors vectors) => WriteSidecar(pngPath, VectorPath(pngPath), vectors.Serialize());
+
+    private static bool WriteSidecar(string pngPath, string final, byte[] data)
     {
         if (!TryParseName(Path.GetFileName(pngPath), out _, out _) || !File.Exists(pngPath)) return false;
-        var final = TextPath(pngPath);
         var temp = final + TempSuffix;
         try
         {
-            File.WriteAllBytes(temp, Encoding.UTF8.GetBytes(text.Serialize()));
+            File.WriteAllBytes(temp, data);
             File.Move(temp, final, overwrite: true);
         }
         catch
@@ -149,7 +158,7 @@ public sealed class HistoryStore
             var path = Path.Combine(Folder, i == 0 ? stamp + ".png" : $"{stamp}_{i}.png");
             var (json, original) = SidecarPaths(path);
             // Осиротевший sidecar с этим именем не должен приклеиться к новому снимку.
-            if (!File.Exists(path) && !File.Exists(json) && !File.Exists(original) && !File.Exists(TextPath(path))) return path;
+            if (!File.Exists(path) && !File.Exists(json) && !File.Exists(original) && !File.Exists(TextPath(path)) && !File.Exists(VectorPath(path))) return path;
         }
     }
 
@@ -189,11 +198,13 @@ public sealed class HistoryStore
             {
                 var (json, original) = SidecarPaths(s.Path);
                 var text = TextPath(s.Path);
+                var vectors = VectorPath(s.Path);
                 return new HistoryItem(s.Path, s.Time)
                 {
                     JsonPath = names.Contains(Path.GetFileName(json)) ? json : null,
                     OriginalPath = names.Contains(Path.GetFileName(original)) ? original : null,
                     TextPath = names.Contains(Path.GetFileName(text)) ? text : null,
+                    VectorPath = names.Contains(Path.GetFileName(vectors)) ? vectors : null,
                 };
             })
             .ToList();
@@ -211,7 +222,7 @@ public sealed class HistoryStore
         if (File.Exists(path)) File.Delete(path);
         if (!TryParseName(Path.GetFileName(path), out _, out _)) return;
         var (json, original) = SidecarPaths(path);
-        foreach (var sidecar in new[] { json, original, TextPath(path) })
+        foreach (var sidecar in new[] { json, original, TextPath(path), VectorPath(path) })
         {
             try { if (File.Exists(sidecar)) File.Delete(sidecar); }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Log.Error($"History sidecar delete failed: {sidecar}", ex); }
@@ -237,6 +248,9 @@ public sealed class HistoryStore
     /// </summary>
     public IReadOnlyList<string> ListTexts() => ListSidecars(TextSuffix, "texts");
 
+    /// <summary>Векторы смыслового поиска (<c>&lt;штамп&gt;.vec</c>): остаются после удаления модуля, пока их не удалят.</summary>
+    public IReadOnlyList<string> ListVectors() => ListSidecars(VectorSuffix, "vectors");
+
     private IReadOnlyList<string> ListSidecars(string suffix, string what)
     {
         try { return Directory.EnumerateFiles(Folder).Where(p => IsSidecarName(Path.GetFileName(p), suffix)).ToList(); }
@@ -256,6 +270,9 @@ public sealed class HistoryStore
 
     /// <summary>Удаляет распознанный текст снимков (только <see cref="ListTexts"/>); снимки и пометки остаются.</summary>
     public int DeleteTexts() => DeleteFiles(ListTexts());
+
+    /// <summary>Удаляет векторы смыслового поиска (только <see cref="ListVectors"/>); снимки и остальное остаются.</summary>
+    public int DeleteVectors() => DeleteFiles(ListVectors());
 
     /// <summary>Удаляет перечисленные sidecar-файлы (из <see cref="ListOriginals"/> или <see cref="ListTexts"/>); возвращает, сколько удалено.</summary>
     internal int DeleteFiles(IEnumerable<string> files)

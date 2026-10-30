@@ -1,0 +1,24 @@
+Screeny semantic search module — third-party components
+=======================================================
+
+This archive contains no Screeny code. Tokenization, image preprocessing and
+search live in the Screeny application (GPL-3.0). The module holds data only:
+
+1. EmbeddingGemma 2 (text model and vision encoder, 4-bit ONNX)
+   - onnx/model_q4.onnx, onnx/model_q4.onnx_data,
+     onnx/vision_encoder_q4.onnx, onnx/vision_encoder_q4.onnx_data
+   - Original model: EmbeddingGemma 2 by Google DeepMind,
+     https://huggingface.co/google/embeddinggemma-2 (commit f9972ac)
+   - ONNX conversion and 4-bit quantization: onnx-community,
+     https://huggingface.co/onnx-community/embeddinggemma-2-ONNX (commit daa72c5)
+   - License: Apache License 2.0, see Apache-2.0.txt. The files are unmodified.
+   - The model card asks deployments to follow the Gemma Prohibited Use Policy,
+     https://ai.google.dev/gemma/prohibited_use_policy
+
+2. Tokenizer (tokenizer.model, SentencePiece)
+   - From https://huggingface.co/google/embeddinggemma-2 (commit f9972ac),
+     Copyright Google LLC. License: Apache License 2.0, see Apache-2.0.txt.
+     The file is unmodified.
+
+The native ONNX Runtime the module runs on is a separate download shared with
+other Screeny modules (Screeny-OrtRuntime-N.zip, with its own notices).

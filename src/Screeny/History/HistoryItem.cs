@@ -11,4 +11,7 @@ public sealed record HistoryItem(string Path, DateTime CreatedAt)
 
     /// <summary>Распознанный текст <c>&lt;stamp&gt;.text.json</c> (<see cref="HistoryText"/>), если снимок уже распознан.</summary>
     public string? TextPath { get; init; }
+
+    /// <summary>Векторы смыслового поиска <c>&lt;stamp&gt;.vec</c> (<see cref="Semantic.SemanticVectors"/>), если снимок уже проиндексирован.</summary>
+    public string? VectorPath { get; init; }
 }

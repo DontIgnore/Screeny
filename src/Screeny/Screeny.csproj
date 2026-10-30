@@ -33,6 +33,9 @@
     <!-- Точное распознавание (MIT): только управляемая часть ONNX Runtime. Нативная onnxruntime.dll не входит в exe —
          она в скачиваемом модуле (Modules/OcrModule.cs) той же версии 1.31.0. -->
     <PackageReference Include="Microsoft.ML.OnnxRuntime.Managed" Version="[1.31.0]" />
+    <!-- Смысловой поиск (MIT, + Google.Protobuf BSD-3-Clause): токенизатор SentencePiece для tokenizer.model из модуля
+         (Modules/SemanticModule.cs). -->
+    <PackageReference Include="Microsoft.ML.Tokenizers" Version="2.0.1" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Assets\**\*" />
