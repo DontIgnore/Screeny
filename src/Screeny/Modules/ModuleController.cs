@@ -55,7 +55,11 @@ public sealed class ModuleController : IModuleHost
     private int _progress;
     private string? _error;
     private int? _installed;
-    private bool _requirementsReady;
+
+    // Модули, которые сейчас скачиваются или ставятся (полный путь корня + id): их общие компоненты не удаляются.
+    // Под этим же замком — проверка «компонент никому не нужен» и его удаление.
+    private static readonly HashSet<string> Installing = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly object InstallingLock = new();
 
     /// <summary>Модуль поставлен (true) или нет (false, с текстом ошибки; отмена — без текста), и нужно ли уведомление в трее.</summary>
     public event Action<bool, string?, bool>? Finished;
@@ -64,6 +68,9 @@ public sealed class ModuleController : IModuleHost
     public event Action? Removed;
     /// <summary>Отложенное удаление отменено («Не удалять»), модуль снова на месте.</summary>
     public event Action? Restored;
+    /// <summary>Этот модуль мог поставить или удалить общий компонент (конец загрузки, удаление, «Не удалять»): другому
+    /// модулю с тем же компонентом — <see cref="OnRequirementsChanged"/>.</summary>
+    public event Action? RequirementsChanged;
 
     /// <param name="source">Источник архива модуля или компонента; null — скачать неоткуда (dev без <c>--module-source</c>).</param>
     /// <param name="inUse">Папку держит загруженная в процесс библиотека.</param>
@@ -94,13 +101,20 @@ public sealed class ModuleController : IModuleHost
     public Func<string, string> LoadErrorText { get; init; } = e => Localization.Loc.F("PreciseOcr.LoadFailed", e);
 
     public ModuleStatus Status => new(_installed, _download is not null, _progress, _installer.RemovalPending,
-        _error ?? (LoadError() is { } e ? LoadErrorText(e) : null), _source(Spec) is not null, Spec.Version, _requirementsReady, MissingBytes());
+        _error ?? (LoadError() is { } e ? LoadErrorText(e) : null), _source(Spec) is not null, Spec.Version, Spec.Requires.All(RequirementPresent), MissingBytes());
 
-    public void Refresh()
+    /// <summary>Перечитать установленную версию с диска (компоненты проверяются при каждом <see cref="Status"/>: их
+    /// ставит и удаляет и другой модуль).</summary>
+    public void Refresh() => _installed = ModuleInstaller.DetectInstalled(_installer.Root, Spec.Id, Spec.Version);
+
+    /// <summary>Общий компонент поставил или удалил другой модуль: перечитать состояние и обновить настройки.</summary>
+    public void OnRequirementsChanged()
     {
-        _installed = ModuleInstaller.DetectInstalled(_installer.Root, Spec.Id, Spec.Version);
-        _requirementsReady = Spec.Requires.All(RequirementPresent);
+        Refresh();
+        Changed?.Invoke();
     }
+
+    private static string Key(string root, ModuleSpec spec) => Path.Combine(Path.GetFullPath(root), spec.Id);
 
     /// <summary>Компонент нужной версии на диске и не помечен к удалению (файлы не хешируются: это делает загрузка).</summary>
     private bool RequirementPresent(ModuleSpec r)
@@ -113,8 +127,13 @@ public sealed class ModuleController : IModuleHost
         => (_installed == Spec.Version && !_installer.RemovalPending ? 0 : Spec.ZipSize)
            + Spec.Requires.Where(r => !RequirementPresent(r)).Sum(r => r.ZipSize);
 
-    /// <summary>При запуске, в фоне: стереть помеченное к удалению и остатки прерванных загрузок (один раз на корень модулей).</summary>
-    public Task CleanupAsync() => Task.Run(_installer.CleanupOnStartup);
+    /// <summary>При запуске, в фоне: стереть помеченное к удалению, остатки прерванных загрузок и общие компоненты, которые
+    /// не нужны ни одному установленному модулю (один раз на корень модулей).</summary>
+    public Task CleanupAsync() => Task.Run(() =>
+    {
+        _installer.CleanupOnStartup();
+        RemoveUnusedRequirements(_others.Prepend(Spec).SelectMany(m => m.Requires));
+    });
 
     public void StartDownload(bool notifyInTray = false)
     {
@@ -126,6 +145,7 @@ public sealed class ModuleController : IModuleHost
         }
         var cts = new CancellationTokenSource();
         _download = cts;
+        lock (InstallingLock) Installing.Add(Key(_installer.Root, Spec));
         _progress = 0;
         _error = null;
         Changed?.Invoke();
@@ -148,6 +168,9 @@ public sealed class ModuleController : IModuleHost
             Log.Error($"Module {Spec.Id} download or install failed", ex);
         }
         finally { cts.Dispose(); }
+        lock (InstallingLock) Installing.Remove(Key(_installer.Root, Spec));
+        // Отмена или ошибка первой установки: уже поставленный компонент никому не нужен — не оставлять его на диске.
+        if (!ok) RemoveUnusedRequirements(Spec.Requires);
         _download = null;
         _error = error;
         Refresh();
@@ -155,6 +178,7 @@ public sealed class ModuleController : IModuleHost
         // Загрузка из мастера всегда заканчивается уведомлением — и при отмене (её мог нажать в настройках сам пользователь).
         if (!cancelled) Finished?.Invoke(ok, error, notifyInTray);
         else if (notifyInTray) Finished?.Invoke(false, Localization.Loc.T("PreciseOcr.Cancelled"), true);
+        RequirementsChanged?.Invoke();
     }
 
     /// <summary>Компоненты (недостающие), затем модуль; прогресс — доля скачанных байт всех архивов.</summary>
@@ -196,22 +220,33 @@ public sealed class ModuleController : IModuleHost
         _error = null;
         var result = _installer.Remove(_inUse);
         Log.Error($"Module {Spec.Id} removal: {result}");
-        if (result != RemoveResult.NotInstalled) RemoveUnusedRequirements();
+        if (result != RemoveResult.NotInstalled) RemoveUnusedRequirements(Spec.Requires);
         Refresh();
         if (result != RemoveResult.NotInstalled) Removed?.Invoke();
         Changed?.Invoke();
+        if (result != RemoveResult.NotInstalled) RequirementsChanged?.Invoke();
     }
 
-    /// <summary>Общий компонент больше не нужен ни одному установленному модулю нужной версии — удаляется (или помечается).</summary>
-    private void RemoveUnusedRequirements()
+    /// <summary>
+    /// Общий компонент из <paramref name="components"/>, который не нужен ни одному модулю (этому и <c>others</c>) — ни
+    /// установленному нужной версии, ни скачиваемому прямо сейчас, — удаляется (или помечается). Компонента нет на диске —
+    /// ничего не делается.
+    /// </summary>
+    private void RemoveUnusedRequirements(IEnumerable<ModuleSpec> components)
     {
-        foreach (var r in Spec.Requires)
+        var modules = _others.Prepend(Spec).ToList();
+        foreach (var r in components.DistinctBy(c => (c.Id, c.Version)))
         {
-            bool needed = _others.Any(o => o.Requires.Any(x => x.Id == r.Id && x.Version == r.Version)
-                                            && ModuleInstaller.InstalledVersions(_installer.Root, o.Id).Contains(o.Version)
-                                            && !new ModuleInstaller(_installer.Root, o).RemovalPending);
-            if (needed) continue;
-            Log.Error($"Shared component {r.Id} removal: {new ModuleInstaller(_installer.Root, r).Remove(_inUse)}");
+            lock (InstallingLock)
+            {
+                bool needed = modules.Any(o => o.Requires.Any(x => x.Id == r.Id && x.Version == r.Version)
+                                               && (Installing.Contains(Key(_installer.Root, o))
+                                                   || (ModuleInstaller.InstalledVersions(_installer.Root, o.Id).Contains(o.Version)
+                                                       && !new ModuleInstaller(_installer.Root, o).RemovalPending)));
+                if (needed) continue;
+                var result = new ModuleInstaller(_installer.Root, r).Remove(_inUse);
+                if (result != RemoveResult.NotInstalled) Log.Error($"Shared component {r.Id} removal: {result}");
+            }
         }
     }
 
@@ -224,6 +259,7 @@ public sealed class ModuleController : IModuleHost
         Refresh();
         if (restored) Restored?.Invoke();
         Changed?.Invoke();
+        RequirementsChanged?.Invoke();
     }
 
     private void Fail(string message, bool notifyInTray)

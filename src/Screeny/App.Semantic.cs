@@ -54,6 +54,12 @@ public partial class App
         _semanticModule.Finished += OnSemanticModuleFinished;
         _semanticModule.Removed += OnSemanticModuleRemoved;
         _semanticModule.Restored += () => { _semantic.Reset(); StartSemanticIndex(TimeSpan.FromSeconds(1)); };
+        // Общий компонент ставит и удаляет любой из двух модулей: состояние другого в настройках — заново.
+        if (_ocrModule is { } ocr)
+        {
+            ocr.RequirementsChanged += _semanticModule.OnRequirementsChanged;
+            _semanticModule.RequirementsChanged += ocr.OnRequirementsChanged;
+        }
     }
 
     /// <summary>Догоняющий проход (при старте, после смены функций или папки, после установки модуля).</summary>

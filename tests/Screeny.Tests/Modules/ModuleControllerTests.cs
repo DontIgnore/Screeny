@@ -289,6 +289,71 @@ public class PreciseOcrControllerTests : IDisposable
         c.UndoRemove();
         Assert.False(File.Exists(Path.Combine(runtimeDir, ModuleInstaller.RemovedMarker)));
     }
+    private static HttpModuleSource Hanging() => new(new HttpClient(new SilentHandler()), new Uri("https://example.invalid/m.zip"));
+
+    [Fact]
+    public async Task Remove_KeepsRuntimeWhileAnotherModuleDownloads_CancelThenRemovesIt()
+    {
+        var (_, a, b, src) = TwoModulesWithRuntime();
+        var runtimeDir = _files.Installed(Root, 1, RuntimeFiles, "ort-runtime");
+        _files.Installed(Root, 1, id: "mod-a");
+        var ca = Controller(a, src, b);
+        var cb = new ModuleController(new ModuleInstaller(Root, b), _ => Hanging(), _ => false, [a]);
+        var finished = NextFinished(cb);
+        cb.StartDownload(notifyInTray: true); // отмена без уведомления Finished не поднимает
+        ca.Remove();
+        Assert.False(Directory.Exists(Path.Combine(Root, "mod-a-1")));
+        Assert.True(Directory.Exists(runtimeDir)); // нужен скачиваемому модулю
+        // Загрузка отменена: компонент больше никому не нужен.
+        cb.CancelDownload();
+        Assert.False((await finished.WaitAsync(TimeSpan.FromSeconds(10))).Ok);
+        Assert.False(Directory.Exists(runtimeDir));
+    }
+
+    [Fact]
+    public async Task FirstInstall_Cancelled_LeavesNoOrphanedRuntime()
+    {
+        var (_, a, b, src) = TwoModulesWithRuntime();
+        var c = new ModuleController(new ModuleInstaller(Root, a),
+            s => s.Id == "ort-runtime" ? new FolderModuleSource(Path.Combine(src, "ort-runtime"), s.ZipName) : Hanging(), _ => false, [b]);
+        var finished = NextFinished(c);
+        c.StartDownload(notifyInTray: true);
+        var runtimeDir = Path.Combine(Root, "ort-runtime-1");
+        for (int i = 0; i < 200 && !Directory.Exists(runtimeDir); i++) await Task.Delay(25);
+        Assert.True(Directory.Exists(runtimeDir));
+        c.CancelDownload();
+        Assert.False((await finished.WaitAsync(TimeSpan.FromSeconds(10))).Ok);
+        Assert.False(Directory.Exists(runtimeDir));
+        Assert.Equal(a.ZipSize + a.Requires[0].ZipSize, c.Status.DownloadBytes);
+    }
+
+    [Fact]
+    public async Task StartupCleanup_RemovesRuntimeNoModuleNeeds()
+    {
+        var (_, a, b, src) = TwoModulesWithRuntime();
+        var runtimeDir = _files.Installed(Root, 1, RuntimeFiles, "ort-runtime");
+        await Controller(a, src, b).CleanupAsync();
+        Assert.False(Directory.Exists(runtimeDir));
+
+        _files.Installed(Root, 1, RuntimeFiles, "ort-runtime");
+        _files.Installed(Root, 1, id: "mod-b");
+        await Controller(a, src, b).CleanupAsync();
+        Assert.True(Directory.Exists(runtimeDir));
+    }
+
+    [Fact]
+    public void RuntimeRemovedElsewhere_StatusIsLive()
+    {
+        var (_, a, b, src) = TwoModulesWithRuntime();
+        var runtimeDir = _files.Installed(Root, 1, RuntimeFiles, "ort-runtime");
+        _files.Installed(Root, 1, id: "mod-a");
+        var c = Controller(a, src, b);
+        Assert.True(c.Status.Ready);
+        Directory.Delete(runtimeDir, recursive: true);
+        Assert.False(c.Status.Ready);
+        Assert.Null(c.ReadyFolder);
+    }
+
     [Fact]
     public async Task OcrV1WithOwnRuntime_IsOutdated_UpdateInstallsRuntimeAndV2_AndRemovesV1()
     {
