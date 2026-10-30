@@ -339,6 +339,10 @@ public partial class OverlayWindow
                 break;
             case "privacy":
                 // Проверка запускается сама, как только выделение устоялось (--select); дальше — DevPrivacyChecked.
+                // Без выделения проверять нечего: в PowerShell «--select 140,130,1000,400» без кавычек — массив, и ключ
+                // молча пропускается.
+                if (!_selection.HasSelection)
+                    Screeny.Logging.Log.Error("Dev scenario 'privacy' needs --select x,y,w,h (in PowerShell, quote it: '140,130,1000,400')");
                 _devPrivacy = true;
                 break;
             case "qr":
