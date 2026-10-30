@@ -46,7 +46,7 @@ public partial class App
         IUpdateClient client = UpdateService.ChooseSource(IsDev, Args.UpdateSource) switch
         {
             UpdateSourceKind.Folder => VelopackUpdateClient.ForFolder(Args.UpdateSource!),
-            UpdateSourceKind.Github => VelopackUpdateClient.ForGithub(),
+            UpdateSourceKind.Github => VelopackUpdateClient.ForGithub(VelopackUpdateClient.IsPrerelease(AppVersion.Informational())),
             _ => NoUpdateClient.Instance, // dev без --update-source: никакой сети, и ручная проверка тоже
         };
         _updates = new UpdateService(client, UpdateStateStore.Default(IsDev), () => Settings.CheckForUpdates);

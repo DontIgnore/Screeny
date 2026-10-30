@@ -56,7 +56,12 @@ public sealed class VelopackUpdateClient : IUpdateClient
 
     private VelopackUpdateClient(IUpdateSource source) => _manager = new UpdateManager(source);
 
-    public static VelopackUpdateClient ForGithub() => new(new GithubSource(RepositoryUrl, accessToken: null, prerelease: false));
+    /// <param name="prerelease">Смотреть и предварительные выпуски (альфа, бета): так тестовая копия получает
+    /// следующую альфу и потом обычный выпуск. Рабочие версии предварительных не видят.</param>
+    public static VelopackUpdateClient ForGithub(bool prerelease = false) => new(new GithubSource(RepositoryUrl, accessToken: null, prerelease: prerelease));
+
+    /// <summary>Версия вида <c>0.3.0-alpha.1</c> — предварительная.</summary>
+    public static bool IsPrerelease(string? version) => version is not null && version.Split('+')[0].Contains('-');
 
     /// <summary>Папка с результатом <c>tools/pack.ps1</c> (<c>releases.win.json</c> и <c>*.nupkg</c>).</summary>
     public static VelopackUpdateClient ForFolder(string folder) => new(new SimpleFileSource(new DirectoryInfo(folder)));
