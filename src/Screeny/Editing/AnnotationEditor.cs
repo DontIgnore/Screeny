@@ -165,7 +165,18 @@ public sealed class AnnotationEditor
     }
 
     /// <summary>Источник пикселей для эффектов (пикселизация, размытие) и пипетки.</summary>
-    public BitmapSource Source { get; }
+    public BitmapSource Source { get; private set; }
+
+    /// <summary>
+    /// Другой кадр под теми же пометками (серия снимков в оверлее): пипетка берёт цвет с него, а пикселизация и размытие
+    /// пересчитываются — их кэш привязан к источнику.
+    /// </summary>
+    public void SetSource(BitmapSource source)
+    {
+        Source = source;
+        _parts.Layer.Source = source;
+        _parts.Layer.InvalidateVisual();
+    }
     public AnnotationDocument Document => _parts.Layer.Document;
     /// <summary>Обводка/заливка, стиль стрелки, фон текста, активный образец.</summary>
     public StyleOptions Options { get; }

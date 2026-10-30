@@ -97,6 +97,18 @@ public class HotkeyManagerTests
     }
 
     [Fact]
+    public void PressedKey_TellsWhichCombinationFired()
+    {
+        var (m, b) = Create();
+        var keys = new List<HotkeySpec?>();
+        m.PressedKey += keys.Add;
+        m.Apply(List(ps: true, wss: true, "Ctrl+Q"), strict: false);
+        foreach (var h in b.Handles) h.Callback();
+        b.Hooks[0].Callback();
+        Assert.Equal([HotkeySpec.PrintScreen, CtrlQ, null], keys);
+    }
+
+    [Fact]
     public void PrintScreenReserved_AndNothingElse_RegistersFallback()
     {
         var (m, b) = Create();

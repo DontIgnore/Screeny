@@ -105,6 +105,18 @@
                   Content="✕" ToolTip="{l:Loc Privacy.Dismiss}" AutomationProperties.Name="{l:Loc Privacy.Dismiss}" Click="OnPrivacyDismiss"/>
         </StackPanel>
       </Border>
+      <!-- Лента кадров серии (удержание клавиши снимка): клик или PageUp/PageDown меняет замороженный кадр. Не в экспорте -->
+      <Border x:Name="Filmstrip" Background="{DynamicResource Overlay.Panel}" CornerRadius="10" Padding="8,6" Visibility="Collapsed"
+              BorderBrush="{DynamicResource Overlay.ShotRing}" BorderThickness="1" Cursor="Arrow">
+        <Border.Effect><DropShadowEffect BlurRadius="18" ShadowDepth="4" Direction="270" Opacity="0.5"/></Border.Effect>
+        <DockPanel>
+          <TextBlock x:Name="FilmstripCounter" DockPanel.Dock="Left" Foreground="{DynamicResource Overlay.Ink70}" FontFamily="{DynamicResource Font.UI}"
+                     FontSize="12" VerticalAlignment="Center" Margin="2,0,8,0"/>
+          <ScrollViewer x:Name="FilmstripScroll" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled" Focusable="False">
+            <StackPanel x:Name="FilmstripItems" Orientation="Horizontal"/>
+          </ScrollViewer>
+        </DockPanel>
+      </Border>
       <!-- Сюда добавляются flyout'ы параметров (OptionsFlyouts.Attach): поверх панели -->
     </Canvas>
   </Grid>

@@ -10,9 +10,12 @@ namespace Screeny;
 /// <item><c>--dev</c> — тестовый экземпляр: свои имена mutex/event (суффикс <see cref="DevSuffix"/>), свой файл
 /// настроек и папка истории, хоткей не регистрируется, снимок экрана не делается ни при старте, ни по клику в трее.</item>
 /// <item><c>--overlay-test &lt;png&gt;</c> (только с <c>--dev</c>) — открыть оверлей по картинке, как будто это снимок экрана.</item>
-/// <item><c>--select x,y,w,h</c> (только с <c>--overlay-test</c>) — готовое выделение.</item>
+/// <item><c>--burst-test &lt;папка&gt;</c> (только с <c>--dev</c>) — открыть оверлей так, будто PNG из папки (по имени файла)
+/// — кадры серии, снятой удержанием клавиши снимка: лента кадров внизу, одинаковые подряд кадры отброшены, как в
+/// настоящей серии. Клавиши при этом не опрашиваются и экран не снимается.</item>
+/// <item><c>--select x,y,w,h</c> (только с <c>--overlay-test</c> или <c>--burst-test</c>) — готовое выделение.</item>
 /// <item><c>--edit &lt;png&gt;</c> (только с <c>--dev</c>) — окно повторного редактирования снимка, как из истории.</item>
-/// <item><c>--scenario &lt;имя&gt;</c> (с <c>--overlay-test</c>, <c>--edit</c>, <c>--history</c> или <c>--settings</c>) — готовое состояние окна
+/// <item><c>--scenario &lt;имя&gt;</c> (с <c>--overlay-test</c>, <c>--burst-test</c>, <c>--edit</c>, <c>--history</c> или <c>--settings</c>) — готовое состояние окна
 /// для проверки UI без ввода мышью: набор фигур оверлея, <c>original</c> для редактора, <c>hover</c> для истории,
 /// <c>hotkey-problems</c> для настроек, <c>conflicts</c> для мастера первого запуска.</item>
 /// <item><c>--setup-wizard</c> — открыть мастер первого запуска (конфликты с другими программами) сразу после старта.
@@ -38,7 +41,7 @@ namespace Screeny;
 /// </summary>
 public sealed record StartupArgs(bool Dev, bool OpenSettings, bool OpenHistory, string? OverlayTest, PixelRect? Select, string? Scenario, string? Edit = null, bool EnableLlHook = false,
     string? UpdateSource = null, bool CheckUpdates = false, bool SetupWizard = false, string? ModuleSource = null,
-    string? FeedbackEndpoint = null, string? Feedback = null)
+    string? FeedbackEndpoint = null, string? Feedback = null, string? BurstTest = null)
 {
     public const string DevSuffix = ".Dev";
     public const string DevEnvironmentVariable = "SCREENY_DEV";
@@ -55,7 +58,7 @@ public sealed record StartupArgs(bool Dev, bool OpenSettings, bool OpenHistory, 
     {
         bool dev = devEnvironment?.Trim() is "1" || string.Equals(devEnvironment?.Trim(), "true", StringComparison.OrdinalIgnoreCase);
         bool settings = false, history = false, llHook = false, checkUpdates = false, wizard = false;
-        string? overlay = null, scenario = null, edit = null, updateSource = null, moduleSource = null, feedbackEndpoint = null, feedback = null;
+        string? overlay = null, scenario = null, edit = null, updateSource = null, moduleSource = null, feedbackEndpoint = null, feedback = null, burst = null;
         PixelRect? select = null;
         for (int i = 0; i < args.Count; i++)
         {
@@ -65,6 +68,7 @@ public sealed record StartupArgs(bool Dev, bool OpenSettings, bool OpenHistory, 
             else if (Is(a, "--settings")) settings = true;
             else if (Is(a, "--history")) history = true;
             else if (Is(a, "--overlay-test")) overlay = Next();
+            else if (Is(a, "--burst-test")) burst = Next();
             else if (Is(a, "--scenario")) scenario = Next();
             else if (Is(a, "--select")) select = TryParseRect(Next());
             else if (Is(a, "--edit")) edit = Next();
@@ -76,16 +80,18 @@ public sealed record StartupArgs(bool Dev, bool OpenSettings, bool OpenHistory, 
             else if (Is(a, "--feedback-endpoint")) feedbackEndpoint = Next();
             else if (Is(a, "--feedback")) feedback = Next()?.Trim().ToLowerInvariant();
         }
-        if (!dev) (overlay, select, scenario, edit, llHook, updateSource, checkUpdates, moduleSource, feedbackEndpoint) = (null, null, null, null, false, null, false, null, null);
+        if (!dev) (overlay, select, scenario, edit, llHook, updateSource, checkUpdates, moduleSource, feedbackEndpoint, burst) = (null, null, null, null, false, null, false, null, null, null);
         if (string.IsNullOrWhiteSpace(feedbackEndpoint)) feedbackEndpoint = null;
         if (feedback is not ("bug" or "idea")) feedback = null;
         if (string.IsNullOrWhiteSpace(updateSource)) updateSource = null;
         if (string.IsNullOrWhiteSpace(moduleSource)) moduleSource = null;
-        if (string.IsNullOrWhiteSpace(overlay)) (overlay, select) = (null, null);
+        if (string.IsNullOrWhiteSpace(overlay)) overlay = null;
+        if (string.IsNullOrWhiteSpace(burst)) burst = null;
+        if (overlay is null && burst is null) select = null;
         if (string.IsNullOrWhiteSpace(edit)) edit = null;
-        if (overlay is null && edit is null && !history && !settings && !wizard && feedback is null) scenario = null;
+        if (overlay is null && burst is null && edit is null && !history && !settings && !wizard && feedback is null) scenario = null;
         return new StartupArgs(dev, settings, history, overlay, select, scenario, edit, llHook, updateSource, checkUpdates, wizard, moduleSource,
-            feedbackEndpoint, feedback);
+            feedbackEndpoint, feedback, burst);
     }
 
     private static bool Is(string a, string key) => string.Equals(a, key, StringComparison.OrdinalIgnoreCase);

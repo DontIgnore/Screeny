@@ -769,6 +769,12 @@ Screeny will close. Start it again and repeat the update.</value>
   <data name="Feature.Privacy.Description" xml:space="preserve">
     <value>After you select an area, Screeny reads its text on your computer and warns about emails, phone numbers, card numbers, keys and IP addresses. Needs text recognition.</value>
   </data>
+  <data name="Feature.Burst.Title" xml:space="preserve">
+    <value>Burst capture</value>
+  </data>
+  <data name="Feature.Burst.Description" xml:space="preserve">
+    <value>Hold the capture key to take a series, about 10 screenshots per second, then pick the one you need. A short press works as before.</value>
+  </data>
   <data name="Update.Title" xml:space="preserve">
     <value>Screeny update</value>
   </data>
@@ -1446,5 +1452,11 @@ Replace it?</value>
   </data>
   <data name="Privacy.Dismiss" xml:space="preserve">
     <value>Dismiss</value>
+  </data>
+  <data name="Burst.Counter" xml:space="preserve">
+    <value>{0} / {1}</value>
+  </data>
+  <data name="Burst.FrameTip" xml:space="preserve">
+    <value>Frame {0} of {1}. PageUp and PageDown switch frames.</value>
   </data>
 </root>

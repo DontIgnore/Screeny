@@ -182,7 +182,7 @@ public partial class App : Application, INotifyPropertyChanged
         if (Args.OpenSettings) ShowSettings();
         if (Args.OpenHistory) ShowHistory();
         if (Args.Feedback is { } feedback) ShowFeedback(feedback == "idea" ? Feedback.FeedbackKind.Idea : Feedback.FeedbackKind.Bug, Args.Scenario);
-        if (Args.OverlayTest is not null) StartCapture();
+        if (Args.OverlayTest is not null || Args.BurstTest is not null) StartCapture();
         if (Args.Edit is not null) OpenEditor(Args.Edit)?.ApplyDevScenario(Args.Scenario);
     }
 
@@ -194,7 +194,7 @@ public partial class App : Application, INotifyPropertyChanged
     private void InitHotkeys()
     {
         _hotkeys = new HotkeyManager(new WindowsHotkeyBackend(Dispatcher), allowRegisterHotKey: !IsDev, allowHook: !IsDev || Args.EnableLlHook);
-        _hotkeys.Pressed += StartCapture;
+        _hotkeys.PressedKey += OnHotkeyPressed; // App.Burst.cs: удержание клавиши — серия снимков
         var result = _hotkeys.Apply(Settings.Hotkeys, strict: false);
         if (result.Report.ProblemSummary() is { } problem)
         {
@@ -467,33 +467,77 @@ public partial class App : Application, INotifyPropertyChanged
         thread.Start();
     }
 
-    public void StartCapture()
+    /// <summary>Снимок из трея, второго экземпляра, тестового запуска: всегда один кадр, без серии.</summary>
+    public void StartCapture() => StartCapture(holdKey: null);
+
+    /// <param name="holdKey">
+    /// Основная клавиша сработавшего хоткея: пока её держат, снимается серия (App.Burst.cs), и оверлей открывается только
+    /// после отпускания. null — оверлей сразу.
+    /// </param>
+    private void StartCapture(int? holdKey)
     {
         if (_capturing || IsShuttingDown) return;
-        // Тестовый экземпляр никогда не снимает экран: только картинку из --overlay-test.
-        if (IsDev && Args.OverlayTest is null) { Notify("Dev instance never captures the screen: start it with --overlay-test <png>."); return; }
-        _capturing = true;
+        // Тестовый экземпляр никогда не снимает экран: только картинки из --overlay-test или --burst-test.
+        if (IsDev && Args.OverlayTest is null && Args.BurstTest is null)
+        {
+            Notify("Dev instance never captures the screen: start it with --overlay-test <png> or --burst-test <folder>.");
+            return;
+        }
+        _capturing = true; // и на всё удержание: повторный WM_HOTKEY (MOD_NOREPEAT и так их не шлёт) и клик в трее не мешают
+        var latency = Stopwatch.StartNew();
+        string mode = "plain";
         try
         {
             Screenshot shot;
             List<WindowInfo> windows;
             OverlayDevOptions? dev = null;
+            IReadOnlyList<BurstFrame>? devFrames = null;
             if (IsDev)
             {
-                shot = DevShot.Load(Args.OverlayTest!);
+                holdKey = null; // клавиши не опрашиваются, экран не снимается
+                if (Args.BurstTest is { } folder)
+                {
+                    (shot, devFrames) = LoadDevBurst(folder);
+                    dev = new OverlayDevOptions(Args.Select, Args.Scenario, folder);
+                }
+                else
+                {
+                    shot = DevShot.Load(Args.OverlayTest!);
+                    dev = new OverlayDevOptions(Args.Select, Args.Scenario, Args.OverlayTest);
+                }
                 windows = new List<WindowInfo>();
-                dev = new OverlayDevOptions(Args.Select, Args.Scenario, Args.OverlayTest);
             }
             else
             {
                 shot = ScreenCapture.CaptureVirtualScreen();
                 windows = WindowFinder.Snapshot(shot.VirtualRect, exclude: OwnWindowHandles());
             }
-            var overlay = new OverlayWindow(shot, windows, Settings, dev, OcrRefiner);
+            OverlayWindow? overlay = null;
+            bool closed = false, burst = devFrames is { Count: > 1 };
+            // Опрос клавиши — до создания окна: окно строится, пока клавишу ещё держат, и к отпусканию уже готово.
+            if (holdKey is { } key)
+            {
+                mode = "tap";
+                BurstRecorder.Start(key, shot, windows, OwnWindowHandles(), latency, result => Dispatcher.BeginInvoke(() =>
+                {
+                    if (overlay is null) return; // окно не создалось: ошибка уже показана
+                    if (result.IsBurst) mode = "burst";
+                    burst = OpenAfterHold(overlay, result, closed);
+                }));
+            }
+            overlay = new OverlayWindow(shot, windows, Settings, dev, OcrRefiner);
             overlay.Completed += OnCaptureCompleted;
             overlay.DisplaysChanged += () => Notify(Loc.T("App.DisplaysChanged"));
-            overlay.Closed += (_, _) => { _capturing = false; SaveSettings(); }; // последний цвет и толщина
-            overlay.Show();
+            overlay.Closed += (_, _) =>
+            {
+                closed = true;
+                _capturing = false;
+                SaveSettings(); // последний цвет и толщина
+                if (burst) ReleaseBurstMemory();
+            };
+            overlay.ContentRendered += (_, _) => Log.Error($"Capture latency: {latency.ElapsedMilliseconds} ms from request to overlay on screen ({mode})");
+            if (devFrames is not null) overlay.SetBurst(devFrames, devFrames.Count - 1);
+            if (holdKey is null) overlay.Show();
         }
         catch (Exception ex)
         {

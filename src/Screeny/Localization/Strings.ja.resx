@@ -769,6 +769,12 @@ Screeny を終了します。もう一度起動して、更新をやり直して
   <data name="Feature.Privacy.Description" xml:space="preserve">
     <value>範囲を選ぶと、Screeny がその中の文字をこのパソコン上で読み取り、メールアドレス、電話番号、カード番号、キー、IP アドレスがあれば知らせます。文字認識が必要です。</value>
   </data>
+  <data name="Feature.Burst.Title" xml:space="preserve">
+    <value>連続キャプチャ</value>
+  </data>
+  <data name="Feature.Burst.Description" xml:space="preserve">
+    <value>キャプチャキーを押し続けると 1 秒に約 10 枚ずつ連続で撮影し、必要な 1 枚を選べます。短く押したときは今までどおりです。</value>
+  </data>
   <data name="Update.Title" xml:space="preserve">
     <value>Screeny の更新</value>
   </data>
@@ -1446,5 +1452,11 @@ Screeny を終了します。もう一度起動して、更新をやり直して
   </data>
   <data name="Privacy.Dismiss" xml:space="preserve">
     <value>閉じる</value>
+  </data>
+  <data name="Burst.Counter" xml:space="preserve">
+    <value>{0} / {1}</value>
+  </data>
+  <data name="Burst.FrameTip" xml:space="preserve">
+    <value>{1} 枚中 {0} 枚目。PageUp と PageDown で切り替えます。</value>
   </data>
 </root>

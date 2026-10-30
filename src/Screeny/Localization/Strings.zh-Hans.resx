@@ -769,6 +769,12 @@ Screeny 将关闭。请重新启动并再次更新。</value>
   <data name="Feature.Privacy.Description" xml:space="preserve">
     <value>选取区域后，Screeny 会在本机读取其中的文字，发现邮箱、电话号码、银行卡号、密钥或 IP 地址时提醒你。需要开启文字识别。</value>
   </data>
+  <data name="Feature.Burst.Title" xml:space="preserve">
+    <value>连拍截图</value>
+  </data>
+  <data name="Feature.Burst.Description" xml:space="preserve">
+    <value>按住截图键可连续截图，每秒约 10 张，然后挑选需要的那一张。短按和以前一样。</value>
+  </data>
   <data name="Update.Title" xml:space="preserve">
     <value>Screeny 更新</value>
   </data>
@@ -1446,5 +1452,11 @@ Screeny 将关闭。请重新启动并再次更新。</value>
   </data>
   <data name="Privacy.Dismiss" xml:space="preserve">
     <value>忽略</value>
+  </data>
+  <data name="Burst.Counter" xml:space="preserve">
+    <value>{0} / {1}</value>
+  </data>
+  <data name="Burst.FrameTip" xml:space="preserve">
+    <value>第 {0} 帧，共 {1} 帧。按 PageUp 和 PageDown 切换。</value>
   </data>
 </root>

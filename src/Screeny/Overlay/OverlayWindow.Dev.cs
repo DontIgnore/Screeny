@@ -14,14 +14,15 @@ public partial class OverlayWindow
     /// <summary>Имена сценариев для <c>--scenario</c>.</summary>
     public static readonly string[] DevScenarios = ["shape", "shape-tool", "arrow", "text", "ruler", "badge", "qr", "beautify", "beautify-sunset", "beautify-light",
         "guides", "textalign", "edgesnap", "flyout-beautify", "flyout-beautify-mid", "flyout-tool", "flyout-shape", "pen-bounds",
-        "ocr", "ocr-select", "readme-hero", "readme-text", "readme-beautify", "privacy", "distances"];
+        "ocr", "ocr-select", "readme-hero", "readme-text", "readme-beautify", "privacy", "distances", "burst"];
 
     /// <summary>Сценарий privacy: дождаться проверки на личные данные, снять кадры до и после «Скрыть» и закрыться.</summary>
     private bool _devPrivacy;
 
     /// <summary>
     /// Кадр самого окна оверлея (RenderTargetBitmap корня, не снимок экрана) рядом с исходником:
-    /// <c>&lt;имя&gt;.&lt;tag&gt;.png</c>, для папки кадров серии — <c>overlay.&lt;tag&gt;.png</c> в ней.
+    /// <c>&lt;имя&gt;.&lt;tag&gt;.png</c>, для папки кадров серии — <c>&lt;папка&gt;.&lt;tag&gt;.png</c> рядом с ней (не в ней: иначе
+    /// следующий запуск взял бы кадр окна за кадр серии).
     /// </summary>
     private void DevRender(string tag)
     {
@@ -33,7 +34,7 @@ public partial class OverlayWindow
         var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(w, h, dpi.PixelsPerInchX, dpi.PixelsPerInchY, PixelFormats.Pbgra32);
         rtb.Render(Root);
         rtb.Freeze();
-        var path = Directory.Exists(source) ? Path.Combine(source, $"overlay.{tag}.png") : Path.ChangeExtension(source, $".{tag}.png");
+        var path = Directory.Exists(source) ? Path.TrimEndingDirectorySeparator(Path.GetFullPath(source)) + $".{tag}.png" : Path.ChangeExtension(source, $".{tag}.png");
         FileSaver.Save(rtb, path);
         Screeny.Logging.Log.Error($"Dev render saved to {path}");
     }
@@ -310,6 +311,30 @@ public partial class OverlayWindow
                 }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
                 break;
             }
+            case "burst":
+                // С --burst-test: кадр окна на последнем кадре серии, переход к первому (как PageUp до упора), проверка, что
+                // снимок, источник редактора и кэши яркости сменились, кадр окна и итоговая картинка выделения, закрытие.
+                Dispatcher.BeginInvoke(() =>
+                {
+                    if (!HasBurst) { Screeny.Logging.Log.Error("Dev burst: no burst frames (start with --burst-test <folder>)"); Cancel(); return; }
+                    DevRender("burst");
+                    int was = _frameIndex;
+                    _ = ShotLuma; // яркость прежнего кадра загружена: смена кадра обязана её сбросить
+                    ShowFrame(0);
+                    var bitmap = _frames[0].Bitmap;
+                    bool swapped = ReferenceEquals(_shot.Bitmap, bitmap) && ReferenceEquals(_editor.Source, bitmap) && ReferenceEquals(ShotImage.Source, bitmap)
+                                   && ReferenceEquals(Annotations.Source, bitmap) && _shotLuma is null && _edgeSnapper is null && _distanceEdges is null;
+                    Screeny.Logging.Log.Error($"Dev burst: frame {was + 1} -> {_frameIndex + 1} of {_frames.Count}, caches reset: {swapped}");
+                    DevRender("burst-first");
+                    if (_dev?.Source is { } folder && _selection.HasSelection)
+                    {
+                        var path = Path.TrimEndingDirectorySeparator(Path.GetFullPath(folder)) + ".burst-export.png";
+                        FileSaver.Save(ComposeResult(_selection.Rect).Image, path);
+                        Screeny.Logging.Log.Error($"Dev export saved to {path}");
+                    }
+                    Cancel();
+                }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                break;
             case "privacy":
                 // Проверка запускается сама, как только выделение устоялось (--select); дальше — DevPrivacyChecked.
                 _devPrivacy = true;

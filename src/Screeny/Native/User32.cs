@@ -19,6 +19,8 @@ internal static class User32
     public const uint MONITOR_DEFAULTTONEAREST = 2;
 
     [DllImport("user32.dll")] public static extern int GetSystemMetrics(int nIndex);
+    /// <summary>Старший бит результата — клавиша сейчас нажата (физическое состояние, из любого потока).</summary>
+    [DllImport("user32.dll")] public static extern short GetAsyncKeyState(int vKey);
     [DllImport("user32.dll")] public static extern IntPtr GetDC(IntPtr hWnd);
     [DllImport("user32.dll")] public static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
     [DllImport("user32.dll", SetLastError = true)] public static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);

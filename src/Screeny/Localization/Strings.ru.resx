@@ -769,6 +769,12 @@ Screeny закроется; запустите его снова и повтор
   <data name="Feature.Privacy.Description" xml:space="preserve">
     <value>После выделения Screeny читает текст области на вашем компьютере и предупреждает о почте, телефонах, номерах карт, ключах и IP-адресах. Нужно распознавание текста.</value>
   </data>
+  <data name="Feature.Burst.Title" xml:space="preserve">
+    <value>Серия снимков</value>
+  </data>
+  <data name="Feature.Burst.Description" xml:space="preserve">
+    <value>Удерживайте клавишу снимка, чтобы снять серию, около 10 скриншотов в секунду, и выберите нужный. Короткое нажатие работает как раньше.</value>
+  </data>
   <data name="Update.Title" xml:space="preserve">
     <value>Обновление Screeny</value>
   </data>
@@ -1446,5 +1452,11 @@ Screeny закроется; запустите его снова и повтор
   </data>
   <data name="Privacy.Dismiss" xml:space="preserve">
     <value>Закрыть</value>
+  </data>
+  <data name="Burst.Counter" xml:space="preserve">
+    <value>{0} / {1}</value>
+  </data>
+  <data name="Burst.FrameTip" xml:space="preserve">
+    <value>Кадр {0} из {1}. PageUp и PageDown переключают кадры.</value>
   </data>
 </root>
