@@ -229,13 +229,21 @@ public sealed class HistoryStore
     /// Сохранённые оригиналы без пометок (<c>&lt;штамп&gt;.orig.png</c>) в папке истории: они содержат то, что было
     /// скрыто размытием. Чужие файлы (<c>bar.orig.png</c>) не считаются. Нет папки или ошибка чтения — пусто.
     /// </summary>
-    public IReadOnlyList<string> ListOriginals()
+    public IReadOnlyList<string> ListOriginals() => ListSidecars(OriginalSuffix, "originals");
+
+    /// <summary>
+    /// Распознанный текст снимков (<c>&lt;штамп&gt;.text.json</c>) в папке истории: остаётся после выключения
+    /// распознавания текста. Чужие файлы (<c>foo.text.json</c>) не считаются. Нет папки или ошибка чтения — пусто.
+    /// </summary>
+    public IReadOnlyList<string> ListTexts() => ListSidecars(TextSuffix, "texts");
+
+    private IReadOnlyList<string> ListSidecars(string suffix, string what)
     {
-        try { return Directory.EnumerateFiles(Folder).Where(p => IsOriginalName(Path.GetFileName(p))).ToList(); }
+        try { return Directory.EnumerateFiles(Folder).Where(p => IsSidecarName(Path.GetFileName(p), suffix)).ToList(); }
         catch (DirectoryNotFoundException) { return Array.Empty<string>(); }
         catch (Exception ex) when (IsListError(ex))
         {
-            Log.Error($"History originals list failed: {Folder}", ex);
+            Log.Error($"History {what} list failed: {Folder}", ex);
             return Array.Empty<string>();
         }
     }
@@ -244,15 +252,19 @@ public sealed class HistoryStore
     /// Удаляет сохранённые оригиналы (только <see cref="ListOriginals"/>); снимки и документы пометок остаются,
     /// и записи открываются в редакторе как готовые картинки. Возвращает, сколько файлов удалено.
     /// </summary>
-    public int DeleteOriginals() => DeleteOriginals(ListOriginals());
+    public int DeleteOriginals() => DeleteFiles(ListOriginals());
 
-    internal int DeleteOriginals(IEnumerable<string> originals)
+    /// <summary>Удаляет распознанный текст снимков (только <see cref="ListTexts"/>); снимки и пометки остаются.</summary>
+    public int DeleteTexts() => DeleteFiles(ListTexts());
+
+    /// <summary>Удаляет перечисленные sidecar-файлы (из <see cref="ListOriginals"/> или <see cref="ListTexts"/>); возвращает, сколько удалено.</summary>
+    internal int DeleteFiles(IEnumerable<string> files)
     {
         int deleted = 0;
-        foreach (var p in originals)
+        foreach (var p in files)
         {
             try { File.Delete(p); deleted++; }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Log.Error($"History original delete failed: {p}", ex); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Log.Error($"History sidecar delete failed: {p}", ex); }
         }
         return deleted;
     }
@@ -272,9 +284,9 @@ public sealed class HistoryStore
         return true;
     }
 
-    private static bool IsOriginalName(string fileName)
-        => fileName.EndsWith(OriginalSuffix, StringComparison.OrdinalIgnoreCase)
-           && TryParseName(fileName[..^OriginalSuffix.Length] + ".png", out _, out _);
+    private static bool IsSidecarName(string fileName, string suffix)
+        => fileName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)
+           && TryParseName(fileName[..^suffix.Length] + ".png", out _, out _);
 
     /// <summary>
     /// Оставляет <see cref="Limit"/> снимков. Только что сохранённый не удаляется, даже если его штамп старше

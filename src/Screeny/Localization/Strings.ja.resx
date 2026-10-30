@@ -122,6 +122,15 @@
   <data name="App.OriginalsPartlyDeletedText" xml:space="preserve">
     <value>{1} 件中 {0} 件を削除しました。詳しくはログを確認してください。</value>
   </data>
+  <data name="App.DeleteTextsTitle" xml:space="preserve">
+    <value>認識したテキスト（{0} 件）を削除しますか？</value>
+  </data>
+  <data name="App.DeleteTextsText" xml:space="preserve">
+    <value>検索のために履歴のスクリーンショットから読み取ったもので、写っていた内容がすべて含まれている可能性があります。スクリーンショットと注釈は残ります。</value>
+  </data>
+  <data name="App.TextsPartlyDeletedTitle" xml:space="preserve">
+    <value>認識したテキストの一部を削除できませんでした</value>
+  </data>
   <data name="App.OpenHistoryFolderFailed" xml:space="preserve">
     <value>履歴フォルダーを開けませんでした: {0}</value>
   </data>

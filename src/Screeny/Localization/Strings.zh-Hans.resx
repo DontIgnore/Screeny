@@ -122,6 +122,15 @@
   <data name="App.OriginalsPartlyDeletedText" xml:space="preserve">
     <value>已删除 {0} 张，共 {1} 张。详细信息请查看日志。</value>
   </data>
+  <data name="App.DeleteTextsTitle" xml:space="preserve">
+    <value>删除已识别的文字（{0} 张截图）？</value>
+  </data>
+  <data name="App.DeleteTextsText" xml:space="preserve">
+    <value>这些文字是为搜索从历史截图中识别出来的，可能包含截图上的任何内容。截图和标注会保留。</value>
+  </data>
+  <data name="App.TextsPartlyDeletedTitle" xml:space="preserve">
+    <value>并非所有识别的文字都已删除</value>
+  </data>
   <data name="App.OpenHistoryFolderFailed" xml:space="preserve">
     <value>无法打开历史记录文件夹：{0}</value>
   </data>

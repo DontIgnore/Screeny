@@ -122,6 +122,15 @@
   <data name="App.OriginalsPartlyDeletedText" xml:space="preserve">
     <value>Se eliminaron {0} de {1}. Encontrarás los detalles en el registro.</value>
   </data>
+  <data name="App.DeleteTextsTitle" xml:space="preserve">
+    <value>¿Eliminar el texto reconocido ({0})?</value>
+  </data>
+  <data name="App.DeleteTextsText" xml:space="preserve">
+    <value>Screeny lo leyó de las capturas del historial para la búsqueda, así que puede contener todo lo que aparecía en ellas. Las capturas y sus anotaciones se conservan.</value>
+  </data>
+  <data name="App.TextsPartlyDeletedTitle" xml:space="preserve">
+    <value>No se eliminó todo el texto reconocido</value>
+  </data>
   <data name="App.OpenHistoryFolderFailed" xml:space="preserve">
     <value>No se pudo abrir la carpeta del historial: {0}</value>
   </data>

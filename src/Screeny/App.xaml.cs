@@ -365,6 +365,10 @@ public partial class App : Application, INotifyPropertyChanged
         // появится после ApplyFeatures.
         bool offerDeleteOriginals = Settings.KeepOriginals && !updated.KeepOriginals && updated.IsFeatureOn(FeatureCatalog.History);
         var originalsStore = offerDeleteOriginals ? History : null;
+        // То же с распознанным текстом: выключили распознавание текста, а история осталась — предлагаем удалить .text.json.
+        bool offerDeleteTexts = Settings.IsFeatureOn(FeatureCatalog.Ocr) && !updated.IsFeatureOn(FeatureCatalog.Ocr)
+                                && updated.IsFeatureOn(FeatureCatalog.History);
+        var textsStore = offerDeleteTexts ? History : null;
         Settings.DisabledFeatures = [.. updated.DisabledFeatures];
         Settings.Hotkeys = updated.Hotkeys;
         Settings.HistoryFolder = updated.HistoryFolder;
@@ -380,10 +384,11 @@ public partial class App : Application, INotifyPropertyChanged
         ApplyFeatures();
         Loc.Apply(Settings.Language);
         if (offerDeleteOriginals) originalsStore ??= History;
+        if (offerDeleteTexts) textsStore ??= History;
         _historyWindow?.Refresh();
         foreach (var pin in Pins) pin.SetExcludedFromCapture(Settings.ExcludePinsFromCapture);
         bool saved = SaveSettings();
-        if (originalsStore is not null) OfferDeleteOriginals(originalsStore);
+        if (originalsStore is not null || textsStore is not null) OfferDeleteSidecars(originalsStore, textsStore);
         return saved;
     }
 
@@ -419,19 +424,28 @@ public partial class App : Application, INotifyPropertyChanged
 
     /// <summary>
     /// Настройку хранения оригиналов выключили: уже сохранённые <c>.orig.png</c> всё ещё содержат то, что было
-    /// скрыто размытием. Спрашиваем, удалить ли их; «Оставить» ничего не трогает (настройка всё равно выключена).
+    /// скрыто размытием. Выключили распознавание текста: <c>.text.json</c> всё ещё содержат текст со скриншотов.
+    /// Спрашиваем по очереди, удалить ли их; «Оставить» ничего не трогает (настройка всё равно выключена).
     /// </summary>
-    private async void OfferDeleteOriginals(HistoryStore store)
+    private async void OfferDeleteSidecars(HistoryStore? originalsStore, HistoryStore? textsStore)
     {
-        var originals = await _imageSaver.Queue.Enqueue(store.ListOriginals);
+        if (originalsStore is not null)
+            await OfferDelete(originalsStore, originalsStore.ListOriginals, "App.DeleteOriginalsTitle", "App.DeleteOriginalsText", "App.OriginalsPartlyDeletedTitle");
+        if (textsStore is not null)
+            await OfferDelete(textsStore, textsStore.ListTexts, "App.DeleteTextsTitle", "App.DeleteTextsText", "App.TextsPartlyDeletedTitle");
+    }
+
+    private async Task OfferDelete(HistoryStore store, Func<IReadOnlyList<string>> list, string titleKey, string textKey, string partlyKey)
+    {
+        var files = await _imageSaver.Queue.Enqueue(list);
         if (IsShuttingDown) return;
-        int count = originals.Count;
+        int count = files.Count;
         if (count == 0) return;
-        if (!Dialogs.Confirm(_settingsWindow, Loc.F("App.DeleteOriginalsTitle", count), Loc.T("App.DeleteOriginalsText"),
+        if (!Dialogs.Confirm(_settingsWindow, Loc.F(titleKey, count), Loc.T(textKey),
                 Loc.T("Common.Delete"), danger: true, cancelLabel: Loc.T("App.Keep")))
             return;
-        int deleted = await _imageSaver.Queue.Enqueue(() => store.DeleteOriginals(originals));
-        if (deleted < count) Dialogs.Info(_settingsWindow, Loc.T("App.OriginalsPartlyDeletedTitle"), Loc.F("App.OriginalsPartlyDeletedText", deleted, count));
+        int deleted = await _imageSaver.Queue.Enqueue(() => store.DeleteFiles(files));
+        if (deleted < count) Dialogs.Info(_settingsWindow, Loc.T(partlyKey), Loc.F("App.OriginalsPartlyDeletedText", deleted, count));
         _historyWindow?.Refresh();
     }
 

@@ -122,6 +122,15 @@
   <data name="App.OriginalsPartlyDeletedText" xml:space="preserve">
     <value>Удалено {0} из {1}. Подробности — в журнале.</value>
   </data>
+  <data name="App.DeleteTextsTitle" xml:space="preserve">
+    <value>Удалить распознанный текст ({0} шт.)?</value>
+  </data>
+  <data name="App.DeleteTextsText" xml:space="preserve">
+    <value>Screeny прочитал его со скриншотов истории для поиска, поэтому в нём может быть всё, что было на них. Скриншоты и пометки останутся.</value>
+  </data>
+  <data name="App.TextsPartlyDeletedTitle" xml:space="preserve">
+    <value>Не весь распознанный текст удалён</value>
+  </data>
   <data name="App.OpenHistoryFolderFailed" xml:space="preserve">
     <value>Не удалось открыть папку истории: {0}</value>
   </data>

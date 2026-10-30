@@ -194,6 +194,38 @@ public class HistorySidecarTests : IDisposable
     }
 
     [Fact]
+    public void DeleteTexts_RemovesOnlyStrictTexts_KeepsSnapshotsSidecarsAndForeign()
+    {
+        var store = new HistoryStore(_dir, 10);
+        var first = store.Save(Png, Both, new DateTime(2026, 1, 1));
+        var second = store.Save(Png, Both, new DateTime(2026, 1, 2));
+        File.WriteAllText(HistoryStore.TextPath(first), "{}");
+        File.WriteAllText(HistoryStore.TextPath(second), "{}");
+        foreach (var name in ForeignSidecars) File.WriteAllText(P(name), "foreign");
+
+        Assert.Equal(["20260101_000000_000.text.json", "20260102_000000_000.text.json"],
+            store.ListTexts().Select(Path.GetFileName).Order(StringComparer.Ordinal));
+        Assert.Equal(2, store.DeleteTexts());
+
+        Assert.Empty(store.ListTexts());
+        Assert.Equal(2, store.List().Count);
+        Assert.All(store.List(), i => Assert.Null(i.TextPath));
+        Assert.Equal(2, store.ListOriginals().Count);
+        Assert.All(ForeignSidecars, name => Assert.True(File.Exists(P(name)), name));
+    }
+
+    [Fact]
+    public void Clear_RemovesRecognizedText()
+    {
+        var store = new HistoryStore(_dir, 10);
+        var shot = store.Save(Png, Both, new DateTime(2026, 1, 1));
+        File.WriteAllText(HistoryStore.TextPath(shot), "{}");
+        File.WriteAllText(P("20250101_000000_000.text.json"), "orphan");
+        store.Clear();
+        Assert.Empty(store.ListTexts());
+    }
+
+    [Fact]
     public void ListOriginals_MissingFolder_IsEmpty()
     {
         var store = new HistoryStore(P("missing"), 10);

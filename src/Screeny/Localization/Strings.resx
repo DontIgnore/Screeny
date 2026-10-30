@@ -122,6 +122,15 @@
   <data name="App.OriginalsPartlyDeletedText" xml:space="preserve">
     <value>Deleted {0} of {1}. See the log for details.</value>
   </data>
+  <data name="App.DeleteTextsTitle" xml:space="preserve">
+    <value>Delete recognized text ({0})?</value>
+  </data>
+  <data name="App.DeleteTextsText" xml:space="preserve">
+    <value>Screeny read it from history screenshots for search, so it can contain anything that was on them. The screenshots and their markup stay.</value>
+  </data>
+  <data name="App.TextsPartlyDeletedTitle" xml:space="preserve">
+    <value>Not all recognized text was deleted</value>
+  </data>
   <data name="App.OpenHistoryFolderFailed" xml:space="preserve">
     <value>Couldn't open the history folder: {0}</value>
   </data>
