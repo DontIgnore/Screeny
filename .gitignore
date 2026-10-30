@@ -17,3 +17,5 @@ publish/
 /tools/ocr-eval/
 /site/
 /tools/ocr-module/models/
+/tools/semantic-module/work/
+/tools/semantic-module/**/__pycache__/
