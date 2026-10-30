@@ -1429,4 +1429,13 @@ Screeny 将关闭。请重新启动并再次更新。</value>
   <data name="Feedback.DiagLog" xml:space="preserve">
     <value>Screeny 日志最后 {0} 行（已替换用户名）：</value>
   </data>
+  <data name="Tray.PinFromClipboard" xml:space="preserve">
+    <value>从剪贴板固定</value>
+  </data>
+  <data name="App.ClipboardNoImage" xml:space="preserve">
+    <value>剪贴板中没有可固定的图片。</value>
+  </data>
+  <data name="App.ClipboardBusyPin" xml:space="preserve">
+    <value>剪贴板正被其他应用占用，请稍后再试。</value>
+  </data>
 </root>

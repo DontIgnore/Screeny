@@ -1429,4 +1429,13 @@ Screeny を終了します。もう一度起動して、更新をやり直して
   <data name="Feedback.DiagLog" xml:space="preserve">
     <value>Screeny のログ (最後の {0} 行、ユーザー名は置き換え済み):</value>
   </data>
+  <data name="Tray.PinFromClipboard" xml:space="preserve">
+    <value>クリップボードから固定</value>
+  </data>
+  <data name="App.ClipboardNoImage" xml:space="preserve">
+    <value>クリップボードに固定できる画像がありません。</value>
+  </data>
+  <data name="App.ClipboardBusyPin" xml:space="preserve">
+    <value>ほかのアプリがクリップボードを使用中です。少し待ってからもう一度お試しください。</value>
+  </data>
 </root>

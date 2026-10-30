@@ -1429,4 +1429,13 @@ Screeny закроется; запустите его снова и повтор
   <data name="Feedback.DiagLog" xml:space="preserve">
     <value>Последние строки журнала Screeny ({0}), имя пользователя заменено:</value>
   </data>
+  <data name="Tray.PinFromClipboard" xml:space="preserve">
+    <value>Закрепить из буфера обмена</value>
+  </data>
+  <data name="App.ClipboardNoImage" xml:space="preserve">
+    <value>В буфере обмена нет картинки, которую можно закрепить.</value>
+  </data>
+  <data name="App.ClipboardBusyPin" xml:space="preserve">
+    <value>Буфер обмена занят другим приложением. Попробуйте ещё раз чуть позже.</value>
+  </data>
 </root>

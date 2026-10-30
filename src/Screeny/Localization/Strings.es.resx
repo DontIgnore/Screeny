@@ -1429,4 +1429,13 @@ Se eliminarán las capturas ({1}) sin pasar por la Papelera de reciclaje. No se 
   <data name="Feedback.DiagLog" xml:space="preserve">
     <value>Registro de Screeny, últimas {0} líneas (nombre de usuario sustituido):</value>
   </data>
+  <data name="Tray.PinFromClipboard" xml:space="preserve">
+    <value>Fijar desde el portapapeles</value>
+  </data>
+  <data name="App.ClipboardNoImage" xml:space="preserve">
+    <value>No hay ninguna imagen en el portapapeles para fijar.</value>
+  </data>
+  <data name="App.ClipboardBusyPin" xml:space="preserve">
+    <value>Otra aplicación está usando el portapapeles. Inténtalo de nuevo en un momento.</value>
+  </data>
 </root>

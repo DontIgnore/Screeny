@@ -55,10 +55,13 @@ public partial class App : Application, INotifyPropertyChanged
     public HistoryStore? History { get; private set; }
     /// <summary>Пункты трея «История…» и «Открыть папку истории».</summary>
     public bool HistoryFeatureOn => Settings.IsFeatureOn(FeatureCatalog.History);
+    /// <summary>Пункт трея «Закрепить из буфера обмена».</summary>
+    public bool PinsFeatureOn => Settings.ActionAllowed(CaptureAction.Pin);
 
     public ICommand CaptureCommand { get; private set; } = null!;
     public ICommand HistoryCommand { get; private set; } = null!;
     public ICommand OpenFolderCommand { get; private set; } = null!;
+    public ICommand PinFromClipboardCommand { get; private set; } = null!;
     public ICommand SettingsCommand { get; private set; } = null!;
     public ICommand ExitCommand { get; private set; } = null!;
     /// <summary>Все работающие хоткеи снимка через « / » (длинный список — первый и «…»); «—», если ни одного.</summary>
@@ -113,6 +116,7 @@ public partial class App : Application, INotifyPropertyChanged
             CaptureCommand = new RelayCommand(StartCapture);
             HistoryCommand = new RelayCommand(ShowHistory);
             OpenFolderCommand = new RelayCommand(OpenHistoryFolder);
+            PinFromClipboardCommand = new RelayCommand(PinFromClipboard);
             SettingsCommand = new RelayCommand(ShowSettings);
             ExitCommand = new RelayCommand(ExitApp);
 
@@ -366,6 +370,7 @@ public partial class App : Application, INotifyPropertyChanged
         foreach (Window window in Windows)
             if (window is EditorWindow editor) editor.ApplyFeatures();
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HistoryFeatureOn)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PinsFeatureOn)));
     }
 
     /// <summary>
@@ -680,6 +685,31 @@ public partial class App : Application, INotifyPropertyChanged
         var work = info.rcWork;
         int x = (work.Left + work.Right - image.PixelWidth) / 2, y = (work.Top + work.Bottom - image.PixelHeight) / 2;
         ShowPin(image, new PixelRect(Math.Max(work.Left, x), Math.Max(work.Top, y), image.PixelWidth, image.PixelHeight));
+    }
+
+    /// <summary>
+    /// Пункт трея «Закрепить из буфера обмена»: картинка (PNG, файл картинки, DIB) закрепляется по центру монитора
+    /// с курсором. Нет картинки или буфер занят — короткое уведомление; буфер не меняется.
+    /// </summary>
+    public void PinFromClipboard() => PinFromClipboard(new SystemClipboardSource());
+
+    internal void PinFromClipboard(IClipboardSource clipboard)
+    {
+        if (IsShuttingDown || !Settings.ActionAllowed(CaptureAction.Pin)) return;
+        var result = ClipboardImageReader.Read(clipboard);
+        switch (result.Status)
+        {
+            case ClipboardImageStatus.Image:
+                try { PinAtCursor(result.Image!); }
+                catch (Exception ex) { Log.Error("Pin from clipboard failed", ex); Notify(Loc.F("App.PinFailed", ex.Message)); }
+                break;
+            case ClipboardImageStatus.Busy:
+                Notify(Loc.T("App.ClipboardBusyPin"));
+                break;
+            default:
+                Notify(Loc.T("App.ClipboardNoImage"));
+                break;
+        }
     }
 
     /// <summary>Все открытые закреплённые снимки — закрываются при выходе.</summary>

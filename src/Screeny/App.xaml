@@ -23,6 +23,9 @@
                       Visibility="{Binding HistoryFeatureOn, Converter={StaticResource BoolToVisibility}}"/>
             <MenuItem Header="{l:Loc Tray.OpenHistoryFolder}" Command="{Binding OpenFolderCommand}"
                       Visibility="{Binding HistoryFeatureOn, Converter={StaticResource BoolToVisibility}}"/>
+            <!-- Без функции «Закрепление» пункта нет -->
+            <MenuItem Header="{l:Loc Tray.PinFromClipboard}" Command="{Binding PinFromClipboardCommand}"
+                      Visibility="{Binding PinsFeatureOn, Converter={StaticResource BoolToVisibility}}"/>
             <Separator/>
             <MenuItem Header="{l:Loc Tray.Settings}" Command="{Binding SettingsCommand}"/>
             <MenuItem Header="{l:Loc Common.CheckConflicts}" Command="{Binding SetupWizardCommand}"/>

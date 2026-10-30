@@ -1429,4 +1429,13 @@ Replace it?</value>
   <data name="Feedback.DiagLog" xml:space="preserve">
     <value>Screeny's log, last {0} lines (user name replaced):</value>
   </data>
+  <data name="Tray.PinFromClipboard" xml:space="preserve">
+    <value>Pin from clipboard</value>
+  </data>
+  <data name="App.ClipboardNoImage" xml:space="preserve">
+    <value>There's no picture in the clipboard to pin.</value>
+  </data>
+  <data name="App.ClipboardBusyPin" xml:space="preserve">
+    <value>Another app is using the clipboard. Try again in a moment.</value>
+  </data>
 </root>
