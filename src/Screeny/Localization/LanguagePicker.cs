@@ -6,7 +6,7 @@ using System.Windows.Data;
 namespace Screeny.Localization;
 
 /// <summary>
-/// Language list for settings and first-run wizard: “As system (…)” and languages, each in itself.
+/// Language list for settings and the first-run wizard: “System default (…)” and language names, each in its own language.
 /// First item label depends on UI language — window calls <see cref="Relabel"/> on <see cref="Loc.Changed"/>.
 /// </summary>
 public static class LanguagePicker

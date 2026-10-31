@@ -63,7 +63,7 @@
       <Button x:Name="ConflictsButton" Content="{l:Loc Common.CheckConflicts}" HorizontalAlignment="Left" Margin="0,12,0,0" Click="OnCheckConflicts"
               ToolTip="{l:Loc Settings.ConflictsTip}"/>
 
-      <!-- Features: checkboxes built by FeatureCheckList; disabled hides its fields below immediately -->
+      <!-- Features: FeatureCheckList builds checkboxes from FeatureCatalog; disabling a feature immediately hides its fields below. -->
       <TextBlock Text="{l:Loc Settings.SectionFeatures}" Style="{StaticResource SectionLabel}" Margin="0,28,0,10"/>
       <StackPanel x:Name="FeaturesPanel"/>
 

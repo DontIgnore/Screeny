@@ -11,7 +11,7 @@ public enum BeautifyPreset { Blue, Sunset, Mint, Graphite, Light, Warm }
 public enum BeautifyPadding { S, M, L }
 
 /// <summary>
-/// Decoration parameters (beautify): background gradient, margin, corner rounding, shadow.
+/// Decoration parameters (beautify): background gradient, padding, rounded corners, and shadow.
 /// Same for composition (<see cref="BeautifyComposer"/>) and swatches in decoration flyout.
 /// </summary>
 public sealed record BeautifyOptions(BeautifyPreset Preset, BeautifyPadding Padding, int Radius, bool Shadow)
@@ -33,7 +33,7 @@ public sealed record BeautifyOptions(BeautifyPreset Preset, BeautifyPadding Padd
         _ => 48,
     };
 
-    /// <summary>Shadow blur ≈ third of margin, offset down ≈ sixth, density 0.35.</summary>
+    /// <summary>Shadow blur is approximately one third of the padding, downward offset one sixth, and opacity 0.35.</summary>
     public double ShadowBlur => PaddingPx / 3.0;
     public double ShadowOffset => Math.Max(2, PaddingPx / 6.0);
     public const double ShadowOpacity = 0.35;

@@ -4,7 +4,7 @@ namespace Screeny.Ocr;
 
 /// <summary>
 /// Moving word selection to another layout of same screenshot: refined recognition replaced Windows OCR layout,
-/// and user already selected part of text. Throughword indices of two engines don't match (they split lines
+/// and the user has already selected some text. The engines' global word indices differ (they split lines
 /// and words differently), so location is moved: new words whose border intersects at least one previous
 /// selected word get selected. Edge touching doesn't count — neighboring word not grabbed.
 /// </summary>

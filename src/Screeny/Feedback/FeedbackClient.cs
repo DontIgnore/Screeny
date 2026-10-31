@@ -110,7 +110,7 @@ public sealed class FeedbackClient(HttpClient http, Uri? endpoint, Func<DateTime
     }
 
     /// <summary>
-    /// Minutes for “try in N min.”: up to integer, at least one. null — server didn't say how long.
+    /// Minutes for “try again in N minutes”: round up to a whole minute, with a minimum of one. null means the server did not specify a delay.
     /// </summary>
     public static int? RetryMinutes(TimeSpan? retryAfter)
         => retryAfter is { } t ? Math.Max(1, (int)Math.Ceiling(t.TotalMinutes)) : null;
