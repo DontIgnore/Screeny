@@ -5,7 +5,7 @@ namespace Screeny.Tests.Ocr;
 
 public class OcrLayoutTests
 {
-    // Два «угла» картинки: блок слева сверху и блок справа снизу, по две строки.
+    // Two image “corners”: block left-top and right-bottom, two lines each.
     //   Hello world        (0,0)
     //   second line        (0,20)
     //                         Right corner   (300,200)
@@ -41,7 +41,7 @@ public class OcrLayoutTests
     {
         var layout = Sample();
         Assert.Equal("world" + Environment.NewLine + "second", layout.TextOf(layout.Range(1, 2)));
-        Assert.Equal(layout.Range(1, 2), layout.Range(2, 1)); // направление жеста не важно
+        Assert.Equal(layout.Range(1, 2), layout.Range(2, 1)); // gesture direction irrelevant
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public class OcrLayoutTests
     [Fact]
     public void TextOf_FullLineUsesEngineText_PartialLineJoinsWords()
     {
-        // Движок пишет строку по-своему (например, с пунктуацией без пробела) — целая строка берётся как есть.
+        // Engine writes line its way (e.g., punctuation without space) — whole line taken as-is.
         var layout = new OcrLayout([Line("Total: 42", W("Total", 0, 0, 30), W(":", 30, 0, 4), W("42", 38, 0, 12))]);
         Assert.Equal("Total: 42", layout.TextOf(layout.All()));
         Assert.Equal("Total :", layout.TextOf(new HashSet<int> { 0, 1 }));
@@ -72,7 +72,7 @@ public class OcrLayoutTests
     {
         var layout = Sample();
         Assert.Equal(0, layout.WordAt(new Point(20, 6)));
-        Assert.Equal(1, layout.WordAt(new Point(44, 6), tolerance: 3)); // ближе к «world»
+        Assert.Equal(1, layout.WordAt(new Point(44, 6), tolerance: 3)); // closer to “world”
         Assert.Null(layout.WordAt(new Point(150, 100)));
     }
 
@@ -104,7 +104,7 @@ public class OcrLayoutTests
     [Fact]
     public void MergeBest_TakesTheMorePlausibleLineFromAnotherEngine()
     {
-        // Русская модель читает английскую строку кириллицей, английская — русскую латиницей.
+        // Russian model reads English line in Cyrillic, English reads Russian in Latin.
         var ru = new OcrLayout([Line("Thank уои", W("Thank", 0, 0, 40), W("уои", 46, 0, 30)), Line("Снимок экрана", W("Снимок", 0, 40, 50), W("экрана", 56, 40, 50))]);
         var en = new OcrLayout([Line("Thank you", W("Thank", 0, 1, 40), W("you", 46, 1, 30)), Line("CHMMOK 3KpaHa", W("CHMMOK", 0, 40, 50), W("3KpaHa", 56, 40, 50))]);
         var merged = OcrLayout.MergeBest([ru, en], 0, OcrService.LinePlausibility);
@@ -114,7 +114,7 @@ public class OcrLayoutTests
     [Fact]
     public void MergeBest_OneWideLineDoesNotReplaceSeveralBaseLines()
     {
-        // Таблица «Name    Value»: один движок режет на две строки, другой отдаёт одну широкую.
+        // Table “Name Value”: one engine splits into two lines, other returns one wide.
         var a = new OcrLayout([Line("Name", W("Name", 0, 0, 40)), Line("Value", W("Value", 300, 0, 40))], language: "en-US");
         var b = new OcrLayout([Line("Name Value", W("Name", 0, 0, 40), W("Value", 300, 0, 40))], language: "ru");
         var merged = OcrLayout.MergeBest([a, b], 0, OcrService.LinePlausibility, OcrService.LanguageFits);
@@ -124,7 +124,7 @@ public class OcrLayoutTests
     [Fact]
     public void MergeBest_KeepsEachLinesOwnSpacingRule()
     {
-        // Основа японская, но английская строка взята у английского движка: её часть склеивается с пробелом.
+        // Base Japanese, English line taken from English engine: its part joined with space.
         var ja = new OcrLayout([Line("Hel1o wor1d", W("Hel1o", 0, 0, 40), W("wor1d", 46, 0, 40))], noSpaces: true, language: "ja");
         var en = new OcrLayout([Line("Hello world", W("Hello", 0, 0, 40), W("world", 46, 0, 40))], language: "en-US");
         var merged = OcrLayout.MergeBest([ja, en], 0, OcrService.LinePlausibility, OcrService.LanguageFits);

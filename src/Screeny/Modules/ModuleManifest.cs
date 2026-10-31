@@ -5,16 +5,16 @@ using Screeny.Localization;
 
 namespace Screeny.Modules;
 
-/// <summary>Файл модуля из <c>module.json</c>: путь относительно папки модуля (через «/»), размер и SHA256 (hex).</summary>
+/// <summary>Module file from <c>module.json</c>: path relative to module folder (via “/”), size and SHA256 (hex).</summary>
 public sealed record ModuleFile(
     [property: JsonPropertyName("path")] string Path,
     [property: JsonPropertyName("size")] long Size,
     [property: JsonPropertyName("sha256")] string Sha256);
 
 /// <summary>
-/// <c>module.json</c> в корне модуля: id, версия и список всех остальных файлов с SHA256. Пишет его
-/// <c>tools/pack-ocr-module.ps1</c>; приложение проверяет по нему распакованные файлы перед установкой и ещё раз — один
-/// раз за процесс — перед первой загрузкой нативной библиотеки.
+/// <c>module.json</c> in module root: id, version and list of all other files with SHA256. Written by
+/// <c>tools/pack-ocr-module.ps1</c>; app checks unpacked files against it before install and once more — one
+/// time per process — before first native library load.
 /// </summary>
 public sealed record ModuleManifest(
     [property: JsonPropertyName("id")] string Id,
@@ -23,7 +23,7 @@ public sealed record ModuleManifest(
 {
     public const string FileName = "module.json";
 
-    /// <summary>Разбор <c>module.json</c>; null — файл не читается или в нём не то.</summary>
+    /// <summary>Parses <c>module.json</c>; null — unreadable or wrong content.</summary>
     public static ModuleManifest? TryRead(string folder)
     {
         try
@@ -36,9 +36,9 @@ public sealed record ModuleManifest(
     }
 
     /// <summary>
-    /// Папка совпадает с манифестом: сам <c>module.json</c> — тот, что зашит в приложении (<paramref name="manifestSha256"/>;
-    /// иначе подменённый вместе с файлами манифест прошёл бы проверку), id и версия ожидаемые, каждый файл на месте с нужным
-    /// размером и SHA256, а лишних файлов нет. Возвращает текст ошибки или null.
+    /// Folder matches manifest: <c>module.json</c> itself is the one hardcoded (<paramref name="manifestSha256"/>;
+    /// else swapped manifest with files would pass), id and version expected, each file present with correct
+    /// size and SHA256, and no extra files. Returns error text or null.
     /// </summary>
     public static string? Verify(string folder, string expectedId, int expectedVersion, string? manifestSha256 = null)
     {

@@ -23,14 +23,14 @@ namespace Screeny.Overlay;
 public enum OverlayMode { Selecting, Editing }
 
 /// <summary>
-/// Тестовый экземпляр (<c>--dev --overlay-test</c>): оверлей не закрывается при потере активности
-/// (его снимают сбоку через PrintWindow), может сразу открыться с выделением и готовым сценарием.
+/// Test instance (<c>--dev --overlay-test</c>): overlay doesn't close on deactivation
+/// (captured via PrintWindow), can open immediately with selection and ready scenario.
 /// </summary>
 public sealed record OverlayDevOptions(PixelRect? Select, string? Scenario, string? Source = null);
 
 /// <summary>
-/// Полноэкранное окно поверх всего виртуального экрана со «замороженным» снимком.
-/// Выделение и аннотации хранятся в пикселях снимка; на экран выводятся через ScaleTransform(1/dpi).
+/// Fullscreen window over entire virtual screen with “frozen” screenshot.
+/// Selection and annotations stored in screenshot pixels; displayed via ScaleTransform(1/dpi).
 /// </summary>
 public partial class OverlayWindow : Window
 {
@@ -40,47 +40,47 @@ public partial class OverlayWindow : Window
     private readonly List<WindowInfo> _windows;
     private readonly AppSettings _settings;
     private readonly SelectionModel _selection;
-    /// <summary>Рисование: инструменты, текст, выбор, параметры (flyout'ы), пипетка, линейка, undo, оформление.</summary>
+    /// <summary>Drawing: tools, text, select, options (flyouts), eyedropper, ruler, undo, decoration.</summary>
     private readonly AnnotationEditor _editor;
-    private bool _toolbarBelow = true;  // панель под выделением: flyout'ы её кнопок открываются вниз
+    private bool _toolbarBelow = true;  // panel below selection: its button flyouts open down
     private DispatcherTimer? _badgeTimer;
     private CoordinateMapper _map;
-    private PixelPoint? _dragAnchor;   // начало перетаскивания нового выделения
-    private bool _thresholdPassed;     // перетаскивание нового выделения ушло дальше порога клика
+    private PixelPoint? _dragAnchor;   // start dragging new selection
+    private bool _thresholdPassed;     // dragging new selection moved beyond click threshold
     private bool _draggingHandle;
     private OverlayMode _mode = OverlayMode.Selecting;
-    private bool _closing;             // Complete/Cancel уже начались: Deactivated от Hide() игнорируем
-    private bool _dialogOpen;          // открыт наш модальный диалог (сохранение): потеря активности ожидаема
+    private bool _closing;             // Complete/Cancel already started: Deactivated from Hide() ignored
+    private bool _dialogOpen;          // our modal dialog open (save): deactivation expected
 
-    // Режим текста (Ctrl+T): распознанные слова можно выделять мышью и копировать.
+    // Text mode (Ctrl+T): recognized words selectable and copyable.
     private bool _textMode;
-    private int _ocrGeneration;        // каждый вход и выход из режима; устаревший результат распознавания отбрасывается
-    private OcrLayout? _ocr;           // рамки слов в пикселях снимка; null — ещё распознаём
+    private int _ocrGeneration;        // each entry/exit; stale recognition result discarded
+    private OcrLayout? _ocr;           // word borders in screenshot pixels; null — still recognizing
     private HashSet<int> _textSelection = new();
-    private int? _textAnchor;          // слово, от которого тянется выделение (и для Shift+клик)
-    private Point? _textPress;         // точка нажатия текущего жеста выделения
-    private bool _textDragFromWord;    // жест начался на слове → выделение по порядку чтения, иначе — рамкой
-    private bool _textDragging;        // жест ушёл дальше порога клика
-    private HashSet<int> _textBase = new(); // выделение до жеста: Shift/Ctrl добавляют к нему
+    private int? _textAnchor;          // word selection starts from (also for Shift+click)
+    private Point? _textPress;         // press point of current selection gesture
+    private bool _textDragFromWord;    // gesture started on word → reading-order selection, else border
+    private bool _textDragging;        // gesture moved beyond click threshold
+    private HashSet<int> _textBase = new(); // selection before gesture: Shift/Ctrl add to it
     private DispatcherTimer? _hintTimer;
-    private bool _copyWhenReady;       // Enter/Ctrl+C нажали, пока ещё распознаём: скопировать сразу по готовности
-    // Точное распознавание (скачиваемый модуль): результат Windows OCR показывается сразу, уточнение в фоне заменяет раскладку.
+    private bool _copyWhenReady;       // Enter/Ctrl+C pressed while still recognizing: copy as soon as ready
+    // Precise recognition (downloadable module): Windows OCR result shown immediately, refinement in background replaces layout.
     private readonly IOcrRefiner? _refiner;
     private CancellationTokenSource? _refineCts;
-    private bool _refining;            // идёт уточнение: в подсказке «уточняю…»
-    private OcrLayout? _pendingRefined; // уточнение пришло посреди жеста выделения: применяется, когда жест закончится
-    /// <summary>Уточнение должно успеть за столько от готовности сессий, иначе остаётся результат Windows OCR.</summary>
+    private bool _refining;            // refinement running: hint shows “refining…”
+    private OcrLayout? _pendingRefined; // refinement arrived mid-selection gesture: applied when gesture ends
+    /// <summary>Refinement must finish within this from session readiness, else Windows OCR result stays.</summary>
     private static readonly TimeSpan RefineBudget = TimeSpan.FromSeconds(5);
-    /// <summary>Подготовка (проверка файлов модуля и загрузка сессий, первый раз ≈0,3 с) — не дольше этого.</summary>
+    /// <summary>Preparation (module file check and session load, first ≈0.3s) — no longer than this.</summary>
     private static readonly TimeSpan PrepareLimit = TimeSpan.FromSeconds(10);
 
     public event Action<CaptureResult>? Completed;
-    /// <summary>Оверлей закрыт, потому что изменилась конфигурация мониторов.</summary>
+    /// <summary>Overlay closed because monitor configuration changed.</summary>
     public event Action? DisplaysChanged;
 
     private readonly OverlayDevOptions? _dev;
 
-    /// <param name="refiner">Точное распознавание для режима текста; null — только Windows OCR.</param>
+    /// <param name="refiner">Precise recognition for text mode; null — only Windows OCR.</param>
     public OverlayWindow(Screenshot shot, List<WindowInfo> windows, AppSettings settings, OverlayDevOptions? dev = null, IOcrRefiner? refiner = null)
     {
         InitializeComponent();
@@ -95,7 +95,7 @@ public partial class OverlayWindow : Window
             layer.Height = shot.Bitmap.PixelHeight;
         }
 
-        // Состояние и параметры оформления запоминаются в настройках для следующих снимков.
+        // Decoration state and parameters remembered in settings for next screenshots.
         var flyouts = new OptionsFlyouts(Toolbar);
         flyouts.Attach(this);
         _editor = new AnnotationEditor(new AnnotationEditorParts(Toolbar, flyouts, TextEditor, Annotations, RulerOverlay, SnapGuides), shot.Bitmap, settings, this,
@@ -122,7 +122,7 @@ public partial class OverlayWindow : Window
         };
     }
 
-    /// <summary>Готовое выделение тестового запуска — как будто его только что выделили мышью, — и сценарий.</summary>
+    /// <summary>Test launch ready selection — as if just selected by mouse — and scenario.</summary>
     private void ApplyDevOptions()
     {
         if (_dev is null) return;
@@ -137,14 +137,14 @@ public partial class OverlayWindow : Window
     private AnnotationDocument Document => Annotations.Document;
     private bool HasGesture => _editor.HasGesture || _draggingHandle || _dragAnchor is not null || _textPress is not null;
 
-    // ---------- Размещение и DPI ----------
+    // ---------- Placement and DPI ----------
 
     private void PlaceOverVirtualScreen()
     {
         var hwnd = new WindowInteropHelper(this).Handle;
         var r = _shot.VirtualRect;
-        // Ставим окно в пикселях устройства через Win32, минуя DIP-пересчёт WPF.
-        // Уже на месте — ничего не делаем: это и защита от цикла с WM_DPICHANGED.
+        // Place window in device pixels via Win32, bypassing WPF DIP conversion.
+        // Already in place — do nothing: also protects from WM_DPICHANGED loop.
         User32.GetWindowRect(hwnd, out var current);
         if (current.Left != r.X || current.Top != r.Y || current.Right != r.Right || current.Bottom != r.Bottom)
             User32.SetWindowPos(hwnd, new IntPtr(-1) /* HWND_TOPMOST */, r.X, r.Y, r.Width, r.Height, User32.SWP_NOACTIVATE);
@@ -152,9 +152,9 @@ public partial class OverlayWindow : Window
     }
 
     /// <summary>
-    /// Окно на весь виртуальный экран пересекает мониторы с разным DPI: на WM_DPICHANGED (в том числе внутри
-    /// нашего же SetWindowPos) WPF ставит окно в предложенный системой прямоугольник. Пересчитываем масштаб
-    /// и после обработки сообщения возвращаем окно на виртуальный экран.
+    /// Window across virtual screen with different-DPI monitors: on WM_DPICHANGED (incl. inside
+    /// our own SetWindowPos) WPF places window into system-proposed rectangle. Recalculate scale
+    /// and after message handling return window to virtual screen.
     /// </summary>
     protected override void OnDpiChanged(DpiScale oldDpi, DpiScale newDpi)
     {
@@ -174,9 +174,9 @@ public partial class OverlayWindow : Window
     }
 
     /// <summary>
-    /// Снимок и координаты окна привязаны к раскладке мониторов на момент захвата. Если она изменилась
-    /// (отключили монитор, сменили разрешение), продолжать нельзя — закрываемся без результата.
-    /// Событие приходит с потока SystemEvents, поэтому переходим в поток окна.
+    /// Screenshot and window coordinates tied to monitor layout at capture. If it changed
+    /// (monitor disconnected, resolution changed), cannot continue — close without result.
+    /// Event arrives from SystemEvents thread, so move to window thread.
     /// </summary>
     private void OnDisplaySettingsChanged(object? sender, EventArgs e)
     {
@@ -196,7 +196,7 @@ public partial class OverlayWindow : Window
         base.OnClosed(e);
     }
 
-    // ---------- Координаты ----------
+    // ---------- Coordinates ----------
 
     private PixelPoint ToPixel(Point canvasPoint)
     {
@@ -204,11 +204,11 @@ public partial class OverlayWindow : Window
         return new PixelPoint(Math.Clamp((int)Math.Floor(canvasPoint.X), 0, b.Width - 1), Math.Clamp((int)Math.Floor(canvasPoint.Y), 0, b.Height - 1));
     }
 
-    /// <summary>Позиция мыши в пикселях снимка — через обратное преобразование PixelCanvas, т.е. ровно как при отрисовке.</summary>
+    /// <summary>Mouse position in screenshot pixels — via inverse PixelCanvas transform, i.e. exactly as during rendering.</summary>
     private PixelPoint MousePixel(MouseEventArgs e) => ToPixel(e.GetPosition(PixelCanvas));
     private PixelPoint CurrentMousePixel() => ToPixel(Mouse.GetPosition(PixelCanvas));
 
-    /// <summary>Точка для инструментов: дробные пиксели, прижатые к выделению (рисовать можно только внутри).</summary>
+    /// <summary>Point for tools: fractional pixels clamped to selection (draw only inside).</summary>
     private Point ToolPoint(MouseEventArgs e)
     {
         var p = e.GetPosition(PixelCanvas);
@@ -216,7 +216,7 @@ public partial class OverlayWindow : Window
         return new Point(Math.Clamp(p.X, r.X, r.Right), Math.Clamp(p.Y, r.Y, r.Bottom));
     }
 
-    /// <summary>Прямоугольник монитора (или его рабочей области без панели задач) под точкой, в пикселях снимка.</summary>
+    /// <summary>Monitor rectangle (or work area without taskbar) under point, in screenshot pixels.</summary>
     private PixelRect MonitorAt(PixelPoint p, bool workArea = false)
     {
         var pt = new User32.POINT { X = p.X + _shot.VirtualRect.X, Y = p.Y + _shot.VirtualRect.Y };
@@ -235,7 +235,7 @@ public partial class OverlayWindow : Window
         return false;
     }
 
-    // ---------- Мышь ----------
+    // ---------- Mouse ----------
 
     protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
     {
@@ -245,7 +245,7 @@ public partial class OverlayWindow : Window
         CommitTextEdit();
         var p = MousePixel(e);
         e.Handled = true;
-        // Пипетка важнее ручек и инструментов: клик в любом месте снимка берёт цвет.
+        // Eyedropper beats handles and tools: click anywhere on screenshot picks color.
         if (_editor.PipetteOn) { _editor.PickColor(p); return; }
 
         var handle = _selection.HitTest(p, HandleTolerance);
@@ -253,7 +253,7 @@ public partial class OverlayWindow : Window
         {
             var exact = e.GetPosition(PixelCanvas);
             bool resizeHandle = handle is not (Handle.None or Handle.Move);
-            // Инструмент «Выбор» по пустому месту внутри области двигает саму область.
+            // Select tool on empty space inside area moves area itself.
             bool moveSelection = handle == Handle.Move && Toolbar.CurrentTool == ToolKind.Select && Document.HitTest(exact) is null;
             if (resizeHandle || moveSelection)
             {
@@ -265,7 +265,7 @@ public partial class OverlayWindow : Window
             {
                 if (_editor.BeginGesture(ToolPoint(e))) CaptureMouse();
             }
-            // Клик вне выделения инструментом рисования игнорируем: рисовать можно только внутри области.
+            // Click outside selection by drawing tool ignored: draw only inside area.
             else Deselect();
             return;
         }
@@ -279,7 +279,7 @@ public partial class OverlayWindow : Window
 
     private void StartHandleDrag(Handle handle, PixelPoint p)
     {
-        _editor.Flyouts.CloseAll(); // панель поедет вместе с рамкой
+        _editor.Flyouts.CloseAll(); // panel moves with border
         _selection.BeginDrag(handle, p);
         _draggingHandle = true;
         BeginFrameGesture();
@@ -324,7 +324,7 @@ public partial class OverlayWindow : Window
         base.OnMouseLeftButtonUp(e);
         if (_textMode) { TextMouseUp(e); return; }
         var p = MousePixel(e);
-        // Состояние жеста сбрасываем до ReleaseMouseCapture: он синхронно вызывает OnLostMouseCapture.
+        // Gesture state reset before ReleaseMouseCapture: it synchronously calls OnLostMouseCapture.
         if (_editor.EndGesture(ToolPoint(e)))
         {
             ReleaseMouseCapture();
@@ -352,11 +352,11 @@ public partial class OverlayWindow : Window
         }
     }
 
-    /// <summary>Захват мыши потерян не по нашей воле (Alt+Tab, всплывшее окно и т.п.) — жест прерывается целиком.</summary>
+    /// <summary>Mouse capture lost not by our will (Alt+Tab, popup window etc.) — gesture aborted entirely.</summary>
     protected override void OnLostMouseCapture(MouseEventArgs e)
     {
         base.OnLostMouseCapture(e);
-        // Событие всплывает и от кнопок панели и поля ввода; нас интересует только захват самого окна.
+        // Event bubbles from panel buttons and input field too; only window capture matters.
         if (!ReferenceEquals(e.OriginalSource, this)) return;
         ResetInteraction();
     }
@@ -413,7 +413,7 @@ public partial class OverlayWindow : Window
         _ => Cursors.Arrow,
     };
 
-    // ---------- Режимы и сброс ----------
+    // ---------- Modes and reset ----------
 
     private void EnterEditing()
     {
@@ -427,8 +427,8 @@ public partial class OverlayWindow : Window
     }
 
     /// <summary>
-    /// Единый сброс текущего жеста мыши: живая фигура или сдвиг аннотации откатываются, перетаскивание ручки
-    /// завершается на месте, начатое новое выделение отбрасывается, захват мыши отпускается. Идемпотентен.
+    /// Unified reset of current mouse gesture: live shape or annotation offset rolled back, handle drag
+    /// ends in place, started new selection discarded, mouse capture released. Idempotent.
     /// </summary>
     private void ResetInteraction()
     {
@@ -457,8 +457,8 @@ public partial class OverlayWindow : Window
     }
 
     /// <summary>
-    /// Esc и правый клик снимают по одному слою: жест → выбранная аннотация / инструмент рисования →
-    /// выделение области (аннотации остаются) → закрытие оверлея.
+    /// Esc and right-click remove one layer: gesture → selected annotation / drawing tool →
+    /// area selection (annotations remain) → close overlay.
     /// </summary>
     private void StepBack()
     {
@@ -486,8 +486,8 @@ public partial class OverlayWindow : Window
     private void Deselect() => _editor.Deselect();
 
     /// <summary>
-    /// Обратно к выбору области. Аннотации не удаляются: они в координатах снимка, остаются на месте
-    /// и при экспорте обрезаются новым выделением.
+    /// Back to area selection. Annotations not deleted: they are in screenshot coordinates, stay
+    /// and are clipped by new selection on export.
     /// </summary>
     private void ResetSelection()
     {
@@ -506,15 +506,15 @@ public partial class OverlayWindow : Window
     }
 
     /// <summary>
-    /// Alt+Tab, UAC, всплывшее чужое окно: Topmost-оверлей без фокуса не реагирует на Esc и мешает работать.
-    /// Закрываемся без результата, кроме случаев, когда активность ушла ожидаемо (наш диалог, ввод текста).
+    /// Alt+Tab, UAC, foreign popup: Topmost overlay without focus doesn't react to Esc and blocks work.
+    /// Close without result, except when activity left expectedly (our dialog, text input).
     /// </summary>
     protected override void OnDeactivated(EventArgs e)
     {
         base.OnDeactivated(e);
         if (_closing || _dialogOpen || _dev is not null) return;
-        // Сразу после показа активность может на миг забрать закрывающееся меню трея или сам Show():
-        // это не уход пользователя, возвращаем фокус себе. То же, если активным стало другое наше окно.
+        // Right after show, closing tray menu or Show() itself may briefly take focus:
+        // not user leaving, return focus to self. Same if another our window becomes active.
         if (DateTime.UtcNow - _shownAt < ActivationGrace || ForegroundIsOurProcess())
         {
             Dispatcher.BeginInvoke(() => { if (!_closing && IsVisible) Activate(); }, DispatcherPriority.Input);
@@ -536,11 +536,11 @@ public partial class OverlayWindow : Window
         return pid == (uint)Environment.ProcessId;
     }
 
-    // ---------- Текст ----------
+    // ---------- Text ----------
 
     private void CommitTextEdit() => _editor.CommitTextEdit();
 
-    // ---------- Отрисовка HUD ----------
+    // ---------- HUD rendering ----------
 
     private void RefreshSelectionVisuals()
     {
@@ -555,10 +555,10 @@ public partial class OverlayWindow : Window
         var r = _selection.Rect;
         Dim.Hole = r;
         Dim.ShowHandles = (_mode == OverlayMode.Editing || _draggingHandle) && !_textMode;
-        // Аннотации (особенно эффекты) не должны вылезать за выделение.
+        // Annotations (esp. effects) must not extend beyond selection.
         Annotations.Clip = new RectangleGeometry(r.ToRect());
 
-        // Размер области; оформление ничего не рисует вокруг выделения — о нём говорит только значок ✨.
+        // Area size; decoration draws nothing around selection — only ✨ icon indicates.
         SizeText.Text = $"{r.Width} × {r.Height}";
         BeautifyMark.Visibility = _editor.BeautifyOn && !_textMode ? Visibility.Visible : Visibility.Collapsed;
         SizeLabel.Visibility = Visibility.Visible;
@@ -574,9 +574,9 @@ public partial class OverlayWindow : Window
     }
 
     /// <summary>
-    /// Под выделением по левому краю; если не влезает — над ним; если и там нет места — внутри у нижнего края.
-    /// Панель целиком остаётся в рабочей области монитора, на котором центр выделения. Открытые flyout'ы
-    /// переставляются следом: с внешней стороны панели, в пределах той же рабочей области.
+    /// Below selection along left edge; doesn't fit — above; no place there — inside at bottom edge.
+    /// Panel entirely stays in work area of monitor with selection center. Open flyouts
+    /// reposition after: on panel outer side, within same work area.
     /// </summary>
     private void PositionToolbar()
     {
@@ -588,22 +588,22 @@ public partial class OverlayWindow : Window
         _editor.Flyouts.Reposition();
     }
 
-    /// <summary>Рабочая область (без панели задач) монитора, на котором центр выделения, в DIP.</summary>
+    /// <summary>Work area (without taskbar) of monitor with selection center, in DIP.</summary>
     private Rect SelectionWorkArea()
     {
         var r = _selection.Rect;
         return _map.PixelToDip(MonitorAt(new PixelPoint(r.X + r.Width / 2, r.Y + r.Height / 2), workArea: true));
     }
 
-    /// <summary>Clamp, при котором нижняя граница выигрывает, если панель шире/выше доступного места.</summary>
+    /// <summary>Clamp where bottom edge wins if panel wider/taller than available space.</summary>
     private static double ClampInto(double v, double min, double max) => HudLayout.ClampInto(v, min, max);
 
     private void UpdateMagnifier(PixelPoint p)
     {
         Magnifier.Visibility = Visibility.Visible;
-        Magnifier.ShowColor = _settings.IsFeatureOn(FeatureCatalog.Pipette); // HEX у лупы — часть пипетки (C)
+        Magnifier.ShowColor = _settings.IsFeatureOn(FeatureCatalog.Pipette); // HEX at magnifier is part of eyedropper (C)
         Magnifier.Update(_shot.Bitmap, p);
-        // После первой компоновки размер лупы известен; Measure на каждое движение мыши не нужен.
+        // After first layout magnifier size known; no Measure per mouse move.
         if (Magnifier.ActualWidth <= 0 || Magnifier.ActualHeight <= 0)
             Magnifier.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
         var size = Magnifier.ActualWidth > 0 ? new Size(Magnifier.ActualWidth, Magnifier.ActualHeight) : Magnifier.DesiredSize;
@@ -618,19 +618,19 @@ public partial class OverlayWindow : Window
         PositionPipetteBadge();
     }
 
-    // ---------- Клавиатура ----------
+    // ---------- Keyboard ----------
 
     protected override void OnPreviewKeyDown(KeyEventArgs e)
     {
         base.OnPreviewKeyDown(e);
-        // Пока вводится текст, горячие клавиши оверлея не работают: цифры, Enter, Delete уходят в поле ввода.
+        // While text entered, overlay hotkeys don't work: digits, Enter, Delete go to input field.
         if (_editor.IsTextEditing) return;
 
         var key = e.Key == Key.System ? e.SystemKey : e.Key;
         var mods = Keyboard.Modifiers;
         bool ctrl = mods.HasFlag(ModifierKeys.Control), shift = mods.HasFlag(ModifierKeys.Shift);
         e.Handled = true;
-        // Голый Alt: прилипание выключается сразу, посреди жеста; системе не отдаём (режим меню окна).
+        // Bare Alt: snapping disabled immediately mid-gesture; not given to system (window menu mode).
         if (key is Key.LeftAlt or Key.RightAlt) { RefreshSnapGestureSoon(); return; }
         if (_textMode) { e.Handled = TextKeyDown(key, ctrl); return; }
         switch (key)
@@ -639,7 +639,7 @@ public partial class OverlayWindow : Window
                 StepBack();
                 break;
             case Key.Enter:
-                // Enter без выделения — окно или монитор под курсором, как по клику.
+                // Enter without selection — window or monitor under cursor, like click.
                 if (_mode == OverlayMode.Selecting && !_selection.HasSelection && !HasGesture) SelectHintUnderCursor();
                 Complete(CaptureAction.Copy);
                 break;
@@ -662,7 +662,7 @@ public partial class OverlayWindow : Window
                 e.Handled = false;
                 break;
             case Key.Left or Key.Right or Key.Up or Key.Down when Document.Selected is null:
-                // Выбранную фигуру двигает редактор; без неё стрелки двигают (Shift — растягивают) выделение.
+                // Selected shape moved by editor; without it arrows move (Shift — stretch) selection.
                 if (HasGesture) break;
                 int step = ctrl ? 10 : 1;
                 int dx = key == Key.Left ? -step : key == Key.Right ? step : 0;
@@ -671,22 +671,22 @@ public partial class OverlayWindow : Window
                 RefreshSelectionVisuals();
                 break;
             default:
-                // I, B, Ctrl+Z/Y, Delete и стрелки для выбранной фигуры, клавиши инструментов (только в режиме рисования).
+                // I, B, Ctrl+Z/Y, Delete and arrows for selected shape, tool keys (only in drawing mode).
                 if (!_editor.HandleKey(key, mods, editing: _mode == OverlayMode.Editing)) e.Handled = false;
                 break;
         }
     }
 
-    // ---------- Режим текста ----------
+    // ---------- Text mode ----------
     //
-    // Ctrl+T (или кнопка OCR) распознаёт выделенную область и подсвечивает найденные слова.
-    //   нажать на слове и тянуть  — выделение по порядку чтения, как в текстовом редакторе
-    //   тянуть с пустого места    — рамка: выделяются только слова внутри неё («только левый верхний угол»)
-    //   клик по слову / двойной   — слово / строка; Shift+клик — до этого слова; Ctrl — добавить к выделению
-    //   Ctrl+A                    — весь текст
-    //   Enter, Ctrl+C, «Копировать текст» — копирует выделенное (без выделения — весь текст) и закрывает
-    //   Esc, правый клик          — снять выделение, затем выйти из режима; Ctrl+T — выйти сразу
-    //   F3, Ctrl+S                — по-прежнему про картинку; рисование, undo и стрелки в режиме не работают
+    // Ctrl+T (or OCR button) recognizes selected area and highlights found words.
+    //   click word and drag — reading-order selection, like text editor
+    //   drag from empty place — border: only words inside selected (“only top-left corner”)
+    //   click word / double — word / line; Shift+click — up to word; Ctrl — add to selection
+    //   Ctrl+A — all text
+    //   Enter, Ctrl+C, “Copy text” — copies selection (without selection — all text) and closes
+    //   Esc, right-click — clear selection, then exit mode; Ctrl+T — exit immediately
+    //   F3, Ctrl+S — still about image; drawing, undo and arrows don't work in mode
 
     private void ToggleTextMode()
     {
@@ -695,7 +695,7 @@ public partial class OverlayWindow : Window
         CommitTextEdit();
         if (_mode == OverlayMode.Selecting)
         {
-            // Как Enter: без выделения берём окно или монитор под курсором.
+            // Like Enter: without selection take window or monitor under cursor.
             if (!_selection.HasSelection) SelectHintUnderCursor();
             if (!_selection.HasSelection) return;
             EnterEditing();
@@ -709,13 +709,13 @@ public partial class OverlayWindow : Window
         SetPipette(false);
         _editor.Ruler.Clear();
         _textMode = true;
-        RefreshOptions(); // в режиме текста параметров нет: flyout'ы закрываются
+        RefreshOptions(); // in text mode no options: flyouts close
         int generation = ++_ocrGeneration;
         _ocr = null;
         _textSelection = new(); _textAnchor = null;
         Toolbar.SetTextMode(true);
-        Dim.ShowHandles = false; // ручки в режиме текста не работают, поэтому и не показываем их
-        RefreshSelectionVisuals(); // распознаётся исходный снимок, без оформления
+        Dim.ShowHandles = false; // handles don't work in text mode, so not shown
+        RefreshSelectionVisuals(); // original screenshot recognized, without decoration
         ShowHint(Loc.T("TextMode.Recognizing"));
         Cursor = Cursors.Wait;
         _refiner?.TextModeUsed();
@@ -729,14 +729,14 @@ public partial class OverlayWindow : Window
         Task<IReadOnlyList<DetectedCode>> codesTask = Task.FromResult<IReadOnlyList<DetectedCode>>([]);
         try
         {
-            // Распознаём то же, что уйдёт в копию (без оформления): размытое и пикселизированное не превращается в текст.
+            // Recognize same as will go to copy (without decoration): blurred/pixelated doesn't become text.
             var image = ImageComposer.Compose(_shot.Bitmap, region, Document);
             if (_refiner is { IsActive: true })
             {
-                pixels = OcrImage.FromBitmap(image); // та же картинка — для уточнения
-                prepared = PrepareRefinerAsync(clock); // проверка модуля и сессии — параллельно с Windows OCR
+                pixels = OcrImage.FromBitmap(image); // same image — for refinement
+                prepared = PrepareRefinerAsync(clock); // module check and sessions — parallel with Windows OCR
             }
-            codesTask = ScanCodesAsync(image); // QR и штрихкоды — параллельно с OCR
+            codesTask = ScanCodesAsync(image); // QR/barcodes — parallel with OCR
             layout = await OcrService.RecognizeLayoutAsync(image);
             if (layout is null) failure = Loc.T("TextMode.OcrUnavailable");
         }
@@ -751,7 +751,7 @@ public partial class OverlayWindow : Window
         bool hasText = layout is { IsEmpty: false };
         if (!hasText && pixels is not null)
         {
-            // Windows OCR ничего не нашёл (мелкий текст, ники) — как раз то, что точное распознавание читает: ждём его.
+            // Windows OCR found nothing (small text, nicks) — exactly what precise recognition reads: wait for it.
             var refined = await RefineAsync(pixels, generation, prepared!, clock);
             if (generation != _ocrGeneration || _closing || !_textMode) return;
             pixels = null;
@@ -759,7 +759,7 @@ public partial class OverlayWindow : Window
         }
         if (!hasText)
         {
-            // Текста нет — ждём коды: только код без текста режим тоже показывает.
+            // No text — wait for codes: mode shows code even without text.
             var codes = await codesTask;
             if (generation != _ocrGeneration || _closing || !_textMode) return;
             if (codes.Count == 0) { FailTextMode(failure ?? Loc.T("TextMode.NotFound")); return; }
@@ -771,7 +771,7 @@ public partial class OverlayWindow : Window
         }
 
         ShowTextLayout(layout!.Map(1, offset), region);
-        if (_copyWhenReady) { CopyText(); return; } // Ctrl+T, Enter подряд: как раньше, весь текст одним движением
+        if (_copyWhenReady) { CopyText(); return; } // Ctrl+T, Enter in a row: as before, whole text in one move
         if (pixels is not null) _ = RefineInBackgroundAsync(pixels, region, generation, prepared!, clock, layout.WordCount);
         var found = await codesTask;
         if (generation != _ocrGeneration || _closing || !_textMode || found.Count == 0) return;
@@ -790,14 +790,14 @@ public partial class OverlayWindow : Window
     }
 
     /// <summary>
-    /// Подготовка уточнения сразу по Ctrl+T, пока работает Windows OCR: проверка файлов модуля и загрузка сессий (не дольше
-    /// <see cref="PrepareLimit"/>). Возвращает момент готовности по <paramref name="clock"/> или null — модуль не загрузился
-    /// (причина в журнале и в настройках) или режим уже закрыли.
+    /// Refinement preparation immediately on Ctrl+T while Windows OCR runs: module file check and session load (no longer than
+    /// <see cref="PrepareLimit"/>). Returns readiness moment by <paramref name="clock"/> or null — module failed to load
+    /// (reason in log and settings) or mode already closed.
     /// </summary>
     private async Task<TimeSpan?> PrepareRefinerAsync(System.Diagnostics.Stopwatch clock)
     {
         _refineCts?.Cancel();
-        var cts = new CancellationTokenSource(); // отмена — выход из режима, закрытие оверлея, новый Ctrl+T (CancelRefine)
+        var cts = new CancellationTokenSource(); // cancel — exit mode, close overlay, new Ctrl+T (CancelRefine)
         _refineCts = cts;
         using var limit = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
         limit.CancelAfter(PrepareLimit);
@@ -810,10 +810,10 @@ public partial class OverlayWindow : Window
     }
 
     /// <summary>
-    /// Точное распознавание той же области. Бюджет <see cref="RefineBudget"/> считается от готовности сессий: первая
-    /// проверка файлов и загрузка моделей в него не входят, так что весь путь ограничен <see cref="PrepareLimit"/> +
-    /// <see cref="RefineBudget"/>. Раскладка — в пикселях области или null: не успело (в журнал), ошибка (в журнал) или
-    /// отменено — выходом из режима, закрытием оверлея, новым Ctrl+T. Отмена останавливает и сам прогон ORT.
+    /// Precise recognition of same area. Budget <see cref="RefineBudget"/> counted from session readiness: first
+    /// file check and model load not included, so whole path bounded by <see cref="PrepareLimit"/> +
+    /// <see cref="RefineBudget"/>. Layout in area pixels or null: didn't make it (log), error (log) or
+    /// canceled — by mode exit, overlay close, new Ctrl+T. Cancel stops ORT run itself.
     /// </summary>
     private async Task<OcrLayout?> RefineAsync(OcrImage pixels, int generation, Task<TimeSpan?> prepared, System.Diagnostics.Stopwatch clock)
     {
@@ -850,9 +850,9 @@ public partial class OverlayWindow : Window
     }
 
     /// <summary>
-    /// Уточнённая раскладка вместо показанной. Выделения нет — просто замена; есть — переносится по месту
-    /// (<see cref="LayoutRemap"/>). Посреди жеста выделения индексы якоря и диапазона относятся к прежней раскладке:
-    /// замена ждёт конца жеста. Enter и копирование до этого момента берут то, что на экране.
+    /// Refined layout replaces shown. No selection — just replacement; selection — moved by location
+    /// (<see cref="LayoutRemap"/>). Mid-selection-gesture anchor/range indices refer to old layout:
+    /// replacement waits for gesture end. Enter and copy before that take what's on screen.
     /// </summary>
     private void ApplyRefined(OcrLayout refined, PixelRect region)
     {
@@ -893,7 +893,7 @@ public partial class OverlayWindow : Window
     private static IReadOnlyList<DetectedCode> MapCodes(IReadOnlyList<DetectedCode> codes, Vector offset)
         => codes.Select(c => c with { Box = Rect.Offset(c.Box, offset) }).ToList();
 
-    /// <summary>Распознавание не дало слов: сообщение на пару секунд и обратно к рисованию.</summary>
+    /// <summary>Recognition gave no words: message for couple seconds and back to drawing.</summary>
     private void FailTextMode(string message)
     {
         ExitTextMode();
@@ -956,7 +956,7 @@ public partial class OverlayWindow : Window
         }
         _textBase = mods.HasFlag(ModifierKeys.Control) ? new HashSet<int>(_textSelection) : new HashSet<int>();
         _textPress = p;
-        // Shift: тянем от прежнего начала выделения по порядку чтения.
+        // Shift: drag from previous selection start in reading order.
         _textDragFromWord = word is not null || extend;
         _textDragging = extend;
         if (word is { } w && !extend) _textAnchor = w;
@@ -977,7 +977,7 @@ public partial class OverlayWindow : Window
 
         if (_textDragFromWord && _textAnchor is { } anchor)
         {
-            // По порядку чтения: до слова под курсором, а между словами — до ближайшего по строке.
+            // Reading order: up to word under cursor, between words — to nearest in line.
             int target = _ocr.WordAt(p, 3 * _map.DpiScale) ?? NearestWord(p) ?? anchor;
             _textSelection = Union(_textBase, _ocr.Range(anchor, target));
             ShowTextSelection();
@@ -1012,11 +1012,11 @@ public partial class OverlayWindow : Window
         ApplyPendingRefined();
     }
 
-    /// <summary>Слово, ближайшее к точке: тянуть можно и по промежуткам между словами.</summary>
+    /// <summary>Word nearest to point: can drag through gaps between words.</summary>
     private int? NearestWord(Point p)
     {
         if (_ocr is null || _ocr.IsEmpty) return null;
-        // Ниже последней строки до конца текста, выше первой до начала, как в текстовом редакторе.
+        // Below last line to text end, above first to start, like text editor.
         if (p.Y > OcrLayout.LineBox(_ocr.Lines[^1]).Bottom) return _ocr.WordCount - 1;
         if (p.Y < OcrLayout.LineBox(_ocr.Lines[0]).Top) return 0;
         int best = 0; double bestD = double.MaxValue;
@@ -1024,7 +1024,7 @@ public partial class OverlayWindow : Window
         {
             var b = _ocr.Word(i).Box;
             double dx = Math.Max(0, Math.Max(b.Left - p.X, p.X - b.Right)), dy = Math.Max(0, Math.Max(b.Top - p.Y, p.Y - b.Bottom));
-            double d = dx * dx + dy * dy * 4; // по вертикали дальше: держимся своей строки
+            double d = dx * dx + dy * dy * 4; // vertically further: stay on own line
             if (d < bestD) { bestD = d; best = i; }
         }
         return best;
@@ -1041,7 +1041,7 @@ public partial class OverlayWindow : Window
             : _ocr.WordAt(p, 3 * _map.DpiScale) is not null ? Cursors.IBeam : Cursors.Cross;
     }
 
-    /// <returns>Клавиша обработана. Сочетания с Alt (Alt+F4) режим текста не перехватывает.</returns>
+    /// <returns>Key handled. Alt combos (Alt+F4) not intercepted by text mode.</returns>
     private bool TextKeyDown(Key key, bool ctrl)
     {
         if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt)) return false;
@@ -1065,10 +1065,10 @@ public partial class OverlayWindow : Window
                 Complete(CaptureAction.Pin);
                 return true;
             case Key.S when ctrl:
-                SaveAs(); // отмена диалога оставляет в режиме текста с уже распознанным текстом
+                SaveAs(); // dialog cancel leaves text mode with already recognized text
                 return true;
             default:
-                return true; // цифры инструментов, undo, Delete, стрелки в режиме текста ничего не делают
+                return true; // tool digits, undo, Delete, arrows do nothing in text mode
         }
     }
 
@@ -1077,14 +1077,14 @@ public partial class OverlayWindow : Window
         if (_closing || !_textMode) return;
         if (_ocr is null) { _copyWhenReady = true; ShowHint(Loc.T("TextMode.CopyWhenReady")); return; }
         var text = _ocr.TextOf(_textSelection);
-        // Только код без текста: Enter копирует его содержимое (открытого в плашке или единственного).
+        // Only code without text: Enter copies its content (open in plaque or only one).
         if (_ocr.IsEmpty && (_openCode ?? (_codes.Count == 1 ? 0 : null)) is { } code) text = _codes[code].Text;
         else if (_ocr.IsEmpty && _codes.Count > 1) { ShowHint(Loc.T("TextMode.ClickCode")); return; }
         if (string.IsNullOrWhiteSpace(text)) { ShowHint(Loc.T("TextMode.NoTextInSelection")); return; }
         var region = _selection.Rect;
         _closing = true;
         Hide();
-        // Картинка в результате не нужна, текст в историю не попадает: передаём снимок как есть, без рендера.
+        // Image not needed, text not into history: pass screenshot as-is, without render.
         Completed?.Invoke(new CaptureResult(_shot.Bitmap, CaptureAction.CopyText, region, region.Offset(_shot.VirtualRect.X, _shot.VirtualRect.Y), Text: text));
         Close();
     }
@@ -1098,7 +1098,7 @@ public partial class OverlayWindow : Window
         if (hideAfter is { } after)
         {
             _hintTimer = new DispatcherTimer { Interval = after };
-            // В режиме текста временное сообщение («Содержимое кода скопировано») сменяется обычной подсказкой.
+            // In text mode temporary message (“Code content copied”) replaced by normal tooltip.
             _hintTimer.Tick += (_, _) =>
             {
                 _hintTimer?.Stop();
@@ -1111,7 +1111,7 @@ public partial class OverlayWindow : Window
 
     private void HideHint() { _hintTimer?.Stop(); TextHint.Visibility = Visibility.Collapsed; }
 
-    /// <summary>Подсказка справа от подписи размера, над выделением; не влезает — у левого края под ней.</summary>
+    /// <summary>Tooltip right of size label, above selection; doesn't fit — at left edge below.</summary>
     private void PositionTextHint()
     {
         if (!_selection.HasSelection) return;
@@ -1130,7 +1130,7 @@ public partial class OverlayWindow : Window
         Canvas.SetTop(TextHint, y - (TextHint.DesiredSize.Height - SizeLabel.DesiredSize.Height) / 2);
     }
 
-    // ---------- Правка ----------
+    // ---------- Editing ----------
 
     private void SelectHintUnderCursor()
     {
@@ -1139,10 +1139,10 @@ public partial class OverlayWindow : Window
         _selection.Rect = rect.Clamp(_shot.PixelBounds);
     }
 
-    // ---------- Завершение ----------
+    // ---------- Completion ----------
 
     /// <summary>
-    /// Ctrl+S: диалог показывается поверх оверлея, пока снимок ещё на экране. Отмена — остаёмся в редакторе.
+    /// Ctrl+S: dialog shown over overlay while screenshot still on screen. Cancel — stay in editor.
     /// </summary>
     private void SaveAs()
     {
@@ -1172,7 +1172,7 @@ public partial class OverlayWindow : Window
             Focus();
             return;
         }
-        // Формат берётся из выбранного фильтра, а не из набранного расширения: "shot.bmp" при PNG → "shot.bmp.png".
+        // Format from selected filter, not typed extension: "shot.bmp" with PNG → "shot.bmp.png".
         Complete(CaptureAction.Save, path);
     }
 
@@ -1182,11 +1182,11 @@ public partial class OverlayWindow : Window
     {
         if (_closing || !_settings.ActionAllowed(action)) return;
         CommitTextEdit();
-        ResetInteraction(); // живая фигура не должна попасть в экспорт
+        ResetInteraction(); // live shape must not enter export
         if (!_selection.HasSelection) return;
         var region = _selection.Rect;
         Document.Selected = null;
-        var (image, screenRegion) = ComposeResult(region); // с оформлением, если оно включено
+        var (image, screenRegion) = ComposeResult(region); // with decoration if enabled
         var (json, original) = HistorySidecarFor(region);
         _closing = true;
         Hide();

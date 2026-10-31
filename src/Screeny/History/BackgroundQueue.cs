@@ -1,6 +1,6 @@
 namespace Screeny.History;
 
-/// <summary>Последовательно выполняет независимые блокирующие операции вне UI-потока.</summary>
+/// <summary>Runs independent blocking operations sequentially off the UI thread.</summary>
 public sealed class BackgroundQueue
 {
     private readonly object _gate = new();
@@ -17,7 +17,7 @@ public sealed class BackgroundQueue
         }
     }
 
-    /// <summary>Ждёт все задачи, принятые до вызова, даже если последняя завершилась ошибкой.</summary>
+    /// <summary>Waits for all tasks queued before this call, even if the last one failed.</summary>
     public Task DrainAsync()
     {
         lock (_gate)

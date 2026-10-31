@@ -3,7 +3,7 @@ using Microsoft.Win32;
 
 namespace Screeny.Settings;
 
-/// <summary>Значение автозапуска в <c>HKCU\...\Run</c>; интерфейс — чтобы проверять логику без реестра.</summary>
+/// <summary>Autostart value in <c>HKCU\...\Run</c>; interface to test logic without registry.</summary>
 public interface IRunKey
 {
     string? Get(string name);
@@ -40,25 +40,25 @@ public static class StartupRegistrar
     public const string Name = "Screeny";
 
     /// <summary>
-    /// Стабильный путь запуска, если он отличается от текущего процесса: у версии из установщика или портативной
-    /// сборки Velopack это стаб <c>&lt;корень&gt;\Screeny.exe</c>, который не меняется между обновлениями
-    /// (сам exe лежит в <c>current\</c>, а эта папка при обновлении заменяется целиком). null — путь процесса.
+    /// Stable launch path if differs from current process: installer or portable Velopack build uses stub <c>&lt;root&gt;\Screeny.exe</c>,
+    ///
+    /// unchanged across updates (exe in <c>current\</c>, folder replaced entirely on update). null — process path.
     /// </summary>
     public static string? LaunchPath { get; private set; }
 
-    /// <summary>Задаётся один раз при старте (см. <see cref="Updates.VelopackInfo"/>).</summary>
+    /// <summary>Set once at startup (see <see cref="Updates.VelopackInfo"/>).</summary>
     public static void UseLaunchPath(string? path) => LaunchPath = string.IsNullOrWhiteSpace(path) ? null : path;
 
-    /// <summary>Команда запуска текущего процесса для ключа Run.</summary>
+    /// <summary>Launch command of current process for Run key.</summary>
     public static string CurrentCommand()
         => LaunchPath is { } stable ? BuildCommand(stable, null) : BuildCommand(Environment.ProcessPath ?? "", AppAssemblyPath());
 
-    /// <summary>Путь к Screeny.dll (нужен только при запуске через dotnet.exe; single-file сюда не попадает).</summary>
+    /// <summary>Path to Screeny.dll (only when run via dotnet.exe; single-file not here).</summary>
     private static string? AppAssemblyPath()
         => Assembly.GetEntryAssembly()?.GetName().Name is { } name ? Path.Combine(AppContext.BaseDirectory, name + ".dll") : null;
 
     /// <summary>
-    /// <c>"exe"</c>; при запуске через <c>dotnet run</c> процесс — dotnet.exe, поэтому добавляется путь к сборке приложения:
+    /// <c>"exe"</c>; when run via <c>dotnet run</c> process is dotnet.exe, so app assembly path appended:
     /// <c>"dotnet.exe" "Screeny.dll"</c>.
     /// </summary>
     public static string BuildCommand(string processPath, string? appAssemblyPath)
@@ -69,7 +69,7 @@ public static class StartupRegistrar
             : $"\"{processPath}\"";
     }
 
-    /// <summary>Записанная команда указывает на тот же запуск (без учёта регистра; кавычки вокруг одиночного пути необязательны).</summary>
+    /// <summary>Recorded command points to same launch (case-insensitive; quotes around single path optional).</summary>
     public static bool Matches(string? stored, string expected)
     {
         if (string.IsNullOrWhiteSpace(stored)) return false;
@@ -88,13 +88,13 @@ public static class StartupRegistrar
         else key.Delete(Name);
     }
 
-    /// <summary>Автозапуск включён именно для этого exe (запись от другой копии или старого пути не считается).</summary>
+    /// <summary>Autostart enabled exactly for this exe (entry from another copy or old path doesn't count).</summary>
     public static bool IsEnabled() => Matches(new RegistryRunKey().Get(Name), CurrentCommand());
 
     /// <summary>
-    /// Автозапуск включён, но записан другой путь (например, старый портативный <c>publish\Screeny.exe</c>, а запущена
-    /// версия из установщика) — переписывает запись на <paramref name="expected"/>. Отсутствующую запись не создаёт:
-    /// выключенный автозапуск остаётся выключенным. true — запись изменена.
+    /// Autostart enabled but another path recorded (e.g., old portable <c>publish\Screeny.exe</c>, running installer version) —
+    /// rewrites entry to <paramref name="expected"/>. Doesn't create missing entry: disabled autostart stays disabled. true — entry changed.
+    ///
     /// </summary>
     public static bool RepairStalePath(IRunKey key, string expected)
     {
@@ -105,8 +105,8 @@ public static class StartupRegistrar
     }
 
     /// <summary>
-    /// Удаление программы: убирает запись автозапуска, только если она указывает внутрь <paramref name="rootDir"/>
-    /// (запись другой копии Screeny не трогаем). true — запись удалена.
+    /// Uninstall: removes autostart entry only if it points inside <paramref name="rootDir"/>
+    /// (another Screeny copy's entry untouched). true — entry removed.
     /// </summary>
     public static bool RemoveIfInside(IRunKey key, string rootDir)
     {
@@ -125,7 +125,7 @@ public static class StartupRegistrar
         return true;
     }
 
-    /// <summary>Путь exe из команды Run: первое значение в кавычках или вся строка без кавычек.</summary>
+    /// <summary>Exe path from Run command: first quoted value or whole unquoted string.</summary>
     public static string? ExecutableOf(string? command)
     {
         if (string.IsNullOrWhiteSpace(command)) return null;

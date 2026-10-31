@@ -10,8 +10,8 @@ using Screeny.Migration;
 namespace Screeny;
 
 /// <summary>
-/// Мастер первого запуска и конфликты с другими программами снимков. Отдельный файл, чтобы в App.xaml.cs были только
-/// две точки входа: <see cref="RunElevatedActionAndExit"/> и <see cref="CheckSetupWizardOnStartup"/>.
+/// First-run wizard and conflicts with other screenshot programs. Separate file so App.xaml.cs has only
+/// two entry points: <see cref="RunElevatedActionAndExit"/> and <see cref="CheckSetupWizardOnStartup"/>.
 /// </summary>
 public partial class App
 {
@@ -20,12 +20,12 @@ public partial class App
     private bool _wizardBalloonPending;
     private bool _balloonHooked;
 
-    /// <summary>Пункт трея «Проверить конфликты…».</summary>
+    /// <summary>Tray item “Check conflicts…”</summary>
     public ICommand SetupWizardCommand => _setupWizardCommand ??= new RelayCommand(ShowSetupWizard);
 
     /// <summary>
-    /// <c>--elevated-action …</c>: экземпляр, запущенный мастером с правами администратора ради одного действия. Выходит до
-    /// mutex, трея и хоткеев, с кодом из <see cref="ElevatedAction"/>.
+    /// <c>--elevated-action …</c>: instance launched by wizard with admin rights for one action. Exits before
+    /// mutex, tray and hotkeys, with code from <see cref="ElevatedAction"/>.
     /// </summary>
     private void RunElevatedActionAndExit(string[] args)
     {
@@ -35,9 +35,9 @@ public partial class App
     }
 
     /// <summary>
-    /// При запуске: мастер ещё не пройден — показать его; пройден — проверить в фоне, не появилась ли новая программа,
-    /// которая занимает включённый хоткей, и сообщить о ней уведомлением (не мастером). Тестовый экземпляр показывает
-    /// мастер только с <c>--setup-wizard</c> и никогда не проверяет реальную среду.
+    /// At startup: wizard not passed — show it; passed — check in background if a new program appeared that
+    /// occupies an enabled hotkey, and notify via notification (not wizard). Test instance shows
+    /// wizard only with <c>--setup-wizard</c> and never checks real environment.
     /// </summary>
     private void CheckSetupWizardOnStartup()
     {
@@ -59,7 +59,7 @@ public partial class App
             if (!known.SequenceEqual(Settings.KnownConflicts))
             {
                 Settings.KnownConflicts = known;
-                SaveSettings(); // напоминаем один раз, а не при каждом запуске
+                SaveSettings(); // remind once, not every launch
             }
             if (fresh.Count == 0) return;
             HookBalloonClick();
@@ -81,12 +81,12 @@ public partial class App
         };
     }
 
-    /// <summary>Мастер конфликтов: при первом запуске, из трея и из настроек. Среда сканируется в фоне.</summary>
+    /// <summary>Conflict wizard: at first run, from tray and from settings. Environment scanned in background.</summary>
     public async void ShowSetupWizard()
     {
         if (_setupWizardWindow is not null) { _setupWizardWindow.Activate(); return; }
         if (IsShuttingDown) return;
-        // В --dev всегда подставная среда и подставные действия (MigrationServices).
+        // In --dev always fake environment and fake actions (MigrationServices).
         var services = MigrationServices.Create(IsDev, Args.Scenario);
         IEnvironmentSnapshot env;
         try { env = await Task.Run(services.Capture); }
@@ -106,29 +106,29 @@ public partial class App
     }
 
     /// <summary>
-    /// Мастер пройден или пропущен: запоминаем версию (чтобы не показывать снова) и конфликты, которые остались после него
-    /// (чтобы не напоминать о них уведомлением; исправленные забываются — если вернутся, будет уведомление). «Проверять обновления»
-    /// и выбор функций сохраняются только по «Применить» (или по «Пропустить» после «Применить», на котором не заработал
-    /// хоткей); функции применяются сразу (<see cref="ApplyFeatures"/>).
+    /// Wizard completed or skipped: remember version (not to show again) and conflicts that remain after it
+    /// (not to remind via notification; fixed ones are forgotten — if they return, notification). “Check for updates”
+    /// and feature choices are saved only on “Apply” (or on “Skip” after “Apply” where hotkey didn't work);
+    /// features are applied immediately (<see cref="ApplyFeatures"/>).
     /// </summary>
     private void FinishSetupWizard(bool? checkForUpdates, IReadOnlyList<string> seenConflicts, IReadOnlyList<KeyValuePair<string, bool>>? features,
         string? language)
     {
         if (checkForUpdates is { } updates) Settings.CheckForUpdates = updates;
-        // Мастер показывал выбранный язык сразу; «Пропустить» возвращает сохранённый.
+        // Wizard showed selected language immediately; “Skip” restores saved one.
         if (language is not null) Settings.Language = language;
         Loc.Apply(Settings.Language);
         if (features is { Count: > 0 })
         {
-            // Поверх текущих настроек: окно настроек, из которого открыт мастер, могло их уже поменять.
+            // Over current settings: settings window from which wizard was opened may have changed them already.
             Settings.DisabledFeatures = FeatureGate.MergeDisabled(Settings.DisabledFeatures, features);
             ApplyFeatures();
         }
         Settings.SetupWizardVersion = Math.Max(Settings.SetupWizardVersion, SetupWizard.Version);
-        Settings.KnownConflicts = [.. seenConflicts.Distinct(StringComparer.Ordinal)]; // только то, что мешает и сейчас
+        Settings.KnownConflicts = [.. seenConflicts.Distinct(StringComparer.Ordinal)]; // only what interferes now
         if (!SaveSettings()) Notify(Loc.T("App.WizardSaveFailed"));
-        // Мастер открыт из окна настроек и что-то применил: без этого «Сохранить» там вернуло бы хоткеи и обновления с
-        // момента открытия. Простой «Пропустить» ничего не менял — несохранённые правки в окне настроек не трогаем.
+        // Wizard opened from settings window and applied something: without this “Save” there would return hotkeys and updates from
+        // moment of opening. Plain “Skip” changed nothing — unsaved edits in settings window are untouched.
         if (checkForUpdates is not null) _settingsWindow?.RefreshFromLiveSettings(HotkeyReport);
     }
 }

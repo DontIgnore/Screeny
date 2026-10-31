@@ -5,33 +5,33 @@ using System.Text.Json;
 
 namespace Screeny.Feedback;
 
-/// <summary>Итог отправки: окно показывает по нему состояние, текст пользователя при любой ошибке остаётся.</summary>
+/// <summary>Send result: window states it, user text stays on any error.</summary>
 public abstract record FeedbackResult
 {
-    /// <summary>201 (или другой 2xx). <paramref name="Id"/> — короткий номер; null, если сервер его не вернул.</summary>
+    /// <summary>201 (or other 2xx). <paramref name="Id"/> — short number; null if server didn't return it.</summary>
     public sealed record Sent(string? Id) : FeedbackResult;
-    /// <summary>400: сервер не принял данные; <paramref name="Message"/> — его объяснение, если есть.</summary>
+    /// <summary>400: server rejected data; <paramref name="Message"/> — its explanation if any.</summary>
     public sealed record Invalid(string? Message) : FeedbackResult;
-    /// <summary>429: слишком часто. <paramref name="RetryAfter"/> — из заголовка Retry-After, если он есть.</summary>
+    /// <summary>429: too often. <paramref name="RetryAfter"/> — from Retry-After header if present.</summary>
     public sealed record RateLimited(TimeSpan? RetryAfter) : FeedbackResult;
     /// <summary>5xx.</summary>
     public sealed record ServerError(int Status) : FeedbackResult;
-    /// <summary>Другой код ответа (404, 413…).</summary>
+    /// <summary>Other response code (404, 413…).</summary>
     public sealed record Failed(int Status) : FeedbackResult;
-    /// <summary>Нет сети, сервер недоступен или не ответил вовремя.</summary>
+    /// <summary>No network, server unavailable or didn't answer in time.</summary>
     public sealed record Offline : FeedbackResult;
-    /// <summary>Тестовый экземпляр без <c>--feedback-endpoint</c>: в сеть не ходим.</summary>
+    /// <summary>Test instance without <c>--feedback-endpoint</c>: no network calls.</summary>
     public sealed record NotConfigured : FeedbackResult;
 }
 
-/// <summary>Куда отправлять сообщения.</summary>
+/// <summary>Where to send messages.</summary>
 public static class FeedbackEndpoint
 {
     public const string Production = "https://screeny.page/api/feedback";
 
     /// <summary>
-    /// Рабочая копия — всегда <see cref="Production"/>. Тестовая (<c>--dev</c>) — только явный <c>--feedback-endpoint</c>
-    /// с абсолютным http(s)-адресом, иначе null: dev-запуск никогда не отправляет в настоящую очередь.
+    /// Working copy always <see cref="Production"/>. Test (<c>--dev</c>) — only explicit <c>--feedback-endpoint</c>
+    /// with absolute http(s) address, else null: dev launch never sends to real queue.
     /// </summary>
     public static Uri? Choose(bool isDev, string? explicitEndpoint)
     {
@@ -42,12 +42,12 @@ public static class FeedbackEndpoint
     }
 }
 
-/// <summary><c>POST</c> сообщения и разбор ответа в <see cref="FeedbackResult"/>. В журнал пишутся только коды, не текст.</summary>
+/// <summary><c>POST</c> message and response parsing into <see cref="FeedbackResult"/>. Log writes only codes, not text.</summary>
 public sealed class FeedbackClient(HttpClient http, Uri? endpoint, Func<DateTimeOffset>? now = null)
 {
     public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(20);
 
-    /// <summary>Отмена через <paramref name="ct"/> (окно закрыли) пробрасывается; истёкшее ожидание — <see cref="FeedbackResult.Offline"/>.</summary>
+    /// <summary>Cancellation via <paramref name="ct"/> (window closed) propagates; expired wait — <see cref="FeedbackResult.Offline"/>.</summary>
     public async Task<FeedbackResult> SendAsync(FeedbackRequest request, CancellationToken ct)
     {
         if (endpoint is null) return new FeedbackResult.NotConfigured();
@@ -83,7 +83,7 @@ public sealed class FeedbackClient(HttpClient http, Uri? endpoint, Func<DateTime
         return status >= 500 ? new FeedbackResult.ServerError(status) : new FeedbackResult.Failed(status);
     }
 
-    /// <summary>Retry-After — секунды или дата; прошедшая дата и отрицательное значение — ноль.</summary>
+    /// <summary>Retry-After — seconds or date; past date and negative — zero.</summary>
     public static TimeSpan? RetryAfter(HttpResponseMessage response, DateTimeOffset now)
     {
         var header = response.Headers.RetryAfter;
@@ -92,7 +92,7 @@ public sealed class FeedbackClient(HttpClient http, Uri? endpoint, Func<DateTime
         return null;
     }
 
-    /// <summary>Строковое поле JSON-объекта; не JSON, не объект, нет поля, пустое — null.</summary>
+    /// <summary>String field of JSON object; not JSON, not object, missing field, empty — null.</summary>
     public static string? ReadString(string? json, string name)
     {
         if (string.IsNullOrWhiteSpace(json)) return null;
@@ -110,20 +110,20 @@ public sealed class FeedbackClient(HttpClient http, Uri? endpoint, Func<DateTime
     }
 
     /// <summary>
-    /// Минуты для «попробуйте через N мин.»: вверх до целой, не меньше одной. null — сервер не сказал, сколько ждать.
+    /// Minutes for “try in N min.”: up to integer, at least one. null — server didn't say how long.
     /// </summary>
     public static int? RetryMinutes(TimeSpan? retryAfter)
         => retryAfter is { } t ? Math.Max(1, (int)Math.Ceiling(t.TotalMinutes)) : null;
 }
 
-/// <summary>Ссылка «Открыть на GitHub»: форма issue с заполненным заголовком.</summary>
+/// <summary>Link “Open on GitHub”: issue form with filled title.</summary>
 public static class GitHubIssueLink
 {
     public const string NewIssueUrl = "https://github.com/DontIgnore/Screeny/issues/new";
 
     public static string Template(FeedbackKind kind) => kind == FeedbackKind.Bug ? "bug_report.yml" : "feature_request.yml";
 
-    /// <summary>Заголовок кодируется целиком (<c>&amp;</c>, <c>#</c>, пробелы, кириллица); пустой — без параметра.</summary>
+    /// <summary>Title encoded entirely (<c>&amp;</c>, <c>#</c>, spaces, Cyrillic); empty — no parameter.</summary>
     public static string Build(FeedbackKind kind, string? title)
     {
         var url = $"{NewIssueUrl}?template={Template(kind)}";

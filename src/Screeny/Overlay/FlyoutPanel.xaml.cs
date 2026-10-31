@@ -6,33 +6,33 @@ using System.Windows.Media.Animation;
 
 namespace Screeny.Overlay;
 
-/// <summary>Содержимое flyout'а, элементы которого появляются поочерёдно (строки, кнопки).</summary>
+/// <summary>Flyout content whose items appear one by one (rows, buttons).</summary>
 public interface IFlyoutItems
 {
     IReadOnlyList<UIElement> FlyoutItems { get; }
 }
 
 /// <summary>
-/// Всплывающая панель параметров в слое HUD (не Popup: живёт в дереве окна, поэтому её видит PrintWindow,
-/// она не забирает активность и клики по ней распознаются как клики по HUD).
+/// Options flyout in HUD layer (not Popup: lives in window tree, so PrintWindow sees it,
+/// doesn't steal focus, clicks on it recognized as HUD clicks).
 /// <para>
-/// Открытие — «вылет из якоря»: карточка масштабируется 0,85→1 из точки якоря (<see cref="UIElement.RenderTransformOrigin"/>)
-/// и проявляется за <see cref="OpenMs"/> мс (CubicEase EaseOut), а её элементы (<see cref="IFlyoutItems"/>) проявляются
-/// поочерёдно с шагом <see cref="StaggerMs"/> мс, сдвигаясь на <see cref="ItemShift"/> px к своему месту. Закрытие —
-/// быстрее (<see cref="CloseMs"/> мс), без поочерёдности. Если в системе выключено «Показывать анимацию»
-/// (<see cref="SystemParameters.ClientAreaAnimation"/>), панель появляется и исчезает сразу.
+/// Opening — “fly out of anchor”: card scales 0.85→1 from anchor point (<see cref="UIElement.RenderTransformOrigin"/>)
+/// and fades in over <see cref="OpenMs"/> ms (CubicEase EaseOut), items (<see cref="IFlyoutItems"/>) fade in
+/// one by one with <see cref="StaggerMs"/> ms step, shifting by <see cref="ItemShift"/> px to place. Closing —
+/// faster (<see cref="CloseMs"/> ms), without stagger. If system “Show animations” off
+/// (<see cref="SystemParameters.ClientAreaAnimation"/>), panel appears/disappears instantly.
 /// </para>
-/// Кадры считает сама панель (<see cref="CompositionTarget.Rendering"/>), поэтому любой кадр можно показать
-/// детерминированно (<see cref="FreezeOpeningAt"/> — для проверки по скриншоту).
+/// Frames computed by panel itself (<see cref="CompositionTarget.Rendering"/>), so any frame can be shown
+/// deterministically (<see cref="FreezeOpeningAt"/> — for screenshot verification).
 /// </summary>
 public partial class FlyoutPanel : UserControl
 {
     public const double OpenMs = 160, CloseMs = 100;
-    /// <summary>Шаг поочерёдного появления элементов, их длительность и задержка первого.</summary>
+    /// <summary>Stagger step, duration and first delay.</summary>
     public const double StaggerMs = 28, ItemMs = 140, ItemDelayMs = 30;
     public const double StartScale = 0.85, CloseScale = 0.95, ItemShift = 6;
 
-    /// <summary>Включена ли анимация (системная настройка); тесты могут подменить.</summary>
+    /// <summary>Animation enabled (system setting); tests may substitute.</summary>
     public static Func<bool> AnimationsEnabled { get; set; } = () => SystemParameters.ClientAreaAnimation;
 
     private static readonly CubicEase Ease = CreateEase();
@@ -53,32 +53,32 @@ public partial class FlyoutPanel : UserControl
         Unloaded += (_, _) => StopTicking();
     }
 
-    /// <summary>Содержимое карточки (секция параметров или оформления).</summary>
+    /// <summary>Card content (options or decoration section).</summary>
     public UIElement? Body
     {
         get => Host.Content as UIElement;
         set => Host.Content = value;
     }
 
-    /// <summary>Открыта или открывается (закрывающаяся считается закрытой: по ней уже не кликнуть).</summary>
+    /// <summary>Open or opening (closing counts closed: can't click).</summary>
     public bool IsOpen => _phase is Phase.Opening or Phase.Open;
 
-    /// <summary>Идёт анимация открытия или закрытия.</summary>
+    /// <summary>Open/close animation running.</summary>
     public bool IsAnimating => _phase is Phase.Opening or Phase.Closing;
 
-    /// <summary>Открытая панель начала закрываться (с анимацией или сразу).</summary>
+    /// <summary>Open panel started closing (with or without animation).</summary>
     public event Action? Closing;
 
-    /// <summary>Панель под якорем (вылетает вниз); false — над якорем.</summary>
+    /// <summary>Panel below anchor (flies down); false — above.</summary>
     public bool Below { get; private set; }
 
-    /// <summary>Полная длительность открытия с поочерёдным появлением <paramref name="items"/> элементов.</summary>
+    /// <summary>Full opening duration with stagger of <paramref name="items"/> items.</summary>
     public static double OpenDuration(int items)
         => Math.Max(OpenMs, items <= 0 ? 0 : ItemDelayMs + (items - 1) * StaggerMs + ItemMs);
 
     /// <summary>
-    /// Показать (уже открытую — только обновить точку вылета). <paramref name="origin"/> — точка якоря в долях
-    /// размера панели (0..1), из неё панель «вылетает».
+    /// Show (already open — only update fly-out point). <paramref name="origin"/> — anchor point in fractions of
+    /// panel size (0..1), panel “flies out” of it.
     /// </summary>
     public void Open(Point origin, bool below)
     {
@@ -100,7 +100,7 @@ public partial class FlyoutPanel : UserControl
         StartTicking();
     }
 
-    /// <summary>Скрыть: с анимацией (если включена в системе) или сразу.</summary>
+    /// <summary>Hide: with animation (if enabled in system) or immediately.</summary>
     public void Close(bool animate = true)
     {
         if (_phase == Phase.Closed) return;
@@ -122,8 +122,8 @@ public partial class FlyoutPanel : UserControl
     }
 
     /// <summary>
-    /// Для проверки по скриншоту: открыть и остановить анимацию на кадре <paramref name="ms"/> миллисекунд
-    /// (как будто прошло столько времени с начала открытия). Без анимации в системе показывает итог.
+    /// For screenshot verification: open and stop animation at frame <paramref name="ms"/> milliseconds
+    /// (as if so much time passed since open start). Without system animation shows final.
     /// </summary>
     public void FreezeOpeningAt(Point origin, bool below, double ms)
     {
@@ -152,13 +152,13 @@ public partial class FlyoutPanel : UserControl
         else StopTicking();
     }
 
-    /// <summary>Кадр открытия в момент <paramref name="t"/> мс; true — открытие закончилось.</summary>
+    /// <summary>Opening frame at time <paramref name="t"/> ms; true — opening finished.</summary>
     private bool ApplyOpening(double t)
     {
         double p = Ease.Ease(Clamp01(t / OpenMs));
         Opacity = p;
         SetScale(StartScale + (1 - StartScale) * p);
-        double direction = Below ? -1 : 1; // элементы приезжают со стороны якоря
+        double direction = Below ? -1 : 1; // items arrive from anchor side
         for (int i = 0; i < _items.Count; i++)
         {
             double q = Ease.Ease(Clamp01((t - ItemDelayMs - i * StaggerMs) / ItemMs));

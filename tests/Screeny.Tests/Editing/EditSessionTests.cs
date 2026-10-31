@@ -31,7 +31,7 @@ public class EditSessionTests : IDisposable
         return Color.FromArgb(px[3], px[2], px[1], px[0]);
     }
 
-    /// <summary>Запись истории: готовый PNG (серый 200), при желании оригинал (серый 50) и JSON.</summary>
+    /// <summary>History entry: ready PNG (gray 200), optional original (gray 50) and JSON.</summary>
     private string Entry(bool original, string? json)
     {
         var store = new HistoryStore(_dir, 10);
@@ -79,7 +79,7 @@ public class EditSessionTests : IDisposable
         Assert.Equal(Color.FromRgb(200, 200, 200), PixelAt(s.Base, 20, 20));
         Assert.Empty(s.Annotations);
         Assert.NotNull(s.Message);
-        // Причина — понятным текстом на языке интерфейса (тесты — по-русски), без внутренних подробностей и двойной точки.
+        // Reason — clear text in UI language (tests in Russian), without internals and double dot.
         Assert.StartsWith(json is null ? "Документ пометок не найден. " : "Документ пометок повреждён. ", s.Message);
         Assert.DoesNotContain("..", s.Message);
         Assert.DoesNotContain("Corrupt", s.Message);
@@ -144,9 +144,9 @@ public class EditSessionTests : IDisposable
 
         Assert.Equal((40, 30), (r.Image.PixelWidth, r.Image.PixelHeight));
         Assert.Equal(Colors.Red, PixelAt(r.Image, 10, 10));
-        Assert.Equal(Color.FromRgb(50, 50, 50), PixelAt(r.Image, 30, 25)); // основа — оригинал
+        Assert.Equal(Color.FromRgb(50, 50, 50), PixelAt(r.Image, 30, 25)); // base — original
         var file = AnnotationSerializer.Deserialize(r.AnnotationsJson);
-        Assert.Single(file.Annotations); // за пределами снимка — не сохраняется
+        Assert.Single(file.Annotations); // outside screenshot — not saved
         Assert.Equal(s.OriginalPng, r.OriginalPng);
     }
 

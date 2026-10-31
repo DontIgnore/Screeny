@@ -2,27 +2,27 @@ using System.Windows;
 
 namespace Screeny.Editing;
 
-/// <summary>Направляющая: вертикальная — линия <c>x = Position</c> от <c>Start</c> до <c>End</c> по Y, горизонтальная — наоборот.</summary>
+/// <summary>Guide: vertical — line <c>x = Position</c> from <c>Start</c> to <c>End</c> along Y, horizontal — vice versa.</summary>
 public enum GuideOrientation { Vertical, Horizontal }
 
-/// <summary>Тонкая линия-направляющая в пикселях снимка: показывает, к чему прилип край или центр.</summary>
+/// <summary>Thin guide line in screenshot pixels: shows what edge or center snapped to.</summary>
 public readonly record struct SnapGuide(GuideOrientation Orientation, double Position, double Start, double End);
 
-/// <param name="Offset">Поправка к положению перемещаемого объекта (по каждой оси — 0, если прилипания нет).</param>
-/// <param name="Guides">Направляющие для совпавших краёв и центров уже после поправки.</param>
+/// <param name="Offset">Correction to moving object position (per axis — 0 if no snap).</param>
+/// <param name="Guides">Guides for matched edges and centers after correction.</param>
 public sealed record SnapResult(Vector Offset, IReadOnlyList<SnapGuide> Guides)
 {
     public static SnapResult None { get; } = new(default, []);
 }
 
 /// <summary>
-/// Прилипание краёв и центров (smart guides), чистая логика без UI. По каждой оси независимо сравниваются
-/// левый край, центр и правый край перемещаемого прямоугольника (по Y — верх, центр, низ) с теми же линиями
-/// целей; ближайшая пара в пределах порога задаёт поправку. Точка — прямоугольник нулевого размера.
+/// Edge/center snapping (smart guides), pure logic without UI. Per axis independently compares
+/// left edge, center and right edge of moving rectangle (Y: top, center, bottom) with same lines
+/// of targets; nearest pair within threshold gives correction. Point is zero-size rectangle.
 /// </summary>
 public static class SnapEngine
 {
-    /// <summary>Совпадение линий после поправки (погрешность double).</summary>
+    /// <summary>Line match after correction (double error).</summary>
     private const double Same = 1e-3;
 
     public static SnapResult Snap(Rect moving, IReadOnlyList<Rect> targets, double threshold)
@@ -39,10 +39,10 @@ public static class SnapEngine
         return new SnapResult(new Vector(dx ?? 0, dy ?? 0), guides);
     }
 
-    /// <summary>Точка прилипает так же, как прямоугольник нулевого размера.</summary>
+    /// <summary>Point snaps same as zero-size rectangle.</summary>
     public static SnapResult SnapPoint(Point p, IReadOnlyList<Rect> targets, double threshold) => Snap(new Rect(p, p), targets, threshold);
 
-    /// <summary>Линии прямоугольника по оси: вертикальные (X) — лево, центр, право; горизонтальные (Y) — верх, центр, низ.</summary>
+    /// <summary>Rectangle lines per axis: vertical (X) — left, center, right; horizontal (Y) — top, center, bottom.</summary>
     private static void Lines(Rect r, bool vertical, Span<double> lines)
     {
         double start = vertical ? r.Left : r.Top;
@@ -52,7 +52,7 @@ public static class SnapEngine
         lines[2] = vertical ? r.Right : r.Bottom;
     }
 
-    /// <summary>Наименьшая по модулю поправка, совмещающая любую линию объекта с любой линией цели; null — ничего в пределах порога.</summary>
+    /// <summary>Smallest by absolute value correction aligning any object line with any target line; null — nothing within threshold.</summary>
     private static double? Nearest(Rect moving, IReadOnlyList<Rect> targets, bool vertical, double threshold)
     {
         Span<double> movingLines = stackalloc double[3];
@@ -74,8 +74,8 @@ public static class SnapEngine
     }
 
     /// <summary>
-    /// Направляющая на каждую совпавшую линию: через общую протяжённость объекта и всех целей с этой линией.
-    /// Одна позиция — одна направляющая (у точки лево, центр и право совпадают).
+    /// Guide for each matched line: through common span of object and all targets with that line.
+    /// One position — one guide (point's left, center, right coincide).
     /// </summary>
     private static void AddGuides(List<SnapGuide> guides, Rect snapped, IReadOnlyList<Rect> targets, bool vertical)
     {
@@ -103,26 +103,26 @@ public static class SnapEngine
 }
 
 /// <summary>
-/// Прилипание на время одного жеста инструмента: цели (края и центры других фигур документа и области снимка)
-/// собираются на старте жеста, порог и «включено ли» спрашиваются у хоста на каждом движении — так <c>Alt</c>
-/// посреди перетаскивания сразу выключает прилипание. Текущие направляющие — в <see cref="Guides"/>.
+/// Snapping for duration of one tool gesture: targets (edges and centers of other document shapes and region)
+/// collected at gesture start, threshold and “enabled” asked from host on each move — so <c>Alt</c>
+/// mid-drag disables snapping immediately. Current guides in <see cref="Guides"/>.
 /// </summary>
-/// <param name="enabled">Настройка включена и <c>Alt</c> не зажат.</param>
-/// <param name="threshold">Порог в пикселях снимка (6 экранных пикселей при текущем масштабе).</param>
-/// <param name="area">Область снимка (выделение в оверлее, холст в редакторе); пустая — без неё.</param>
+/// <param name="enabled">Setting enabled and <c>Alt</c> not held.</param>
+/// <param name="threshold">Threshold in screenshot pixels (6 screen pixels at current scale).</param>
+/// <param name="area">Screenshot region (overlay selection, editor canvas); empty — without it.</param>
 public sealed class Snapper(Func<bool> enabled, Func<double> threshold, Func<Rect> area)
 {
     private Rect[] _targets = [];
 
-    /// <summary>Направляющие текущего прилипания; пусто — ничего не прилипло или жеста нет.</summary>
+    /// <summary>Guides of current snap; empty — nothing snapped or no gesture.</summary>
     public IReadOnlyList<SnapGuide> Guides { get; private set; } = [];
     public event Action? GuidesChanged;
 
-    /// <summary>Начало жеста: цели — все фигуры документа, кроме <paramref name="exclude"/> (перемещаемой), и область.</summary>
+    /// <summary>Gesture start: targets — all document shapes except <paramref name="exclude"/> (moving) and area.</summary>
     public void Begin(Screeny.Annotations.AnnotationDocument doc, Screeny.Annotations.Annotation? exclude = null)
         => Begin(doc.Items.Where(a => !ReferenceEquals(a, exclude)).Select(a => a.GeometryBounds));
 
-    /// <summary>Начало жеста с готовым списком целей (кроме области — она добавляется сама).</summary>
+    /// <summary>Gesture start with prepared target list (area added automatically).</summary>
     public void Begin(IEnumerable<Rect> others)
     {
         var list = others.Where(r => !r.IsEmpty).ToList();
@@ -132,7 +132,7 @@ public sealed class Snapper(Func<bool> enabled, Func<double> threshold, Func<Rec
         SetGuides([]);
     }
 
-    /// <summary>Поправка для перемещаемого прямоугольника (0, если прилипание выключено или не нашлось цели).</summary>
+    /// <summary>Correction for moving rectangle (0 if snapping disabled or no target found).</summary>
     public Vector SnapRect(Rect moving)
     {
         if (!enabled()) { SetGuides([]); return default; }
@@ -141,13 +141,13 @@ public sealed class Snapper(Func<bool> enabled, Func<double> threshold, Func<Rec
         return r.Offset;
     }
 
-    /// <summary>Точка (угол рисуемой фигуры, конец линии, позиция текста), прилипшая к линиям целей.</summary>
+    /// <summary>Point (corner of drawing shape, line end, text position) snapped to target lines.</summary>
     public Point SnapPoint(Point p) => p + SnapRect(new Rect(p, p));
 
-    /// <summary>Убрать направляющие, не заканчивая жест (Shift: квадрат и шаг 45° важнее прилипания).</summary>
+    /// <summary>Remove guides without ending gesture (Shift: square and 45° step beat snapping).</summary>
     public void Hide() => SetGuides([]);
 
-    /// <summary>Конец жеста: направляющие исчезают.</summary>
+    /// <summary>Gesture end: guides disappear.</summary>
     public void End()
     {
         _targets = [];

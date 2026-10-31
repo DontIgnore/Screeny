@@ -7,14 +7,14 @@ namespace Screeny.Tests.Ocr;
 
 public class CodeScannerTests
 {
-    /// <summary>Белый холст Bgra32 с нарисованными на нём кодами.</summary>
+    /// <summary>White Bgra32 canvas with codes drawn on it.</summary>
     private sealed class Canvas
     {
         public readonly int W, H;
         public readonly byte[] Px;
         public Canvas(int w, int h) { W = w; H = h; Px = new byte[w * h * 4]; Array.Fill(Px, (byte)255); }
 
-        /// <summary>Рисует код и возвращает его прямоугольник на холсте.</summary>
+        /// <summary>Draws code and returns its rectangle on canvas.</summary>
         public Rect Draw(BarcodeFormat format, string text, int x, int y, int w, int h, int margin = 4)
         {
             var writer = new BarcodeWriterPixelData
@@ -33,7 +33,7 @@ public class CodeScannerTests
             for (int i = 0; i < Px.Length; i += 4) { Px[i] = (byte)(255 - Px[i]); Px[i + 1] = (byte)(255 - Px[i + 1]); Px[i + 2] = (byte)(255 - Px[i + 2]); }
         }
 
-        /// <summary>Поворот на 90° по часовой.</summary>
+        /// <summary>Rotation 90° clockwise.</summary>
         public Canvas Rotate90()
         {
             var r = new Canvas(H, W);
@@ -90,7 +90,7 @@ public class CodeScannerTests
         var rotated = c.Rotate90();
         var code = Assert.Single(rotated.Scan());
         Assert.Equal("rotated", code.Text);
-        // Код на повёрнутом холсте: x' = H-1-y, y' = x → центр (300-1-140, 220).
+        // Code on rotated canvas: x' = H-1-y, y' = x → center (300-1-140, 220).
         Assert.True(code.Box.Contains(new Point(299 - 140, 220)), $"box {code.Box}");
     }
 
@@ -103,7 +103,7 @@ public class CodeScannerTests
         Assert.Equal("5901234123457", code.Text);
         Assert.Equal(BarcodeFormat.EAN_13, code.Format);
         Assert.Equal("EAN-13", code.FormatName);
-        // Рамка по высоте штрихов, а не по строке сканирования: почти вся высота кода и не дальше его краёв.
+        // Border by bar height, not scanline: almost full code height and not beyond edges.
         Assert.True(code.Box.Height > drawn.Height * 0.8, $"box {code.Box} vs drawn {drawn}");
         var around = drawn; around.Inflate(8, 8);
         Assert.True(around.Contains(code.Box), $"box {code.Box} vs drawn {drawn}");
@@ -118,7 +118,7 @@ public class CodeScannerTests
         c.Draw(BarcodeFormat.EAN_13, "5901234123457", 60, 60, 300, 120, margin: 10);
         var code = Assert.Single(c.Rotate90().Scan());
         Assert.Equal("5901234123457", code.Text);
-        // Центр кода (210, 120) на повёрнутом холсте: (260-1-120, 210).
+        // Code center (210, 120) on rotated canvas: (260-1-120, 210).
         Assert.True(code.Box.Contains(new Point(139, 210)), $"box {code.Box}");
         Assert.True(code.Box.Width > 120 * 0.8, $"box {code.Box}");
     }

@@ -2,7 +2,7 @@ using Screeny.Hotkeys;
 
 namespace Screeny.Tests.Hotkeys;
 
-/// <summary>Логика HotkeyManager на подставном backend: настоящие RegisterHotKey и хук в тестах не вызываются.</summary>
+/// <summary>HotkeyManager logic on fake backend: real RegisterHotKey and hook not called in tests.</summary>
 public class HotkeyManagerTests
 {
     private sealed class FakeHandle(HotkeySpec? spec, Action callback) : IDisposable
@@ -102,7 +102,7 @@ public class HotkeyManagerTests
         var (m, b) = Create();
         b.Reserved = true;
         var r = m.Apply(List(), strict: false);
-        Assert.Equal([HotkeySpec.Fallback], b.Live); // PrintScreen при системном захвате даже не регистрируется
+        Assert.Equal([HotkeySpec.Fallback], b.Live); // PrintScreen not even registered under system capture
         Assert.Equal(HotkeyStatus.ReservedBySystem, r.Report.Find(HotkeyKind.PrintScreen)!.Status);
         Assert.Equal(HotkeySpec.Fallback, r.Report.Fallback);
         Assert.Equal(["Ctrl+Alt+S"], r.Report.ActiveNames);
@@ -190,7 +190,7 @@ public class HotkeyManagerTests
         int calls = b.RegisterCalls;
         var r = m.Apply(List(ps: true, wss: true, "Ctrl+Q"), strict: true);
         Assert.True(r.Success);
-        Assert.Equal(calls, b.RegisterCalls); // своё же сочетание повторно не регистрируется (дало бы 1409)
+        Assert.Equal(calls, b.RegisterCalls); // own combo not re-registered (would give 1409)
         Assert.Equal(1, b.HookCalls);
         Assert.All(b.Handles, h => Assert.False(h.Disposed));
         Assert.False(b.Hooks[0].Disposed);
@@ -223,8 +223,8 @@ public class HotkeyManagerTests
         Assert.Equal(HotkeyStatus.Busy, r.Error.Status);
         Assert.Contains("занят", r.Error.Message);
         Assert.Same(before, m.Report);
-        Assert.Equal([HotkeySpec.PrintScreen, CtrlQ], b.Live); // старые продолжают работать
-        Assert.True(b.Hooks.Single().Disposed);                // новый хук снят
+        Assert.Equal([HotkeySpec.PrintScreen, CtrlQ], b.Live); // old keep working
+        Assert.True(b.Hooks.Single().Disposed);                // new hook removed
         Assert.False(m.IsHookInstalled);
     }
 
@@ -238,7 +238,7 @@ public class HotkeyManagerTests
         Assert.False(r.Success);
         Assert.Equal(HotkeyKind.WinShiftS, r.Error!.Binding.Kind);
         Assert.Contains("5", r.Error.Message);
-        Assert.Equal([HotkeySpec.PrintScreen], b.Live); // Ctrl+Q, зарегистрированный в этой попытке, снят
+        Assert.Equal([HotkeySpec.PrintScreen], b.Live); // Ctrl+Q registered in this attempt removed
     }
 
     [Fact]
@@ -286,7 +286,7 @@ public class HotkeyManagerTests
         var fallbackHandle = b.Handles.Single();
         var r = m.Apply(List(ps: true, wss: false, "Ctrl+Alt+S"), strict: true);
         Assert.True(r.Success);
-        Assert.Null(r.Report.Fallback); // работает своё сочетание — запасной не нужен
+        Assert.Null(r.Report.Fallback); // own combo works — fallback not needed
         Assert.False(fallbackHandle.Disposed);
         Assert.Single(b.Handles);
         Assert.Equal(["Ctrl+Alt+S"], r.Report.ActiveNames);

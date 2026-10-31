@@ -3,18 +3,18 @@ using System.Windows.Media;
 
 namespace Screeny.Annotations.Shapes;
 
-/// <summary>Прямоугольник: обводка и/или заливка (<see cref="AnnotationStyle.Fill"/>).</summary>
+/// <summary>Rectangle: stroke and/or fill (<see cref="AnnotationStyle.Fill"/>).</summary>
 public sealed class RectAnnotation(Rect rect, AnnotationStyle style) : BoxAnnotation(rect, style)
 {
-    /// <summary>Обводка лежит по контуру: половина её толщины снаружи прямоугольника.</summary>
+    /// <summary>Stroke lies on outline: half its thickness outside rectangle.</summary>
     public override Rect Bounds => Style.StrokeEnabled ? Rect.InflateCopy(Style.Thickness / 2) : Rect;
 
     public override void Render(DrawingContext dc, RenderContext ctx) => dc.DrawRectangle(FillBrush, StrokePenOrNull, Rect);
 
     /// <summary>
-    /// Без заливки — только полоса рамки: клик внутри проходит к нижним аннотациям или начинает новую фигуру.
-    /// У маленькой фигуры внутренней «прозрачной» области нет — попаданием считается весь bounds.
-    /// Залитая фигура ловится по всей площади.
+    /// Without fill — only border band: click inside passes to lower annotations or starts new shape.
+    /// Small shape has no inner “transparent” area — entire bounds hit-tests.
+    /// Filled shape hit-tests across whole area.
     /// </summary>
     public override bool HitTest(Point p)
     {

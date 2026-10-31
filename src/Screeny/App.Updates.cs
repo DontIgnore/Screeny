@@ -9,8 +9,8 @@ using Screeny.Updates;
 namespace Screeny;
 
 /// <summary>
-/// Обновления и путь автозапуска. Отдельный файл, чтобы App.xaml.cs менялся минимально: оттуда вызываются только
-/// <see cref="InitUpdates"/> (в конце старта) и <see cref="DisposeUpdates"/> (при выходе).
+/// Updates and autostart path. Separate file so App.xaml.cs changes minimally: from there only
+/// <see cref="InitUpdates"/> (at end of startup) and <see cref="DisposeUpdates"/> (on exit) are called.
 /// </summary>
 public partial class App
 {
@@ -18,36 +18,36 @@ public partial class App
     private UpdateService? _updates;
     private UpdateWindow? _updateWindow;
     private ICommand? _checkUpdatesCommand;
-    /// <summary>Последнее уведомление трея — «Доступна версия X»: клик по нему открывает окно обновления.</summary>
+    /// <summary>Last tray notification — “Version X available”: click opens update window.</summary>
     private UpdateCandidate? _updateBalloon;
     /// <summary>
-    /// Обновление, о котором не спрашивали (все изменения — про выключенные функции): версия, которая скачивается,
-    /// и скачанное, которое применится без окон при выходе.
+    /// Update that wasn't asked about (all changes concern disabled features): version being downloaded
+    /// and downloaded content that will apply without windows on exit.
     /// </summary>
     private string? _silentVersion;
     private UpdateCandidate? _silentReady;
-    /// <summary>Растёт, когда тихое обновление отменено (пропустили версию, ставят обычным путём): незаконченная тихая
-    /// загрузка, закончившись, видит другое число и не готовит применение.</summary>
+    /// <summary>Increments when silent update is canceled (version skipped, installing normally): unfinished silent
+    /// download, when done, sees different number and does not prepare apply.</summary>
     private int _silentGeneration;
-    /// <summary>Обычное обновление уже передано Update.exe: тихое при выходе не запускаем второй раз.</summary>
+    /// <summary>Normal update already handed to Update.exe: silent-on-exit not launched second time.</summary>
     private bool _applyScheduled;
-    /// <summary>Выход из-за завершения сеанса Windows: тихое обновление не применяем (Update.exe могут прервать).</summary>
+    /// <summary>Exit due to Windows session ending: silent update not applied (Update.exe may be interrupted).</summary>
     private bool _sessionEnding;
 
-    /// <summary>Пункт меню трея «Проверить обновления…».</summary>
+    /// <summary>Tray menu item “Check for updates…”</summary>
     public ICommand CheckUpdatesCommand => _checkUpdatesCommand ??= new RelayCommand(() => _ = CheckForUpdatesManuallyAsync());
 
     private void InitUpdates()
     {
         _velopack = VelopackInfo.Detect();
-        // Путь автозапуска уже задан в Program.Main. Тестовый экземпляр не трогает запись Run рабочего.
+        // Autostart path already set in Program.Main. Test instance does not touch working Run key.
         if (!IsDev && _velopack.IsInstalled) RepairStartupPath();
 
         IUpdateClient client = UpdateService.ChooseSource(IsDev, Args.UpdateSource) switch
         {
             UpdateSourceKind.Folder => VelopackUpdateClient.ForFolder(Args.UpdateSource!),
             UpdateSourceKind.Github => VelopackUpdateClient.ForGithub(),
-            _ => NoUpdateClient.Instance, // dev без --update-source: никакой сети, и ручная проверка тоже
+            _ => NoUpdateClient.Instance, // dev without --update-source: no network, manual check also
         };
         _updates = new UpdateService(client, UpdateStateStore.Default(IsDev), () => Settings.CheckForUpdates);
         _updates.UpdateFound += OnUpdateFound;
@@ -55,21 +55,21 @@ public partial class App
 
         if (UpdateService.AutomaticAllowed(IsDev, Args.UpdateSource is not null, client.CanUpdate)) _ = _updates.RunAsync();
         if (Args.CheckUpdates) _ = CheckForUpdatesManuallyAsync();
-        OnHotkeysChanged(); // подсказка трея была собрана до появления клиента: теперь с версией из пакета Velopack
+        OnHotkeysChanged(); // tray hint was built before client appeared: now with version from Velopack package
     }
 
     /// <summary>
-    /// Версия этой копии: из пакета Velopack (та же, что у проверки обновлений), у копии без него — из сборки.
-    /// До <see cref="InitUpdates"/> — всегда из сборки.
+    /// Version of this copy: from Velopack package (same as update check), without it — from assembly.
+    /// Before <see cref="InitUpdates"/> — always from assembly.
     /// </summary>
     public string CurrentVersion => AppVersion.Choose(_updates?.Client.CurrentVersion, AppVersion.Informational());
 
-    /// <summary>Копия умеет обновляться сама (установлена или портативная, и есть источник обновлений).</summary>
+    /// <summary>Copy can update itself (installed or portable, and has update source).</summary>
     public bool CanUpdateItself => _updates?.Client.CanUpdate == true;
 
     /// <summary>
-    /// Автозапуск включён, но указывает на другой exe (старый портативный <c>publish\Screeny.exe</c>, прежняя папка) —
-    /// переписываем на стаб установленной версии. Выключенный автозапуск не включаем.
+    /// Autostart enabled but points to another exe (old portable <c>publish\Screeny.exe</c>, previous folder) —
+    /// rewrite to stub of installed version. Disabled autostart is not enabled.
     /// </summary>
     private static void RepairStartupPath()
     {
@@ -90,13 +90,13 @@ public partial class App
             return;
         }
         Notify(Loc.F("Updates.AvailableBalloon", update.Version));
-        _updateBalloon = update; // после Notify: тот сбрасывает признак для остальных уведомлений
+        _updateBalloon = update; // after Notify: it resets flag for other notifications
     }
 
     /// <summary>
-    /// Все изменения версии — про выключенные функции: не отвлекаем, а скачиваем в фоне; применит <see cref="DisposeUpdates"/>
-    /// при выходе. Ошибка — только в журнал, следующая проверка попробует снова. Пока шла загрузка, версию могли
-    /// пропустить или начать ставить из окна, а приложение — начать выходить: тогда скачанное молча не применяется.
+    /// All version changes concern disabled features: don't distract, download in background; <see cref="DisposeUpdates"/>
+    /// applies on exit. Error — only log, next check retries. While downloading, version could be
+    /// skipped or install started from window, and app could start exiting: then downloaded content silently not applied.
     /// </summary>
     private async Task DownloadSilentlyAsync(UpdateCandidate update)
     {
@@ -120,8 +120,8 @@ public partial class App
     }
 
     /// <summary>
-    /// Ручная проверка (меню трея и «О программе» в настройках): идёт и при выключенной автоматической. null — проверки не
-    /// было: приложение выходит или окно обновления уже открыто (тогда оно выводится вперёд).
+    /// Manual check (tray menu and About in settings): runs even when automatic is off. null — no check was
+    /// made: app exiting or update window already open (then it is brought forward).
     /// </summary>
     public async Task<UpdateCheckResult?> CheckForUpdatesAsync()
     {
@@ -131,7 +131,7 @@ public partial class App
         return IsShuttingDown ? null : result;
     }
 
-    /// <summary>Пункт трея: итог — диалогом, найденная версия — окном обновления.</summary>
+    /// <summary>Tray item: result — dialog, found version — update window.</summary>
     private async Task CheckForUpdatesManuallyAsync()
     {
         switch (await CheckForUpdatesAsync())
@@ -151,7 +151,7 @@ public partial class App
         }
     }
 
-    /// <summary>Окно показывается всегда, даже если все изменения — про выключенные функции (так бывает у ручной проверки).</summary>
+    /// <summary>Window always shown even if all changes concern disabled features (happens for manual check).</summary>
     public void ShowUpdateWindow(UpdateCandidate update)
     {
         _updateBalloon = null;
@@ -164,7 +164,7 @@ public partial class App
             () =>
             {
                 if (!updates.Skip(update.Version)) return false;
-                CancelSilentUpdate(); // пропущенную не ставим и молча — даже если её тихая загрузка ещё идёт
+                CancelSilentUpdate(); // skipped version not installed silently — even if its silent download is still running
                 return true;
             });
         _updateWindow.Closed += (_, _) => _updateWindow = null;
@@ -173,22 +173,22 @@ public partial class App
     }
 
     /// <summary>
-    /// Скачать, дождаться незаконченных сохранений снимков (как при обычном выходе), передать применение Update.exe
-    /// и выйти: Update.exe ждёт завершения процесса, заменяет <c>current\</c> и запускает новую версию.
-    /// Идущая тихая загрузка той же версии не повторяется: ждём её и берём скачанное (<see cref="UpdateService.DownloadAsync"/>).
+    /// Download, wait for unfinished screenshot saves (as on normal exit), hand apply to Update.exe
+    /// and exit: Update.exe waits for process exit, replaces <c>current\</c> and starts new version.
+    /// Ongoing silent download of same version is not repeated: wait for it and use downloaded (<see cref="UpdateService.DownloadAsync"/>).
     /// </summary>
     private async Task InstallUpdateAsync(UpdateService updates, UpdateCandidate update, Action<int> progress, CancellationToken ct)
     {
-        CancelSilentUpdate(); // ставится это обновление, а не тихое
+        CancelSilentUpdate(); // this update is installed, not silent one
         await updates.DownloadAsync(update, progress, ct);
         ct.ThrowIfCancellationRequested();
         if (!await PrepareForExitAsync()) return;
         CancelSilentUpdate();
-        _applyScheduled = true; // и если запуск Update.exe не удался — тихое при выходе всё равно не нужно
+        _applyScheduled = true; // and if Update.exe launch failed — silent-on-exit not needed either
         try { updates.Client.ApplyAfterExit(update, RestartArgs()); }
         catch (Exception ex)
         {
-            // Окна уже заблокированы для выхода: сообщаем и всё равно завершаемся, обновление можно повторить после запуска.
+            // Windows already locked for exit: report and still exit; update can be repeated after launch.
             Log.Error("Update apply failed to start", ex);
             Dialogs.Info(null, Loc.T("Updates.ApplyFailedTitle"), Loc.F("Updates.ApplyFailedText", ex.Message));
         }
@@ -196,8 +196,8 @@ public partial class App
     }
 
     /// <summary>
-    /// Ключи для перезапуска после обновления. Тестовый экземпляр перезапускается тестовым (с теми же ключами),
-    /// иначе новая версия стала бы рабочим экземпляром; обычный — без ключей.
+    /// Keys for restart after update. Test instance restarts as test (with same keys),
+    /// otherwise new version would become working instance; normal — without keys.
     /// </summary>
     private void CancelSilentUpdate()
     {
@@ -216,9 +216,9 @@ public partial class App
     }
 
     /// <summary>
-    /// Выход с тихо скачанным обновлением: Update.exe дождётся завершения процесса и применит его без окон и без
-    /// перезапуска. Не применяем, если за это время выключили «Проверять обновления», пропустили версию, включили функцию
-    /// из списка изменений, уже запланировали обычное обновление или выходим из-за завершения сеанса Windows.
+    /// Exit with silently downloaded update: Update.exe waits for process exit and applies it without windows and without
+    /// restart. Not applied if meanwhile “Check for updates” was disabled, version skipped, a feature
+    /// from changelog enabled, normal update already scheduled, or exiting due to Windows session end.
     /// </summary>
     private void ApplySilentUpdateOnExit()
     {
@@ -230,7 +230,7 @@ public partial class App
             Log.Error($"Silent update {update.Version} not applied: Windows session is ending");
             return;
         }
-        // Функцию могли снова включить: тогда в списке изменений есть что показать — пусть спросит следующая проверка.
+        // Feature could be re-enabled: then changelog has something to show — let next check ask.
         if (UpdatePrompt.Decide(update, NotesFilter, UpdateCheckKind.Automatic, Loc.Culture.Name).Action != UpdatePromptAction.ApplySilently)
         {
             Log.Error($"Silent update {update.Version} not applied: it now concerns enabled features");

@@ -24,7 +24,7 @@ public class ThemeManagerTests
     [InlineData("system")]
     public void UnknownOverrideFollowsSystem(string? value) => Assert.Null(ThemeManager.ParseOverride(value));
 
-    /// <summary>Палитры подменяются целиком: ключ, которого нет в одной из них, оставил бы контролы без цвета.</summary>
+    /// <summary>Palettes replaced entirely: key missing in one would leave controls without color.</summary>
     [Fact]
     public void PalettesDefineSameKeys()
     {

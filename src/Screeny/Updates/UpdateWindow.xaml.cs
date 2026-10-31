@@ -10,13 +10,13 @@ using Screeny.Themes;
 namespace Screeny.Updates;
 
 /// <summary>
-/// «Доступна версия X»: список изменений и выбор — обновить сейчас, позже или пропустить версию.
-/// Ничего не ставится без нажатия «Обновить и перезапустить». При смене языка на лету обновляются заголовок и кнопки;
-/// список изменений остаётся на языке, выбранном при открытии окна (<see cref="ReleaseNotes.ForLanguage"/>).
+/// “Version X available”: changelog and choice — update now, later or skip version.
+/// Nothing installed without pressing “Update and restart”. On language change title and buttons update;
+/// changelog stays in language chosen at window open (<see cref="ReleaseNotes.ForLanguage"/>).
 /// </summary>
 public partial class UpdateWindow : ChromeWindow
 {
-    /// <summary>Скачать с прогрессом (0–100) и применить; после успешного вызова приложение завершается.</summary>
+    /// <summary>Download with progress (0–100) and apply; after successful call app exits.</summary>
     public delegate Task InstallHandler(Action<int> progress, CancellationToken ct);
 
     private readonly InstallHandler _install;
@@ -25,7 +25,7 @@ public partial class UpdateWindow : ChromeWindow
 
     public UpdateCandidate Update { get; }
 
-    /// <param name="prompt">Что показать из списка изменений (<see cref="UpdatePrompt.Decide"/>).</param>
+    /// <param name="prompt">What to show from changelog (<see cref="UpdatePrompt.Decide"/>).</param>
     public UpdateWindow(UpdateCandidate update, UpdatePrompt prompt, string? currentVersion, InstallHandler install, Func<bool> skip)
     {
         InitializeComponent();
@@ -80,7 +80,7 @@ public partial class UpdateWindow : ChromeWindow
 
     private FrameworkElement ListItem(NoteBlock block)
     {
-        var grid = new Grid(); // отступ вложенности задаёт RenderNotes вместе с вертикальным
+        var grid = new Grid(); // nesting indent set by RenderNotes with vertical
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(20) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         var marker = Text([new NoteInline(block.Kind == NoteBlockKind.Numbered ? $"{block.Number}." : "•")], "Body", Brush("Brush.Ink50"));

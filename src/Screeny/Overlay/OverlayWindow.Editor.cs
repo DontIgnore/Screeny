@@ -4,8 +4,8 @@ using Screeny.Editing;
 
 namespace Screeny.Overlay;
 
-// Оверлей как хост редактора аннотаций: режимы оверлея решают, доступны ли параметры и пипетка,
-// HUD живёт в DIP поверх снимка в пикселях (масштаб 1/dpi). Flyout'ы параметров — в слое HUD.
+// Overlay as annotation editor host: overlay modes decide options/eyedropper availability,
+// HUD lives in DIP over pixel screenshot (scale 1/dpi). Options flyouts in HUD layer.
 public partial class OverlayWindow : IAnnotationEditorHost, IFlyoutHost
 {
     bool IAnnotationEditorHost.OptionsEnabled => _mode == OverlayMode.Editing && !_textMode && _selection.HasSelection;
@@ -33,7 +33,7 @@ public partial class OverlayWindow : IAnnotationEditorHost, IFlyoutHost
     Rect IFlyoutHost.FlyoutWorkArea => _selection.HasSelection ? SelectionWorkArea() : _map.PixelToDip(_shot.PixelBounds);
     bool IFlyoutHost.ToolbarFlyoutsBelow => _toolbarBelow;
 
-    /// <summary>Видимая рамка фигуры в DIP (часть за выделением обрезана — по ней и ставим flyout).</summary>
+    /// <summary>Visible shape border in DIP (part behind selection clipped — flyout placed on it).</summary>
     Rect? IFlyoutHost.ShapeRect(Screeny.Annotations.Annotation shape)
     {
         var b = shape.Bounds;

@@ -7,8 +7,8 @@ using Screeny.Editing;
 namespace Screeny.Overlay.Tools;
 
 /// <summary>
-/// Метка показывается на Down как живая, пока кнопка зажата — едет за мышью, и попадает в документ
-/// (одним шагом undo) на Up. С <paramref name="snap"/> её края и центр прилипают к другим фигурам и области.
+/// Label shown on Down as live while button held — follows mouse, enters document
+/// (one undo step) on Up. With <paramref name="snap"/> its edges and center snap to other shapes and area.
 /// </summary>
 public sealed class NumberTool(Snapper? snap = null) : ITool
 {
@@ -55,7 +55,7 @@ public sealed class NumberTool(Snapper? snap = null) : ITool
         if (_doc is not null) _doc.Live = null;
     }
 
-    /// <summary>Центр метки — в точку мыши с поправкой прилипания (по рамке метки: края и центр).</summary>
+    /// <summary>Label center at mouse point with snap correction (by label border: edges and center).</summary>
     private void Place(Point px)
     {
         if (_label is null) return;

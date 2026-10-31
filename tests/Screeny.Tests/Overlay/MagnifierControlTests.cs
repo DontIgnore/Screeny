@@ -31,9 +31,9 @@ public class MagnifierControlTests
         magnifier.Update(shot, new PixelPoint(1, 2));
         var hex = (TextBlock)magnifier.FindName("ColorText");
         var coords = (TextBlock)magnifier.FindName("Coords");
-        Assert.True(magnifier.ShowColor); // по умолчанию (редактор: лупа только в режиме пипетки)
+        Assert.True(magnifier.ShowColor); // default (editor: magnifier only in eyedropper mode)
 
-        magnifier.ShowColor = false; // выключенная пипетка: HEX у лупы не показываем
+        magnifier.ShowColor = false; // disabled eyedropper: HEX at magnifier not shown
         Assert.False(IsShown(hex));
         Assert.True(IsShown(coords));
         Assert.Equal("1, 2", coords.Text);
@@ -42,7 +42,7 @@ public class MagnifierControlTests
         Assert.True(IsShown(hex));
     });
 
-    /// <summary>Без окна IsVisible всегда false: смотрим Visibility по цепочке родителей.</summary>
+    /// <summary>Without window IsVisible always false: check Visibility through ancestor chain.</summary>
     private static bool IsShown(FrameworkElement element)
     {
         for (DependencyObject? e = element; e is not null; e = VisualTreeHelper.GetParent(e) ?? LogicalTreeHelper.GetParent(e))

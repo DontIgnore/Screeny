@@ -3,24 +3,24 @@ using Screeny.Settings;
 
 namespace Screeny.Migration;
 
-/// <summary>Что выбрано в секции хоткеев мастера.</summary>
+/// <summary>What is selected in wizard hotkey section.</summary>
 public sealed record WizardHotkeyChoice(bool PrintScreen, bool WinShiftS, HotkeySpec? Custom);
 
-/// <summary>Правила мастера первого запуска: когда показывать, что считать новым конфликтом, какой список хоткеев применить.</summary>
+/// <summary>First-run wizard rules: when to show, what counts as new conflict, which hotkey list to apply.</summary>
 public static class SetupWizard
 {
     /// <summary>
-    /// Текущая версия мастера. Поднять, если мастер нужно показать заново всем, кто его уже прошёл.
-    /// 2 — в мастере появился выбор функций: установленные копии видят его один раз.
+    /// Current wizard version. Raise to show wizard again to all who already passed.
+    /// 2 — wizard gained feature choice: installed copies see it once.
     /// </summary>
     public const int Version = 2;
 
-    /// <summary>Показать мастер при запуске: пользователь ещё не проходил (или не пропускал) эту версию.</summary>
+    /// <summary>Show wizard at startup: user hasn't passed (or skipped) this version.</summary>
     public static bool ShouldShowOnStartup(AppSettings settings) => settings.SetupWizardVersion < Version;
 
     /// <summary>
-    /// Конфликты, о которых стоит напомнить уведомлением после пройденного мастера: программа мешает включённому хоткею
-    /// и её не было среди уже известных (показанных в мастере или в прошлом уведомлении).
+    /// Conflicts worth reminding via notification after passed wizard: program conflicts with enabled hotkey
+    /// and wasn't among known (shown in wizard or previous notification).
     /// </summary>
     public static IReadOnlyList<Conflict> NewBlockingConflicts(IReadOnlyList<Conflict> conflicts, IEnumerable<HotkeyBinding> hotkeys,
         IEnumerable<string> known)
@@ -30,12 +30,12 @@ public static class SetupWizard
         return conflicts.Where(c => !knownSet.Contains(c.Id) && c.Blocks(list)).ToList();
     }
 
-    /// <summary>Что сделать при запуске.</summary>
+    /// <summary>What to do at startup.</summary>
     public enum StartupAction { Nothing, ShowWizard, CheckForNewConflicts }
 
     /// <summary>
-    /// Мастер — при явном <c>--setup-wizard</c> или если рабочий экземпляр его ещё не проходил; иначе рабочий экземпляр
-    /// в фоне проверяет новые конфликты. Тестовый экземпляр без ключа ничего не показывает и реальную среду не проверяет.
+    /// Wizard — on explicit <c>--setup-wizard</c> or if working instance hasn't passed it; else working instance
+    /// checks new conflicts in background. Test instance without key shows nothing and doesn't check real environment.
     /// </summary>
     public static StartupAction OnStartup(bool isDev, bool wizardRequested, AppSettings settings)
         => wizardRequested ? StartupAction.ShowWizard
@@ -44,8 +44,8 @@ public static class SetupWizard
             : StartupAction.CheckForNewConflicts;
 
     /// <summary>
-    /// Проверка при запуске: известными остаются только программы, которые всё ещё найдены (исправленная и потом вернувшаяся
-    /// снова считается новой); новые, мешающие включённому хоткею, возвращаются для уведомления и сразу становятся известными.
+    /// Startup check: only still-found programs remain known (fixed and returned counts as new); new ones
+    /// conflicting with enabled hotkey are returned for notification and immediately become known.
     /// </summary>
     public static (IReadOnlyList<Conflict> Fresh, List<string> Known) CheckForNewConflicts(IReadOnlyList<Conflict> conflicts,
         IEnumerable<HotkeyBinding> hotkeys, IEnumerable<string> known)
@@ -56,7 +56,7 @@ public static class SetupWizard
         return (fresh, [.. stillKnown, .. fresh.Select(c => c.Id)]);
     }
 
-    /// <summary>Текст уведомления в трее: «PrintScreen занят программой Lightshot — открыть мастер?».</summary>
+    /// <summary>Tray notification text: “PrintScreen is busy by Lightshot — open wizard?”</summary>
     public static string NotificationText(IReadOnlyList<Conflict> conflicts, IEnumerable<HotkeyBinding> hotkeys)
     {
         var list = hotkeys.ToList();
@@ -67,8 +67,8 @@ public static class SetupWizard
     }
 
     /// <summary>
-    /// Список хоткеев после мастера: PrintScreen и Win+Shift+S — по галочкам, своё сочетание из поля добавляется (включённым)
-    /// к уже настроенным; прочие свои сочетания не трогаются. Нормализация — в <see cref="AppSettings.NormalizeHotkeys"/>.
+    /// Hotkey list after wizard: PrintScreen and Win+Shift+S by checkboxes, custom combo from field added (enabled)
+    /// to configured ones; other custom combos untouched. Normalization in <see cref="AppSettings.NormalizeHotkeys"/>.
     /// </summary>
     public static List<HotkeyBinding> BuildHotkeys(IEnumerable<HotkeyBinding> current, WizardHotkeyChoice choice)
     {
@@ -81,7 +81,7 @@ public static class SetupWizard
         return AppSettings.NormalizeHotkeys([HotkeyBinding.PrintScreen(choice.PrintScreen), HotkeyBinding.WinShiftS(choice.WinShiftS), .. customs]);
     }
 
-    /// <summary>Хотя бы один хоткей включён (иначе снимок — только из трея).</summary>
+    /// <summary>At least one hotkey enabled (otherwise screenshot only from tray).</summary>
     public static bool HasAnyHotkey(WizardHotkeyChoice choice, IEnumerable<HotkeyBinding> current)
         => choice.PrintScreen || choice.WinShiftS || choice.Custom is not null || current.Any(b => b.Kind == HotkeyKind.Custom && b.Enabled);
 }

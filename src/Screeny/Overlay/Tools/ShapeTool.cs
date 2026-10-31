@@ -7,13 +7,13 @@ using Screeny.Editing;
 namespace Screeny.Overlay.Tools;
 
 /// <summary>
-/// Фигуры по двум точкам: рамка, эллипс, линия, стрелка, пикселизация, размытие.
-/// Во время протяжки фигура — живая аннотация документа (вне undo); в документ она попадает только на Up.
+/// Shapes by two points: border, ellipse, line, arrow, pixelate, blur.
+/// During drag shape is live annotation of document (outside undo); enters document only on Up.
 /// </summary>
-/// <param name="constrain">Зажат ли Shift: квадрат/круг, линия с шагом 45°. Без него — свободная форма.</param>
+/// <param name="constrain">Shift held: square/circle, line 45° step. Without — freeform.</param>
 /// <param name="snap">
-/// Прилипание: начальная точка и тянущийся угол (конец линии) прилипают к краям и центрам других фигур и области.
-/// С Shift не работает — квадрат и шаг 45° важнее.
+/// Snapping: start point and dragged corner (line end) snap to edges/centers of other shapes and area.
+/// With Shift doesn't work — square and 45° beat it.
 /// </param>
 public sealed class ShapeTool(ToolKind kind, Func<bool>? constrain = null, Snapper? snap = null) : ITool
 {
@@ -41,7 +41,7 @@ public sealed class ShapeTool(ToolKind kind, Func<bool>? constrain = null, Snapp
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
         };
         doc.Live = _shape;
-        // Эффекты во время протяжки считаются по уменьшенной копии; полный расчёт — после Up.
+        // Effects during drag computed on downscaled copy; full computation after Up.
         if (_shape is EffectAnnotation effect) effect.BeginLiveEdit();
     }
 
@@ -73,7 +73,7 @@ public sealed class ShapeTool(ToolKind kind, Func<bool>? constrain = null, Snapp
         _doc.Live = null;
         if (shape is EffectAnnotation effect) effect.EndLiveEdit();
         var b = shape is LineAnnotation l ? new Rect(l.Start, l.End) : shape.GeometryBounds;
-        // Случайный клик без перетаскивания просто отбрасывается: в undo ничего не попадает, redo не трогается.
+        // Accidental click without drag discarded: nothing in undo, redo untouched.
         if (b.Width < MinSize && b.Height < MinSize) { _doc.NotifyChanged(); return; }
         _doc.Add(shape);
     }
@@ -93,10 +93,10 @@ public sealed class ShapeTool(ToolKind kind, Func<bool>? constrain = null, Snapp
         return new Rect(a, new Point(a.X + SignOrPlus(b.X - a.X) * side, a.Y + SignOrPlus(b.Y - a.Y) * side));
     }
 
-    /// <summary>Знак смещения; при строго вертикальном/горизонтальном движении нулевая сторона растёт в +.</summary>
+    /// <summary>Offset sign; on strictly vertical/horizontal movement zero side grows positive.</summary>
     private static int SignOrPlus(double v) => v < 0 ? -1 : 1;
 
-    /// <summary>Shift для линий — шаг 45°.</summary>
+    /// <summary>Shift for lines — 45° step.</summary>
     private static Point SnapAngle(Point a, Point b)
     {
         var v = b - a;

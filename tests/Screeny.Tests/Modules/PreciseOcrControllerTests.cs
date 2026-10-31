@@ -4,7 +4,7 @@ using Screeny.Ocr.Paddle;
 
 namespace Screeny.Tests.Modules;
 
-/// <summary>Загрузка, удаление и «Не удалять» глазами настроек и мастера; служба точного распознавания без моделей.</summary>
+/// <summary>Download, delete and “Don't delete” from settings/wizard; precise recognition service without models.</summary>
 public class PreciseOcrControllerTests : IDisposable
 {
     private readonly ModuleTestFiles _files = new();
@@ -41,7 +41,7 @@ public class PreciseOcrControllerTests : IDisposable
         Assert.Equal(Path.Combine(Root, "ocr-paddle-1"), c.ReadyFolder);
     }
 
-    /// <summary>Отдаёт заголовки и затем молчит.</summary>
+    /// <summary>Sends headers then is silent.</summary>
     private sealed class SilentHandler : HttpMessageHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
@@ -142,7 +142,7 @@ public class PreciseOcrControllerTests : IDisposable
     }
 
     [Theory]
-    // Тексты — по-русски: язык строк в тестах закреплён (Localization/TestCulture.cs).
+    // Texts in Russian: test language fixed (Localization/TestCulture.cs).
     [InlineData(typeof(HttpRequestException), "Нет связи с сервером")]
     [InlineData(typeof(TimeoutException), "Нет связи с сервером")]
     [InlineData(typeof(InvalidDataException), "архив модуля повреждён")]
@@ -167,7 +167,7 @@ public class PreciseOcrControllerTests : IDisposable
         var dir = _files.Installed(Root, 1);
         var manifestSha = ModuleManifest.Sha256Of(Path.Combine(dir, ModuleManifest.FileName));
         var spec = new ModuleSpec("ocr-paddle", 1, "", manifestSha);
-        // Подмена и файла, и манифеста: без зашитого хеша манифеста проверка прошла бы.
+        // Both file and manifest swapped: without hardcoded manifest hash check would pass.
         var files = new Dictionary<string, byte[]>(ModuleTestFiles.DefaultFiles) { ["det.onnx"] = [1, 2, 3] };
         _files.Installed(Root, 1, files);
         using var service = new PreciseOcrService(() => dir, () => { }, spec);

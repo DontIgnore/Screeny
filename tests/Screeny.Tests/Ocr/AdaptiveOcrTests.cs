@@ -81,7 +81,7 @@ public class AdaptiveOcrTests
     [Fact]
     public void ResizeBgra_KeepsAHardEdgeSharpAndInRange()
     {
-        // Чёрная левая половина, белая правая: после x2 края остаются чистыми, середина — переход.
+        // Black left half, white right: after x2 edges stay clean, middle transition.
         int w = 8, h = 1;
         var src = new byte[w * h * 4];
         for (int x = 0; x < w; x++) { byte v = x < 4 ? (byte)0 : (byte)255; src[x * 4] = src[x * 4 + 1] = src[x * 4 + 2] = v; src[x * 4 + 3] = 255; }

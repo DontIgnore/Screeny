@@ -1,13 +1,13 @@
-﻿# Сборка релиза Screeny: dotnet publish → vpk pack (Velopack).
+﻿# Build a Screeny release: dotnet publish → vpk pack (Velopack).
 #   powershell -File tools/pack.ps1 -Version 0.2.0
-#   powershell -File tools/pack.ps1                       — версия из тега текущего коммита (v0.2.0 → 0.2.0)
+#   powershell -File tools/pack.ps1                       — version from the current commit tag (v0.2.0 → 0.2.0)
 #   powershell -File tools/pack.ps1 -Version 0.2.1 -OutputDir C:\tmp\rel-0.2.1
-# Результат в releases/ (или -OutputDir):
-#   Screeny-win-Setup.exe     — установщик (per-user, %LocalAppData%\DontIgnore.Screeny, ставит .NET 10 Desktop Runtime при необходимости)
-#   Screeny-win-Portable.zip  — портативная версия (тоже обновляется; .NET 10 Desktop Runtime нужен заранее)
-#   DontIgnore.Screeny-<версия>-full.nupkg, *-delta.nupkg, releases.win.json — файлы обновлений
-# Все файлы из папки прикладываются к релизу GitHub (см. docs/maintainers.md, «Making a release»).
-# Для дельта-обновлений в -OutputDir должны лежать пакеты предыдущей версии (vpk сам найдёт последний *-full.nupkg).
+# Output in releases/ (or -OutputDir):
+#   Screeny-win-Setup.exe     — installer (per-user, %LocalAppData%\DontIgnore.Screeny, installs .NET 10 Desktop Runtime if needed)
+#   Screeny-win-Portable.zip  — portable version (also updates; requires .NET 10 Desktop Runtime beforehand)
+#   DontIgnore.Screeny-<version>-full.nupkg, *-delta.nupkg, releases.win.json — update files
+# Attach all files in the directory to the GitHub release (see docs/maintainers.md, “Making a release”).
+# For delta updates, -OutputDir must contain previous version packages (vpk finds the latest *-full.nupkg automatically).
 param(
     [string]$Version,
     [string]$OutputDir,
@@ -15,7 +15,7 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$packId = 'DontIgnore.Screeny'   # = папка установки %LocalAppData%\DontIgnore.Screeny (не %LocalAppData%\Screeny, где история)
+$packId = 'DontIgnore.Screeny'   # = installation folder %LocalAppData%\DontIgnore.Screeny (not %LocalAppData%\Screeny, which contains history)
 
 if (-not $Version) {
     $tag = git -C $root describe --tags --exact-match 2>$null
@@ -56,7 +56,7 @@ try {
 }
 finally { Pop-Location }
 
-# Установщик и zip не входят в ленту обновлений (releases.win.json) — даём им короткие имена для страницы релиза.
+# The installer and zip are not in the update feed (releases.win.json); give them short names for the release page.
 foreach ($pair in @(@('Setup.exe', 'Screeny-win-Setup.exe'), @('Portable.zip', 'Screeny-win-Portable.zip'))) {
     $from = Join-Path $OutputDir "$packId-win-$($pair[0])"
     $to = Join-Path $OutputDir $pair[1]

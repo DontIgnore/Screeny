@@ -32,8 +32,8 @@ public class SettingsStoreTests : IDisposable
         Assert.False(s.StartWithWindows);
         Assert.Equal("#FF3B30", s.LastColor);
         Assert.Equal(3, s.LastThickness);
-        Assert.False(s.ExcludePinsFromCapture); // закреплённые снимки иногда как раз нужно снять
-        Assert.False(s.KeepOriginals);          // оригинал хранит то, что скрыто размытием
+        Assert.False(s.ExcludePinsFromCapture); // pinned screenshots sometimes need removal
+        Assert.False(s.KeepOriginals);          // original stores what blur hid
         Assert.EndsWith(Path.Combine("Screeny", "History"), s.HistoryFolder);
     }
 
@@ -53,7 +53,7 @@ public class SettingsStoreTests : IDisposable
             LastThickness = 7,
             ExcludePinsFromCapture = true,
             KeepOriginals = true,
-            LastStrokeEnabled = false,   // в паре с заливкой: обе выключенные Normalize исправил бы
+            LastStrokeEnabled = false,   // paired with fill: both disabled Normalize would fix
             LastFillEnabled = true,
             LastFillOpacity = 70,
             LastArrowStyle = ArrowStyle.Thick,
@@ -75,14 +75,14 @@ public class SettingsStoreTests : IDisposable
         };
         var defaults = new AppSettings();
         var props = typeof(AppSettings).GetProperties();
-        Assert.Equal(29, props.Length); // новое поле — добавить его сюда
-        // Каждое поле действительно проверяется; версия формата у сохранённого файла всегда текущая.
+        Assert.Equal(29, props.Length); // new field — add here
+        // Each field actually validated; saved file format version always current.
         foreach (var p in props.Where(p => p.Name != nameof(AppSettings.SettingsVersion))) Assert.NotEqual(p.GetValue(defaults), p.GetValue(s));
 
         store.Save(s);
         var loaded = store.Load();
         foreach (var p in props) Assert.Equal(p.GetValue(s), p.GetValue(loaded));
-        Assert.Equal(["settings.json"], Directory.GetFiles(_dir).Select(Path.GetFileName)); // временный файл не остаётся
+        Assert.Equal(["settings.json"], Directory.GetFiles(_dir).Select(Path.GetFileName)); // temp file doesn't remain
     }
 
     [Fact]
@@ -111,7 +111,7 @@ public class SettingsStoreTests : IDisposable
         var backup = Assert.Single(Directory.GetFiles(_dir, "settings.json.corrupt-*"));
         Assert.Matches(@"^settings\.json\.corrupt-\d{8}-\d{6}$", Path.GetFileName(backup));
         Assert.Equal("{ not json", File.ReadAllText(backup));
-        Assert.True(File.Exists(FilePath)); // оригинал не трогаем, его перезапишет следующий Save
+        Assert.True(File.Exists(FilePath)); // original untouched, next Save overwrites
     }
 
     [Fact]
@@ -147,7 +147,7 @@ public class SettingsStoreTests : IDisposable
         var s = LoadJson("""{ "HistoryLimit": "25", "LastThickness": "5", "Hotkey": "Ctrl+Shift+Q" }""");
         Assert.Equal(25, s.HistoryLimit);
         Assert.Equal(5, s.LastThickness);
-        Assert.Equal(HotkeyBinding.Custom("Ctrl+Shift+Q"), s.Hotkeys[2]); // остальные поля не сброшены
+        Assert.Equal(HotkeyBinding.Custom("Ctrl+Shift+Q"), s.Hotkeys[2]); // other fields not reset
     }
 
     [Theory]
@@ -219,12 +219,12 @@ public class SettingsStoreTests : IDisposable
         Assert.DoesNotContain("FallbackHotkey", saved);
         Assert.DoesNotContain("\"Hotkey\"", saved);
         Assert.Contains("\"SettingsVersion\": 2", saved);
-        Assert.Contains("\"Kind\": \"Custom\"", saved); // вид записи — строкой, а не числом
+        Assert.Contains("\"Kind\": \"Custom\"", saved); // entry type string, not number
         Assert.Contains("\"Spec\": \"Ctrl+Shift+X\"", saved);
 
         var again = new SettingsStore(FilePath).Load();
         Assert.Equal(s.Hotkeys, again.Hotkeys);
-        Assert.Equal(saved, File.ReadAllText(FilePath)); // v2 повторно не переписывается
+        Assert.Equal(saved, File.ReadAllText(FilePath)); // v2 not rewritten again
     }
 
     [Fact]
@@ -233,7 +233,7 @@ public class SettingsStoreTests : IDisposable
         const string v2 = """{ "SettingsVersion": 2, "Hotkeys": [ { "Kind": "PrintScreen", "Enabled": true } ], "HistoryLimit": 7 }""";
         var s = LoadJson(v2);
         Assert.Equal(7, s.HistoryLimit);
-        Assert.Equal(DefaultHotkeys, s.Hotkeys); // недостающая WinShiftS добавлена в памяти
+        Assert.Equal(DefaultHotkeys, s.Hotkeys); // missing WinShiftS added in memory
         Assert.Equal(v2, File.ReadAllText(FilePath));
         Assert.Equal(["settings.json"], Directory.GetFiles(_dir).Select(Path.GetFileName));
     }
@@ -264,7 +264,7 @@ public class SettingsStoreTests : IDisposable
         Assert.Equal(ArrowStyle.Normal, s.LastArrowStyle);
         Assert.False(s.LastTextBackground);
         Assert.Equal(TextAlign.Left, s.LastTextAlign);
-        Assert.True(s.SnapEnabled); // прилипание по умолчанию включено
+        Assert.True(s.SnapEnabled); // snap default enabled
     }
 
     [Fact]
@@ -321,7 +321,7 @@ public class SettingsStoreTests : IDisposable
     [Fact]
     public void Load_WhenPathIsDirectory_ReturnsDefaults()
     {
-        Directory.CreateDirectory(FilePath); // settings.json — папка: File.Exists = false, путь «файла нет»
+        Directory.CreateDirectory(FilePath); // settings.json is folder: File.Exists = false, path “no file”
         Assert.Equal(DefaultHotkeys, new SettingsStore(FilePath).Load().Hotkeys);
     }
 
@@ -333,7 +333,7 @@ public class SettingsStoreTests : IDisposable
         Assert.Null(LoadJson("""{ "SettingsVersion": 2 }""").InstallId);
         var json = """{ "SettingsVersion": 2, "InstallId": null }""";
         Assert.Null(LoadJson(json).InstallId);
-        Assert.Equal(json, File.ReadAllText(FilePath)); // null — допустимое значение, а не повод переписать файл
+        Assert.Equal(json, File.ReadAllText(FilePath)); // null — valid value, not reason to rewrite
     }
 
     [Theory]

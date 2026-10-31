@@ -2,7 +2,7 @@ namespace Screeny.Feedback;
 
 public enum FeedbackFieldError { TooShort, TooLong }
 
-/// <summary>Длины полей из контракта сервера. Считаются по тексту без пробелов по краям.</summary>
+/// <summary>Field length limits from server contract. Counted on text without edge spaces.</summary>
 public static class FeedbackRules
 {
     public const int TitleMin = 3, TitleMax = 120;
@@ -13,7 +13,7 @@ public static class FeedbackRules
 
     public static FeedbackFieldError? CheckDescription(string? text) => Check(text, DescriptionMin, DescriptionMax);
 
-    /// <summary>Контакт необязателен: пустой — без ошибки.</summary>
+    /// <summary>Contact optional: empty — no error.</summary>
     public static FeedbackFieldError? CheckContact(string? text) => Check(text, 0, ContactMax);
 
     public static bool IsValid(string? title, string? description, string? contact)

@@ -87,7 +87,7 @@ public class StartupRegistrarRunKeyTests
     [InlineData("C:\\Users\\u\\AppData\\Local\\DontIgnore.Screeny\\current\\Screeny.exe", true)]
     [InlineData("\"c:\\users\\u\\appdata\\local\\dontignore.screeny\\Screeny.exe\"", true)]
     [InlineData("\"D:\\Tools\\Screeny\\publish\\Screeny.exe\"", false)]
-    [InlineData("\"C:\\Users\\u\\AppData\\Local\\DontIgnore.Screeny.Other\\Screeny.exe\"", false)] // соседняя папка с тем же префиксом
+    [InlineData("\"C:\\Users\\u\\AppData\\Local\\DontIgnore.Screeny.Other\\Screeny.exe\"", false)] // neighboring folder with same prefix
     public void RemoveIfInside_DeletesOnlyOwnEntry(string stored, bool removed)
     {
         var key = new FakeRunKey();

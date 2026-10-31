@@ -3,16 +3,16 @@ using Screeny.Export;
 
 namespace Screeny.Overlay;
 
-// Оформление (beautify): кнопка ✨ и клавиша B включают, flyout у кнопки ✨ меняет фон, отступ, скругление и тень.
-// Вокруг выделения ничего не рисуется (панель и подпись размера не прыгают): включённое оформление видно по
-// подсвеченной кнопке ✨ и значку ✨ у подписи размера. Результат Copy/Save/Pin и история проходят через
-// BeautifyComposer. Режим текста (OCR) работает по исходному снимку без оформления.
+// Decoration (beautify): ✨ button and B key enable, flyout at ✨ changes background, margin, rounding, shadow.
+// Nothing drawn around selection (panel and size label don't jump): enabled decoration visible by
+// highlighted ✨ button and ✨ icon next to size label. Copy/Save/Pin result and history go through
+// BeautifyComposer. Text mode (OCR) works on original screenshot without decoration.
 public partial class OverlayWindow
 {
     /// <summary>
-    /// Данные для повторного редактирования из истории: документ аннотаций в координатах региона (фигуры целиком
-    /// вне региона не попадают — их нет и в картинке) и, если включена настройка, регион без пометок и оформления.
-    /// Сбой здесь не должен мешать копированию — только журнал. Без функции «История» ничего не собирается.
+    /// Data for re-editing from history: annotation document in region coordinates (shapes entirely
+    /// outside region don't get in — absent in image too) and, if setting enabled, region without marks and decoration.
+    /// Failure here must not block copy — only log. Without History feature nothing collected.
     /// </summary>
     private (string? Json, System.Windows.Media.Imaging.BitmapSource? Original) HistorySidecarFor(PixelRect region)
     {
@@ -31,17 +31,17 @@ public partial class OverlayWindow
         return (json, original);
     }
 
-    /// <summary>Регион снимка без пометок и оформления для <c>.orig.png</c>; при выключенной настройке — null (файл не пишется).</summary>
+    /// <summary>Region without marks and decoration for <c>.orig.png</c>; when setting disabled — null (file not written).</summary>
     public static System.Windows.Media.Imaging.BitmapSource? OriginalForHistory(bool keepOriginals, System.Windows.Media.Imaging.BitmapSource shot, PixelRect region)
         => keepOriginals ? ImageComposer.Compose(shot, region, null) : null;
 
-    /// <summary>Итоговая картинка: снимок с аннотациями и, если включено, оформление.</summary>
+    /// <summary>Final image: screenshot with annotations and, if enabled, decoration.</summary>
     private (System.Windows.Media.Imaging.BitmapSource Image, PixelRect ScreenRegion) ComposeResult(PixelRect region)
     {
         var image = ImageComposer.Compose(_shot.Bitmap, region, Document);
         var screen = region.Offset(_shot.VirtualRect.X, _shot.VirtualRect.Y);
         if (!_editor.BeautifyOn) return (image, screen);
-        // Закреплённый снимок встаёт так, чтобы сам снимок остался на месте, а оформление было вокруг.
+        // Pinned screenshot placed so screenshot itself stays in place, decoration around.
         int p = _editor.Beautify.PaddingPx;
         return (BeautifyComposer.Compose(image, _editor.Beautify), new PixelRect(screen.X - p, screen.Y - p, screen.Width + 2 * p, screen.Height + 2 * p));
     }

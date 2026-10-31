@@ -3,7 +3,7 @@ using D = Screeny.Hotkeys.WinShiftSDetector;
 
 namespace Screeny.Tests.Hotkeys;
 
-/// <summary>Машина состояний Win+Shift+S; сам хук (SetWindowsHookEx) в тестах не ставится.</summary>
+/// <summary>Win+Shift+S state machine; hook itself (SetWindowsHookEx) not installed in tests.</summary>
 public class WinShiftSDetectorTests
 {
     private static readonly KeyDecision Pass = KeyDecision.Pass;
@@ -22,7 +22,7 @@ public class WinShiftSDetectorTests
     public void WinShiftS_TriggersAndSwallowsS(int win, int shift)
     {
         var d = new D();
-        Assert.Equal(Pass, Down(d, win));   // Win и Shift до системы доходят
+        Assert.Equal(Pass, Down(d, win));   // Win and Shift reach system
         Assert.Equal(Pass, Down(d, shift));
         Assert.Equal(Trigger, Down(d, D.VkS));
         Assert.Equal(Swallow, Up(d, D.VkS));
@@ -47,7 +47,7 @@ public class WinShiftSDetectorTests
         Assert.Equal(Swallow, Down(d, D.VkS));
         Assert.Equal(Swallow, Down(d, D.VkS));
         Assert.Equal(Swallow, Up(d, D.VkS));
-        Assert.Equal(Trigger, Down(d, D.VkS)); // новое нажатие при зажатых Win+Shift — новый снимок
+        Assert.Equal(Trigger, Down(d, D.VkS)); // new press with Win+Shift held — new screenshot
     }
 
     [Fact]
@@ -73,8 +73,8 @@ public class WinShiftSDetectorTests
     }
 
     [Theory]
-    [InlineData(new[] { D.VkLWin })]               // Win+S — поиск Windows
-    [InlineData(new[] { D.VkLShift })]             // заглавная S
+    [InlineData(new[] { D.VkLWin })]               // Win+S — Windows search
+    [InlineData(new[] { D.VkLShift })]             // capital S
     [InlineData(new int[0])]
     public void WithoutWinAndShift_Passes(int[] held)
     {
@@ -112,14 +112,14 @@ public class WinShiftSDetectorTests
         Assert.Equal(Pass, d.OnKey(D.VkLWin, true, injected: true));
         Assert.Equal(Pass, d.OnKey(D.VkLShift, true, injected: true));
         Assert.Equal(Pass, d.OnKey(D.VkS, true, injected: true));
-        Assert.Equal(Pass, Down(d, D.VkS)); // инъекция не «зажала» Win и Shift
+        Assert.Equal(Pass, Down(d, D.VkS)); // injection didn't “hold” Win and Shift
         Up(d, D.VkS);
 
         Down(d, D.VkLWin); Down(d, D.VkLShift);
-        Assert.Equal(Pass, d.OnKey(D.VkS, true, injected: true)); // наша или чужая SendInput — не срабатывание
+        Assert.Equal(Pass, d.OnKey(D.VkS, true, injected: true)); // our or foreign SendInput — not trigger
         Assert.Equal(Pass, d.OnKey(D.MaskKey, true, injected: true));
         Assert.Equal(Pass, d.OnKey(D.VkLWin, false, injected: true));
-        Assert.Equal(Trigger, Down(d, D.VkS)); // физическая Win всё ещё зажата
+        Assert.Equal(Trigger, Down(d, D.VkS)); // physical Win still held
     }
 
     [Fact]
@@ -131,8 +131,8 @@ public class WinShiftSDetectorTests
         d.OnMaskSent();
         Assert.Equal(Pass, Up(d, D.VkLWin));
         Assert.Equal(Pass, Up(d, D.VkLShift));
-        Assert.Equal(Swallow, Up(d, D.VkS)); // отпускание без нажатия в приложениях не появится
-        Assert.Equal(Pass, Down(d, D.VkS));  // дальше S — обычная клавиша
+        Assert.Equal(Swallow, Up(d, D.VkS)); // release without press won't appear in apps
+        Assert.Equal(Pass, Down(d, D.VkS));  // then S — normal key
     }
 
     [Fact]
@@ -143,7 +143,7 @@ public class WinShiftSDetectorTests
         Assert.Empty(d.OnMaskSent());
         Assert.False(d.MaskPending);
         Assert.Equal(Pass, Up(d, D.VkLShift));
-        Assert.Equal(Pass, Up(d, D.VkLWin)); // маска уже между нажатием и отпусканием Win — «Пуск» не откроется
+        Assert.Equal(Pass, Up(d, D.VkLWin)); // mask already between Win press and release — Start won't open
     }
 
     [Fact]
@@ -151,9 +151,9 @@ public class WinShiftSDetectorTests
     {
         var d = new D();
         Down(d, D.VkRWin); Down(d, D.VkLShift); Down(d, D.VkS);
-        Assert.Equal(Swallow, Up(d, D.VkRWin)); // гонка: отпускание пришло раньше обработки маски
+        Assert.Equal(Swallow, Up(d, D.VkRWin)); // race: release arrived before mask processing
         Assert.False(d.WinDown);
-        Assert.Equal([D.VkRWin], d.OnMaskSent()); // вставить после маски
+        Assert.Equal([D.VkRWin], d.OnMaskSent()); // insert after mask
         Assert.False(d.MaskPending);
         Assert.Empty(d.OnMaskSent());
         Down(d, D.VkLWin);

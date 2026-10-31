@@ -1,16 +1,16 @@
 namespace Screeny.Ocr.Paddle;
 
 /// <summary>
-/// Похожие буквы кириллицы и латиницы. Кириллическая rec-модель пишет латиницу внутри русского текста похожими
-/// кириллическими буквами («Privaсу», «PrintSсгееn»). В слове со смешанной письменностью буквы меньшинства заменяются
-/// двойниками письменности большинства. Замена 1:1 — позиции символов (шаги CTC) не сдвигаются.
+/// Similar Cyrillic/Latin letters. Cyrillic rec-model writes Latin inside Russian text with similar
+/// Cyrillic letters (“Privaсу”, “PrintSсгееn”). In word with mixed script, minority letters are replaced
+/// by majority-script counterparts. 1:1 replacement — character positions (CTC steps) don't shift.
 /// </summary>
 public static class Homoglyphs
 {
     private const string Cyr = "аАвВеЕкКмМнНоОрРсСтТуУхХгіІјЈѕЅԁ";
     private const string Lat = "aABBeEkKMMHHoOpPcCTTyYxXrIIjJsSd";
-    // «в» и «н» строчные похожи на латиницу только в некоторых шрифтах: в обратную сторону (латиница → кириллица)
-    // их не меняем, чтобы «B» и «H» в английских словах не превращались в «в» и «н».
+    // lowercase “в” and “н” resemble Latin only in some fonts: reverse (Latin → Cyrillic)
+    // not replaced, so “B” and “H” in English words don't become “в”/“н”.
     private static readonly Dictionary<char, char> ToLat = Cyr.Zip(Lat).ToDictionary(p => p.First, p => p.Second);
     private static readonly Dictionary<char, char> ToCyr = Cyr.Zip(Lat).Where(p => p.First is not ('в' or 'н' or 'м' or 'т' or 'г' or 'і' or 'І' or 'ј' or 'Ј' or 'ѕ' or 'Ѕ' or 'ԁ'))
         .GroupBy(p => p.Second).ToDictionary(g => g.Key, g => g.First().First);
@@ -28,7 +28,7 @@ public static class Homoglyphs
         if (cyr == 0 || lat == 0) return w;
         var map = lat >= cyr ? ToLat : ToCyr;
         var fixedWord = new string(w.Select(c => map.TryGetValue(c, out var r) ? r : c).ToArray());
-        // Если двойника нашлось не для всех букв меньшинства, слово оставляем как есть: это не гомоглифы («X5K7M», «Wi-Fiсеть»).
+        // If not all minority letters have doubles, word left as-is: not homoglyphs (“X5K7M”, “Wi-Fiсеть”).
         return fixedWord.Any(IsCyr) && fixedWord.Any(IsLat) ? w : fixedWord;
     }
 }

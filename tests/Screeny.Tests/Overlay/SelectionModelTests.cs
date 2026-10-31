@@ -95,12 +95,12 @@ public class SelectionModelTests
     [Fact]
     public void DragHandle_Right_ReachesLastColumn()
     {
-        // Модель принимает exclusive-правый край, равный Bounds.Right.
+        // Model accepts exclusive right edge equal Bounds.Right.
         var m = new SelectionModel(Bounds) { Rect = new PixelRect(10, 10, 100, 100) };
         m.BeginDrag(Handle.Right, new PixelPoint(110, 50));
         m.DragTo(new PixelPoint(Bounds.Right, 50));
         Assert.Equal(Bounds.Right, m.Rect.Right);
-        m.DragTo(new PixelPoint(Bounds.Right + 50, 50)); // дальше края — прижимается
+        m.DragTo(new PixelPoint(Bounds.Right + 50, 50)); // beyond edge — clamped
         Assert.Equal(Bounds.Right, m.Rect.Right);
     }
 
@@ -117,7 +117,7 @@ public class SelectionModelTests
     [Fact]
     public void DragHandle_Right_GrabbedOnBorder_ReachesLastColumnAtLastCursorPixel()
     {
-        // Рамка рисуется по пикселю Right, за неё и хватают; курсор не может уйти дальше Bounds.Right − 1.
+        // Border drawn on pixel Right, grabbed there; cursor can't go beyond Bounds.Right − 1.
         var m = new SelectionModel(Bounds) { Rect = new PixelRect(10, 10, 100, 100) };
         m.BeginDrag(Handle.Right, new PixelPoint(110, 50));
         m.DragTo(new PixelPoint(Bounds.Right - 1, 50));

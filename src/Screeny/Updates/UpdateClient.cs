@@ -3,38 +3,38 @@ using Velopack.Sources;
 
 namespace Screeny.Updates;
 
-/// <summary>Найденное обновление: версия, список изменений (markdown) и объект Velopack для загрузки.</summary>
-/// <param name="EarlierNotes">Списки изменений промежуточных версий (новые первыми), если источник знает все версии
-/// между текущей и целевой: пустой список — целевая идёт сразу за текущей; null — промежуточные версии неизвестны.</param>
+/// <summary>Found update: version, changelog (markdown) and Velopack object for download.</summary>
+/// <param name="EarlierNotes">Intermediate version changelogs (newer first), if source knows all versions
+/// between current and target: empty list — target immediately after current; null — intermediates unknown.</param>
 public sealed record UpdateCandidate(string Version, string? NotesMarkdown, object? Handle = null, IReadOnlyList<string?>? EarlierNotes = null)
 {
-    /// <summary>Списки изменений всех версий от новой к старой: целевая, затем промежуточные.</summary>
+    /// <summary>Changelogs of all versions newest to oldest: target, then intermediates.</summary>
     public IEnumerable<string?> AllNotes => EarlierNotes is null ? [NotesMarkdown] : [NotesMarkdown, .. EarlierNotes];
 }
 
-/// <summary>Источник обновлений; интерфейс — чтобы проверять <see cref="UpdateService"/> без сети и Velopack.</summary>
+/// <summary>Update source; interface to test <see cref="UpdateService"/> without network and Velopack.</summary>
 public interface IUpdateClient
 {
-    /// <summary>Копия умеет обновляться: установлена через Setup или запущена из портативной сборки Velopack.</summary>
+    /// <summary>Copy can update: installed via Setup or run from Velopack portable build.</summary>
     bool CanUpdate { get; }
-    /// <summary>Текущая версия (из пакета Velopack); null у копии, собранной не через <c>tools/pack.ps1</c>.</summary>
+    /// <summary>Current version (from Velopack package); null for copy not built via <c>tools/pack.ps1</c>.</summary>
     string? CurrentVersion { get; }
-    /// <summary>null — новее нет. Ошибки сети и источника — исключением.</summary>
+    /// <summary>null — no newer. Network and source errors — exception.</summary>
     Task<UpdateCandidate?> CheckAsync(CancellationToken ct);
     Task DownloadAsync(UpdateCandidate update, Action<int>? progress, CancellationToken ct);
     /// <summary>
-    /// Запускает Update.exe, который дождётся выхода приложения (до 60 с), применит обновление и перезапустит Screeny
-    /// с <paramref name="restartArgs"/>. Сразу после вызова приложение должно завершиться.
+    /// Launches Update.exe, which waits for app exit (up to 60s), applies update and restarts Screeny
+    /// with <paramref name="restartArgs"/>. App must exit right after call.
     /// </summary>
     void ApplyAfterExit(UpdateCandidate update, string[] restartArgs);
     /// <summary>
-    /// Как <see cref="ApplyAfterExit"/>, но без окон Update.exe и без перезапуска: обновление, о котором не спрашивали
-    /// (все изменения про выключенные функции), применяется при обычном выходе из Screeny.
+    /// Like <see cref="ApplyAfterExit"/>, but without Update.exe windows and restart: update not asked about
+    /// (all changes concern disabled features) applied on normal Screeny exit.
     /// </summary>
     void ApplySilentlyAfterExit(UpdateCandidate update);
 }
 
-/// <summary>Источник «ниоткуда»: копия считается необновляемой и ни к чему не обращается.</summary>
+/// <summary>“Nowhere” source: copy considered non-updatable, contacts nothing.</summary>
 public sealed class NoUpdateClient : IUpdateClient
 {
     public static readonly NoUpdateClient Instance = new();
@@ -47,7 +47,7 @@ public sealed class NoUpdateClient : IUpdateClient
     public void ApplySilentlyAfterExit(UpdateCandidate update) => throw new InvalidOperationException("No update source");
 }
 
-/// <summary>Обновления через Velopack: GitHub Releases или (только <c>--dev --update-source</c>) локальная папка.</summary>
+/// <summary>Updates via Velopack: GitHub Releases or (only <c>--dev --update-source</c>) local folder.</summary>
 public sealed class VelopackUpdateClient : IUpdateClient
 {
     public const string RepositoryUrl = "https://github.com/DontIgnore/Screeny";
@@ -58,7 +58,7 @@ public sealed class VelopackUpdateClient : IUpdateClient
 
     public static VelopackUpdateClient ForGithub() => new(new GithubSource(RepositoryUrl, accessToken: null, prerelease: false));
 
-    /// <summary>Папка с результатом <c>tools/pack.ps1</c> (<c>releases.win.json</c> и <c>*.nupkg</c>).</summary>
+    /// <summary>Folder with result of <c>tools/pack.ps1</c> (<c>releases.win.json</c> and <c>*.nupkg</c>).</summary>
     public static VelopackUpdateClient ForFolder(string folder) => new(new SimpleFileSource(new DirectoryInfo(folder)));
 
     public bool CanUpdate => _manager.IsInstalled;
@@ -71,9 +71,9 @@ public sealed class VelopackUpdateClient : IUpdateClient
         var info = await _manager.CheckForUpdatesAsync().ConfigureAwait(false);
         if (info is null) return null;
         var target = info.TargetFullRelease;
-        // Промежуточные версии Velopack знает только по цепочке дельт (DeltasToTarget: по дельте на каждую версию после
-        // текущей, до целевой включительно; есть не всегда — нужен локальный пакет текущей версии). Без цепочки
-        // (или если она не доходит до целевой) промежуточные неизвестны: null, и молча такое обновление не ставится.
+        // Intermediate versions Velopack knows only via delta chain (DeltasToTarget: one delta per version after
+        // current up to target inclusive; not always present — needs local current version package). Without chain
+        // (or if doesn't reach target) intermediates unknown: null, and silent such update not installed.
         var deltas = info.DeltasToTarget ?? [];
         IReadOnlyList<string?>? earlier = deltas.Any(d => d.Version == target.Version)
             ? deltas

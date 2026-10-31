@@ -9,8 +9,8 @@ using Screeny.Logging;
 namespace Screeny.Migration;
 
 /// <summary>
-/// Снимок реальной среды. Только чтение: реестр (Run, StartupApproved, Uninstall, клавиатура), папки «Автозагрузка»,
-/// список процессов и настройки PowerToys. Ошибки чтения отдельных мест пишутся в журнал и не прерывают снимок.
+/// Real environment snapshot. Read-only: registry (Run, StartupApproved, Uninstall, keyboard), Startup folders,
+/// process list and PowerToys settings. Individual read errors logged and don't abort snapshot.
 /// </summary>
 public sealed class WindowsEnvironmentSnapshot : IEnvironmentSnapshot
 {
@@ -24,7 +24,7 @@ public sealed class WindowsEnvironmentSnapshot : IEnvironmentSnapshot
     public int OsBuild { get; private init; }
     public string? PowerToysKeyboardConfig { get; private init; }
 
-    /// <summary>Читает всё заново. Можно вызывать из фонового потока.</summary>
+    /// <summary>Reads everything anew. Can be called from background thread.</summary>
     public static WindowsEnvironmentSnapshot Capture() => new()
     {
         Processes = Safe(ReadProcesses, "processes"),
@@ -49,7 +49,7 @@ public sealed class WindowsEnvironmentSnapshot : IEnvironmentSnapshot
             using (p)
             {
                 try { list.Add(new ProcessEntry(p.ProcessName, ProcessPath(p.Id), p.Id)); }
-                catch (InvalidOperationException) { /* процесс уже завершился */ }
+                catch (InvalidOperationException) { /* process already exited */ }
             }
         }
         return list;
@@ -58,8 +58,8 @@ public sealed class WindowsEnvironmentSnapshot : IEnvironmentSnapshot
     private const uint ProcessQueryLimitedInformation = 0x1000;
 
     /// <summary>
-    /// Путь exe по PID через QueryFullProcessImageName: в отличие от <c>Process.MainModule</c> работает и для процессов,
-    /// запущенных от администратора. null — нет доступа.
+    /// Exe path by PID via QueryFullProcessImageName: unlike <c>Process.MainModule</c> works for processes
+    /// started by admin. null — no access.
     /// </summary>
     public static string? ProcessPath(int pid)
     {
@@ -141,7 +141,7 @@ public sealed class WindowsEnvironmentSnapshot : IEnvironmentSnapshot
                 {
                     using var key = root.OpenSubKey(keyName);
                     if (key?.GetValue("DisplayName") is not string displayName || string.IsNullOrWhiteSpace(displayName)) continue;
-                    // Ключ, не перенаправляемый WOW64, виден в обоих представлениях — берём один раз.
+                    // Key not redirected by WOW64 visible in both views — read once.
                     if (!seen.Add($"{hive}|{keyName}|{displayName}")) continue;
                     list.Add(new UninstallEntry(keyName, displayName.Trim(), key.GetValue("UninstallString") as string,
                         key.GetValue("InstallLocation") as string, machine));
@@ -162,7 +162,7 @@ public sealed class WindowsEnvironmentSnapshot : IEnvironmentSnapshot
         catch (Exception ex) { Log.Error("Environment snapshot: keyboard settings failed", ex); return null; }
     }
 
-    /// <summary>JSON активной конфигурации Keyboard Manager, если модуль включён в PowerToys. Только чтение файлов.</summary>
+    /// <summary>JSON of active Keyboard Manager config if module enabled in PowerToys. Read-only files.</summary>
     private static string? ReadPowerToysConfig()
     {
         try
@@ -208,7 +208,7 @@ public sealed class WindowsEnvironmentSnapshot : IEnvironmentSnapshot
         catch (Exception ex) when (ex is System.Security.SecurityException or UnauthorizedAccessException or IOException) { return null; }
     }
 
-    /// <summary>Цель ярлыка через IShellLink (только чтение файла ярлыка); null — не удалось.</summary>
+    /// <summary>Shortcut target via IShellLink (read-only file); null — failed.</summary>
     private static string? ShortcutTarget(string lnk)
     {
         object? link = null;

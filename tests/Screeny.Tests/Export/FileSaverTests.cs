@@ -84,7 +84,7 @@ public class FileSaverTests : IDisposable
     {
         var path = Path.Combine(_dir, "c.png");
         File.WriteAllText(path, "old");
-        File.SetAttributes(path, FileAttributes.ReadOnly); // замена падает уже после записи временного файла
+        File.SetAttributes(path, FileAttributes.ReadOnly); // replacement fails after temp file write
         try
         {
             Assert.ThrowsAny<Exception>(() => FileSaver.Save(Image(), path));

@@ -4,26 +4,26 @@ using Screeny.Settings;
 
 namespace Screeny.Export;
 
-/// <summary>Фон оформления: градиенты в палитре бренда.</summary>
+/// <summary>Decoration background: gradients in brand palette.</summary>
 public enum BeautifyPreset { Blue, Sunset, Mint, Graphite, Light, Warm }
 
-/// <summary>Отступ вокруг снимка: S/M/L = 24/48/80 пикселей снимка.</summary>
+/// <summary>Margin around screenshot: S/M/L = 24/48/80 screenshot pixels.</summary>
 public enum BeautifyPadding { S, M, L }
 
 /// <summary>
-/// Параметры оформления (beautify): фон-градиент, отступ, скругление углов снимка, тень.
-/// Одни и те же для композиции (<see cref="BeautifyComposer"/>) и образцов во всплывающей панели оформления.
+/// Decoration parameters (beautify): background gradient, margin, corner rounding, shadow.
+/// Same for composition (<see cref="BeautifyComposer"/>) and swatches in decoration flyout.
 /// </summary>
 public sealed record BeautifyOptions(BeautifyPreset Preset, BeautifyPadding Padding, int Radius, bool Shadow)
 {
     public static readonly BeautifyOptions Default = new(BeautifyPreset.Blue, BeautifyPadding.M, 8, true);
 
-    /// <summary>Допустимые скругления в пикселях снимка.</summary>
+    /// <summary>Allowed roundings in screenshot pixels.</summary>
     public static readonly int[] Radii = [0, 8, 16];
 
     public static readonly BeautifyPreset[] Presets = Enum.GetValues<BeautifyPreset>();
 
-    /// <summary>Отступ в пикселях снимка.</summary>
+    /// <summary>Margin in screenshot pixels.</summary>
     public int PaddingPx => PaddingPixels(Padding);
 
     public static int PaddingPixels(BeautifyPadding p) => p switch
@@ -33,15 +33,15 @@ public sealed record BeautifyOptions(BeautifyPreset Preset, BeautifyPadding Padd
         _ => 48,
     };
 
-    /// <summary>Размытие тени ≈ треть отступа, смещение вниз ≈ шестая часть, плотность 0,35.</summary>
+    /// <summary>Shadow blur ≈ third of margin, offset down ≈ sixth, density 0.35.</summary>
     public double ShadowBlur => PaddingPx / 3.0;
     public double ShadowOffset => Math.Max(2, PaddingPx / 6.0);
     public const double ShadowOpacity = 0.35;
 
-    /// <summary>Ближайшее допустимое скругление (битая настройка не даёт произвольного радиуса).</summary>
+    /// <summary>Nearest allowed rounding (broken setting doesn't give arbitrary radius).</summary>
     public static int SnapRadius(int radius) => Radii.OrderBy(r => Math.Abs(r - radius)).ThenBy(r => r).First();
 
-    /// <summary>Начальный и конечный цвета градиента (по диагонали из левого верхнего угла в правый нижний).</summary>
+    /// <summary>Gradient start and end colors (diagonal from top-left to bottom-right).</summary>
     public static (Color From, Color To) Colors(BeautifyPreset preset) => preset switch
     {
         BeautifyPreset.Sunset => (Hex(0xFF7A59), Hex(0xFFB547)),
@@ -62,7 +62,7 @@ public sealed record BeautifyOptions(BeautifyPreset Preset, BeautifyPadding Padd
         _ => Localization.Loc.T("Beautify.Blue"),
     };
 
-    /// <summary>Замороженная кисть градиента в относительных координатах: одна и та же на холсте любого размера.</summary>
+    /// <summary>Frozen gradient brush in relative coordinates: same on any canvas size.</summary>
     public static LinearGradientBrush Brush(BeautifyPreset preset)
     {
         var (from, to) = Colors(preset);

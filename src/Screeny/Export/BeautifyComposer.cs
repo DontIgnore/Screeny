@@ -8,10 +8,10 @@ namespace Screeny.Export;
 public static class BeautifyComposer
 {
     /// <summary>
-    /// Оформляет готовый снимок: фон-градиент на весь холст, снимок с отступом и скруглёнными углами, мягкая тень.
-    /// Размер — снимок + 2 × отступ, 96 DPI, 1 единица = 1 пиксель. Результат всегда непрозрачный (альфа 255
-    /// во всех пикселях): при DIB-вставке в Paint или Word прозрачные углы стали бы чёрными. Чистая функция,
-    /// результат заморожен.
+    /// Decorates ready screenshot: background gradient on whole canvas, screenshot with margin and rounded corners, soft shadow.
+    /// Size — screenshot + 2 × margin, 96 DPI, 1 unit = 1 pixel. Result always opaque (alpha 255
+    /// in all pixels): DIB paste into Paint/Word would make transparent corners black. Pure function,
+    /// result frozen.
     /// </summary>
     public static BitmapSource Compose(BitmapSource content, BeautifyOptions o)
     {
@@ -26,7 +26,7 @@ public static class BeautifyComposer
         var background = new DrawingVisual();
         using (var dc = background.RenderOpen())
         {
-            // Сплошной цвет под градиентом: даже краевые пиксели градиента не оставят прозрачности.
+            // Solid color under gradient: even edge gradient pixels leave no transparency.
             dc.DrawRectangle(Solid(BeautifyOptions.Colors(o.Preset).From), null, full);
             dc.DrawRectangle(BeautifyOptions.Brush(o.Preset), null, full);
         }
@@ -46,7 +46,7 @@ public static class BeautifyComposer
         using (var dc = foreground.RenderOpen())
         {
             if (r > 0) dc.PushClip(new RectangleGeometry(inner, r, r));
-            // Прямоугольник в пикселях, а не в DIP снимка: снимок с другим DPI не масштабируется.
+            // Rectangle in pixels, not screenshot DIP: screenshot with other DPI not scaled.
             dc.DrawImage(content, inner);
             if (r > 0) dc.Pop();
         }
@@ -58,12 +58,12 @@ public static class BeautifyComposer
     }
 
     /// <summary>
-    /// Размытая тень в уменьшенном масштабе: программный BlurEffect на снимке 4K стоит сотни миллисекунд,
-    /// а мягкая тень после растягивания с линейной интерполяцией выглядит так же. Маска — на весь холст.
+    /// Blurred shadow at reduced scale: software BlurEffect on 4K screenshot costs hundreds of milliseconds,
+    /// while soft shadow after stretching with linear interpolation looks same. Mask over whole canvas.
     /// </summary>
     private static BitmapSource ShadowMask(int width, int height, Rect rect, double radius, double blur)
     {
-        double k = Math.Clamp(Math.Floor(blur / 2), 1, 4); // во сколько раз меньше; радиус размытия ≥ 2 px маски
+        double k = Math.Clamp(Math.Floor(blur / 2), 1, 4); // how many times smaller; blur radius ≥ 2 px of mask
         int mw = Math.Max(1, (int)Math.Ceiling(width / k)), mh = Math.Max(1, (int)Math.Ceiling(height / k));
         var visual = new DrawingVisual
         {
@@ -71,7 +71,7 @@ public static class BeautifyComposer
         };
         using (var dc = visual.RenderOpen())
         {
-            // Прозрачный прямоугольник на весь холст: размытие не обрезается по границе самой тени.
+            // Transparent rectangle over whole canvas: blur not clipped by shadow boundary.
             dc.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, mw, mh));
             dc.DrawRoundedRectangle(Solid(Color.FromArgb((byte)Math.Round(255 * BeautifyOptions.ShadowOpacity), 0, 0, 0)), null,
                 new Rect(rect.X / k, rect.Y / k, rect.Width / k, rect.Height / k), radius / k, radius / k);
@@ -82,12 +82,12 @@ public static class BeautifyComposer
         return rtb;
     }
 
-    /// <summary>Размер результата для снимка <paramref name="w"/> × <paramref name="h"/>.</summary>
+    /// <summary>Result size for screenshot <paramref name="w"/> × <paramref name="h"/>.</summary>
     public static (int Width, int Height) SizeFor(int w, int h, BeautifyOptions o) => (w + 2 * o.PaddingPx, h + 2 * o.PaddingPx);
 
     /// <summary>
-    /// Bgra32 с альфой 255 во всех пикселях. Фон уже непрозрачный, так что это лишь гарантия: пиксель
-    /// с альфой меньше 255 (premultiplied) становится тем же цветом поверх чёрного.
+    /// Bgra32 with alpha 255 in all pixels. Background already opaque, so this is just guarantee: pixel
+    /// with alpha &lt; 255 (premultiplied) becomes same color over black.
     /// </summary>
     private static BitmapSource Opaque(BitmapSource pbgra)
     {

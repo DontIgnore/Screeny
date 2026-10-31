@@ -5,8 +5,8 @@ using Screeny.Overlay;
 namespace Screeny.Capture;
 
 /// <summary>
-/// «Снимок» из файла для тестового экземпляра (<c>--dev --overlay-test x.png</c>): оверлей проверяется
-/// без захвата настоящего экрана. Картинка лежит от начала основного монитора (0, 0).
+/// A file-backed screenshot for the development instance (<c>--dev --overlay-test x.png</c>), allowing the overlay
+/// to be tested without capturing the screen. The image starts at the primary monitor's origin (0, 0).
 /// </summary>
 public static class DevShot
 {
@@ -18,7 +18,7 @@ public static class DevShot
         return new Screenshot(Normalize(image), new PixelRect(0, 0, image.PixelWidth, image.PixelHeight));
     }
 
-    /// <summary>Bgra32 и 96 DPI — как у настоящего снимка (эффекты и лупа рассчитывают именно на это).</summary>
+    /// <summary>Bgra32 and 96 DPI, matching a real screenshot as expected by effects and the magnifier.</summary>
     public static BitmapSource Normalize(BitmapSource image)
     {
         var bgra = image.Format == PixelFormats.Bgra32 ? image : new FormatConvertedBitmap(image, PixelFormats.Bgra32, null, 0);

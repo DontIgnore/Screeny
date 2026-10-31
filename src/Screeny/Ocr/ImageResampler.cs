@@ -1,8 +1,8 @@
 namespace Screeny.Ocr;
 
 /// <summary>
-/// Масштабирование BGRA-картинки бикубическим фильтром Catmull-Rom, по осям раздельно.
-/// Для OCR важна резкость контуров букв: билинейное увеличение их размывает, ближайший сосед даёт «лесенку».
+/// BGRA image scaling with bicubic Catmull-Rom filter, separable axes.
+/// For OCR letter edge sharpness matters: bilinear upscale blurs, nearest neighbor gives jaggies.
 /// </summary>
 public static class ImageResampler
 {
@@ -10,7 +10,7 @@ public static class ImageResampler
     {
         if (nw == w && nh == h) return (byte[])src.Clone();
         var tmp = new float[nw * h * 4];
-        // По горизонтали: w → nw.
+        // Horizontal: w → nw.
         var (hIdx, hWts) = Kernel(w, nw);
         Parallel.For(0, h, y =>
         {
@@ -27,7 +27,7 @@ public static class ImageResampler
                 tmp[o] = b; tmp[o + 1] = g; tmp[o + 2] = r; tmp[o + 3] = a;
             }
         });
-        // По вертикали: h → nh.
+        // Vertical: h → nh.
         var dst = new byte[nw * nh * 4];
         var (vIdx, vWts) = Kernel(h, nh);
         Parallel.For(0, nh, y =>
@@ -47,7 +47,7 @@ public static class ImageResampler
         return dst;
     }
 
-    /// <summary>Для каждого выходного пикселя — четыре исходных индекса (с прижатием к краю) и веса Catmull-Rom.</summary>
+    /// <summary>For each output pixel — four source indices (clamped) and Catmull-Rom weights.</summary>
     private static (int[] Index, float[] Weight) Kernel(int size, int newSize)
     {
         var idx = new int[newSize * 4];

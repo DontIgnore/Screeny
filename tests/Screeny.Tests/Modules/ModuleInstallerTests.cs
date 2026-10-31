@@ -5,7 +5,7 @@ using Screeny.Modules;
 
 namespace Screeny.Tests.Modules;
 
-/// <summary>Установка модуля: загрузка через подставной <see cref="HttpMessageHandler"/>, проверки, уборка за собой.</summary>
+/// <summary>Module install: download via fake <see cref="HttpMessageHandler"/>, checks, self-cleanup.</summary>
 public class ModuleInstallerTests : IDisposable
 {
     private readonly ModuleTestFiles _files = new();
@@ -14,7 +14,7 @@ public class ModuleInstallerTests : IDisposable
 
     public void Dispose() => _files.Dispose();
 
-    /// <summary>Отвечает на любой запрос заданным статусом и телом (поток — чтобы проверять отмену посреди загрузки).</summary>
+    /// <summary>Answers any request with given status and body (stream — to test cancel mid-download).</summary>
     private sealed class FakeHandler(Func<HttpResponseMessage> respond) : HttpMessageHandler
     {
         public int Requests { get; private set; }
@@ -28,7 +28,7 @@ public class ModuleInstallerTests : IDisposable
     private static HttpModuleSource Source(byte[] body, HttpStatusCode status = HttpStatusCode.OK)
         => new(new HttpClient(new FakeHandler(() => new HttpResponseMessage(status) { Content = new ByteArrayContent(body) })), Url);
 
-    /// <summary>Отдаёт первый кусок, а дальше ждёт до отмены.</summary>
+    /// <summary>Sends first chunk, then waits until cancel.</summary>
     private sealed class StallingStream(byte[] first, long length) : Stream
     {
         private bool _sent;
@@ -50,7 +50,7 @@ public class ModuleInstallerTests : IDisposable
         public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
     }
 
-    /// <summary>В корне модулей не осталось временных файлов и папок установки.</summary>
+    /// <summary>No temp files or install folders remain in modules root.</summary>
     private void AssertNoTemporaries()
     {
         if (!Directory.Exists(Root)) return;
@@ -72,7 +72,7 @@ public class ModuleInstallerTests : IDisposable
         Assert.Equal(1, ModuleInstaller.DetectInstalled(Root, "ocr-paddle", 1));
         Assert.Equal(0, progress[0]);
         Assert.Equal(100, progress[^1]);
-        Assert.Equal(progress.OrderBy(p => p), progress); // не убывает
+        Assert.Equal(progress.OrderBy(p => p), progress); // doesn't decrease
         AssertNoTemporaries();
     }
 
@@ -143,7 +143,7 @@ public class ModuleInstallerTests : IDisposable
     [InlineData("C:/evil.txt")]
     public async Task Install_ZipSlipEntry_IsRejected(string entry)
     {
-        // Хеш архива верный (как будто подменили архив на сервере и хеш в приложении): защита всё равно срабатывает.
+        // Archive hash correct (as if archive swapped on server and hash in app): protection still triggers.
         var zip = ModuleTestFiles.Zip(ModuleTestFiles.DefaultFiles, extra: [new(entry, Encoding.ASCII.GetBytes("pwned"))]);
         var installer = new ModuleInstaller(Root, ModuleTestFiles.SpecFor(zip));
         var ex = await Assert.ThrowsAsync<ModuleInstallException>(() => installer.InstallAsync(Source(zip), null, CancellationToken.None));
@@ -159,7 +159,7 @@ public class ModuleInstallerTests : IDisposable
     {
         var files = new Dictionary<string, byte[]>(ModuleTestFiles.DefaultFiles);
         var manifest = ModuleTestFiles.Manifest("ocr-paddle", 1, files);
-        files["det.onnx"] = Encoding.ASCII.GetBytes("tampered model!"); // та же длина, другой хеш
+        files["det.onnx"] = Encoding.ASCII.GetBytes("tampered model!"); // same length, different hash
         var zip = ModuleTestFiles.Zip(files, manifest);
         var installer = new ModuleInstaller(Root, ModuleTestFiles.SpecFor(zip));
         var ex = await Assert.ThrowsAsync<ModuleInstallException>(() => installer.InstallAsync(Source(zip), null, CancellationToken.None));
@@ -230,10 +230,10 @@ public class ModuleInstallerTests : IDisposable
     [Fact]
     public void DetectInstalled_PrefersRequiredVersion_ElseNewest_IgnoresBroken()
     {
-        Assert.Null(ModuleInstaller.DetectInstalled(Root, "ocr-paddle", 1)); // папки нет
+        Assert.Null(ModuleInstaller.DetectInstalled(Root, "ocr-paddle", 1)); // no folder
         _files.Installed(Root, 1);
         _files.Installed(Root, 3);
-        Directory.CreateDirectory(Path.Combine(Root, "ocr-paddle-7")); // без module.json
+        Directory.CreateDirectory(Path.Combine(Root, "ocr-paddle-7")); // without module.json
         Directory.CreateDirectory(Path.Combine(Root, "ocr-paddle-x"));
         Assert.Equal(1, ModuleInstaller.DetectInstalled(Root, "ocr-paddle", 1));
         Assert.Equal(3, ModuleInstaller.DetectInstalled(Root, "ocr-paddle", 2));
@@ -264,8 +264,8 @@ public class ModuleInstallerTests : IDisposable
         var installer = new ModuleInstaller(Root, new ModuleSpec("ocr-paddle", 1, ""));
         Assert.Equal(RemoveResult.PendingRestart, installer.Remove(inUse: d => d == dir));
         Assert.True(installer.RemovalPending);
-        Assert.True(File.Exists(Path.Combine(dir, "det.onnx"))); // файлы целы: их держит загруженная библиотека
-        Assert.Null(ModuleInstaller.DetectInstalled(Root, "ocr-paddle", 1)); // но модуль уже не считается установленным
+        Assert.True(File.Exists(Path.Combine(dir, "det.onnx"))); // files intact: held by loaded library
+        Assert.Null(ModuleInstaller.DetectInstalled(Root, "ocr-paddle", 1)); // but module no longer counted installed
 
         installer.CleanupOnStartup();
         Assert.False(Directory.Exists(dir));
@@ -307,7 +307,7 @@ public class ModuleInstallerTests : IDisposable
 
     [Theory]
     [InlineData(false, null, ModuleSourceKind.Github)]
-    [InlineData(true, null, ModuleSourceKind.None)]   // dev без --module-source в сеть не ходит
+    [InlineData(true, null, ModuleSourceKind.None)]   // dev without --module-source doesn't go to network
     [InlineData(true, @"C:\mod", ModuleSourceKind.Folder)]
     [InlineData(false, @"C:\mod", ModuleSourceKind.Folder)]
     public void ChooseSource(bool dev, string? folder, ModuleSourceKind kind)
@@ -341,7 +341,7 @@ public class ModuleInstallerTests : IDisposable
         AssertNoTemporaries();
     }
 
-    /// <summary>Сервер не отвечает даже заголовками.</summary>
+    /// <summary>Server doesn't respond even headers.</summary>
     private sealed class NeverRespondingHandler : HttpMessageHandler
     {
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
@@ -364,7 +364,7 @@ public class ModuleInstallerTests : IDisposable
     [Fact]
     public async Task Install_SlowButSteadyBody_IsNotTimedOut()
     {
-        // Таймаут — на паузу между кусками, а не на всю загрузку.
+        // Timeout on pause between chunks, not entire download.
         var zip = ModuleTestFiles.Zip(ModuleTestFiles.DefaultFiles);
         var installer = new ModuleInstaller(Root, ModuleTestFiles.SpecFor(zip) with { ReadTimeout = TimeSpan.FromMilliseconds(300) });
         var http = new HttpClient(new FakeHandler(() => new HttpResponseMessage(HttpStatusCode.OK)
@@ -375,7 +375,7 @@ public class ModuleInstallerTests : IDisposable
         Assert.True(Directory.Exists(installer.TargetFolder));
     }
 
-    /// <summary>Отдаёт данные маленькими кусками с паузой.</summary>
+    /// <summary>Sends data in small chunks with pauses.</summary>
     private sealed class TricklingStream(byte[] data, int chunk, int delayMs) : Stream
     {
         private int _pos;
@@ -403,7 +403,7 @@ public class ModuleInstallerTests : IDisposable
     [Fact]
     public async Task Install_ManifestNotMatchingPinnedHash_IsRejected()
     {
-        // Архив цел и согласован сам с собой, но module.json — не тот, что зашит в приложении.
+        // Archive intact and self-consistent, but module.json not the hardcoded one.
         var zip = ModuleTestFiles.Zip(ModuleTestFiles.DefaultFiles);
         var installer = new ModuleInstaller(Root, ModuleTestFiles.SpecFor(zip) with { ManifestSha256 = new string('b', 64) });
         var ex = await Assert.ThrowsAsync<ModuleInstallException>(() => installer.InstallAsync(Source(zip), null, CancellationToken.None));
@@ -427,7 +427,7 @@ public class ModuleInstallerTests : IDisposable
         var from = Path.Combine(_files.Dir, "from");
         Directory.CreateDirectory(from);
         var locked = new FileStream(Path.Combine(from, "x.dll"), FileMode.Create, FileAccess.ReadWrite, FileShare.None);
-        using var release = new Timer(_ => locked.Dispose(), null, 300, Timeout.Infinite); // «антивирус» отпускает файл
+        using var release = new Timer(_ => locked.Dispose(), null, 300, Timeout.Infinite); // “antivirus” releases file
         var to = Path.Combine(_files.Dir, "to");
         ModuleInstaller.MoveWithRetry(from, to, attempts: 5, delayMs: 200);
         Assert.True(File.Exists(Path.Combine(to, "x.dll")));
@@ -454,7 +454,7 @@ public class ModuleInstallerTests : IDisposable
     [Fact]
     public void DeleteRootOrMark_LockedModule_IsMarkedAndNoLongerInstalled()
     {
-        // Модуль держит работающая портативная копия: папка общая.
+        // Module held by running portable copy: folder shared.
         var dir = _files.Installed(Root, 1);
         Directory.CreateDirectory(Path.Combine(Root, ".staging-x"));
         using (new FileStream(Path.Combine(dir, "onnxruntime.dll"), FileMode.Create, FileAccess.ReadWrite, FileShare.None))
@@ -464,7 +464,7 @@ public class ModuleInstallerTests : IDisposable
             Assert.Null(ModuleInstaller.DetectInstalled(Root, "ocr-paddle", 1));
             Assert.False(Directory.Exists(Path.Combine(Root, ".staging-x")));
         }
-        new ModuleInstaller(Root, new ModuleSpec("ocr-paddle", 1, "")).CleanupOnStartup(); // следующий запуск копии
+        new ModuleInstaller(Root, new ModuleSpec("ocr-paddle", 1, "")).CleanupOnStartup(); // next copy launch
         Assert.False(Directory.Exists(dir));
     }
 }

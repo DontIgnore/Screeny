@@ -7,7 +7,7 @@ namespace Screeny.Capture;
 
 public static class WindowFinder
 {
-    /// <summary>Видимые окна в Z-порядке (первое — самое верхнее), без своих окон и без оболочки.</summary>
+    /// <summary>Visible windows in Z-order (first is topmost), excluding own windows and shell.</summary>
     public static List<WindowInfo> Snapshot(PixelRect virtualRect, ISet<IntPtr> exclude)
     {
         var list = new List<WindowInfo>();
@@ -18,7 +18,7 @@ public static class WindowFinder
             if (hwnd == shell || exclude.Contains(hwnd)) return true;
             if (!User32.IsWindowVisible(hwnd) || User32.IsIconic(hwnd)) return true;
             int ex = User32.GetWindowLong(hwnd, User32.GWL_EXSTYLE);
-            // Панели инструментов и «прозрачные для мыши» окна (оверлеи, подсказки) не выделяем.
+            // Toolbars and click-through windows (overlays, tooltips) are not selected.
             if ((ex & (User32.WS_EX_TOOLWINDOW | User32.WS_EX_TRANSPARENT)) != 0) return true;
             if (DwmApi.DwmGetWindowAttribute(hwnd, DwmApi.DWMWA_CLOAKED, out int cloaked, sizeof(int)) == 0 && cloaked != 0) return true;
 
@@ -33,7 +33,7 @@ public static class WindowFinder
             rect = rect.Clamp(bounds);
             if (rect.IsEmpty) return true;
 
-            // Заголовок не читаем: GetWindowText шлёт WM_GETTEXT и может зависнуть на неотвечающем окне.
+            // Title not read: GetWindowText sends WM_GETTEXT and can hang on unresponsive window.
             list.Add(new WindowInfo(hwnd, rect));
             return true;
         }, IntPtr.Zero);
@@ -44,10 +44,10 @@ public static class WindowFinder
         => windows.FirstOrDefault(w => w.Rect.Contains(p));
 
     /// <summary>
-    /// Видимые края окон на линии курсора — кандидаты прилипания рамки. Для вертикальных краёв (<see cref="EdgeAxis.Vertical"/>)
-    /// берутся окна, чья высота накрывает строку <paramref name="cross"/>, и только те края, у которых это окно —
-    /// верхнее в этой точке (край, закрытый другим окном, не виден и не притягивает). Значения — границы между
-    /// пикселями, как <see cref="PixelRect.X"/> и <see cref="PixelRect.Right"/>.
+    /// Visible window edges on cursor line — snap candidates for selection border. For vertical edges (<see cref="EdgeAxis.Vertical"/>)
+    /// windows whose height covers row <paramref name="cross"/> are taken, and only edges where that window is
+    /// topmost at that point (edge covered by another window is not visible and doesn't snap). Values are boundaries between
+    /// pixels, like <see cref="PixelRect.X"/> and <see cref="PixelRect.Right"/>.
     /// </summary>
     public static IEnumerable<int> VisibleEdges(IReadOnlyList<WindowInfo> windows, EdgeAxis axis, int cross)
     {

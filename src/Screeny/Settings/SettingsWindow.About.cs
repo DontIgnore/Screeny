@@ -8,8 +8,8 @@ using Screeny.Updates;
 namespace Screeny.Settings;
 
 /// <summary>
-/// Раздел «О программе»: версия, ручная проверка обновлений, ссылки и «Сообщить об ошибке» / «Предложить улучшение». Проверку и окно обновления ведёт App (тот же путь,
-/// что у пункта трея «Проверить обновления…»); здесь только итог строкой под кнопкой.
+/// “About” section: version, manual update check, links and “Report a bug” / “Suggest improvement”. Check and update window handled by App (same path
+/// as tray item “Check for updates…”); here only result line under button.
 /// </summary>
 public partial class SettingsWindow
 {
@@ -48,7 +48,7 @@ public partial class SettingsWindow
         if (_aboutStatus.Update is { } update) CurrentApp?.ShowUpdateWindow(update);
     }
 
-    /// <summary>Строка состояния из сохранённого состояния: при смене языка собирается заново.</summary>
+    /// <summary>Status string from saved state; rebuilt on language change.</summary>
     private void ShowAboutStatus()
     {
         var s = _aboutStatus;

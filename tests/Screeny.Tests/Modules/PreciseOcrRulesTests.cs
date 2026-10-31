@@ -5,7 +5,7 @@ using Screeny.Updates;
 
 namespace Screeny.Tests.Modules;
 
-/// <summary>«Точное распознавание активно» и его метка в списке изменений.</summary>
+/// <summary>“Precise recognition active” and its changelog label.</summary>
 public class PreciseOcrRulesTests
 {
     private const int Required = OcrModule.Version;
@@ -22,10 +22,10 @@ public class PreciseOcrRulesTests
 
     [Theory]
     [InlineData(true, true, Required, true)]
-    [InlineData(false, true, Required, false)]     // модуль стоит, но согласия нет
-    [InlineData(true, false, Required, false)]     // распознавание текста выключено
-    [InlineData(true, true, null, false)]          // модуля нет
-    [InlineData(true, true, Required + 1, false)]  // другая версия
+    [InlineData(false, true, Required, false)]     // module installed but no consent
+    [InlineData(true, false, Required, false)]     // text recognition disabled
+    [InlineData(true, true, null, false)]          // no module
+    [InlineData(true, true, Required + 1, false)]  // different version
     public void IsActive(bool optedIn, bool ocrOn, int? installed, bool active)
         => Assert.Equal(active, PreciseOcrRules.IsActive(Settings(optedIn, ocrOn), installed));
 
@@ -33,7 +33,7 @@ public class PreciseOcrRulesTests
     [InlineData(true, Required + 1, true)]
     [InlineData(true, Required, false)]
     [InlineData(true, null, false)]
-    [InlineData(false, Required + 1, false)]       // не включали — и напоминать не о чем
+    [InlineData(false, Required + 1, false)]       // never enabled — nothing to remind
     public void NeedsModuleUpdate(bool optedIn, int? installed, bool needs)
         => Assert.Equal(needs, PreciseOcrRules.NeedsModuleUpdate(Settings(optedIn), installed));
 
@@ -44,10 +44,10 @@ public class PreciseOcrRulesTests
         s.SetFeature(FeatureCatalog.Pins, false);
         int? installed = null;
         var isOn = PreciseOcrRules.NotesFilter(s, () => installed);
-        Assert.False(isOn(PreciseOcrRules.NotesTag)); // для AppSettings.IsFeatureOn неизвестный id — «включён»
+        Assert.False(isOn(PreciseOcrRules.NotesTag)); // AppSettings.IsFeatureOn unknown id — “enabled”
         Assert.True(isOn(FeatureCatalog.Ocr));
         Assert.False(isOn(FeatureCatalog.Pins));
-        installed = Required;                          // версия читается при каждом вызове
+        installed = Required;                          // version read on each call
         Assert.True(isOn(PreciseOcrRules.NotesTag));
     }
 
@@ -65,8 +65,8 @@ public class PreciseOcrRulesTests
     private static UpdateCandidate Next(string notes) => new("0.3.1", notes, EarlierNotes: []);
 
     [Theory]
-    [InlineData(false, Required)]  // не согласился
-    [InlineData(true, null)]       // модуль не установлен
+    [InlineData(false, Required)]  // no consent
+    [InlineData(true, null)]       // module not installed
     public void TaggedNote_HiddenWhenNotActive(bool optedIn, int? installed)
     {
         var prompt = UpdatePrompt.Decide(Next(Mixed), PreciseOcrRules.NotesFilter(Settings(optedIn), () => installed), UpdateCheckKind.Automatic);
@@ -87,8 +87,8 @@ public class PreciseOcrRulesTests
     [Fact]
     public void OnlyPreciseNotes_NotActive_ApplySilently_LikeDisabledFeatures()
     {
-        // Всё про точное распознавание, которым пользователь не пользуется: как про выключенную функцию — молча при выходе;
-        // ручная проверка всё равно показывает окно.
+        // All about precise recognition user doesn't use: like disabled feature — silently on exit;
+        // manual check still shows window.
         var isOn = PreciseOcrRules.NotesFilter(Settings(false), () => null);
         Assert.Equal(UpdatePromptAction.ApplySilently, UpdatePrompt.Decide(Next(PreciseOnly), isOn, UpdateCheckKind.Automatic).Action);
         var manual = UpdatePrompt.Decide(Next(PreciseOnly), isOn, UpdateCheckKind.Manual);
@@ -103,7 +103,7 @@ public class PreciseOcrRulesTests
 
     [Fact]
     public void OnlyPreciseNotes_WithPlainIsFeatureOn_WouldWronglyCountAsOn()
-        // Почему нужен свой фильтр: обычная проверка функций считает «ocr-precise» включённым у всех.
+        // Why own filter: normal feature check counts “ocr-precise” enabled for all.
         => Assert.Equal(UpdatePromptAction.Show, UpdatePrompt.Decide(Next(PreciseOnly), Settings(false).IsFeatureOn, UpdateCheckKind.Automatic).Action);
 
     [Fact]
@@ -124,7 +124,7 @@ public class PreciseOcrRulesTests
         var blocks = ReleaseNotes.Parse(notes);
         Assert.Contains(blocks, b => b.Features.SequenceEqual([FeatureCatalog.Ocr]));
         Assert.Contains(blocks, b => b.Features.SequenceEqual([PreciseOcrRules.NotesTag]));
-        // Кто модуль не скачивал, видит объявление (метка ocr), но не подробности (метка ocr-precise).
+        // Who never downloaded module sees announcement (label ocr), not details (label ocr-precise).
         var visible = ReleaseNotes.Filter(blocks, PreciseOcrRules.NotesFilter(Settings(false), () => null));
         Assert.DoesNotContain(visible, b => b.Features.Contains(PreciseOcrRules.NotesTag));
         Assert.Contains(visible, b => b.Features.Contains(FeatureCatalog.Ocr));
@@ -138,12 +138,12 @@ public class PreciseOcrRulesTests
     }
 
     [Theory]
-    [InlineData(null, false, false, true, true)]           // модуля нет, источник есть — предлагаем
-    [InlineData(Required + 1, false, false, true, true)]   // устаревший — предлагаем обновить
-    [InlineData(Required, false, false, true, false)]      // уже стоит
-    [InlineData(null, true, false, true, false)]           // ждёт удаления после перезапуска: файлы заняты
-    [InlineData(null, false, true, true, false)]           // уже качается
-    [InlineData(null, false, false, false, false)]         // dev без --module-source
+    [InlineData(null, false, false, true, true)]           // no module, source exists — offer
+    [InlineData(Required + 1, false, false, true, true)]   // outdated — offer update
+    [InlineData(Required, false, false, true, false)]      // already installed
+    [InlineData(null, true, false, true, false)]           // waiting deletion after restart: files busy
+    [InlineData(null, false, true, true, false)]           // already downloading
+    [InlineData(null, false, false, false, false)]         // dev without --module-source
     public void WizardOffersDownload(int? installed, bool removalPending, bool downloading, bool source, bool offered)
         => Assert.Equal(offered, PreciseOcrRules.WizardOffersDownload(new PreciseOcrStatus(installed, downloading, 0, removalPending, null, source)));
 
@@ -153,11 +153,11 @@ public class PreciseOcrRulesTests
     private const string Ours = @"C:\Users\u\AppData\Local\Screeny\Modules\ocr-paddle-1\msvcp140.dll";
 
     [Theory]
-    [InlineData(@"C:\Windows\System32\msvcp140.dll", "14.29.30133.0", "14.50.35710.0", true)]   // старый из System32 — отказ
-    [InlineData(@"C:\Windows\System32\msvcp140.dll", "14.50.35710.0", "14.50.35710.0", false)]  // та же версия
-    [InlineData(@"C:\Windows\System32\msvcp140.dll", "14.51.1.0", "14.50.35710.0", false)]      // новее — годится
-    [InlineData(Ours, "14.29.30133.0", "14.50.35710.0", false)]                                    // это наша копия
-    [InlineData(@"C:\Windows\System32\msvcp140.dll", null, "14.50.35710.0", false)]               // версия неизвестна
+    [InlineData(@"C:\Windows\System32\msvcp140.dll", "14.29.30133.0", "14.50.35710.0", true)]   // old from System32 — refusal
+    [InlineData(@"C:\Windows\System32\msvcp140.dll", "14.50.35710.0", "14.50.35710.0", false)]  // same version
+    [InlineData(@"C:\Windows\System32\msvcp140.dll", "14.51.1.0", "14.50.35710.0", false)]      // newer — acceptable
+    [InlineData(Ours, "14.29.30133.0", "14.50.35710.0", false)]                                    // it's our copy
+    [InlineData(@"C:\Windows\System32\msvcp140.dll", null, "14.50.35710.0", false)]               // version unknown
     public void CrtConflict(string loaded, string? loadedVersion, string ourVersion, bool conflict)
     {
         var text = Screeny.Ocr.Paddle.OrtNative.CrtConflict("msvcp140.dll", loaded, loadedVersion is null ? null : Version.Parse(loadedVersion), Ours, Version.Parse(ourVersion));

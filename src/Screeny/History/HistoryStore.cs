@@ -7,16 +7,16 @@ using Screeny.Logging;
 
 namespace Screeny.History;
 
-/// <summary>Sidecar-файлы снимка для повторного редактирования.</summary>
-/// <param name="Json">Документ аннотаций (<see cref="Annotations.AnnotationSerializer"/>); null — не писать.</param>
-/// <param name="OriginalPng">Регион снимка без пометок и без оформления; null — не писать (настройка выключена).</param>
+/// <summary>Sidecar files of screenshot for re-editing.</summary>
+/// <param name="Json">Annotation document (<see cref="Annotations.AnnotationSerializer"/>); null — not write.</param>
+/// <param name="OriginalPng">Region without marks and decoration; null — not write (setting disabled).</param>
 public sealed record HistorySidecar(string? Json, byte[]? OriginalPng);
 
 /// <summary>
-/// Папка снимков истории. Своими считаются только файлы с именем <c>yyyyMMdd_HHmmss_fff[_N].png</c>:
-/// пользователь может выбрать папку с другими картинками, и ротация/очистка не должны их трогать.
-/// У снимка могут быть sidecar-файлы <c>&lt;имя&gt;.screeny.json</c> и <c>&lt;имя&gt;.orig.png</c> (повторное редактирование):
-/// List() их не показывает, Delete/Prune/Clear удаляют вместе со снимком.
+/// History screenshots folder. Only files named <c>yyyyMMdd_HHmmss_fff[_N].png</c> are considered own:
+/// user may choose folder with other images; rotation/cleanup must not touch them.
+/// Screenshot may have sidecar files <c>&lt;name&gt;.screeny.json</c> and <c>&lt;name&gt;.orig.png</c> (re-editing):
+/// List() doesn't show them, Delete/Prune/Clear delete them with screenshot.
 /// </summary>
 public sealed class HistoryStore
 {
@@ -25,10 +25,10 @@ public sealed class HistoryStore
     private static readonly Regex NamePattern =
         new(@"^(?<stamp>\d{8}_\d{6}_\d{3})(?:_(?<n>[1-9]\d{0,8}))?\.png$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
-    /// <summary>Суффиксы sidecar-файлов: документ аннотаций и оригинал без пометок.</summary>
+    /// <summary>Sidecar suffixes: annotation document and original without marks.</summary>
     public const string JsonSuffix = ".screeny.json", OriginalSuffix = ".orig.png";
 
-    /// <summary>Строгое имя sidecar-файла: штамп снимка истории + суффикс. Чужие foo.screeny.json сюда не попадают.</summary>
+    /// <summary>Strict sidecar name: history screenshot stamp + suffix. Foreign foo.screeny.json don't get here.</summary>
     private static readonly Regex SidecarPattern =
         new(@"^(?<base>\d{8}_\d{6}_\d{3}(?:_[1-9]\d{0,8})?)\.(?:screeny\.json|orig\.png)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
@@ -46,14 +46,14 @@ public sealed class HistoryStore
         return Save(ms.ToArray(), timestamp);
     }
 
-    /// <summary>Сохраняет уже закодированный PNG (чтобы не кодировать дважды для буфера и истории).</summary>
+    /// <summary>Saves already encoded PNG (to avoid double encoding for clipboard and history).</summary>
     public string Save(byte[] png, DateTime? timestamp = null) => Save(png, sidecar: null, timestamp);
 
     /// <summary>
-    /// Сохраняет снимок вместе с sidecar-файлами атомарно: всё пишется во временные файлы с «чужими» именами
-    /// (их List() не видит), затем переименовывается — sidecar-файлы первыми, снимок последним, чтобы запись
-    /// не появилась без своих данных. При сбое временные и уже переименованные файлы удаляются (откат).
-    /// Если процесс упал между переименованиями, остаются осиротевшие sidecar-файлы — их убирают Prune и Clear.
+    /// Saves screenshot with sidecar files atomically: everything written to temp files with “foreign” names
+    /// (List() doesn't see), then renamed — sidecars first, screenshot last, so entry doesn't appear without its data.
+    /// On failure temp and already renamed files removed (rollback).
+    /// If process crashed between renames, orphaned sidecars remain — Prune and Clear remove them.
     /// </summary>
     public string Save(byte[] png, HistorySidecar? sidecar, DateTime? timestamp = null)
     {
@@ -65,7 +65,7 @@ public sealed class HistoryStore
         var files = new List<(string Final, byte[] Data)>();
         if (sidecar?.Json is { } json) files.Add((jsonPath, Encoding.UTF8.GetBytes(json)));
         if (sidecar?.OriginalPng is { } original) files.Add((originalPath, original));
-        files.Add((path, png)); // снимок — последним
+        files.Add((path, png)); // screenshot last
 
         var moved = new List<string>();
         var temporaryFiles = new List<string>();
@@ -86,7 +86,7 @@ public sealed class HistoryStore
         }
         catch
         {
-            // Уборка не должна скрывать исходную ошибку.
+            // Cleanup must not hide original error.
             foreach (var temp in temporaryFiles) TryDelete(temp);
             foreach (var final in moved) TryDelete(final);
             throw;
@@ -97,10 +97,10 @@ public sealed class HistoryStore
 
     private static void TryDelete(string path)
     {
-        try { File.Delete(path); } catch { /* уборка — по возможности */ }
+        try { File.Delete(path); } catch { /* cleanup — best effort */ }
     }
 
-    /// <summary>Пути sidecar-файлов снимка (в той же папке): документ аннотаций и оригинал без пометок.</summary>
+    /// <summary>Sidecar paths of screenshot (same folder): annotation document and original without marks.</summary>
     public static (string Json, string Original) SidecarPaths(string pngPath)
     {
         var stem = Path.Combine(Path.GetDirectoryName(pngPath) ?? "", Path.GetFileNameWithoutExtension(pngPath));
@@ -108,8 +108,8 @@ public sealed class HistoryStore
     }
 
     /// <summary>
-    /// Имя для нового снимка с этим штампом. Суффикс — больше максимального существующего, а не первый свободный:
-    /// после ротации младшие номера освобождаются, и повторно занятый «_1» оказался бы старше уцелевших «_10».
+    /// Name for new screenshot with this stamp. Suffix is maximum existing + 1, not first free:
+    /// after rotation lower numbers free up, and reused “_1” would sort older than surviving “_10”.
     /// </summary>
     private string NextFreePath(string stamp)
     {
@@ -121,14 +121,14 @@ public sealed class HistoryStore
         {
             var path = Path.Combine(Folder, i == 0 ? stamp + ".png" : $"{stamp}_{i}.png");
             var (json, original) = SidecarPaths(path);
-            // Осиротевший sidecar с этим именем не должен приклеиться к новому снимку.
+            // Orphaned sidecar with this name must not attach to new screenshot.
             if (!File.Exists(path) && !File.Exists(json) && !File.Exists(original)) return path;
         }
     }
 
     /// <summary>
-    /// Снимки от новых к старым: по времени из имени, затем по суффиксу коллизии численно.
-    /// Чужие файлы не попадают в список. Ошибка чтения папки → пустой список.
+    /// Screenshots newest to oldest: by time from name, then collision suffix numerically.
+    /// Foreign files don't enter list. Folder read error → empty list.
     /// </summary>
     public IReadOnlyList<HistoryItem> List()
     {
@@ -140,7 +140,7 @@ public sealed class HistoryStore
         }
     }
 
-    /// <summary>Как <see cref="List"/>, но ошибку чтения папки пробрасывает (окну истории нужно её показать). Нет папки — пусто.</summary>
+    /// <summary>Like <see cref="List"/>, but propagates folder read error (history window needs to show it). No folder — empty.</summary>
     public IReadOnlyList<HistoryItem> ListOrThrow()
     {
         var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -174,8 +174,8 @@ public sealed class HistoryStore
         => ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException;
 
     /// <summary>
-    /// Удаляет снимок и — если это снимок истории (строгое имя) — его sidecar-файлы. Ошибка удаления самого снимка
-    /// пробрасывается; не удалившийся sidecar остаётся сиротой и уходит при следующей ротации или очистке.
+    /// Deletes screenshot and — if it's a history screenshot (strict name) — its sidecar files. Screenshot delete error
+    /// propagates; failed sidecar remains orphan and is removed on next rotation or cleanup.
     /// </summary>
     public void Delete(string path)
     {
@@ -189,7 +189,7 @@ public sealed class HistoryStore
         }
     }
 
-    /// <summary>Удаляет все снимки истории с их sidecar-файлами (и осиротевшие); чужие файлы в папке (в том числе PNG) не трогает.</summary>
+    /// <summary>Deletes all history screenshots with their sidecars (and orphans); foreign files in folder (incl. PNG) untouched.</summary>
     public void Clear()
     {
         foreach (var item in List()) Delete(item.Path);
@@ -197,8 +197,8 @@ public sealed class HistoryStore
     }
 
     /// <summary>
-    /// Сохранённые оригиналы без пометок (<c>&lt;штамп&gt;.orig.png</c>) в папке истории: они содержат то, что было
-    /// скрыто размытием. Чужие файлы (<c>bar.orig.png</c>) не считаются. Нет папки или ошибка чтения — пусто.
+    /// Saved originals without marks (<c>&lt;stamp&gt;.orig.png</c>) in history folder: they contain what was
+    /// hidden by blur. Foreign files (<c>bar.orig.png</c>) not counted. No folder or read error — empty.
     /// </summary>
     public IReadOnlyList<string> ListOriginals()
     {
@@ -212,8 +212,8 @@ public sealed class HistoryStore
     }
 
     /// <summary>
-    /// Удаляет сохранённые оригиналы (только <see cref="ListOriginals"/>); снимки и документы пометок остаются,
-    /// и записи открываются в редакторе как готовые картинки. Возвращает, сколько файлов удалено.
+    /// Deletes saved originals (only <see cref="ListOriginals"/>); screenshots and marks documents remain,
+    /// and entries open in editor as ready images. Returns number of files deleted.
     /// </summary>
     public int DeleteOriginals() => DeleteOriginals(ListOriginals());
 
@@ -228,10 +228,10 @@ public sealed class HistoryStore
         return deleted;
     }
 
-    /// <summary>Время из имени вида yyyyMMdd_HHmmss_fff[_N].png.</summary>
+    /// <summary>Time from name like yyyyMMdd_HHmmss_fff[_N].png.</summary>
     public static bool TryParseTimestamp(string fileName, out DateTime timestamp) => TryParseName(fileName, out timestamp, out _);
 
-    /// <summary>Время и номер коллизии (0 — без суффикса) из имени снимка; false для чужого файла.</summary>
+    /// <summary>Time and collision number (0 — no suffix) from screenshot name; false for foreign file.</summary>
     public static bool TryParseName(string fileName, out DateTime timestamp, out int suffix)
     {
         timestamp = default; suffix = 0;
@@ -248,8 +248,8 @@ public sealed class HistoryStore
            && TryParseName(fileName[..^OriginalSuffix.Length] + ".png", out _, out _);
 
     /// <summary>
-    /// Оставляет <see cref="Limit"/> снимков. Только что сохранённый не удаляется, даже если его штамп старше
-    /// остальных (часы переведены назад): иначе Save вернул бы путь к несуществующему файлу.
+    /// Keeps <see cref="Limit"/> screenshots. Just saved is not deleted even if its stamp is older
+    /// than others (clock set back): otherwise Save would return path to nonexistent file.
     /// </summary>
     private void Prune(string keep)
     {
@@ -263,8 +263,8 @@ public sealed class HistoryStore
     }
 
     /// <summary>
-    /// Sidecar-файлы со строгим именем штампа без основного снимка (сбой между переименованиями, снимок удалён
-    /// вручную). Чужие <c>foo.screeny.json</c> и <c>bar.orig.png</c> не трогаются.
+    /// Sidecar files with strict stamp name without main screenshot (crash between renames, screenshot deleted
+    /// manually). Foreign <c>foo.screeny.json</c> and <c>bar.orig.png</c> untouched.
     /// </summary>
     private void DeleteOrphanSidecars()
     {

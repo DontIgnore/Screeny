@@ -90,8 +90,8 @@ public class HudLayoutTests
     }
 
     [Theory]
-    [InlineData(2)]      // у левого края
-    [InlineData(1260)]   // у правого края
+    [InlineData(2)]      // at left edge
+    [InlineData(1260)]   // at right edge
     public void Flyout_ClampedToWorkHorizontally(double anchorX)
     {
         var f = HudLayout.PlaceFlyout(new Rect(anchorX, 300, 18, 40), Fly, Work, preferBelow: true);
@@ -102,7 +102,7 @@ public class HudLayoutTests
     [Fact]
     public void Flyout_FlipsAbove_WhenNoRoomBelow()
     {
-        var anchor = new Rect(500, 720, 32, 40); // снизу до края 40 px
+        var anchor = new Rect(500, 720, 32, 40); // bottom to edge 40 px
         var f = HudLayout.PlaceFlyout(anchor, Fly, Work, preferBelow: true);
         Assert.False(f.Below);
         Assert.Equal(anchor.Top - HudLayout.FlyoutGap - Fly.Height, f.TopLeft.Y, 3);
@@ -127,7 +127,7 @@ public class HudLayoutTests
     [Fact]
     public void Flyout_AvoidsToolbar_FlipsToOtherSide()
     {
-        // Фигура прямо над панелью: снизу flyout лёг бы на панель — встаёт над фигурой.
+        // Shape directly above panel: flyout below would land on panel — places above shape.
         var shape = new Rect(400, 500, 200, 100);
         var toolbar = new Rect(300, 606, 600, 40);
         var f = HudLayout.PlaceFlyout(shape, Fly, Work, preferBelow: true, avoid: toolbar);
@@ -138,7 +138,7 @@ public class HudLayoutTests
     [Fact]
     public void Flyout_FromToolbarButton_NeverCoversToolbar_FullScreenSelection()
     {
-        // Выделение на весь экран: панель внутри у нижнего края, flyout кнопки — над панелью, в пределах экрана.
+        // Full-screen selection: panel inside at bottom edge, button flyout above panel within screen.
         var p = HudLayout.Place(Work, Work, Bar);
         var bar = new Rect(p.Toolbar, Bar);
         foreach (double bx in new[] { bar.Left + 5, bar.Left + 400, bar.Right - 37 })

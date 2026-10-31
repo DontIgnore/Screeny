@@ -13,16 +13,16 @@ public sealed class AppSettings
     public const int MinHistoryLimit = 1, MaxHistoryLimit = 500;
     public const int MinThickness = 1, MaxThickness = 20;
 
-    /// <summary>Версия формата файла настроек; <see cref="SettingsMigrator"/> поднимает старые файлы до неё.</summary>
+    /// <summary>Settings file format version; <see cref="SettingsMigrator"/> upgrades old files to it.</summary>
     public const int CurrentVersion = 2;
 
-    /// <summary>Версия формата. У файла без поля — 1 (до списка хоткеев).</summary>
+    /// <summary>Format version. File without field — 1 (before hotkey list).</summary>
     public int SettingsVersion { get; set; } = CurrentVersion;
 
     /// <summary>
-    /// Хоткеи снимка: всегда ровно одна запись PrintScreen и одна WinShiftS (после <see cref="Normalize"/>), затем свои
-    /// сочетания. Хотя бы одна запись включена. Запасной <c>Ctrl+Alt+S</c> здесь не хранится: его включает
-    /// <see cref="HotkeyManager"/>, когда PrintScreen недоступен и ничего другого не работает.
+    /// Screenshot hotkeys: always exactly one PrintScreen and one WinShiftS entry (after <see cref="Normalize"/>), then custom
+    /// combos. At least one entry enabled. Fallback <c>Ctrl+Alt+S</c> not stored here: <see cref="HotkeyManager"/> enables it
+    /// when PrintScreen unavailable and nothing else works.
     /// </summary>
     public List<HotkeyBinding> Hotkeys { get; set; } = DefaultHotkeys();
 
@@ -34,55 +34,55 @@ public sealed class AppSettings
     public bool StartWithWindows { get; set; } = false;
     public string LastColor { get; set; } = "#FF3B30";
     public int LastThickness { get; set; } = 3;
-    /// <summary>Скрывать закреплённые снимки от захвата экрана (SetWindowDisplayAffinity).</summary>
+    /// <summary>Hide pinned screenshots from screen capture (SetWindowDisplayAffinity).</summary>
     public bool ExcludePinsFromCapture { get; set; } = false;
     /// <summary>
-    /// Хранить рядом со снимком истории регион без пометок (<c>.orig.png</c>) для повторного редактирования.
-    /// По умолчанию выключено: оригинал содержит то, что скрыто размытием и пикселизацией.
+    /// Store region without marks (<c>.orig.png</c>) next to history screenshot for re-editing.
+    /// Default off: original contains what is hidden by blur and pixelate.
     /// </summary>
     public bool KeepOriginals { get; set; } = false;
     /// <summary>
-    /// Прилипание рамки снимка к краям окон и контрастным границам, направляющие для фигур. По умолчанию включено;
-    /// <c>Alt</c> во время перетаскивания временно отключает.
+    /// Selection border snap to window edges and contrast edges, shape guides. Default on;
+    /// <c>Alt</c> during drag temporarily disables.
     /// </summary>
     public bool SnapEnabled { get; set; } = true;
     /// <summary>
-    /// Проверять обновления на GitHub Releases. Снимки никуда не отправляются: в сеть Screeny ходит только за обновлениями,
-    /// по просьбе пользователя — за модулем точного распознавания (его загрузку эта настройка не запрещает) и когда
-    /// пользователь сам отправляет сообщение об ошибке или предложение.
-    /// По умолчанию включено; показывается в настройках и в мастере первого запуска.
+    /// Check updates on GitHub Releases. Screenshots never sent: Screeny goes to network only for updates,
+    /// on user request — for precise recognition module (this setting doesn't block its download) and when
+    /// user sends error/suggestion.
+    /// Default on; shown in settings and first-run wizard.
     /// </summary>
     public bool CheckForUpdates { get; set; } = true;
     /// <summary>
-    /// Точное распознавание текста (PaddleOCR из скачиваемого модуля, <see cref="Modules.OcrModule"/>). Согласие, а не функция
-    /// каталога: по умолчанию выключено и включается только явным действием — загрузкой модуля или галочкой в настройках.
-    /// Работает, только если модуль нужной версии установлен (<see cref="Modules.PreciseOcrRules.IsActive"/>).
+    /// Precise text recognition (PaddleOCR from downloadable module, <see cref="Modules.OcrModule"/>). Consent, not catalog feature:
+    /// default off, enabled only by explicit action — module download or settings checkbox.
+    /// Works only if module of needed version installed (<see cref="Modules.PreciseOcrRules.IsActive"/>).
     /// </summary>
     public bool PreciseOcr { get; set; } = false;
     /// <summary>
-    /// Версия мастера первого запуска, которую пользователь уже прошёл (0 — ни разу). Мастер показывается, если
-    /// значение меньше текущей версии мастера; так он появляется и в портативной версии, и после установки.
+    /// First-run wizard version user has passed (0 — never). Wizard shown if
+    /// value less than current wizard version; so appears in portable and after install.
     /// </summary>
     public int SetupWizardVersion { get; set; } = 0;
     /// <summary>
-    /// Id мешающих программ (<c>Migration.ConflictCatalog</c>), которые пользователь уже видел в мастере или в уведомлении.
-    /// При запуске уведомление показывается только о новых — тех, кого здесь нет.
+    /// Ids of conflicting programs (<c>Migration.ConflictCatalog</c>) user has seen in wizard or notification.
+    /// At startup only new ones notified — those not here.
     /// </summary>
     public List<string> KnownConflicts { get; set; } = new();
     /// <summary>
-    /// Id выключенных функций (<see cref="FeatureCatalog"/>). Хранятся выключенные, а не включённые: функция из новой версии
-    /// по умолчанию включена. Неизвестные id (от более новой Screeny) сохраняются как есть и ни на что не влияют.
+    /// Ids of disabled features (<see cref="FeatureCatalog"/>). Disabled stored, not enabled: feature from new version
+    /// default enabled. Unknown ids (from newer Screeny) kept as-is, affect nothing.
     /// </summary>
     public List<string> DisabledFeatures { get; set; } = new();
     /// <summary>
-    /// Язык интерфейса: <see cref="Loc.Auto"/> (язык Windows, по умолчанию и у старых файлов без поля) или код из
-    /// <see cref="Loc.Supported"/>. Имя культуры («ru-RU») читается как язык, который для неё выбрал бы «auto»,
-    /// неизвестное значение — как «auto».
+    /// UI language: <see cref="Loc.Auto"/> (Windows language, default for old files without field) or code from
+    /// <see cref="Loc.Supported"/>. Culture name (“ru-RU”) read as language Auto would choose for it,
+    /// unknown — as “auto”.
     /// </summary>
     public string Language { get; set; } = Loc.Auto;
     /// <summary>
-    /// Случайный GUID для сообщений об ошибках и предложений (<c>installId</c>): сервер по нему только ограничивает частоту.
-    /// Ни с чем не связан; создаётся при первой настоящей отправке, до неё — null. Не GUID — null (создастся заново).
+    /// Random GUID for error/suggestion messages (<c>installId</c>): server uses it only for rate limiting.
+    /// Unrelated; created at first real send, before — null. Not GUID — null (created anew).
     /// </summary>
     public string? InstallId { get; set; }
 
@@ -94,28 +94,28 @@ public sealed class AppSettings
         if (!on) DisabledFeatures.Add(id);
     }
 
-    // Последние значения полосы параметров оверлея.
+    // Last overlay options strip values.
     public const int MinFillOpacity = 10, MaxFillOpacity = 100;
-    /// <summary>Обводка у прямоугольника и эллипса. Хотя бы одно из обводки и заливки включено.</summary>
+    /// <summary>Stroke for rectangle and ellipse. At least one of stroke/fill enabled.</summary>
     public bool LastStrokeEnabled { get; set; } = true;
     public bool LastFillEnabled { get; set; } = false;
-    /// <summary>Прозрачность заливки в процентах (цвет заливки — цвет палитры).</summary>
+    /// <summary>Fill opacity in percent (fill color — palette color).</summary>
     public int LastFillOpacity { get; set; } = 40;
     public ArrowStyle LastArrowStyle { get; set; } = ArrowStyle.Normal;
     public bool LastTextBackground { get; set; } = false;
     public TextAlign LastTextAlign { get; set; } = TextAlign.Left;
 
-    // Оформление (beautify): по умолчанию выключено, состояние и параметры запоминаются.
+    // Decoration (beautify): default off, state and parameters remembered.
     public bool BeautifyEnabled { get; set; } = false;
     public BeautifyPreset BeautifyPreset { get; set; } = BeautifyOptions.Default.Preset;
     public BeautifyPadding BeautifyPadding { get; set; } = BeautifyOptions.Default.Padding;
-    /// <summary>Скругление углов снимка в пикселях: 0, 8 или 16.</summary>
+    /// <summary>Screenshot corner rounding in pixels: 0, 8 or 16.</summary>
     public int BeautifyRadius { get; set; } = BeautifyOptions.Default.Radius;
     public bool BeautifyShadow { get; set; } = BeautifyOptions.Default.Shadow;
 
     /// <summary>
-    /// Заменяет недопустимые значения (null, пустые строки, относительную папку, нераспознаваемый цвет или хоткей,
-    /// числа вне диапазона) значениями по умолчанию. Нужен после чтения файла, который мог быть изменён вручную.
+    /// Replaces invalid values (null, empty strings, relative folder, unrecognizable color or hotkey,
+    /// out-of-range numbers) with defaults. Needed after reading file that may be hand-edited.
     /// </summary>
     public AppSettings Normalize()
     {
@@ -128,7 +128,7 @@ public sealed class AppSettings
         LastFillOpacity = Math.Clamp(LastFillOpacity, MinFillOpacity, MaxFillOpacity);
         if (!Enum.IsDefined(LastArrowStyle)) LastArrowStyle = d.LastArrowStyle;
         if (!Enum.IsDefined(LastTextAlign)) LastTextAlign = d.LastTextAlign;
-        if (!LastStrokeEnabled && !LastFillEnabled) LastStrokeEnabled = true; // невидимая фигура
+        if (!LastStrokeEnabled && !LastFillEnabled) LastStrokeEnabled = true; // invisible shape
         if (!Enum.IsDefined(BeautifyPreset)) BeautifyPreset = d.BeautifyPreset;
         if (!Enum.IsDefined(BeautifyPadding)) BeautifyPadding = d.BeautifyPadding;
         BeautifyRadius = BeautifyOptions.SnapRadius(BeautifyRadius);
@@ -138,17 +138,17 @@ public sealed class AppSettings
         KnownConflicts = (KnownConflicts ?? []).Where(id => !string.IsNullOrWhiteSpace(id)).Distinct(StringComparer.Ordinal).ToList();
         DisabledFeatures = (DisabledFeatures ?? []).Where(id => !string.IsNullOrWhiteSpace(id))
             .Select(id => id.Trim().ToLowerInvariant()).Distinct(StringComparer.Ordinal).ToList();
-        // KeepOriginals — bool без недопустимых значений: отсутствующее в файле поле остаётся false (по умолчанию).
-        // SnapEnabled — так же: отсутствующее поле (настройки старой версии) остаётся true.
+        // KeepOriginals — bool without invalid values: missing field stays false (default).
+        // SnapEnabled — same: missing field (old settings) stays true.
         return this;
     }
 
     /// <summary>
-    /// Приводит список хоткеев к виду, на который рассчитывают окно настроек, мастер и <see cref="HotkeyManager"/>:
-    /// первая запись PrintScreen, вторая WinShiftS (повторы схлопываются, «включено» — если включена хоть одна копия),
-    /// затем свои сочетания в канонической записи без повторов; нераспознанные и недопустимые (<see cref="HotkeyRules"/>)
-    /// выбрасываются с записью в журнал. Свой «PrintScreen» превращается в запись PrintScreen. Если ничего не включено —
-    /// включается PrintScreen.
+    /// Normalizes hotkey list to form expected by settings window, wizard and <see cref="HotkeyManager"/>:
+    /// first PrintScreen entry, second WinShiftS (duplicates collapsed, “enabled” if any copy enabled),
+    /// then custom combos in canonical form without duplicates; unrecognized and invalid (<see cref="HotkeyRules"/>)
+    /// dropped with log entry. Custom “PrintScreen” becomes PrintScreen entry. If nothing enabled —
+    /// PrintScreen enabled.
     /// </summary>
     public static List<HotkeyBinding> NormalizeHotkeys(IEnumerable<HotkeyBinding?>? source)
     {
@@ -169,7 +169,7 @@ public sealed class AppSettings
                         break;
                     }
                     if (spec == HotkeySpec.PrintScreen) { printScreen |= b.Enabled; break; }
-                    if (!seen.Add(spec)) break; // повтор: первая запись важнее
+                    if (!seen.Add(spec)) break; // duplicate: first entry wins
                     customs.Add(HotkeyBinding.Custom(spec.ToString(), b.Enabled));
                     break;
                 default:
@@ -182,8 +182,8 @@ public sealed class AppSettings
     }
 
     /// <summary>
-    /// Включает или выключает PrintScreen / WinShiftS (для мастера первого запуска). Свои сочетания правятся через
-    /// <see cref="Hotkeys"/>. Как и <see cref="NormalizeHotkeys"/>, не оставляет все хоткеи выключенными.
+    /// Enables/disables PrintScreen / WinShiftS (for first-run wizard). Custom combos edited via
+    /// <see cref="Hotkeys"/>. Like <see cref="NormalizeHotkeys"/>, doesn't leave all hotkeys disabled.
     /// </summary>
     public void SetHotkeyEnabled(HotkeyKind kind, bool enabled)
     {

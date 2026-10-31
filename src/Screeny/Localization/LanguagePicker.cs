@@ -6,14 +6,14 @@ using System.Windows.Data;
 namespace Screeny.Localization;
 
 /// <summary>
-/// Список языков для настроек и мастера первого запуска: «Как в системе (…)» и языки, каждый на нём самом.
-/// Подпись первого пункта зависит от языка интерфейса — окно вызывает <see cref="Relabel"/> по <see cref="Loc.Changed"/>.
+/// Language list for settings and first-run wizard: “As system (…)” and languages, each in itself.
+/// First item label depends on UI language — window calls <see cref="Relabel"/> on <see cref="Loc.Changed"/>.
 /// </summary>
 public static class LanguagePicker
 {
     /// <summary>
-    /// Содержимое пункта «как в системе»: подпись меняется на месте (шаблон привязан к <see cref="Text"/>), поэтому и в
-    /// списке, и в поле выбора она обновляется без повторного выбора пункта — и без <c>SelectionChanged</c>.
+    /// Content of “as system” item: label changes in place (template bound to <see cref="Text"/>), so in both
+    /// list and combo it updates without re-selecting item — and without <c>SelectionChanged</c>.
     /// </summary>
     public sealed class AutoItem : INotifyPropertyChanged
     {
@@ -38,7 +38,7 @@ public static class LanguagePicker
         return template;
     }
 
-    /// <summary>Заполняет список и выбирает <paramref name="setting"/> (неизвестное значение — «как в системе»).</summary>
+    /// <summary>Fills list and selects <paramref name="setting"/> (unknown → “as system”).</summary>
     public static void Fill(ComboBox box, string? setting)
     {
         box.Items.Clear();
@@ -53,21 +53,21 @@ public static class LanguagePicker
         box.SelectedItem = box.Items.OfType<ComboBoxItem>().First(i => (string)i.Tag == code);
     }
 
-    /// <summary>Значение настройки по выбранному пункту; null — ничего не выбрано.</summary>
+    /// <summary>Setting value by selected item; null — nothing selected.</summary>
     public static string? SelectedOrNull(ComboBox box) => box.SelectedItem is ComboBoxItem { Tag: string code } ? code : null;
 
-    /// <summary>Значение настройки по выбранному пункту.</summary>
+    /// <summary>Setting value by selected item.</summary>
     public static string Selected(ComboBox box) => SelectedOrNull(box) ?? Loc.Auto;
 
-    /// <summary>Новая подпись «как в системе» на текущем языке. Выбор не трогает.</summary>
+    /// <summary>New “as system” label in current language. Does not touch selection.</summary>
     public static void Relabel(ComboBox box)
     {
         if (box.Items.Count > 0 && box.Items[0] is ComboBoxItem { Content: AutoItem auto }) auto.Refresh();
     }
 
-    /// <summary>Подпись пункта «как в системе» (для тестов и доступности).</summary>
+    /// <summary>“As system” item label (for tests and accessibility).</summary>
     public static string AutoText(ComboBox box) => box.Items[0] is ComboBoxItem { Content: AutoItem auto } ? auto.Text : "";
 
-    /// <summary>«Как в системе (Русский)»: какой язык выберет <see cref="Loc.Auto"/> на этом компьютере.</summary>
+    /// <summary>“As system (Russian)”: which language <see cref="Loc.Auto"/> would pick on this machine.</summary>
     public static string AutoLabel() => Loc.F("Language.System", Loc.NativeName(Loc.Resolve(Loc.Auto, Loc.SystemCulture)));
 }

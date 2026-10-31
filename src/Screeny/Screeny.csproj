@@ -10,15 +10,15 @@
     <ApplicationIcon>Assets\screeny.ico</ApplicationIcon>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Version>0.2.3</Version>
-    <!-- Свой Main (Program.cs): VelopackApp.Build().Run() должен выполниться раньше WPF. -->
+    <!-- Own Main (Program.cs): VelopackApp.Build().Run() must run before WPF. -->
     <StartupObject>Screeny.Program</StartupObject>
     <Product>Screeny</Product>
     <Description>Снимки экрана с аннотациями</Description>
-    <!-- Строки интерфейса: Localization/Strings.resx — английский, остальные языки — сопутствующие сборки (Strings.ru.resx…). -->
+    <!-- UI strings: Localization/Strings.resx — English, other languages — satellite assemblies (Strings.ru.resx…). -->
     <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
-  <!-- Публикация: один Screeny.exe (нужен .NET 10 Desktop Runtime). RID задаётся в tools/publish.ps1,
-       а не здесь: RuntimeIdentifier в csproj меняет путь вывода обычной сборки. -->
+  <!-- Publishing: one Screeny.exe (requires .NET 10 Desktop Runtime). RID set in tools/publish.ps1,
+       not here: RuntimeIdentifier in csproj changes normal build output path. -->
   <PropertyGroup>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>false</SelfContained>
@@ -28,15 +28,15 @@
   <ItemGroup>
     <PackageReference Include="H.NotifyIcon.Wpf" Version="2.1.3" />
     <PackageReference Include="Velopack" Version="1.2.161" />
-    <!-- QR и штрихкоды в режиме текста (Apache-2.0) -->
+    <!-- QR/barcodes in text mode (Apache-2.0) -->
     <PackageReference Include="ZXing.Net" Version="0.16.9" />
-    <!-- Точное распознавание (MIT): только управляемая часть ONNX Runtime. Нативная onnxruntime.dll не входит в exe —
-         она в скачиваемом модуле (Modules/OcrModule.cs) той же версии 1.31.0. -->
+    <!-- Precise recognition (MIT): only managed part of ONNX Runtime. Native onnxruntime.dll not in exe —
+         it's in downloadable module (Modules/OcrModule.cs) same version 1.31.0. -->
     <PackageReference Include="Microsoft.ML.OnnxRuntime.Managed" Version="[1.31.0]" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Assets\**\*" />
-    <!-- Лицензии сторонних пакетов внутри exe: лежат рядом с Screeny.exe (и в установщике, и в портативной сборке). -->
+    <!-- Third-party license texts inside exe: next to Screeny.exe (in installer and portable build). -->
     <None Include="THIRD-PARTY-NOTICES.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
   </ItemGroup>
 </Project>

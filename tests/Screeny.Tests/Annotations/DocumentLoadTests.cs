@@ -41,7 +41,7 @@ public class DocumentLoadTests
         doc.Undo.Redo();
         Assert.Empty(doc.Items);
         doc.Undo.Undo();
-        doc.Undo.Undo(); // шаг добавления метки
+        doc.Undo.Undo(); // label addition step
         Assert.Equal([a, b], doc.Items);
     }
 

@@ -5,10 +5,10 @@ namespace Screeny.Tests.Hotkeys;
 public class PrintScreenPolicyTests
 {
     [Theory]
-    [InlineData(1, 19045, true)]   // явно включено
-    [InlineData(0, 26200, false)]  // явно выключено
-    [InlineData(null, 26200, true)] // Windows 11: по умолчанию PrintScreen открывает Snipping Tool
-    [InlineData(null, 19045, false)] // Windows 10: по умолчанию выключено
+    [InlineData(1, 19045, true)]   // explicitly enabled
+    [InlineData(0, 26200, false)]  // explicitly disabled
+    [InlineData(null, 26200, true)] // Windows 11: PrintScreen opens Snipping Tool by default
+    [InlineData(null, 19045, false)] // Windows 10: disabled by default
     public void IsSnippingKeyEnabled(int? registryValue, int osBuild, bool expected)
         => Assert.Equal(expected, PrintScreenPolicy.IsSnippingKeyEnabled(registryValue, osBuild));
 

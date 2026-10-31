@@ -4,19 +4,19 @@ using System.Text.Json.Serialization;
 
 namespace Screeny.Feedback;
 
-/// <summary>Сообщение об ошибке или предложение: от этого зависят подсказки окна и шаблон issue на GitHub.</summary>
+/// <summary>Error message or suggestion: determines window hints and GitHub issue template.</summary>
 public enum FeedbackKind { Bug, Idea }
 
 /// <summary>
-/// Технические подробности к сообщению об ошибке (<c>diagnostics</c>). Журнал уже очищен <see cref="LogScrubber"/>;
-/// окно показывает пользователю именно этот объект и его же отправляет.
+/// Technical details for error message (<c>diagnostics</c>). Log already scrubbed by <see cref="LogScrubber"/>;
+/// window shows user exactly this object and sends it.
 /// </summary>
 public sealed record FeedbackDiagnostics(string AppVersion, string OsVersion, string UiLanguage, int Dpi, int Monitors, string LogTail);
 
-/// <summary>Что заполнил пользователь, без <c>installId</c>: тот появляется только при настоящей отправке.</summary>
+/// <summary>What user filled, without <c>installId</c>: it appears only on real send.</summary>
 public sealed record FeedbackDraft(FeedbackKind Kind, string Title, string Description, string? Contact, FeedbackDiagnostics? Diagnostics)
 {
-    /// <summary>Тело запроса: поля без пробелов по краям, пустой контакт — null.</summary>
+    /// <summary>Request body: fields without edge spaces, empty contact — null.</summary>
     public FeedbackRequest ToRequest(string installId) => new(
         Kind,
         Title.Trim(),
@@ -26,11 +26,11 @@ public sealed record FeedbackDraft(FeedbackKind Kind, string Title, string Descr
         installId);
 }
 
-/// <summary>Тело <c>POST /api/feedback</c>.</summary>
+/// <summary>Body of <c>POST /api/feedback</c>.</summary>
 public sealed record FeedbackRequest(FeedbackKind Kind, string Title, string Description, string? Contact, FeedbackDiagnostics? Diagnostics, string InstallId)
 {
     /// <summary>
-    /// camelCase, вид — «bug»/«idea», null пишется явно (<c>"contact": null</c>). Кириллица и прочее — как есть, без \u.
+    /// camelCase, type — “bug”/“idea”, null written explicitly (<c>"contact": null</c>). Cyrillic and rest as-is, without \u.
     /// </summary>
     public static readonly JsonSerializerOptions JsonOptions = new()
     {

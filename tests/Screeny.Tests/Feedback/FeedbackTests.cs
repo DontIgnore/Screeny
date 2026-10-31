@@ -58,7 +58,7 @@ public class FeedbackRulesTests
 {
     [Theory]
     [InlineData("ab", FeedbackFieldError.TooShort)]
-    [InlineData("  ab  ", FeedbackFieldError.TooShort)] // пробелы по краям не считаются
+    [InlineData("  ab  ", FeedbackFieldError.TooShort)] // edge spaces not counted
     [InlineData("", FeedbackFieldError.TooShort)]
     [InlineData(null, FeedbackFieldError.TooShort)]
     [InlineData("abc", null)]
@@ -284,7 +284,7 @@ public class FeedbackClientTests
     [Fact]
     public async Task Timeout_IsOffline()
     {
-        // Ответ не приходит: таймаут клиента (а не отмена пользователем) — это «нет связи».
+        // No response: client timeout (not user cancel) — “no connection”.
         var handler = new FakeHandler(_ => throw new TaskCanceledException("The request was canceled due to the configured timeout."));
         using var http = new HttpClient(handler);
         Assert.IsType<FeedbackResult.Offline>(await new FeedbackClient(http, Endpoint).SendAsync(Request, CancellationToken.None));
@@ -395,7 +395,7 @@ public class FeedbackDiagnosticsTests
         => Assert.Equal(expected, FeedbackDiagnosticsCollector.OsVersion(new Version(major, minor, build), "X64"));
 }
 
-/// <summary>Итог отправки → текст для пользователя (строки тестов — русские, см. TestCulture).</summary>
+/// <summary>Send result → user text (test strings Russian, see TestCulture).</summary>
 public class FeedbackMessagesTests
 {
     [Fact]

@@ -5,10 +5,10 @@ using Screeny.Editing;
 namespace Screeny.Overlay;
 
 /// <summary>
-/// Направляющие прилипания поверх снимка: акцентная линия в 1 пиксель устройства со светлой полупрозрачной
-/// каймой (читается и на светлом, и на тёмном фоне). Слой лежит в пикселях снимка; <see cref="PixelSize"/> —
-/// сколько единиц слоя в одном пикселе устройства (оверлей — 1, редактор — 1/масштаб), чтобы линия оставалась
-/// тонкой при любом зуме. В документ и экспорт направляющие не попадают — это только HUD.
+/// Snap guides over screenshot: accent 1 device-pixel line with light semi-transparent
+/// border (readable on light and dark). Layer in screenshot pixels; <see cref="PixelSize"/> —
+/// how many layer units per device pixel (overlay — 1, editor — 1/scale), so line stays thin at any zoom. Not in document/export — HUD only.
+///
 /// </summary>
 public sealed class SnapGuideLayer : FrameworkElement
 {
@@ -32,7 +32,7 @@ public sealed class SnapGuideLayer : FrameworkElement
         }
     }
 
-    /// <summary>Единиц слоя (пикселей снимка) в одном пикселе устройства.</summary>
+    /// <summary>Layer units (screenshot pixels) per device pixel.</summary>
     public double PixelSize
     {
         get => _pixelSize;
@@ -41,14 +41,14 @@ public sealed class SnapGuideLayer : FrameworkElement
 
     protected override void OnRender(DrawingContext dc)
     {
-        // Сначала все каймы, потом сердцевины: пересекающиеся направляющие не перекрывают друг друга светлым.
+        // First borders, then cores: intersecting guides don't cover each other with light.
         foreach (var g in _guides) dc.DrawRectangle(HaloBrush, null, LineRect(g, _pixelSize, halo: true));
         foreach (var g in _guides) dc.DrawRectangle(CoreBrush, null, LineRect(g, _pixelSize, halo: false));
     }
 
     /// <summary>
-    /// Линия ложится ровно на столбец (строку) пикселей устройства, в котором лежит позиция: 1 px без размытия
-    /// (сдвиг холста редактора тоже кратен пикселю устройства). Кайма — ещё по пикселю с каждой стороны.
+    /// Line lands exactly on device-pixel column (row) containing position: 1 px without blur
+    /// (editor canvas offset also multiple of device pixel). Border one more pixel each side.
     /// </summary>
     private static Rect LineRect(SnapGuide g, double ps, bool halo)
     {

@@ -5,17 +5,17 @@ using Screeny.Settings;
 namespace Screeny.Features;
 
 /// <summary>
-/// Единая проверка выключенных функций (<see cref="FeatureCatalog"/>). Её спрашивают и при сборке панели, и в каждом
-/// обработчике клавиш и действий: скрытая кнопка с живой клавишей — главная ошибка, которой здесь не должно быть.
-/// Настройки читаются каждый раз заново: окно настроек меняет тот же объект <see cref="AppSettings"/>.
+/// Unified disabled-feature check (<see cref="FeatureCatalog"/>). Asked when building panel and in every
+/// key and action handler: hidden button with live key is the main error that must not happen.
+/// Settings read anew each time: settings window changes same <see cref="AppSettings"/> object.
 /// </summary>
 public static class FeatureGate
 {
-    /// <summary>Инструмент доступен: линейка — только с включённой функцией «Линейка».</summary>
+    /// <summary>Tool available: ruler — only with Ruler feature enabled.</summary>
     public static bool ToolAllowed(this AppSettings settings, ToolKind kind)
         => kind != ToolKind.Ruler || settings.IsFeatureOn(FeatureCatalog.Ruler);
 
-    /// <summary>Действие завершения доступно: закрепление — с функцией «Закрепление», текст — с распознаванием.</summary>
+    /// <summary>Completion action available: pin — with Pin feature, text — with recognition.</summary>
     public static bool ActionAllowed(this AppSettings settings, CaptureAction action) => action switch
     {
         CaptureAction.Pin => settings.IsFeatureOn(FeatureCatalog.Pins),
@@ -24,17 +24,17 @@ public static class FeatureGate
     };
 
     /// <summary>
-    /// Enter копирует снимок: по настройке или всегда, если истории нет (иначе снимок пропал бы бесследно).
-    /// Сохранённое значение <see cref="AppSettings.CopyOnCapture"/> не меняется — включили историю, и оно снова в силе.
+    /// Enter copies screenshot: by setting or always if no history (otherwise screenshot would be lost).
+    /// Saved <see cref="AppSettings.CopyOnCapture"/> value unchanged — history enabled, it applies again.
     /// </summary>
     public static bool CopyOnEnter(this AppSettings settings)
         => settings.CopyOnCapture || !settings.IsFeatureOn(FeatureCatalog.History);
 
     /// <summary>
-    /// Поля окна настроек, скрытые вместе со своей функцией, сохраняются без изменений (что бы ни было в скрытых
-    /// галочках): без истории — папка, лимит, оригиналы и «Enter копирует», без закрепления — «Не захватывать закреплённые»,
-    /// без распознавания текста — «Точное распознавание».
-    /// Так выключение истории никогда не выглядит как выключение оригиналов и не предлагает их удалить.
+    /// Settings window fields hidden with their feature save unchanged (whatever hidden
+    /// checkboxes say): without history — folder, limit, originals and “Enter copies”; without pin — “Don't capture pinned”;
+    /// without text recognition — “Precise recognition”.
+    /// So disabling history never looks like disabling originals and never offers to delete them.
     /// </summary>
     public static void KeepHiddenSettings(AppSettings updated, AppSettings current)
     {
@@ -50,8 +50,8 @@ public static class FeatureGate
     }
 
     /// <summary>
-    /// Новый список выключенных функций по галочкам (окно настроек, мастер). Строится от текущего: id, которых нет в
-    /// <paramref name="choices"/> (в том числе неизвестные от более новой версии), остаются как были.
+    /// New disabled-feature list from checkboxes (settings window, wizard). Built from current: ids not in
+    /// <paramref name="choices"/> (including unknown from newer version) remain as they were.
     /// </summary>
     public static List<string> MergeDisabled(IEnumerable<string> current, IEnumerable<KeyValuePair<string, bool>> choices)
     {

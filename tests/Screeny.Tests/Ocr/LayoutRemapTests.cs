@@ -9,7 +9,7 @@ public class LayoutRemapTests
         => new(lines.Select(l => new OcrLine(l.Select(w => new OcrWord(w.Text, new Rect(w.X, w.Y, w.W, 20))).ToList(),
             string.Join(" ", l.Select(w => w.Text)))).ToList());
 
-    // Windows OCR: «Moonlit» одним словом; Paddle: те же места, но слово разбито иначе и строк больше.
+    // Windows OCR: “Moonlit” one word; Paddle: same places but broken differently and more lines.
     private static readonly OcrLayout Windows = Layout(
         [("Привет", 0, 0, 60), ("мир", 70, 0, 30)],
         [("Moonlit", 0, 40, 70)]);
@@ -32,13 +32,13 @@ public class LayoutRemapTests
 
     [Fact]
     public void NewWordsOutsideOldSelection_AreNotSelected()
-        => Assert.DoesNotContain(4, LayoutRemap.Selection(Windows, Windows.All(), Paddle)); // SKYLINE Windows не нашёл
+        => Assert.DoesNotContain(4, LayoutRemap.Selection(Windows, Windows.All(), Paddle)); // SKYLINE Windows didn't find
 
     [Fact]
     public void TouchingEdges_DoNotCount()
     {
         var from = Layout([("a", 0, 0, 10)]);
-        var to = Layout([("b", 10, 0, 10)]); // правый край старого = левый край нового
+        var to = Layout([("b", 10, 0, 10)]); // old right edge = new left edge
         Assert.Empty(LayoutRemap.Selection(from, new HashSet<int> { 0 }, to));
     }
 

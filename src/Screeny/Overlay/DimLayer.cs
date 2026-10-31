@@ -4,8 +4,8 @@ using System.Windows.Media;
 namespace Screeny.Overlay;
 
 /// <summary>
-/// Затемнение с «дыркой» под выделение, подсветка окна под курсором, рамка выделения и ручки.
-/// Рисуется в пикселях снимка (внутри PixelCanvas), поэтому 1 единица = 1 пиксель устройства.
+/// Dimming with “hole” under selection, window highlight under cursor, selection border and handles.
+/// Drawn in screenshot pixels (inside PixelCanvas), so 1 unit = 1 device pixel.
 /// </summary>
 public sealed class DimLayer : FrameworkElement
 {
@@ -33,7 +33,7 @@ public sealed class DimLayer : FrameworkElement
         if (_hole is { IsEmpty: false } hole)
         {
             DrawDimAround(dc, full, hole.ToRect());
-            // Рамка по внешнему краю выделения: полупиксельный сдвиг даёт чёткую линию в 1 px.
+            // Border on outer edge of selection: half-pixel shift gives crisp 1 px line.
             var border = new Rect(hole.X - 0.5, hole.Y - 0.5, hole.Width + 1, hole.Height + 1);
             dc.DrawRectangle(null, BorderPen, border);
             dc.DrawRectangle(null, BorderDashPen, border);
@@ -48,15 +48,15 @@ public sealed class DimLayer : FrameworkElement
             dc.DrawRectangle(HintFill, HintPen, new Rect(hint.X + 1, hint.Y + 1, Math.Max(0, hint.Width - 2), Math.Max(0, hint.Height - 2)));
     }
 
-    /// <summary>Затемнение четырьмя прямоугольниками вокруг дырки (сверху, снизу, слева, справа) — без CombinedGeometry.</summary>
+    /// <summary>Dimming by four rectangles around hole (top, bottom, left, right) — without CombinedGeometry.</summary>
     private static void DrawDimAround(DrawingContext dc, Rect full, Rect hole)
     {
         hole.Intersect(full);
         if (hole.IsEmpty) { dc.DrawRectangle(DimBrush, null, full); return; }
-        DrawIfAny(dc, full.Left, full.Top, full.Width, hole.Top - full.Top);              // сверху
-        DrawIfAny(dc, full.Left, hole.Bottom, full.Width, full.Bottom - hole.Bottom);     // снизу
-        DrawIfAny(dc, full.Left, hole.Top, hole.Left - full.Left, hole.Height);           // слева
-        DrawIfAny(dc, hole.Right, hole.Top, full.Right - hole.Right, hole.Height);        // справа
+        DrawIfAny(dc, full.Left, full.Top, full.Width, hole.Top - full.Top);              // top
+        DrawIfAny(dc, full.Left, hole.Bottom, full.Width, full.Bottom - hole.Bottom);     // bottom
+        DrawIfAny(dc, full.Left, hole.Top, hole.Left - full.Left, hole.Height);           // left
+        DrawIfAny(dc, hole.Right, hole.Top, full.Right - hole.Right, hole.Height);        // right
     }
 
     private static void DrawIfAny(DrawingContext dc, double x, double y, double w, double h)

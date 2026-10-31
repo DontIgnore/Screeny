@@ -6,34 +6,34 @@ using Screeny.Settings;
 namespace Screeny.Overlay;
 
 /// <summary>
-/// Текущие параметры новых фигур, которые не помещаются в палитру и толщину: обводка/заливка, стиль стрелки,
-/// подложка текста, активный образец. Без UI — панели параметров и редактор только вызывают методы.
+/// Current parameters of new shapes not fitting palette and thickness: stroke/fill, arrow style,
+/// text background, active swatch. Without UI — options panel and editor only call methods.
 /// <para>
-/// Схема правки: панель параметров меняет «действующий» стиль (выбранной фигуры или будущей), результат применяется
-/// к выбранной фигуре через <see cref="AnnotationDocument.Restyle"/> и запоминается здесь через <see cref="Absorb"/>.
+/// Edit scheme: options panel changes “active” style (selected shape or future), result applied
+/// to selected shape via <see cref="AnnotationDocument.Restyle"/> and remembered here via <see cref="Absorb"/>.
 /// </para>
 /// </summary>
 public sealed class StyleOptions
 {
-    /// <summary>Значения, по которым циклически переключается прозрачность заливки (клик по «40 %»).</summary>
+    /// <summary>Values fill opacity cycles through (click on “40%”).</summary>
     public static readonly int[] FillOpacitySteps = [20, 40, 60, 80, 100];
 
-    /// <summary>Подложка текста по умолчанию — почти чёрная, непрозрачная: любой цвет палитры на ней читается.</summary>
+    /// <summary>Default text background — almost black opaque: any palette color readable on it.</summary>
     public static readonly Color DefaultTextBackground = Color.FromRgb(0x1C, 0x19, 0x17);
 
     public bool StrokeEnabled { get; private set; } = true;
     public bool FillEnabled { get; private set; }
-    /// <summary>Цвет заливки без прозрачности; прозрачность — <see cref="FillOpacity"/>.</summary>
+    /// <summary>Fill color without opacity; opacity — <see cref="FillOpacity"/>.</summary>
     public Color FillColor { get; private set; } = Colors.Red;
     public int FillOpacity { get; private set; } = 40;
     public ArrowStyle Arrow { get; private set; } = ArrowStyle.Normal;
     public bool TextBackgroundEnabled { get; private set; }
     public Color TextBackgroundColor { get; private set; } = DefaultTextBackground;
     public TextAlign TextAlign { get; private set; } = TextAlign.Left;
-    /// <summary>Подсвеченный образец параметров: его красит палитра.</summary>
+    /// <summary>Highlighted options swatch: palette paints it.</summary>
     public PaintTarget ActiveTarget { get; set; } = PaintTarget.Color;
 
-    /// <summary>Цвет заливки по умолчанию — цвет палитры (с прозрачностью из настроек).</summary>
+    /// <summary>Default fill color — palette color (with opacity from settings).</summary>
     public static StyleOptions FromSettings(AppSettings s, Color paletteColor)
     {
         var o = new StyleOptions
@@ -61,8 +61,8 @@ public sealed class StyleOptions
     }
 
     /// <summary>
-    /// Стиль новой фигуры инструмента. Заливка — только у прямоугольника и эллипса, стиль стрелки — только у стрелки,
-    /// подложка — только у текста; остальные инструменты получают стиль из одного цвета и толщины.
+    /// Style of future shape of tool. Fill only for rectangle/ellipse, arrow style only for arrow,
+    /// background only for text; other tools get style from one color and thickness.
     /// </summary>
     public AnnotationStyle StyleFor(ToolKind tool, Color color, double thickness)
     {
@@ -80,7 +80,7 @@ public sealed class StyleOptions
         };
     }
 
-    /// <summary>Запоминает параметры секции из стиля, который пользователь только что изменил.</summary>
+    /// <summary>Remembers section parameters from style user just changed.</summary>
     public void Absorb(AnnotationStyle style, OptionsSectionKind section)
     {
         switch (section)
@@ -101,22 +101,22 @@ public sealed class StyleOptions
         }
     }
 
-    // ---------- Операции параметров над стилем (чистые: возвращают новый стиль) ----------
+    // ---------- Style operations (pure: return new style) ----------
 
-    /// <summary>Кнопка ⊘ у обводки: переключает обводку (последнюю видимую часть не выключает).</summary>
+    /// <summary>⊘ button at stroke: toggles stroke (doesn't disable last visible part).</summary>
     public AnnotationStyle ToggleStroke(AnnotationStyle s) => s.WithStroke(!s.StrokeEnabled);
 
-    /// <summary>Кнопка ⊘ у заливки: убирает заливку или возвращает её запомненным цветом и прозрачностью.</summary>
+    /// <summary>⊘ button at fill: removes fill or restores with remembered color and opacity.</summary>
     public AnnotationStyle ToggleFill(AnnotationStyle s)
         => s.WithFill(s.Fill is null ? ColorHex.WithOpacity(FillColor, FillOpacity) : null);
 
-    /// <summary>Клик по «40 %»: следующая прозрачность заливки (заливка при этом включается).</summary>
+    /// <summary>Click on “40%”: next fill opacity (fill enabled).</summary>
     public AnnotationStyle NextFillOpacity(AnnotationStyle s)
     {
         int current = s.Fill is { } f ? ColorHex.OpacityPercent(f) : FillOpacity;
         int next = FillOpacitySteps.FirstOrDefault(step => step > current + 1, FillOpacitySteps[0]);
         var rgb = s.Fill is { } fill ? Opaque(fill) : FillColor;
-        FillOpacity = next; // и без заливки следующая включённая получит эту прозрачность
+        FillOpacity = next; // and without fill, next enabled fill gets this opacity
         return s.WithFill(ColorHex.WithOpacity(rgb, next));
     }
 
@@ -128,8 +128,8 @@ public sealed class StyleOptions
     public static AnnotationStyle WithTextAlign(AnnotationStyle s, TextAlign align) => s with { TextAlign = align };
 
     /// <summary>
-    /// Цвет из палитры или пипетки в образец <paramref name="target"/>. Покраска выключенной обводки, заливки
-    /// или подложки включает её. Прозрачность заливки сохраняется.
+    /// Color from palette or eyedropper into swatch <paramref name="target"/>. Painting disabled stroke, fill
+    /// or background enables it. Fill opacity preserved.
     /// </summary>
     public AnnotationStyle Paint(AnnotationStyle s, PaintTarget target, Color c) => target switch
     {
@@ -138,7 +138,7 @@ public sealed class StyleOptions
         _ => s with { Color = Opaque(c), StrokeEnabled = true },
     };
 
-    /// <summary>Цвет, который должен быть подсвечен на палитре для образца <paramref name="target"/>.</summary>
+    /// <summary>Color to highlight on palette for swatch <paramref name="target"/>.</summary>
     public static Color? SwatchColor(AnnotationStyle s, PaintTarget target) => target switch
     {
         PaintTarget.Fill => s.Fill is { } f ? Opaque(f) : null,

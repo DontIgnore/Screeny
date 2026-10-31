@@ -68,7 +68,7 @@ public class ToolTests
         var rect = new RectAnnotation(new Rect(0, 0, 50, 50), Style);
         doc.Add(rect);
         var tool = new SelectTool();
-        tool.Down(new Point(0, 25), doc, Style); // по рамке
+        tool.Down(new Point(0, 25), doc, Style); // on border
         Assert.Same(rect, doc.Selected);
         tool.Move(new Point(5, 30));
         tool.Move(new Point(10, 35));
@@ -130,9 +130,9 @@ public class ToolTests
         doc.Add(a);
         var tool = new ShapeTool(ToolKind.Rect);
         tool.Down(new Point(50, 50), doc, Style);
-        doc.Undo.Undo();               // Ctrl+Z с зажатой кнопкой убирает A
+        doc.Undo.Undo();               // Ctrl+Z with button held removes A
         Assert.Empty(doc.Items);
-        tool.Up(new Point(51, 50));    // мини-сдвиг: B отбрасывается
+        tool.Up(new Point(51, 50));    // mini-move: B discarded
         Assert.Empty(doc.Items);
         Assert.True(doc.Undo.CanRedo);
         doc.Undo.Redo();
@@ -150,7 +150,7 @@ public class ToolTests
         Assert.False(tool.IsActive);
         Assert.Null(doc.Live);
         Assert.Empty(doc.Items);
-        tool.Up(new Point(60, 60)); // поздний Up после отмены ничего не добавляет
+        tool.Up(new Point(60, 60)); // late Up after undo adds nothing
         Assert.Empty(doc.Items);
     }
 
@@ -213,14 +213,14 @@ public class ToolTests
         var tool = new SelectTool();
         tool.Down(new Point(0, 25), doc, Style);
         tool.Move(new Point(10, 35));
-        doc.Undo.Undo();               // фигура удалена посреди перетаскивания
+        doc.Undo.Undo();               // shape deleted mid-drag
         tool.Up(new Point(20, 45));
         Assert.Empty(doc.Items);
         Assert.False(doc.Undo.CanUndo);
         Assert.True(doc.Undo.CanRedo);
         doc.Undo.Redo();
         Assert.Same(rect, Assert.Single(doc.Items));
-        Assert.Equal(new Rect(0, 0, 50, 50), rect.Rect); // вернулась на исходное место
+        Assert.Equal(new Rect(0, 0, 50, 50), rect.Rect); // returned to original place
     }
 
     [Fact]
@@ -238,7 +238,7 @@ public class ToolTests
         Assert.Equal(new Rect(0, 0, 50, 50), rect.Rect);
         tool.Up(new Point(30, 30));
         Assert.Equal(new Rect(0, 0, 50, 50), rect.Rect);
-        doc.Undo.Undo(); // единственный шаг — добавление
+        doc.Undo.Undo(); // single step — addition
         Assert.Empty(doc.Items);
         Assert.False(doc.Undo.CanUndo);
     }

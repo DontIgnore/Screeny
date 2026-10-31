@@ -3,29 +3,29 @@ using Screeny.Modules;
 
 namespace Screeny.Ocr.Paddle;
 
-/// <summary>Уточнение текста для режима текста (оверлей не знает, откуда оно берётся).</summary>
+/// <summary>Text refinement for text mode (overlay doesn't know where it comes from).</summary>
 public interface IOcrRefiner
 {
-    /// <summary>Точное распознавание активно и модуль не сломан: уточнение стоит запускать.</summary>
+    /// <summary>Precise recognition active and module not broken: refinement should run.</summary>
     bool IsActive { get; }
 
-    /// <summary>Проверить файлы модуля и загрузить сессии, если их ещё нет. false — модуль не загрузился (причина в журнале).</summary>
+    /// <summary>Verify module files and load sessions if not yet. false — module failed to load (reason in log).</summary>
     Task<bool> PrepareAsync(CancellationToken ct);
 
-    /// <summary>Раскладка в пикселях <paramref name="image"/> или null (неактивно, ошибка загрузки — уже в журнале).</summary>
+    /// <summary>Layout in pixels of <paramref name="image"/> or null (inactive, load error — already in log).</summary>
     Task<OcrLayout?> RecognizeAsync(OcrImage image, CancellationToken ct);
 
-    /// <summary>Пользователь вошёл в режим текста (Ctrl+T): повод напомнить про устаревший модуль.</summary>
+    /// <summary>User entered text mode (Ctrl+T): reason to remind about outdated module.</summary>
     void TextModeUsed();
 }
 
 /// <summary>
-/// Точное распознавание для всего приложения. Сессии ORT создаются при первом уточнении и освобождаются через
-/// <see cref="IdleTimeout"/> без работы: на полном экране арена ORT держит до ≈1 ГБ, фоновому приложению в трее это ни к чему.
-/// Прогоны идут по одному (семафор), освобождение по таймеру берёт тот же семафор и не попадает на идущий прогон.
-/// Каждый раз, когда сессии создаются заново (первый раз и после освобождения), файлы модуля сверяются с <c>module.json</c>,
-/// а сам он — с SHA256, зашитым в приложении. Ошибка загрузки (повреждённые файлы, нет или устарел рантайм VC++,
-/// антивирус) выключает уточнение до перезапуска или переустановки — режим текста работает на Windows OCR.
+/// Precise recognition for whole app. ORT sessions created at first refinement and released via
+/// <see cref="IdleTimeout"/> of inactivity: on full screen ORT arena holds up to ~1 GB, background tray app doesn't need it.
+/// Runs are single (semaphore), release by timer takes same semaphore and doesn't collide with running run.
+/// Each time sessions are recreated (first and after release), module files verified against <c>module.json</c>,
+/// and it against SHA256 hardcoded in app. Load error (corrupted files, missing/outdated VC++ runtime,
+/// antivirus) disables refinement until restart or reinstall — text mode uses Windows OCR.
 /// </summary>
 public sealed class PreciseOcrService : IOcrRefiner, IDisposable
 {
@@ -42,9 +42,9 @@ public sealed class PreciseOcrService : IOcrRefiner, IDisposable
     private volatile string? _loadError;
     private bool _disposed;
 
-    /// <param name="activeFolder">Папка модуля, если точное распознавание активно (<see cref="PreciseOcrRules.IsActive"/>), иначе null.</param>
-    /// <param name="textModeUsed">Вызывается при каждом входе в режим текста.</param>
-    /// <param name="spec">Что проверять в папке; по умолчанию — модуль этой сборки (<see cref="OcrModule.Spec"/>).</param>
+    /// <param name="activeFolder">Module folder if precise recognition active (<see cref="PreciseOcrRules.IsActive"/>), else null.</param>
+    /// <param name="textModeUsed">Called on each entry to text mode.</param>
+    /// <param name="spec">What to verify in folder; default — module of this build (<see cref="OcrModule.Spec"/>).</param>
     public PreciseOcrService(Func<string?> activeFolder, Action textModeUsed, ModuleSpec? spec = null)
     {
         _activeFolder = activeFolder;
@@ -53,14 +53,14 @@ public sealed class PreciseOcrService : IOcrRefiner, IDisposable
         _idle = new Timer(_ => ReleaseIdle(), null, Timeout.Infinite, Timeout.Infinite);
     }
 
-    /// <summary>Модуль не загрузился в этом процессе: текст для настроек. null — ошибок не было.</summary>
+    /// <summary>Module failed to load in this process: text for settings. null — no errors.</summary>
     public string? LoadError => _loadError;
 
     public bool IsActive => _loadError is null && !_disposed && _activeFolder() is not null;
 
     public void TextModeUsed() => _textModeUsed();
 
-    /// <summary>Модуль переустановлен или удалён: прежняя ошибка больше не в силе.</summary>
+    /// <summary>Module reinstalled or deleted: previous error no longer applies.</summary>
     public void Reset()
     {
         _loadError = null;
@@ -79,7 +79,7 @@ public sealed class PreciseOcrService : IOcrRefiner, IDisposable
             return layout;
         }, ct);
 
-    /// <summary>Под семафором, в фоне: сессии на месте → <paramref name="work"/>. Модуль неактивен или не загрузился — default.</summary>
+    /// <summary>Under semaphore, in background: sessions present → <paramref name="work"/>. Module inactive or failed — default.</summary>
     private async Task<T?> UseEngineAsync<T>(Func<PaddleEngine, T> work, CancellationToken ct)
     {
         if (_activeFolder() is not { } folder || _loadError is not null) return default;
@@ -97,7 +97,7 @@ public sealed class PreciseOcrService : IOcrRefiner, IDisposable
         }
     }
 
-    /// <summary>Сессии на месте (под семафором). null — модуль не загрузился, причина в <see cref="LoadError"/>.</summary>
+    /// <summary>Sessions present (under semaphore). null — module failed, reason in <see cref="LoadError"/>.</summary>
     private PaddleEngine? EnsureEngine(string folder)
     {
         if (_engine is not null && _engineFolder == folder) return _engine;
@@ -106,7 +106,7 @@ public sealed class PreciseOcrService : IOcrRefiner, IDisposable
         try
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
-            // Каждый раз перед созданием сессий, а не раз за процесс: после освобождения файлы могли подменить.
+            // Every time before creating sessions, not once per process: after release files could be swapped.
             if (ModuleManifest.Verify(folder, _spec.Id, _spec.Version, _spec.ManifestSha256) is { } error)
             {
                 Fail(Localization.Loc.F("PreciseOcr.FilesDamaged", error), null);
@@ -121,8 +121,8 @@ public sealed class PreciseOcrService : IOcrRefiner, IDisposable
         catch (OrtLoadException ex) { Fail(ex.Message, ex); return null; }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            // Чаще всего — DllNotFoundException: нет рантайма или файл заблокирован антивирусом. Текст исключения .NET
-            // пользователю не показываем: он в журнале.
+            // Most often DllNotFoundException: no runtime or file locked by antivirus. .NET exception text
+            // not shown; it's in log.
             Fail(ex is DllNotFoundException or BadImageFormatException
                 ? Localization.Loc.T("PreciseOcr.OnnxLoadFailed")
                 : Localization.Loc.T("PreciseOcr.ModuleLoadFailed"), ex);
@@ -138,7 +138,7 @@ public sealed class PreciseOcrService : IOcrRefiner, IDisposable
 
     private void ReleaseIdle()
     {
-        if (!_gate.Wait(0)) return; // идёт прогон: по его окончании таймер запустится заново
+        if (!_gate.Wait(0)) return; // run ongoing: after it timer restarts
         try
         {
             if (_engine is null) return;

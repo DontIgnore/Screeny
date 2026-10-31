@@ -8,7 +8,7 @@ using Screeny.Tests.Updates;
 
 namespace Screeny.Tests.Localization;
 
-/// <summary>Строки интерфейса: полнота переводов, подстановки и ключи, на которые ссылается код.</summary>
+/// <summary>UI strings: translation completeness, substitutions and keys referenced by code.</summary>
 public partial class LocalizationTests
 {
     public static TheoryData<string> Translations => new(Loc.Supported.Where(l => l != Loc.Fallback));
@@ -31,8 +31,8 @@ public partial class LocalizationTests
     public void EveryKey_ExistsInEveryLanguage(string language)
     {
         var translated = Strings(CultureInfo.GetCultureInfo(language));
-        Assert.Empty(English.Keys.Except(translated.Keys)); // не переведено
-        Assert.Empty(translated.Keys.Except(English.Keys)); // лишнее: ключ удалён или переименован
+        Assert.Empty(English.Keys.Except(translated.Keys)); // untranslated
+        Assert.Empty(translated.Keys.Except(English.Keys)); // extra: key removed or renamed
     }
 
     [Theory]
@@ -63,7 +63,7 @@ public partial class LocalizationTests
     [Fact]
     public void FormatStrings_FormatWithTheirPlaceholders()
     {
-        // Каждая строка с подстановками форматируется без исключения (нет одиночных «{» и номеров вне ряда 0…n−1).
+        // Each substitution string formats without exception (no lone “{”, numbers in 0…n−1 range).
         foreach (var language in Loc.Supported)
         {
             var strings = language == Loc.Fallback ? English : Strings(CultureInfo.GetCultureInfo(language));
@@ -83,8 +83,8 @@ public partial class LocalizationTests
     private static partial Regex CodeKeyRx();
 
     /// <summary>
-    /// Ключи, на которые ссылаются XAML (<c>{l:Loc …}</c>) и код (строковые литералы вида «Раздел.Имя» с разделом из
-    /// строк интерфейса), есть в английских строках — опечатка в ключе показала бы пользователю сам ключ.
+    /// Keys referenced by XAML (<c>{l:Loc …}</c>) and code (string literals like “Section.Name” with section from
+    /// UI strings) exist in English strings — typo would show user the key itself.
     /// </summary>
     [Fact]
     public void KeysUsedInSource_Exist()
@@ -157,7 +157,7 @@ public partial class LocalizationTests
     [InlineData("klingon", "auto")]
     [InlineData("", "auto")]
     [InlineData(null, "auto")]
-    [InlineData("ru-RU", "ru")]         // имя культуры — как выбрал бы «auto» для неё
+    [InlineData("ru-RU", "ru")]         // culture name — as Auto would choose for it
     [InlineData("en-US", "en")]
     [InlineData("zh-CN", "zh-Hans")]
     [InlineData("zh", "en")]
@@ -191,7 +191,7 @@ public partial class LocalizationTests
         => Assert.Equal(English["Common.Cancel"], Loc.Get("Common.Cancel", CultureInfo.GetCultureInfo("de-DE")));
 }
 
-/// <summary>Старый файл настроек (без поля «Language») читается с языком «как в системе».</summary>
+/// <summary>Old settings file (without “Language” field) read with language “as system”.</summary>
 public class LanguageSettingMigrationTests : IDisposable
 {
     private readonly string _dir = Path.Combine(Path.GetTempPath(), "ScreenyTests", Guid.NewGuid().ToString("N"));

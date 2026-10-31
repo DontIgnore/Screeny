@@ -6,35 +6,35 @@ using Windows.Media.Ocr;
 
 namespace Screeny.Ocr;
 
-/// <summary>Распознавание текста встроенным в Windows движком (офлайн, языки профиля пользователя).</summary>
+/// <summary>Text recognition by built-in Windows engine (offline, user profile languages).</summary>
 public static class OcrService
 {
     public static bool IsAvailable => OcrEngine.TryCreateFromUserProfileLanguages() is not null;
 
     /// <summary>
-    /// Текст снимка или null, если в системе нет ни одного языка с поддержкой OCR.
-    /// Движок одного языка не читает чужую письменность (английский превращает кириллицу в «3aKpb1Ba»),
-    /// поэтому распознаём всеми языками профиля и берём самый правдоподобный результат.
+    /// Screenshot text or null if system has no language with OCR support.
+    /// Engine of one language doesn't read foreign script (English turns Cyrillic into “3aKpb1Ba”),
+    /// so recognize with all profile languages and take most plausible result.
     /// </summary>
     public static async Task<string?> RecognizeAsync(BitmapSource image, bool adaptive = true)
         => (await RecognizeLayoutAsync(image, adaptive))?.TextOf(null);
 
-    /// <summary>Текст с медианной высотой слова ниже порога (в пикселях) считается мелким и распознаётся ещё и с увеличением.</summary>
+    /// <summary>Text with median word height below threshold (in pixels) considered small and also recognized with upscale.</summary>
     public const double SmallWordHeight = 18;
 
     /// <summary>
-    /// Масштабы дополнительных проходов для мелкого текста. Подобраны на наборе трудных снимков:
-    /// 2–2,5× дают меньше всего ошибок, 3× и больше снова хуже.
+    /// Additional pass scales for small text. Tuned on set of difficult screenshots:
+    /// 2–2.5× give least errors, 3× and more worse again.
     /// </summary>
     public static readonly double[] UpscalePasses = [2.0, 2.5];
 
     /// <summary>
-    /// Текст с геометрией: строки, слова и рамки слов в пикселях <paramref name="image"/>.
-    /// null — в системе нет ни одного языка с OCR.
-    /// Движок Windows плохо читает мелкий текст: строка в 12 px даёт «срабатыват.е» вместо «срабатывание»,
-    /// а нередко не находит вообще ничего. Поэтому первый проход измеряет высоту слов, и если текст мелкий
-    /// (или ничего не найдено в небольшой картинке), картинка распознаётся ещё и увеличенной в 2 и 2,5 раза.
-    /// Итог собирается голосованием по строкам (<see cref="OcrLayout.Consensus"/>).
+    /// Text with geometry: lines, words and borders in pixels of <paramref name="image"/>.
+    /// null — no language with OCR in system.
+    /// Windows engine reads small text poorly: 12 px line gives “срабатыват.е” instead of “срабатывание”,
+    /// often nothing at all. So first pass measures word height, and if text small
+    /// (or nothing found in small image), image also recognized at 2 and 2.5×.
+    /// Result assembled by line voting (<see cref="OcrLayout.Consensus"/>).
     /// </summary>
     public static async Task<OcrLayout?> RecognizeLayoutAsync(BitmapSource image, bool adaptive = true)
     {
@@ -43,23 +43,23 @@ public static class OcrService
         var first = await RecognizeCoreAsync(engines, image, 1);
         if (!adaptive || !NeedsUpscale(MedianWordHeight(first), Math.Max(image.PixelWidth, image.PixelHeight))) return first;
 
-        // Проходы независимы и идут параллельно. Экземпляр OcrEngine не распознаёт две картинки сразу,
-        // поэтому у каждого прохода свои движки.
+        // Passes independent and run parallel. OcrEngine instance can't recognize two images at once,
+        // so each pass has own engines.
         var frozen = image.IsFrozen ? image : (BitmapSource)image.GetAsFrozen();
         var passes = (await Task.WhenAll(UpscalePasses.Select(s => Task.Run(() => RecognizeCoreAsync(Engines(), frozen, s))))).ToList();
         passes.Add(first);
-        // Основа — самый крупный проход, если он что-то нашёл; иначе тот, что прочитал больше всего.
+        // Base is largest pass if it found something; else the one that read most.
         int baseIndex = passes[UpscalePasses.Length - 1].IsEmpty
             ? passes.Select((p, i) => (p, i)).OrderByDescending(x => Score(x.p)).First().i
             : UpscalePasses.Length - 1;
         return OcrLayout.Consensus(passes, baseIndex);
     }
 
-    /// <summary>Мелкий текст (медиана ниже <see cref="SmallWordHeight"/>) или ничего не найдено в небольшой картинке.</summary>
+    /// <summary>Small text (median below <see cref="SmallWordHeight"/>) or nothing found in small image.</summary>
     public static bool NeedsUpscale(double? medianWordHeight, int longestSide)
         => medianWordHeight is { } h ? h < SmallWordHeight : longestSide <= 1600;
 
-    /// <summary>Распознавание с принудительным увеличением (для сравнения и тестов). Рамки — в пикселях исходной картинки.</summary>
+    /// <summary>Recognition with forced upscale (for comparison and tests). Borders in original image pixels.</summary>
     public static async Task<OcrLayout?> RecognizeAtScaleAsync(BitmapSource image, double upscale)
     {
         var engines = Engines();
@@ -73,7 +73,7 @@ public static class OcrService
         return heights[heights.Count / 2];
     }
 
-    /// <summary>Оценка раскладки для выбора между проходами: сумма правдоподобия строк.</summary>
+    /// <summary>Layout score for choosing between passes: sum of line plausibility.</summary>
     public static int Score(OcrLayout layout) => layout.Lines.Sum(l => LinePlausibility(l.Text));
 
     private static async Task<OcrLayout> RecognizeCoreAsync(List<OcrEngine> engines, BitmapSource image, double upscale)
@@ -81,7 +81,7 @@ public static class OcrService
         var bitmap = ToSoftwareBitmap(image, upscale, out double scale);
         try
         {
-            // Языки распознают одну и ту же картинку независимо — параллельно.
+            // Languages recognize same image independently — parallel.
             var layouts = (await Task.WhenAll(engines.Select(async engine =>
             {
                 var result = await engine.RecognizeAsync(bitmap);
@@ -100,7 +100,7 @@ public static class OcrService
 
     private static readonly string[] CyrillicLanguages = ["ru", "uk", "be", "bg", "sr", "mk", "kk", "ky", "tg", "mn"];
 
-    /// <summary>Язык движка подходит письменности строки: кириллическая строка — кириллический язык, латинская — нет.</summary>
+    /// <summary>Engine language fits line script: Cyrillic line — Cyrillic language, Latin — no.</summary>
     public static bool LanguageFits(string line, string? languageTag)
     {
         if (string.IsNullOrEmpty(languageTag)) return false;
@@ -112,11 +112,11 @@ public static class OcrService
         return cyr > latin ? cyrLang : !cyrLang && !IsNoSpaceLanguage(languageTag);
     }
 
-    /// <summary>Японский и китайский пишутся без пробелов между словами.</summary>
+    /// <summary>Japanese and Chinese are written without spaces between words.</summary>
     public static bool IsNoSpaceLanguage(string languageTag)
         => languageTag.StartsWith("ja", StringComparison.OrdinalIgnoreCase) || languageTag.StartsWith("zh", StringComparison.OrdinalIgnoreCase);
 
-    /// <summary>Движки для языков профиля, у которых есть OCR, в порядке предпочтения пользователя.</summary>
+    /// <summary>Engines for profile languages with OCR, in user preference order.</summary>
     private static List<OcrEngine> Engines()
     {
         var engines = new List<OcrEngine>();
@@ -131,12 +131,12 @@ public static class OcrService
         return engines;
     }
 
-    /// <param name="upscale">Желаемое увеличение; итоговый масштаб (<paramref name="scale"/>) ограничен пределом движка.</param>
+    /// <param name="upscale">Desired upscale; final scale (<paramref name="scale"/>) limited by engine limit.</param>
     private static SoftwareBitmap ToSoftwareBitmap(BitmapSource image, double upscale, out double scale)
     {
         BitmapSource src = image;
         double fit = ScaleToFit(image.PixelWidth, image.PixelHeight, (int)OcrEngine.MaxImageDimension);
-        // Больше предела движка — уменьшаем средствами WPF; увеличение (мелкий текст) — своим бикубическим фильтром.
+        // Above engine limit — downscale via WPF; upscale (small text) — own bicubic filter.
         if (fit < 1) src = new TransformedBitmap(image, new ScaleTransform(fit, fit));
         if (src.Format != PixelFormats.Bgra32) src = new FormatConvertedBitmap(src, PixelFormats.Bgra32, null, 0);
         int w = src.PixelWidth, h = src.PixelHeight;
@@ -159,7 +159,7 @@ public static class OcrService
         return sb;
     }
 
-    /// <summary>Индекс самого правдоподобного текста; при равенстве — первый (язык выше в списке пользователя).</summary>
+    /// <summary>Index of most plausible text; on tie — first (language higher in user list).</summary>
     public static int PickBest(IReadOnlyList<string> candidates)
     {
         int best = 0;
@@ -169,8 +169,8 @@ public static class OcrService
     }
 
     /// <summary>
-    /// Сумма длин «чистых» слов: буквы одной письменности (латиница или кириллица) без цифр внутри,
-    /// либо только цифры. Мусор чужой модели («3aKpb1Ba'0T», «Соmmittеd») не засчитывается.
+    /// Sum of lengths of “clean” words: letters of one script (Latin or Cyrillic) without digits inside,
+    /// or only digits. Garbage from foreign model (“3aKpb1Ba'0T”, “Соmmittеd”) not counted.
     /// </summary>
     public static int Plausibility(string text)
     {
@@ -195,9 +195,9 @@ public static class OcrService
     }
 
     /// <summary>
-    /// Правдоподобие одной строки. Строка почти всегда написана одной письменностью, поэтому «чистые» слова
-    /// основной письменности строки идут в полный вес, а слова другой — в половину: так «Thank уои» (английская
-    /// строка, прочитанная русской моделью) проигрывает «Thank you», а «используйте git commit» остаётся русской.
+    /// Plausibility of one line. Line almost always written in one script, so “clean” words
+    /// of main script get full weight, other script half: so “Thank уои” (English line
+    /// read by Russian model) loses to “Thank you”, and “используйте git commit” stays Russian.
     /// </summary>
     public static int LinePlausibility(string line)
     {
@@ -213,7 +213,7 @@ public static class OcrService
         return 2 * (main + rest) + minor;
     }
 
-    /// <summary>Коэффициент уменьшения, чтобы длинная сторона не превышала предел движка (не увеличивает).</summary>
+    /// <summary>Downscale factor so long side doesn't exceed engine limit (never upscales).</summary>
     public static double ScaleToFit(int width, int height, int maxDimension)
     {
         int longest = Math.Max(width, height);

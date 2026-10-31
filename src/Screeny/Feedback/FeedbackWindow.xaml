@@ -9,13 +9,13 @@
     <Style x:Key="FieldLabel" TargetType="TextBlock" BasedOn="{StaticResource Body}">
       <Setter Property="Margin" Value="0,14,0,6"/>
     </Style>
-    <!-- Подсказка поверх пустого поля: клики проходят в поле -->
+    <!-- Hint over empty field: clicks pass through to field -->
     <Style x:Key="Placeholder" TargetType="TextBlock" BasedOn="{StaticResource Body}">
       <Setter Property="Foreground" Value="{DynamicResource Brush.Ink50}"/>
       <Setter Property="IsHitTestVisible" Value="False"/>
       <Setter Property="TextWrapping" Value="Wrap"/>
     </Style>
-    <!-- Многострочное поле: текст сверху, полоса прокрутки при длинном тексте (у общего стиля её нет) -->
+    <!-- Multiline field: text top, scrollbar for long text (common style has none) -->
     <Style x:Key="MultilineBox" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
       <Setter Property="AcceptsReturn" Value="True"/>
       <Setter Property="TextWrapping" Value="Wrap"/>
@@ -45,7 +45,7 @@
   </Window.Resources>
 
   <DockPanel>
-    <!-- Нижняя панель: ссылка на GitHub слева, «Отмена» и «Отправить» справа; после отправки — только «Закрыть» -->
+    <!-- Bottom panel: GitHub link left, “Cancel” and “Send” right; after send — only “Close” -->
     <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource Brush.Stroke}" BorderThickness="0,1,0,0" Padding="24,14,24,18">
       <DockPanel>
         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
@@ -66,7 +66,7 @@
         <TextBlock x:Name="HeadingText" Style="{StaticResource H1}" TextWrapping="Wrap"/>
         <TextBlock x:Name="IntroText" Style="{StaticResource Caption}" Margin="0,4,0,0" TextWrapping="Wrap" LineHeight="17"/>
 
-        <!-- Форма: блокируется на время отправки, после успеха прячется -->
+        <!-- Form: blocked during send, after success hidden -->
         <StackPanel x:Name="FormPanel">
           <TextBlock Text="{l:Loc Feedback.TitleLabel}" Style="{StaticResource FieldLabel}"/>
           <Grid>
@@ -94,7 +94,7 @@
           <TextBlock x:Name="ContactError" Style="{StaticResource ErrorText}"/>
           <TextBlock Text="{l:Loc Feedback.ContactNote}" Style="{StaticResource Caption}" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="17"/>
 
-          <!-- Только для ошибки: технические подробности и то, что именно уходит -->
+          <!-- Only for error: technical details and what exactly is sent -->
           <StackPanel x:Name="DetailsPanel" Margin="0,16,0,0">
             <DockPanel>
               <TextBlock DockPanel.Dock="Right" Style="{StaticResource Caption}" Margin="12,1,0,0">
@@ -111,7 +111,7 @@
           <TextBlock Text="{l:Loc Feedback.Privacy}" Style="{StaticResource Caption}" Margin="0,16,0,0" TextWrapping="Wrap" LineHeight="17"/>
         </StackPanel>
 
-        <!-- Отправка: бегущая полоса и подпись -->
+        <!-- Sending: progress bar and caption -->
         <StackPanel x:Name="SendingPanel" Margin="0,16,0,0" Visibility="Collapsed">
           <Border Height="3" CornerRadius="1.5" Background="{DynamicResource Brush.Ink10}" ClipToBounds="True">
             <Canvas x:Name="ProgressTrack" ClipToBounds="True">
@@ -121,13 +121,13 @@
           <TextBlock Text="{l:Loc Feedback.Sending}" Style="{StaticResource Caption}" Margin="0,8,0,0"/>
         </StackPanel>
 
-        <!-- Ошибка отправки: текст в полях остаётся, можно отправить ещё раз -->
+        <!-- Send error: field text remains, can send again -->
         <Border x:Name="ErrorPanel" Margin="0,16,0,0" Padding="12,10" CornerRadius="8" Background="{DynamicResource Brush.DangerSubtle}"
                 Visibility="Collapsed">
           <TextBlock x:Name="ErrorText" Style="{StaticResource Body}" Foreground="{DynamicResource Brush.DangerText}" TextWrapping="Wrap" LineHeight="18"/>
         </Border>
 
-        <!-- Успех -->
+        <!-- Success -->
         <StackPanel x:Name="SuccessPanel" Margin="0,20,0,4" Visibility="Collapsed">
           <Border Width="40" Height="40" CornerRadius="20" Background="{StaticResource Brush.Accent}" HorizontalAlignment="Left">
             <Path Data="M 11,20.5 L 17.5,27 L 29,14" Stroke="{StaticResource Brush.OnAccent}" StrokeThickness="2.6"

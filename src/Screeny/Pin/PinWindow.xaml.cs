@@ -14,8 +14,8 @@ using Screeny.Overlay;
 namespace Screeny.Pin;
 
 /// <summary>
-/// Закреплённый снимок поверх всех окон. Размер и позиция задаются в пикселях устройства через SetWindowPos,
-/// поэтому при масштабе 100 % картинка совпадает с исходным местом на экране пиксель в пиксель.
+/// Pinned screenshot above all windows. Size and position set in device pixels via SetWindowPos,
+/// so at 100% scale image matches original on-screen place pixel-perfect.
 /// </summary>
 public partial class PinWindow : Window
 {
@@ -27,7 +27,7 @@ public partial class PinWindow : Window
     private readonly DispatcherTimer _badgeTimer;
     private double _scale = 1.0;
     private bool _dpiFixPending;
-    private PixelRect? _initialRegion; // пока пользователь не двигал и не масштабировал окно — точное исходное место
+    private PixelRect? _initialRegion; // until user moved or scaled window — exact original place
 
     public PinWindow(BitmapSource image, PixelRect screenRegion, bool excludeFromCapture = false)
     {
@@ -52,7 +52,7 @@ public partial class PinWindow : Window
 
     public double Scale => _scale;
 
-    /// <summary>Не попадать в новые снимки экрана (Windows 10 2004+; на старых системах не работает — пишем в лог).</summary>
+    /// <summary>Don't appear in new screen captures (Windows 10 2004+; older systems — doesn't work, logged).</summary>
     public void SetExcludedFromCapture(bool exclude)
     {
         if (!User32.SetWindowDisplayAffinity(Hwnd, exclude ? User32.WDA_EXCLUDEFROMCAPTURE : User32.WDA_NONE))
@@ -67,8 +67,8 @@ public partial class PinWindow : Window
     private User32.RECT PixelBounds() { User32.GetWindowRect(Hwnd, out var r); return r; }
 
     /// <summary>
-    /// Верхний предел масштаба: не больше 500 % и не больше, чем окно помещается в виртуальный экран
-    /// (иначе 2560×1440 × 500 % дало бы layered-окно 12800×7200).
+    /// Upper scale limit: no more than 500% and no more than window fits virtual screen
+    /// (else 2560×1440 × 500% would give 12800×7200 layered window).
     /// </summary>
     private double MaxScale
     {
@@ -81,14 +81,14 @@ public partial class PinWindow : Window
         }
     }
 
-    /// <summary>Масштаб относительно точки под курсором (в экранных пикселях), чтобы она оставалась на месте.</summary>
+    /// <summary>Scale around point under cursor (in screen pixels) so it stays in place.</summary>
     public void ZoomTo(double scale, Point? anchorScreen = null)
     {
         ApplyScale(scale, anchorScreen);
         ShowBadge($"{Math.Round(_scale * 100)} %");
     }
 
-    /// <summary>Физический размер окна = размер снимка × масштаб; опорная точка остаётся на месте.</summary>
+    /// <summary>Physical window size = screenshot size × scale; anchor stays.</summary>
     private void ApplyScale(double scale, Point? anchorScreen)
     {
         _initialRegion = null;
@@ -105,9 +105,9 @@ public partial class PinWindow : Window
     }
 
     /// <summary>
-    /// При переходе на монитор с другим масштабом WPF применяет предложенный системой размер (пересчитанный по DPI),
-    /// и соответствие «1 пиксель снимка = _scale пикселей экрана» ломается. Восстанавливаем физический размер
-    /// после того, как WPF закончит обработку WM_DPICHANGED; опорная точка — курсор (если он над окном) или центр.
+    /// When moving to monitor with different scale, WPF applies system-proposed size (recalculated by DPI),
+    /// and “1 screenshot pixel = _scale screen pixels” breaks. Restore physical size
+    /// after WPF finishes WM_DPICHANGED; anchor — cursor (if over window) or center.
     /// </summary>
     protected override void OnDpiChanged(DpiScale oldDpi, DpiScale newDpi)
     {
@@ -120,7 +120,7 @@ public partial class PinWindow : Window
             if (Hwnd == IntPtr.Zero) return;
             if (_initialRegion is { } ir)
             {
-                // Окно ещё на исходном месте (DPI сменился при первой расстановке): возвращаем ровно туда.
+                // Window still at original place (DPI changed at first layout): return exactly there.
                 SetPixelBounds(ir.X, ir.Y, (int)Math.Round(ir.Width * _scale), (int)Math.Round(ir.Height * _scale));
                 return;
             }
@@ -148,16 +148,16 @@ public partial class PinWindow : Window
         _badgeTimer.Start();
     }
 
-    // ---------- Ввод ----------
+    // ---------- Input ----------
 
     protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
     {
         base.OnMouseLeftButtonDown(e);
-        // DragMove «съедает» двойной клик, поэтому проверяем его заранее.
+        // DragMove “eats” double-click, so check beforehand.
         if (e.ClickCount == 2) { Close(); return; }
         _initialRegion = null;
         try { DragMove(); }
-        catch (InvalidOperationException) { /* кнопка уже отпущена */ }
+        catch (InvalidOperationException) { /* button already released */ }
     }
 
     protected override void OnMouseWheel(MouseWheelEventArgs e)
@@ -166,7 +166,7 @@ public partial class PinWindow : Window
         e.Handled = true;
         int dir = Math.Sign(e.Delta);
         if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) { SetOpacity(Opacity + 0.1 * dir); return; }
-        // PointToScreen в PerMonitorV2 возвращает пиксели устройства.
+        // PointToScreen in PerMonitorV2 returns device pixels.
         var anchor = PointToScreen(e.GetPosition(this));
         ZoomTo(_scale * (dir > 0 ? 1.1 : 1 / 1.1), anchor);
     }

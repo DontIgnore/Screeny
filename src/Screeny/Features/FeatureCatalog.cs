@@ -1,8 +1,8 @@
 namespace Screeny.Features;
 
-/// <summary>Отключаемая функция: id хранится в настройках и в метках списка изменений (<c>&lt;!-- feature: id --&gt;</c>).</summary>
-/// <param name="TitleKey">Ключ названия в строках интерфейса (<see cref="Localization.Loc"/>).</param>
-/// <param name="DescriptionKey">Ключ пояснения.</param>
+/// <summary>Disablable feature: id stored in settings and changelog labels (<c>&lt;!-- feature: id --&gt;</c>).</summary>
+/// <param name="TitleKey">Title key in UI strings (<see cref="Localization.Loc"/>).</param>
+/// <param name="DescriptionKey">Description key.</param>
 public sealed record FeatureInfo(string Id, string TitleKey, string DescriptionKey)
 {
     public string Title => Localization.Loc.T(TitleKey);
@@ -10,10 +10,10 @@ public sealed record FeatureInfo(string Id, string TitleKey, string DescriptionK
 }
 
 /// <summary>
-/// Функции, которые пользователь может выключить в мастере первого запуска и в настройках. Выключенная функция исчезает
-/// целиком: нет кнопок, клавиш, пунктов меню и разделов настроек, её код не запускается, а пункты списка изменений про неё
-/// не показываются. В настройках хранится список выключенных (<see cref="Settings.AppSettings.DisabledFeatures"/>),
-/// поэтому новые функции по умолчанию включены.
+/// Features user can disable in first-run wizard and settings. Disabled feature disappears
+/// entirely: no buttons, keys, menu items, settings sections; its code not run; changelog items about it
+/// not shown. Settings store list of disabled (<see cref="Settings.AppSettings.DisabledFeatures"/>),
+/// so new features are enabled by default.
 /// </summary>
 public static class FeatureCatalog
 {

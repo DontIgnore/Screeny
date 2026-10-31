@@ -16,7 +16,7 @@ public class ModuleManifestTests : IDisposable
     public void Verify_ChangedFile_FailsOnHash()
     {
         var dir = _files.Installed(_files.Dir, 1);
-        File.WriteAllBytes(Path.Combine(dir, "det.onnx"), Encoding.ASCII.GetBytes("det model byteZ")); // та же длина
+        File.WriteAllBytes(Path.Combine(dir, "det.onnx"), Encoding.ASCII.GetBytes("det model byteZ")); // same length
         Assert.Contains("SHA256 det.onnx", ModuleManifest.Verify(dir, "ocr-paddle", 1));
     }
 
@@ -53,7 +53,7 @@ public class ModuleManifestTests : IDisposable
     [Fact]
     public void Verify_PinnedManifest_CatchesConsistentTampering()
     {
-        // Подменены и файл, и module.json под него: сам по себе манифест проверку прошёл бы, зашитый хеш — нет.
+        // Both file and module.json swapped: manifest alone would pass, hardcoded hash not.
         var dir = _files.Installed(_files.Dir, 1);
         var pinned = ModuleManifest.Sha256Of(Path.Combine(dir, ModuleManifest.FileName));
         _files.Installed(_files.Dir, 1, new Dictionary<string, byte[]>(ModuleTestFiles.DefaultFiles) { ["det.onnx"] = [9, 9, 9] });

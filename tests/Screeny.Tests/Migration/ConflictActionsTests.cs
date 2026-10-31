@@ -4,7 +4,7 @@ using Screeny.Migration;
 
 namespace Screeny.Tests.Migration;
 
-/// <summary>Реальная логика действий на подставных реестре, процессах и запуске программ — система не трогается.</summary>
+/// <summary>Real action logic on fake registry, processes and launches — system untouched.</summary>
 public class ConflictActionsTests
 {
     private sealed class FakeRegistry : IRegistryWriter
@@ -194,7 +194,7 @@ public class ConflictActionsTests
         Assert.True(result.Success);
         var call = Assert.Single(_shell.Elevated);
         Assert.Equal(["--elevated-action", "disable-autostart", "lightshot"], call.Args.TakeLast(3));
-        Assert.True(call.Args.Count <= 4); // под dotnet.exe первым идёт путь к Screeny.dll
+        Assert.True(call.Args.Count <= 4); // under dotnet.exe first argument is Screeny.dll path
     }
 
     [Theory]
@@ -255,7 +255,7 @@ public class ConflictActionsTests
         await fake.DisableAutostartElevatedAsync(Find(env, "lightshot"));
         fake.DisableSystemPrintScreen();
         Assert.Equal(["close:snipaste", "autostart:sharex", "elevated:lightshot", "printscreen"], fake.Calls);
-        // ShareX ещё запущен, Lightshot тоже — но автозапуск обоих отключён, Snipaste закрыт.
+        // ShareX still running, Lightshot too — but both autostarts disabled, Snipaste closed.
         var after = ConflictDetector.Detect(env, catalog);
         Assert.Equal(["lightshot", "sharex"], after.Select(c => c.Id));
         Assert.All(after, c => Assert.Empty(c.Autostarts));

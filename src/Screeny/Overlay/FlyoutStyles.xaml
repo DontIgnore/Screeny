@@ -1,7 +1,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <!-- Стили содержимого всплывающих панелей параметров: всегда тёмные, как панель оверлея.
-       Ключи StripButton, SwatchButton, Label и Separator ищет BeautifySection (SetResourceReference). -->
+  <!-- Content styles of options flyouts: always dark, like overlay panel.
+       Keys StripButton, SwatchButton, Label and Separator are looked up by BeautifySection (SetResourceReference). -->
   <FontFamily x:Key="IconFont">Segoe Fluent Icons, Segoe MDL2 Assets, Segoe UI Symbol</FontFamily>
   <Style TargetType="ToolTip" BasedOn="{StaticResource {x:Type ToolTip}}">
     <Setter Property="Background" Value="{DynamicResource Overlay.Tooltip}"/>
@@ -36,7 +36,7 @@
       </Setter.Value>
     </Setter>
   </Style>
-  <!-- «Нет» (⊘): нажата — часть выключена -->
+  <!-- “None” (⊘): pressed — part disabled -->
   <Style x:Key="NoneButton" TargetType="ToggleButton" BasedOn="{StaticResource StripButton}">
     <Setter Property="FontFamily" Value="Segoe UI Symbol"/>
     <Setter Property="FontSize" Value="14"/>
@@ -44,14 +44,14 @@
     <Setter Property="Width" Value="26"/>
     <Setter Property="Content" Value="⊘"/>
   </Style>
-  <!-- Выравнивание текста: иконка Segoe Fluent, нажата — активное -->
+  <!-- Text alignment: Segoe Fluent icon, pressed — active -->
   <Style x:Key="AlignButton" TargetType="ToggleButton" BasedOn="{StaticResource StripButton}">
     <Setter Property="FontFamily" Value="{StaticResource IconFont}"/>
     <Setter Property="FontSize" Value="14"/>
     <Setter Property="Padding" Value="0"/>
     <Setter Property="Width" Value="26"/>
   </Style>
-  <!-- Образец цвета: рамка подсвечена, когда образец активен (его красит палитра) -->
+  <!-- Color swatch: border highlighted when swatch active (palette paints it) -->
   <Style x:Key="SwatchButton" TargetType="Button">
     <Setter Property="Focusable" Value="False"/>
     <Setter Property="Width" Value="26"/>
@@ -73,7 +73,7 @@
       </Setter.Value>
     </Setter>
   </Style>
-  <!-- Подпись строки: колонка одной ширины, чтобы образцы и кнопки строк стояли друг под другом -->
+  <!-- Row label: fixed-width column so swatches and buttons align -->
   <Style x:Key="Label" TargetType="TextBlock">
     <Setter Property="Foreground" Value="{DynamicResource Overlay.Ink70}"/>
     <Setter Property="FontFamily" Value="{DynamicResource Font.UI}"/>
@@ -82,7 +82,7 @@
     <Setter Property="MinWidth" Value="82"/>
     <Setter Property="Margin" Value="4,0,6,0"/>
   </Style>
-  <!-- Строка flyout'а: подпись и кнопки; строки появляются поочерёдно при открытии -->
+  <!-- Flyout row: label and buttons; rows appear one by one on open -->
   <Style x:Key="Row" TargetType="StackPanel">
     <Setter Property="Orientation" Value="Horizontal"/>
     <Setter Property="Margin" Value="0,2"/>

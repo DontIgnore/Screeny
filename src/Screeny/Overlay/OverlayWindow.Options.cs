@@ -9,24 +9,24 @@ using Screeny.Overlay.Tools;
 
 namespace Screeny.Overlay;
 
-// Полоса параметров, палитра, смена инструмента и пипетка живут в редакторе (Editing/AnnotationEditor);
-// здесь — то, что есть только у оверлея: пипетка при выделении (C) и бейдж «скопирован» у лупы.
+// Options strip, palette, tool change and eyedropper live in editor (Editing/AnnotationEditor);
+// here only overlay-specific: eyedropper on selection (C) and “copied” badge at magnifier.
 public partial class OverlayWindow
 {
     private void RefreshOptions() => _editor.RefreshOptions();
     private void SetTool(ToolKind kind) => _editor.SetTool(kind);
     private void SetPipette(bool on) => _editor.SetPipette(on);
 
-    // ---------- Пипетка при выделении ----------
+    // ---------- Eyedropper on selection ----------
 
-    /// <summary>C при выделении области: HEX пикселя под лупой в буфер обмена, оверлей остаётся открытым.</summary>
+    /// <summary>C with selection: HEX of pixel under magnifier to clipboard, overlay stays open.</summary>
     private void CopyColorUnderMagnifier()
     {
         if (!_settings.IsFeatureOn(FeatureCatalog.Pipette)) return;
         var p = Magnifier.Current ?? CurrentMousePixel();
         var c = Pipette.ColorAt(_shot.Bitmap, p);
         var hex = ColorHex.Rgb(c);
-        // Запись в буфер: незавершённый OCR не должен её перезаписать.
+        // Clipboard write: unfinished OCR must not overwrite it.
         (Application.Current as App)?.NoteClipboardWrite();
         bool ok = ClipboardService.CopyText(hex);
         ShowPipetteBadge(c, ok ? Localization.Loc.F("Pipette.Copied", hex) : Localization.Loc.T("Common.ClipboardBusy"));
@@ -50,7 +50,7 @@ public partial class OverlayWindow
         PipetteBadge.Visibility = Visibility.Collapsed;
     }
 
-    /// <summary>Бейдж под лупой (не влезает — над ней); едет вместе с лупой.</summary>
+    /// <summary>Badge under magnifier (doesn't fit — above); moves with magnifier.</summary>
     private void PositionPipetteBadge()
     {
         if (PipetteBadge.Visibility != Visibility.Visible || Magnifier.Visibility != Visibility.Visible) return;

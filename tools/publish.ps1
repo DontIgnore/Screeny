@@ -1,6 +1,6 @@
-# Публикация Screeny в publish/Screeny.exe (один файл).
-#   powershell -File tools/publish.ps1                 — нужен установленный .NET 10 Desktop Runtime (~1 МБ exe)
-#   powershell -File tools/publish.ps1 -SelfContained — автономный exe со встроенным рантаймом (~70 МБ)
+# Publish Screeny to publish/Screeny.exe (single file).
+#   powershell -File tools/publish.ps1                 — requires .NET 10 Desktop Runtime installed (~1 MB exe)
+#   powershell -File tools/publish.ps1 -SelfContained — standalone exe with bundled runtime (~70 MB)
 param([switch]$SelfContained)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot

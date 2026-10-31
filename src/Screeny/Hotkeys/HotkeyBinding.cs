@@ -2,27 +2,27 @@ using System.Text.Json.Serialization;
 
 namespace Screeny.Hotkeys;
 
-/// <summary>Вид хоткея снимка.</summary>
+/// <summary>Kind of screenshot hotkey.</summary>
 [JsonConverter(typeof(JsonStringEnumConverter<HotkeyKind>))]
 public enum HotkeyKind
 {
-    /// <summary>Клавиша PrintScreen без модификаторов (<c>RegisterHotKey</c>).</summary>
+    /// <summary>PrintScreen without modifiers (<c>RegisterHotKey</c>).</summary>
     PrintScreen,
-    /// <summary>Win+Shift+S — перехват низкоуровневым хуком клавиатуры вместо системных «Ножниц».</summary>
+    /// <summary>Win+Shift+S — intercepted by low-level keyboard hook instead of system Snipping Tool.</summary>
     WinShiftS,
-    /// <summary>Своё сочетание из <see cref="HotkeyBinding.Spec"/> (<c>RegisterHotKey</c>).</summary>
+    /// <summary>Custom combo from <see cref="HotkeyBinding.Spec"/> (<c>RegisterHotKey</c>).</summary>
     Custom,
 }
 
 /// <summary>
-/// Одна запись списка хоткеев снимка. В JSON: <c>{ "Kind": "Custom", "Spec": "Ctrl+Shift+X", "Enabled": true }</c>;
-/// у PrintScreen и WinShiftS поле <c>Spec</c> не пишется.
+/// One entry in screenshot hotkey list. In JSON: <c>{ "Kind": "Custom", "Spec": "Ctrl+Shift+X", "Enabled": true }</c>;
+/// for PrintScreen and WinShiftS <c>Spec</c> field is not written.
 /// </summary>
 public sealed record HotkeyBinding
 {
     public HotkeyKind Kind { get; init; }
 
-    /// <summary>Сочетание в формате <see cref="HotkeyParser"/>; только для <see cref="HotkeyKind.Custom"/>.</summary>
+    /// <summary>Combo in <see cref="HotkeyParser"/> format; only for <see cref="HotkeyKind.Custom"/>.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Spec { get; init; }
 
@@ -32,7 +32,7 @@ public sealed record HotkeyBinding
     public static HotkeyBinding WinShiftS(bool enabled) => new() { Kind = HotkeyKind.WinShiftS, Enabled = enabled };
     public static HotkeyBinding Custom(string spec, bool enabled = true) => new() { Kind = HotkeyKind.Custom, Spec = spec, Enabled = enabled };
 
-    /// <summary>Сочетание, которое регистрируется через <c>RegisterHotKey</c>, или null (WinShiftS, нераспознанный Custom).</summary>
+    /// <summary>Combo registered via <c>RegisterHotKey</c>, or null (WinShiftS, unrecognized Custom).</summary>
     public HotkeySpec? ToRegisterSpec() => Kind switch
     {
         HotkeyKind.PrintScreen => HotkeySpec.PrintScreen,
@@ -40,7 +40,7 @@ public sealed record HotkeyBinding
         _ => null,
     };
 
-    /// <summary>Подпись для пользователя: «PrintScreen», «Win+Shift+S» или сочетание.</summary>
+    /// <summary>Label for user: “PrintScreen”, “Win+Shift+S” or combo.</summary>
     [JsonIgnore]
     public string DisplayName => Kind switch
     {

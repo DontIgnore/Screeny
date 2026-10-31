@@ -6,26 +6,26 @@ using Screeny.Editing;
 
 namespace Screeny.Overlay;
 
-// Прилипание рамки снимка: при протяжке новой рамки и перетаскивании ручек тянущийся край прилипает к краям окон
-// (WindowFinder) и к контрастным границам на снимке (EdgeSnapper) в пределах 8 экранных пикселей. Прилипший край
-// показывается направляющей через весь снимок. Alt выключает прилипание (и фигур тоже), стрелки не прилипают.
+// Selection border snap: when dragging new border and moving handles, dragged edge snaps to window edges
+// (WindowFinder) and contrast image edges (EdgeSnapper) within 8 screen pixels. Snapped edge
+// shown by guide across screenshot. Alt disables snapping (also shapes), arrows don't snap.
 public partial class OverlayWindow
 {
-    /// <summary>Порог прилипания рамки в экранных пикселях (DIP).</summary>
+    /// <summary>Border snap threshold in screen pixels (DIP).</summary>
     public const double FrameSnapDip = 8;
 
-    private EdgeSnapper? _edgeSnapper;         // лениво: яркость снимка читается плитками только у курсора
+    private EdgeSnapper? _edgeSnapper;         // lazily: screenshot brightness read in tiles only near cursor
     private readonly List<SnapGuide> _frameGuides = new();
 
-    /// <summary>Прилипание включено в настройках и Alt не зажат.</summary>
+    /// <summary>Snap enabled in settings and Alt not held.</summary>
     private bool SnapActive => _settings.SnapEnabled && !Keyboard.Modifiers.HasFlag(ModifierKeys.Alt);
 
     private int FrameSnapThreshold => (int)Math.Round(FrameSnapDip * _map.DpiScale);
 
-    /// <summary>Начало жеста рамки: оценки границ прошлого жеста больше не нужны.</summary>
+    /// <summary>Border gesture start: previous gesture edge estimates no longer needed.</summary>
     private void BeginFrameGesture() => _edgeSnapper?.ResetCache();
 
-    /// <summary>Протяжка новой рамки от <paramref name="anchor"/> до <paramref name="p"/> с прилипанием.</summary>
+    /// <summary>Drag new border from <paramref name="anchor"/> to <paramref name="p"/> with snap.</summary>
     private void DragNewFrame(PixelPoint anchor, PixelPoint p)
     {
         _frameGuides.Clear();
@@ -33,7 +33,7 @@ public partial class OverlayWindow
         ShowFrameGuides();
     }
 
-    /// <summary>Перетаскивание ручки или края рамки с прилипанием (перемещение целиком не прилипает).</summary>
+    /// <summary>Drag handle or border edge with snap (whole move doesn't snap).</summary>
     private void DragFrameHandle(PixelPoint p)
     {
         _frameGuides.Clear();
@@ -50,8 +50,8 @@ public partial class OverlayWindow
     }
 
     /// <summary>
-    /// Ближайший в пределах порога кандидат для края: видимый край окна (окно сверху в этой точке) или
-    /// контрастная граница снимка в полосе вокруг курсора. Прилипший край запоминается для направляющей.
+    /// Nearest candidate within threshold for edge: visible window edge (window top at that point) or
+    /// contrast image edge in band around cursor. Snapped edge remembered for guide.
     /// </summary>
     private int? SnapFrameEdge(EdgeAxis axis, int edge, int cross)
     {
@@ -80,8 +80,8 @@ public partial class OverlayWindow
     // ---------- Alt ----------
 
     /// <summary>
-    /// Голый Alt: не отдаём системе (иначе отпускание Alt включает режим меню окна и уводит клавиатуру),
-    /// а идущий жест пересчитываем — прилипание выключается или включается сразу. Alt+F4 и прочие сочетания не трогаем.
+    /// Bare Alt: not given to system (else Alt release enables window menu mode and steals keyboard),
+    /// and ongoing gesture recalculated — snapping disables/enables immediately. Alt+F4 etc. untouched.
     /// </summary>
     private static bool IsBareAlt(KeyEventArgs e) => (e.Key == Key.System ? e.SystemKey : e.Key) is Key.LeftAlt or Key.RightAlt;
 
@@ -93,7 +93,7 @@ public partial class OverlayWindow
         RefreshSnapGestureSoon();
     }
 
-    /// <summary>Пересчитать жест после того, как состояние Alt в Keyboard.Modifiers обновится.</summary>
+    /// <summary>Recalculate gesture after Alt state in Keyboard.Modifiers updates.</summary>
     private void RefreshSnapGestureSoon() => Dispatcher.BeginInvoke(RefreshSnapGesture, DispatcherPriority.Input);
 
     private void RefreshSnapGesture()

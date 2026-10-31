@@ -10,26 +10,26 @@ using Screeny.Overlay;
 namespace Screeny.Editing;
 
 /// <summary>
-/// Запись истории, открытая для повторного редактирования.
+/// History entry opened for re-editing.
 /// <list type="bullet">
-/// <item>Есть <c>.orig.png</c> и читаемый <c>.screeny.json</c> — основа <see cref="Base"/> = оригинал, пометки и оформление из JSON,
-/// доступен переключатель «Оригинал / С пометками».</item>
-/// <item>Оригинала нет — основа = готовый PNG (старые пометки и оформление уже в картинке), документ пустой.</item>
-/// <item>Оригинал есть, но JSON нет, он битый, содержит неизвестные пометки, новее поддерживаемого или другого размера — тоже готовый PNG и
-/// <see cref="Message"/>: на оригинале без пометок пропало бы то, что было скрыто размытием.</item>
+/// <item>Has <c>.orig.png</c> and readable <c>.screeny.json</c> — base <see cref="Base"/> = original, marks and decoration from JSON,
+/// “Original / With marks” toggle available.</item>
+/// <item>No original — base = ready PNG (old marks and decoration already in image), empty document.</item>
+/// <item>Original exists but JSON missing, malformed, has unknown marks, newer than supported or different size — also ready PNG and
+/// <see cref="Message"/>: on original without marks what was hidden by blur would be lost.</item>
 /// </list>
 /// </summary>
-/// <param name="Path">Снимок истории, который открыт.</param>
-/// <param name="Base">Основа редактирования (Bgra32, 96 DPI, заморожена): источник пикселей эффектов и пипетки.</param>
-/// <param name="HasOriginal">Основа — оригинал без пометок (есть переключатель).</param>
-/// <param name="OriginalPng">Байты оригинала: прочитаны при открытии, потому что ротация истории после сохранения
-/// может удалить исходную запись раньше, чем оригинал скопирован в новую.</param>
-/// <param name="Message">Что пошло не так при чтении пометок; null — всё в порядке.</param>
+/// <param name="Path">History screenshot that is opened.</param>
+/// <param name="Base">Editing base (Bgra32, 96 DPI, frozen): pixel source for effects and eyedropper.</param>
+/// <param name="HasOriginal">Base is original without marks (has toggle).</param>
+/// <param name="OriginalPng">Original bytes: read at open, because history rotation after save
+/// may delete source entry before original is copied to new one.</param>
+/// <param name="Message">What went wrong reading marks; null — everything ok.</param>
 public sealed record EditSession(string Path, BitmapSource Base, bool HasOriginal, byte[]? OriginalPng,
     IReadOnlyList<Annotation> Annotations, BeautifyOptions? Beautify, string? Message)
 {
-    /// <exception cref="IOException">Сам снимок не читается.</exception>
-    /// <exception cref="NotSupportedException">Файл — не картинка.</exception>
+    /// <exception cref="IOException">Screenshot itself unreadable.</exception>
+    /// <exception cref="NotSupportedException">File is not an image.</exception>
     public static EditSession Load(string pngPath)
     {
         var finished = Decode(File.ReadAllBytes(pngPath));
@@ -57,7 +57,7 @@ public sealed record EditSession(string Path, BitmapSource Base, bool HasOrigina
                                        or FileFormatException or ArgumentException or InvalidOperationException)
         {
             Log.Error($"Re-edit sidecar read failed: {pngPath}", ex);
-            // Подробности (текст исключения) — в журнале; пользователю — понятная причина на его языке.
+            // Details (exception text) in log; user gets clear reason in his language.
             problem = ex switch
             {
                 UnsupportedDocumentVersionException newer => Localization.Loc.F("Edit.NewerDocument", newer.Version),
@@ -71,7 +71,7 @@ public sealed record EditSession(string Path, BitmapSource Base, bool HasOrigina
     private static EditSession Flat(string path, BitmapSource finished, string? message)
         => new(path, finished, false, null, [], null, message);
 
-    /// <summary>PNG → независимый Bgra32 96 DPI: эффекты работают только с Bgra32, а DPI файла не должен менять размер на экране.</summary>
+    /// <summary>PNG → independent Bgra32 96 DPI: effects work only with Bgra32, and file DPI must not change on-screen size.</summary>
     public static BitmapSource Decode(byte[] png)
     {
         using var ms = new MemoryStream(png, writable: false);
@@ -86,13 +86,13 @@ public sealed record EditSession(string Path, BitmapSource Base, bool HasOrigina
     }
 }
 
-/// <summary>Итог редактора для действия (копировать, сохранить, закрепить): картинка и sidecar-файлы новой записи истории.</summary>
-/// <param name="Image">Основа с пометками и, если включено, оформлением.</param>
-/// <param name="AnnotationsJson">Ровно то, что нарисовано на <paramref name="Image"/> (в режиме «Оригинал» — пусто).</param>
-/// <param name="OriginalPng">Оригинал для новой записи: только если он был у исходной и включена настройка хранения.</param>
+/// <summary>Editor result for action (copy, save, pin): image and sidecar files of new history entry.</summary>
+/// <param name="Image">Base with marks and, if enabled, decoration.</param>
+/// <param name="AnnotationsJson">Exactly what is drawn on <paramref name="Image"/> (in “Original” mode — empty).</param>
+/// <param name="OriginalPng">Original for new entry: only if source had it and storage setting enabled.</param>
 public sealed record EditResult(BitmapSource Image, string AnnotationsJson, byte[]? OriginalPng)
 {
-    /// <param name="annotations">Видимые пометки; в режиме «Оригинал» — пустой список.</param>
+    /// <param name="annotations">Visible marks; in “Original” mode — empty list.</param>
     public static EditResult Build(EditSession session, IReadOnlyList<Annotation> annotations, BeautifyOptions? beautify, bool keepOriginals)
     {
         var b = session.Base;

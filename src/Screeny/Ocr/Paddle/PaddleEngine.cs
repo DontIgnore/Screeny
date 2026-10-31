@@ -5,9 +5,9 @@ using Microsoft.ML.OnnxRuntime.Tensors;
 namespace Screeny.Ocr.Paddle;
 
 /// <summary>
-/// PaddleOCR PP-OCRv5 (mobile det + cyrillic rec) на ONNX Runtime, только CPU. Единственный класс приложения, который
-/// трогает типы ORT: пока точное распознавание не включено, ни управляемая сборка ORT, ни нативная библиотека не грузятся.
-/// Пре- и постобработка — <see cref="PaddlePipeline"/>.
+/// PaddleOCR PP-OCRv5 (mobile det + cyrillic rec) on ONNX Runtime, CPU only. Only app class that
+/// touches ORT types: until precise recognition enabled, neither managed ORT assembly nor native library loads.
+/// Pre/post-processing — <see cref="PaddlePipeline"/>.
 /// </summary>
 public sealed class PaddleEngine : IDisposable
 {
@@ -17,7 +17,7 @@ public sealed class PaddleEngine : IDisposable
     private readonly string[] _dict;
     private readonly int _par;
 
-    /// <summary>Время последнего прогона по этапам (для журнала).</summary>
+    /// <summary>Time of last run by stages (for log).</summary>
     public string Stats { get; private set; } = "";
 
     private PaddleEngine(InferenceSession det, InferenceSession rec, string[] dict, int par)
@@ -25,12 +25,12 @@ public sealed class PaddleEngine : IDisposable
         _det = det; _rec = rec; _dict = dict; _par = par;
     }
 
-    /// <summary>Сессии из папки модуля. <paramref name="par"/> строк распознаются параллельно, у каждой сессии
-    /// <paramref name="threads"/> потоков ORT (<see cref="PaddlePipeline.ThreadSplit"/>).</summary>
+    /// <summary>Sessions from module folder. <paramref name="par"/> lines recognized in parallel, each session has
+    /// <paramref name="threads"/> ORT threads (<see cref="PaddlePipeline.ThreadSplit"/>).</summary>
     public static PaddleEngine Load(string folder, int par, int threads)
     {
         OrtNative.EnsureLoaded(folder);
-        // Параметры сессии — нативный объект: нужен только при создании сессий.
+        // Session parameters are native object: needed only when creating sessions.
         using var options = Options(threads);
         InferenceSession? det = null, rec = null;
         try
@@ -52,9 +52,9 @@ public sealed class PaddleEngine : IDisposable
     public void Dispose() { _det.Dispose(); _rec.Dispose(); }
 
     /// <summary>
-    /// Детекция и распознавание; рамки слов в пикселях <paramref name="src"/>. Отмена прерывает и идущий прогон ORT
-    /// (<see cref="RunOptions.Terminate"/>), а не только отбрасывает результат: иначе отменённое уточнение полного экрана
-    /// продолжало бы занимать процессор на слабом ПК ещё несколько секунд.
+    /// Detection and recognition; word borders in pixels of <paramref name="src"/>. Cancel interrupts running ORT run
+    /// (<see cref="RunOptions.Terminate"/>), not just discards result: otherwise canceled full-screen refinement
+    /// would keep using CPU on weak PC for seconds.
     /// </summary>
     public OcrLayout Run(OcrImage src, CancellationToken ct)
     {
@@ -85,8 +85,8 @@ public sealed class PaddleEngine : IDisposable
         return PaddlePipeline.Boxes(prob, rw, rh, img.W, img.H);
     }
 
-    /// <summary>Строки по одной (батч 1: у строк разной ширины паддинг съедает выигрыш), <see cref="_par"/> одновременно;
-    /// <see cref="InferenceSession.Run(IReadOnlyCollection{NamedOnnxValue})"/> потокобезопасен.</summary>
+    /// <summary>Lines one by one (batch 1: different-width lines lose on padding), <see cref="_par"/> at once;
+    /// <see cref="InferenceSession.Run(IReadOnlyCollection{NamedOnnxValue})"/> thread-safe.</summary>
     private RecResult[] Recognize(OcrImage img, List<Int32Rect> crops, CancellationToken ct)
     {
         var chunks = new List<(int Parent, Int32Rect Box, bool SpaceBefore)>();
@@ -95,7 +95,7 @@ public sealed class PaddleEngine : IDisposable
         var parts = new RecResult[chunks.Count];
         var order = Enumerable.Range(0, chunks.Count).OrderBy(i => (double)chunks[i].Box.Width / Math.Max(1, chunks[i].Box.Height)).ToList();
         try { RecognizeChunks(img, chunks, order, parts, ct); }
-        // Отмена посреди прогона: прерванные строки бросают OCE изнутри тел цикла, и Parallel заворачивает их в AggregateException.
+        // Cancel mid-run: interrupted lines throw OCE inside loop bodies, Parallel wraps into AggregateException.
         catch (AggregateException ex) when (ct.IsCancellationRequested && ex.Flatten().InnerExceptions.All(e => e is OperationCanceledException))
         { throw new OperationCanceledException(ct); }
         var results = new RecResult[crops.Count];
@@ -111,12 +111,12 @@ public sealed class PaddleEngine : IDisposable
         {
             var crop = chunks[i].Box;
             int rw = Math.Min(3200, PaddlePipeline.RecWidth(crop));
-            int W = Math.Max(320, rw); // нули справа = серый после нормализации, как паддинг в PaddleX
+            int W = Math.Max(320, rw); // right zeros = gray after normalization, like padding in PaddleX
             var buf = new float[3 * PaddlePipeline.RecHeight * W];
             PaddlePipeline.ResizeInto(img, crop, rw, PaddlePipeline.RecHeight, buf, 0, W, PaddlePipeline.RecHeight * W, PaddlePipeline.RecScale, PaddlePipeline.RecBias);
             var data = RunSession(_rec, new DenseTensor<float>(buf, [1, 3, PaddlePipeline.RecHeight, W]), ct, out var dims);
             int T = dims[1], C = dims[2];
-            // Ширина шага CTC в пикселях выреза: шаг по входу W, в вырезе — с учётом ресайза до высоты 48.
+            // CTC step width in crop pixels: input step W, in crop — accounting for resize to height 48.
             parts[i] = PaddlePipeline.Decode(data, T, C, _dict, (double)W / T * crop.Width / rw);
         });
     }

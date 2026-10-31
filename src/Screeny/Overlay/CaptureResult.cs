@@ -3,21 +3,21 @@ using System.Windows.Media.Imaging;
 namespace Screeny.Overlay;
 
 /// <summary>
-/// Copy — Enter: копирует, только если включена настройка CopyOnCapture.
-/// CopyExplicit — Ctrl+C и кнопка «Копировать»: копирует всегда.
-/// Save — путь уже выбран в диалоге оверлея (<see cref="CaptureResult.SavePath"/>).
-/// CopyText — в режиме текста (Ctrl+T) выбран текст; он в <see cref="CaptureResult.Text"/>.
+/// Copy — Enter: copies only if CopyOnCapture is enabled.
+/// CopyExplicit — Ctrl+C or the Copy button: always copies.
+/// Save — the path has already been selected in the overlay dialog (<see cref="CaptureResult.SavePath"/>).
+/// CopyText — text was selected in text mode (Ctrl+T); see <see cref="CaptureResult.Text"/>.
 /// </summary>
 public enum CaptureAction { Copy, CopyExplicit, Save, Pin, CopyText }
 
-/// <param name="Region">Выделение в пикселях снимка.</param>
+/// <param name="Region">Selection in screenshot pixels.</param>
 /// <param name="ScreenRegion">
-/// То же выделение в экранных пикселях (с учётом начала виртуального экрана); с оформлением — расширено
-/// на отступ, чтобы закреплённый снимок встал вокруг прежнего места. Размер совпадает с <paramref name="Image"/>.
+/// The same selection in screen pixels, accounting for the virtual screen origin. When styled, it is expanded
+/// by the padding so the pinned image surrounds the original position. Its size matches <paramref name="Image"/>.
 /// </param>
-/// <param name="SavePath">Для <see cref="CaptureAction.Save"/> — файл, выбранный пользователем.</param>
-/// <param name="Text">Для <see cref="CaptureAction.CopyText"/> — распознанный и выбранный текст.</param>
-/// <param name="AnnotationsJson">Документ аннотаций в координатах региона (<see cref="Annotations.AnnotationSerializer"/>) — sidecar истории.</param>
-/// <param name="Original">Регион без пометок и оформления — только при включённой настройке «Хранить оригиналы».</param>
+/// <param name="SavePath">For <see cref="CaptureAction.Save"/>, the file selected by the user.</param>
+/// <param name="Text">For <see cref="CaptureAction.CopyText"/>, the recognized and selected text.</param>
+/// <param name="AnnotationsJson">Annotation document in region coordinates (<see cref="Annotations.AnnotationSerializer"/>), stored as a history sidecar.</param>
+/// <param name="Original">The region without annotations or styling, only when Keep Originals is enabled.</param>
 public sealed record CaptureResult(BitmapSource Image, CaptureAction Action, PixelRect Region, PixelRect ScreenRegion, string? SavePath = null, string? Text = null,
     string? AnnotationsJson = null, BitmapSource? Original = null);

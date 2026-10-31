@@ -15,7 +15,7 @@ public class OcrServiceTests
     [Fact]
     public void Plausibility_PrefersRealWordsOverLatinGarbageForCyrillicText()
     {
-        // Так английская модель читает «Esc двойной закрывает pin»
+        // So English model reads “Esc double close pin”
         var garbage = OcrService.Plausibility("Esc ABOäH0i 3aKpb1Ba'0T pin");
         var proper = OcrService.Plausibility("Esc двойной закрывает pin");
         Assert.True(proper > garbage);
@@ -24,7 +24,7 @@ public class OcrServiceTests
     [Fact]
     public void Plausibility_PenalizesMixedScriptsInsideWord()
     {
-        Assert.True(OcrService.Plausibility("Committed Task 12") > OcrService.Plausibility("Соmmittеd Таsk 12")); // кириллица внутри латиницы
+        Assert.True(OcrService.Plausibility("Committed Task 12") > OcrService.Plausibility("Соmmittеd Таsk 12")); // Cyrillic inside Latin
     }
 
     [Fact]

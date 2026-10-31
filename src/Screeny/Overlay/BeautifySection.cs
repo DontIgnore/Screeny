@@ -8,10 +8,10 @@ using Screeny.Localization;
 namespace Screeny.Overlay;
 
 /// <summary>
-/// Параметры оформления — содержимое flyout'а у кнопки ✨: строки «Фон» (6 градиентов-пресетов), «Отступ» S/M/L,
-/// «Скругление» 0/8/16 и «Тень». Сама ведёт своё состояние: клик сообщает новый набор параметров через
-/// <see cref="OptionsChanged"/>, а показывает то, что задано <see cref="Show"/>. Стили кнопок берёт у flyout'а
-/// (динамические ресурсы из FlyoutStyles.xaml). Все кнопки Focusable=False — клавиатура остаётся у окна.
+/// Decoration parameters — content of flyout near ✨ button: “Background” row (6 gradient presets), “Margin” S/M/L,
+/// “Rounding” 0/8/16 and “Shadow”. Manages own state: click reports new parameter set via
+/// <see cref="OptionsChanged"/>, shows what <see cref="Show"/> sets. Button styles taken from flyout
+/// (dynamic resources from FlyoutStyles.xaml). All buttons Focusable=False — keyboard stays with window.
 /// </summary>
 public sealed class BeautifySection : StackPanel, IFlyoutItems
 {
@@ -20,7 +20,7 @@ public sealed class BeautifySection : StackPanel, IFlyoutItems
     private readonly Dictionary<int, ToggleButton> _radii = new();
     private readonly ToggleButton _shadow;
     private BeautifyOptions _options = BeautifyOptions.Default;
-    /// <summary>Подписи и подсказки из строк интерфейса: заново при смене языка (flyout редактора живёт долго).</summary>
+    /// <summary>Labels and tooltips from UI strings: rebuilt on language change (editor flyout lives long).</summary>
     private readonly List<Action> _texts = new();
 
     public event Action<BeautifyOptions>? OptionsChanged;
@@ -65,7 +65,7 @@ public sealed class BeautifySection : StackPanel, IFlyoutItems
         _shadow = Toggle(shadow, () => Loc.T("Beautify.Soft"), () => Loc.T("Beautify.SoftTip"), () => _options with { Shadow = !_options.Shadow });
         _shadow.Padding = new Thickness(8, 0, 8, 0);
         ApplyTexts();
-        // Loaded может прийти не один раз (вкладка, повторный показ): подписка без дублей.
+        // Loaded may come more than once (tab, re-show): subscribe without duplicates.
         Loaded += (_, _) => { Loc.Changed -= ApplyTexts; Loc.Changed += ApplyTexts; ApplyTexts(); };
         Unloaded += (_, _) => Loc.Changed -= ApplyTexts;
     }
@@ -75,10 +75,10 @@ public sealed class BeautifySection : StackPanel, IFlyoutItems
         foreach (var apply in _texts) apply();
     }
 
-    /// <summary>Строки по порядку: при открытии flyout'а они появляются поочерёдно.</summary>
+    /// <summary>Rows in order: on flyout open they appear one by one.</summary>
     public IReadOnlyList<UIElement> FlyoutItems => Children.Cast<UIElement>().ToList();
 
-    /// <summary>Показать текущие параметры: активный пресет обведён, выбранные отступ, скругление и тень нажаты.</summary>
+    /// <summary>Show current parameters: active preset outlined, selected margin, rounding and shadow pressed.</summary>
     public void Show(BeautifyOptions options)
     {
         _options = options;
@@ -111,7 +111,7 @@ public sealed class BeautifySection : StackPanel, IFlyoutItems
         var button = new ToggleButton { Focusable = false };
         _texts.Add(() => { button.Content = text(); button.ToolTip = tooltip(); });
         button.SetResourceReference(StyleProperty, "StripButton");
-        // ToggleButton сам переключил IsChecked; состояние задаёт Show.
+        // ToggleButton already toggled IsChecked; state set by Show.
         button.Click += (_, _) => { button.IsChecked = !button.IsChecked; Raise(next()); };
         row.Children.Add(button);
         return button;

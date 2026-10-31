@@ -5,8 +5,8 @@ using System.Windows.Media;
 namespace Screeny.Overlay;
 
 /// <summary>
-/// Измерение линейки поверх снимка: линия с засечками и подпись Δx, Δy, длина. Рисуется в пикселях снимка
-/// (внутри PixelCanvas), толщины и шрифт домножаются на <see cref="DpiScale"/>, чтобы на экране они были постоянными.
+/// Ruler measurement over screenshot: line with ticks and label Δx, Δy, length. Drawn in screenshot pixels
+/// (inside PixelCanvas), thicknesses and font multiplied by <see cref="DpiScale"/>, so they are constant on screen.
 /// </summary>
 public sealed class RulerLayer : FrameworkElement
 {
@@ -27,14 +27,14 @@ public sealed class RulerLayer : FrameworkElement
     {
         if (_measurement is not { } m) return;
         double s = _dpiScale;
-        var a = m.Start + new Vector(0.5, 0.5); // центр пикселя
+        var a = m.Start + new Vector(0.5, 0.5); // pixel center
         var b = m.End + new Vector(0.5, 0.5);
         var halo = new Pen(HaloBrush, 4 * s) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round };
         var line = new Pen(LineBrush, 2 * s) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round };
         dc.DrawLine(halo, a, b);
         dc.DrawLine(line, a, b);
 
-        // Засечки поперёк линии на концах.
+        // Ticks across line at ends.
         var dir = b - a;
         var n = dir.LengthSquared > 1e-9 ? new Vector(-dir.Y, dir.X) / dir.Length * (6 * s) : new Vector(0, 6 * s);
         foreach (var end in new[] { a, b })
@@ -47,11 +47,11 @@ public sealed class RulerLayer : FrameworkElement
         var text = new FormattedText(m.Label, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, Face, 12 * s, Brushes.White, pixelsPerDip: 1.0);
         double padX = 8 * s, padY = 4 * s;
         var size = new Size(text.Width + padX * 2, text.Height + padY * 2);
-        // Подпись у середины, сдвинута по нормали, чтобы не закрывать саму линию.
+        // Label at middle, shifted by normal not to cover line.
         var mid = a + dir / 2;
         var offset = dir.LengthSquared > 1e-9 ? new Vector(-dir.Y, dir.X) / dir.Length : new Vector(0, -1);
-        if (offset.Y > 0) offset = -offset; // над линией
-        // Расстояние, при котором прямоугольник подписи целиком уходит с линии при любом её наклоне.
+        if (offset.Y > 0) offset = -offset; // above line
+        // Distance at which label rectangle fully leaves line at any slope.
         double clearance = Math.Abs(offset.X) * size.Width / 2 + Math.Abs(offset.Y) * size.Height / 2 + 6 * s;
         var center = mid + offset * clearance;
         var box = new Rect(center.X - size.Width / 2, center.Y - size.Height / 2, size.Width, size.Height);

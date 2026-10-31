@@ -9,7 +9,7 @@ namespace Screeny.Tests.Editing;
 
 public class SnapEngineTests
 {
-    private static readonly Rect Target = new(100, 100, 50, 40); // лево 100, центр 125, право 150; верх 100, центр 120, низ 140
+    private static readonly Rect Target = new(100, 100, 50, 40); // left 100, center 125, right 150; top 100, center 120, bottom 140
 
     [Fact]
     public void NoTargets_NoChange()
@@ -22,13 +22,13 @@ public class SnapEngineTests
     [Fact]
     public void LeftToLeft_WithinThreshold_Snaps()
     {
-        // Лево 104 → 100; по Y далеко от всех линий цели.
+        // Left 104 → 100; Y far from all target lines.
         var r = SnapEngine.Snap(new Rect(104, 300, 60, 20), [Target], 6);
         Assert.Equal(new Vector(-4, 0), r.Offset);
         var g = Assert.Single(r.Guides);
         Assert.Equal(GuideOrientation.Vertical, g.Orientation);
         Assert.Equal(100, g.Position);
-        // Через общую протяжённость: от верха цели до низа объекта.
+        // Through common span: from target top to object bottom.
         Assert.Equal(100, g.Start);
         Assert.Equal(320, g.End);
     }
@@ -36,7 +36,7 @@ public class SnapEngineTests
     [Fact]
     public void OutsideThreshold_NoSnap()
     {
-        // Лево 107 до 100 — 7, вне порога; ближе всех правый край 127 к центру цели 125.
+        // Left 107 to 100 — 7, outside threshold; nearest is right 127 to target center 125.
         var r = SnapEngine.Snap(new Rect(107, 300, 20, 20), [Target], 6);
         Assert.Equal(new Vector(-2, 0), r.Offset);
         var far = SnapEngine.Snap(new Rect(200, 300, 21, 20), [Target], 6);
@@ -47,14 +47,14 @@ public class SnapEngineTests
     [Fact]
     public void ExactlyAtThreshold_Snaps_JustBeyond_DoesNot()
     {
-        Assert.Equal(new Vector(-6, 0), SnapEngine.Snap(new Rect(156, 300, 30, 20), [Target], 6).Offset); // лево 156 → право цели 150
+        Assert.Equal(new Vector(-6, 0), SnapEngine.Snap(new Rect(156, 300, 30, 20), [Target], 6).Offset); // left 156 → target right 150
         Assert.Equal(default, SnapEngine.Snap(new Rect(156.5, 300, 30, 20), [Target], 6).Offset);
     }
 
     [Fact]
     public void CenterToCenter_Snaps()
     {
-        // Центр объекта 127 → центр цели 125; края 117 и 137 далеко от 100 и 150.
+        // Object center 127 → target center 125; edges 117 and 137 far from 100 and 150.
         var r = SnapEngine.Snap(new Rect(117, 300, 20, 20), [Target], 6);
         Assert.Equal(new Vector(-2, 0), r.Offset);
         Assert.Equal(125, Assert.Single(r.Guides).Position);
@@ -63,9 +63,9 @@ public class SnapEngineTests
     [Fact]
     public void NearestCandidateWins()
     {
-        var a = new Rect(0, 0, 10, 10);     // правый край 10
-        var b = new Rect(13, 50, 10, 10);   // левый край 13
-        // Левый край объекта 12: до 10 — 2, до 13 — 1 → к 13.
+        var a = new Rect(0, 0, 10, 10);     // right edge 10
+        var b = new Rect(13, 50, 10, 10);   // left edge 13
+        // Object left edge 12: to 10 — 2, to 13 — 1 → to 13.
         var r = SnapEngine.Snap(new Rect(12, 200, 40, 5), [a, b], 6);
         Assert.Equal(new Vector(1, 0), r.Offset);
     }
@@ -83,7 +83,7 @@ public class SnapEngineTests
     [Fact]
     public void BothAxes_SnapIndependently()
     {
-        // Право 153 → 150 (−3); верх 98 → 100 (+2).
+        // Right 153 → 150 (−3); top 98 → 100 (+2).
         var r = SnapEngine.Snap(new Rect(121, 98, 32, 30), [Target], 6);
         Assert.Equal(new Vector(-3, 2), r.Offset);
         Assert.Contains(r.Guides, g => g.Orientation == GuideOrientation.Vertical && g.Position == 150);
@@ -138,20 +138,20 @@ public class SnapperToolTests
         doc.Add(anchor); doc.Add(moving);
         var snap = MakeSnapper();
         var tool = new SelectTool(snap);
-        tool.Down(new Point(0, 315), doc, Style); // за левый край (фигура без заливки ловится по обводке)
+        tool.Down(new Point(0, 315), doc, Style); // beyond left edge (shape without fill caught by stroke)
         Assert.True(tool.IsActive);
-        tool.Move(new Point(103, 315)); // лево 103 → 100
+        tool.Move(new Point(103, 315)); // left 103 → 100
         Assert.Equal(100, moving.Rect.Left);
         Assert.NotEmpty(snap.Guides);
-        tool.Move(new Point(104, 316)); // всё ещё в пороге: стоит на месте, без накопленной ошибки
+        tool.Move(new Point(104, 316)); // still within threshold: stays, no accumulated error
         Assert.Equal(100, moving.Rect.Left);
-        tool.Move(new Point(175, 316)); // ушли от целей: следует за мышью точно
+        tool.Move(new Point(175, 316)); // left targets: follows mouse exactly
         Assert.Equal(175, moving.Rect.Left);
         Assert.Empty(snap.Guides);
         tool.Move(new Point(104, 315));
         tool.Up(new Point(104, 315));
         Assert.Equal(new Rect(100, 300, 30, 30), moving.Rect);
-        Assert.Empty(snap.Guides); // направляющие исчезают при отпускании
+        Assert.Empty(snap.Guides); // guides disappear on release
         doc.Undo.Undo();
         Assert.Equal(new Rect(0, 300, 30, 30), moving.Rect);
         Assert.Equal(new Rect(100, 100, 50, 50), anchor.Rect);
@@ -197,7 +197,7 @@ public class SnapperToolTests
         doc.Add(moving);
         var tool = new SelectTool(MakeSnapper(area: new Rect(0, 0, 200, 100)));
         tool.Down(new Point(50, 60), doc, Style);
-        tool.Up(new Point(137, 63)); // по X линий области (0, 100, 200) рядом нет; верх 53 → центр области по Y 50
+        tool.Up(new Point(137, 63)); // no area lines on X (0, 100, 200); top 53 → area center Y 50
         Assert.Equal(new Rect(137, 50, 20, 20), moving.Rect);
     }
 
@@ -209,7 +209,7 @@ public class SnapperToolTests
         var tool = new ShapeTool(ToolKind.Rect, () => false, MakeSnapper());
         tool.Down(new Point(10, 10), doc, Style);
         tool.Move(new Point(147, 60));
-        tool.Up(new Point(147, 60)); // право 147 → 150
+        tool.Up(new Point(147, 60)); // right 147 → 150
         var r = Assert.IsType<RectAnnotation>(doc.Items[^1]);
         Assert.Equal(new Rect(10, 10, 140, 50), r.Rect);
     }
@@ -222,7 +222,7 @@ public class SnapperToolTests
         var snap = MakeSnapper();
         var tool = new ShapeTool(ToolKind.Line, () => true, snap);
         tool.Down(new Point(10, 102), doc, Style);
-        tool.Up(new Point(148, 102)); // Shift: горизонталь от начала, без прилипания к 150 и к 100
+        tool.Up(new Point(148, 102)); // Shift: horizontal from start, without snapping to 150 and 100
         var line = Assert.IsType<LineAnnotation>(doc.Items[^1]);
         Assert.Equal(new Point(10, 102), line.Start);
         Assert.Equal(148, line.End.X, 6);
@@ -237,7 +237,7 @@ public class SnapperToolTests
         doc.Add(new RectAnnotation(new Rect(100, 100, 50, 50), Style));
         var tool = new ShapeTool(ToolKind.Arrow, () => false, MakeSnapper());
         tool.Down(new Point(98, 300), doc, Style); // X 98 → 100
-        tool.Up(new Point(126, 123));              // → центр (125, 125)
+        tool.Up(new Point(126, 123));              // → center (125, 125)
         var arrow = Assert.IsType<ArrowAnnotation>(doc.Items[^1]);
         Assert.Equal(new Point(100, 300), arrow.Start);
         Assert.Equal(new Point(125, 125), arrow.End);
@@ -251,7 +251,7 @@ public class SnapperToolTests
         var tool = new NumberTool(MakeSnapper());
         tool.Down(new Point(400, 400), doc, Style);
         tool.Move(new Point(127, 300));
-        tool.Up(new Point(127, 300)); // центр 127 → 125
+        tool.Up(new Point(127, 300)); // center 127 → 125
         var n = Assert.IsType<NumberAnnotation>(doc.Items[^1]);
         Assert.Equal(new Point(125, 300), n.Center);
     }

@@ -1,39 +1,39 @@
 namespace Screeny.Migration;
 
-/// <summary>Запущенный процесс: имя без «.exe», полный путь (null, если не удалось прочитать) и PID.</summary>
+/// <summary>Running process: name without “.exe”, full path (null if unreadable) and PID.</summary>
 public sealed record ProcessEntry(string Name, string? Path, int Pid);
 
-/// <summary>Где записан автозапуск. От места зависит ключ <c>StartupApproved</c> и нужны ли права администратора.</summary>
+/// <summary>Where autostart is recorded. Place determines <c>StartupApproved</c> key and admin rights.</summary>
 public enum AutostartLocation
 {
-    /// <summary>HKCU\Software\Microsoft\Windows\CurrentVersion\Run (не перенаправляется WOW64).</summary>
+    /// <summary>HKCU\Software\Microsoft\Windows\CurrentVersion\Run (not redirected by WOW64).</summary>
     RunUser,
-    /// <summary>HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run, 64-битное представление.</summary>
+    /// <summary>HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run, 64-bit view.</summary>
     RunMachine64,
-    /// <summary>HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Run (32-битные программы).</summary>
+    /// <summary>HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Run (32-bit programs).</summary>
     RunMachine32,
-    /// <summary>Ярлык в папке «Автозагрузка» пользователя.</summary>
+    /// <summary>Shortcut in user Startup folder.</summary>
     StartupFolderUser,
-    /// <summary>Ярлык в общей папке «Автозагрузка» (для всех пользователей).</summary>
+    /// <summary>Shortcut in common Startup folder (for all users).</summary>
     StartupFolderCommon,
 }
 
 /// <summary>
-/// Запись автозапуска. <see cref="Name"/> — имя значения Run или имя файла ярлыка («ShareX.lnk»); <see cref="Command"/> —
-/// команда из Run или цель ярлыка. <see cref="Approval"/> — байты из <c>Explorer\StartupApproved\…</c> (null — значения нет,
-/// запись включена): так Диспетчер задач хранит «Отключено», не удаляя саму запись.
+/// Autostart entry. <see cref="Name"/> — Run value name or shortcut file name (“ShareX.lnk”); <see cref="Command"/> —
+/// command from Run or shortcut target. <see cref="Approval"/> — bytes from <c>Explorer\StartupApproved\…</c> (null — no value,
+/// entry enabled): Task Manager stores “Disabled” this way without deleting entry.
 /// </summary>
 public sealed record AutostartEntry(AutostartLocation Location, string Name, string Command, byte[]? Approval = null)
 {
     public bool IsEnabled => StartupApproved.IsEnabled(Approval);
 
-    /// <summary>Запись для всех пользователей (HKLM или общая папка): для отключения нужны права администратора.</summary>
+    /// <summary>Entry for all users (HKLM or common folder): admin rights needed to disable.</summary>
     public bool IsMachineWide => Location is AutostartLocation.RunMachine64 or AutostartLocation.RunMachine32 or AutostartLocation.StartupFolderCommon;
 
-    /// <summary>Имя exe из команды или цели ярлыка («Lightshot.exe»); null, если не удалось выделить.</summary>
+    /// <summary>Exe name from command or shortcut target (“Lightshot.exe”); null if couldn't extract.</summary>
     public string? ExeFileName => UninstallCommand.ExtractExePath(Command) is { } path ? System.IO.Path.GetFileName(path) : null;
 
-    /// <summary>Понятное место для пользователя.</summary>
+    /// <summary>Understandable location for user.</summary>
     public string LocationText => Location switch
     {
         AutostartLocation.RunUser => Localization.Loc.T("Autostart.RunUser"),
@@ -43,13 +43,13 @@ public sealed record AutostartEntry(AutostartLocation Location, string Name, str
     };
 }
 
-/// <summary>Запись «Программы и компоненты». <see cref="UninstallString"/> — родной деинсталлятор (тихие ключи не читаются вовсе).</summary>
+/// <summary>Programs and Features entry. <see cref="UninstallString"/> — native uninstaller (silent keys never read).</summary>
 public sealed record UninstallEntry(string KeyName, string DisplayName, string? UninstallString, string? InstallLocation, bool MachineWide);
 
 /// <summary>
-/// Снимок среды, по которому <see cref="ConflictDetector"/> ищет мешающие программы. Только чтение: реальная реализация
-/// (<see cref="WindowsEnvironmentSnapshot"/>) читает реестр, папки автозагрузки и список процессов; подставная
-/// (<see cref="FakeEnvironmentSnapshot"/>) — для тестов и dev-сценариев.
+/// Environment snapshot on which <see cref="ConflictDetector"/> searches conflicting programs. Read-only: real implementation
+/// (<see cref="WindowsEnvironmentSnapshot"/>) reads registry, startup folders and process list; fake
+/// (<see cref="FakeEnvironmentSnapshot"/>) — for tests and dev scenarios.
 /// </summary>
 public interface IEnvironmentSnapshot
 {
@@ -57,15 +57,15 @@ public interface IEnvironmentSnapshot
     IReadOnlyList<AutostartEntry> Autostart { get; }
     IReadOnlyList<UninstallEntry> Uninstall { get; }
 
-    /// <summary><c>HKCU\Control Panel\Keyboard\PrintScreenKeyForSnippingEnabled</c>; null — значения нет.</summary>
+    /// <summary><c>HKCU\Control Panel\Keyboard\PrintScreenKeyForSnippingEnabled</c>; null — no value.</summary>
     int? PrintScreenKeyForSnippingEnabled { get; }
 
-    /// <summary>Сборка Windows: без значения выше системный захват PrintScreen включён по умолчанию с Windows 11 (22000).</summary>
+    /// <summary>Windows build: without value above system PrintScreen capture is on by default from Windows 11 (22000).</summary>
     int OsBuild { get; }
 
     /// <summary>
-    /// JSON активной конфигурации Keyboard Manager из PowerToys (<c>%LocalAppData%\Microsoft\PowerToys\Keyboard Manager</c>)
-    /// или null: PowerToys нет, модуль выключен или файл не прочитался.
+    /// JSON of active PowerToys Keyboard Manager config (<c>%LocalAppData%\Microsoft\PowerToys\Keyboard Manager</c>)
+    /// or null: no PowerToys, module disabled, or file unreadable.
     /// </summary>
     string? PowerToysKeyboardConfig { get; }
 }

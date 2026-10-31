@@ -150,7 +150,7 @@ public class ReleaseNotesTests
     [Fact]
     public void Filter_DeeperHeadingIsNestedUnderH3()
     {
-        // «####» показывается как «###», но вложен в него: родитель с оставшимся подразделом не пропадает.
+        // “####” shown as “###” but nested: parent with remaining subsection doesn't disappear.
         var blocks = ReleaseNotes.Parse("""
             ## Снимки
             ### Инструменты
@@ -245,7 +245,7 @@ public class ReleaseNotesTests
         var noOcrHistory = ReleaseNotes.Filter(blocks, id => id is not ("ocr" or "history"));
         Assert.DoesNotContain(noOcrHistory, b => b.PlainText is "Текст и коды" or "История");
         Assert.Contains(noOcrHistory, b => b.PlainText == "Надёжность");
-        // Пипетку прячем, только когда выключены обе функции пункта.
+        // Hide eyedropper only when both feature items disabled.
         Assert.Contains(ReleaseNotes.Filter(blocks, id => id != "pipette"), b => b.PlainText.StartsWith("Пипетка", StringComparison.Ordinal));
         Assert.DoesNotContain(ReleaseNotes.Filter(blocks, id => id is not ("pipette" or "ruler")), b => b.PlainText.StartsWith("Пипетка", StringComparison.Ordinal));
     }
@@ -263,8 +263,8 @@ public class ReleaseNotesTests
     }
 
     /// <summary>
-    /// Разделы языков в любом списке изменений — переводы одного текста: те же блоки того же вида с теми же метками
-    /// функций (иначе выключенная функция пряталась бы в одном языке и не пряталась в другом).
+    /// Language sections in any changelog are translations of one text: same blocks same kind same feature labels
+    /// (else disabled feature would hide in one language and not another).
     /// </summary>
     [Theory]
     [MemberData(nameof(NotesWithLanguages))]
@@ -281,7 +281,7 @@ public class ReleaseNotesTests
     [Fact]
     public void Release020_SectionsAreTheirOwnLanguage()
     {
-        // Раздел — только свой язык: в английском нет кириллицы, в русском нет английского заголовка.
+        // Section only own language: English has no Cyrillic, Russian no English title.
         Assert.DoesNotContain(ReleaseNotes.Parse(ReleaseNotes.ForLanguage(Release020, "en")), b => b.PlainText.Any(c => c is >= 'А' and <= 'я'));
         Assert.DoesNotContain(ReleaseNotes.Parse(ReleaseNotes.ForLanguage(Release020, "ru")), b => b.PlainText == "Reliability");
     }
@@ -289,7 +289,7 @@ public class ReleaseNotesTests
     [Fact]
     public void Release020_SilentUpdateClaimRemoved()
     {
-        // Решение владельца: в списке изменений нет фразы о тихой установке и о «ничего не ставится».
+        // Owner decision: changelog has no phrase about silent install or “nothing installed”.
         Assert.DoesNotContain("молча,", Release020);
         Assert.DoesNotContain("ничего не ставится", Release020);
         Assert.DoesNotContain("silently", Release020);
@@ -309,8 +309,8 @@ public class ReleaseNotesTests
     [Theory]
     [InlineData("ru", "Версия")]
     [InlineData("en", "Version")]
-    [InlineData("es", "Version")]     // раздела нет — английский
-    [InlineData("zh-Hans", "版本")]   // «zh» подходит для «zh-Hans»
+    [InlineData("es", "Version")]     // no section — English
+    [InlineData("zh-Hans", "版本")]   // “zh” matches for “zh-Hans”
     [InlineData("ja", "Version")]
     public void ForLanguage_PicksSection_ThenEnglish(string language, string heading)
         => Assert.Equal(heading, ReleaseNotes.Parse(ReleaseNotes.ForLanguage(Multi, language))[0].PlainText);
@@ -386,7 +386,7 @@ public class ReleaseNotesTests
         Assert.Contains(ReleaseNotes.Parse(ReleaseNotes.ForLanguage(notes, "ru")), b => b.PlainText == "still English");
     }
 
-    /// <summary>Файл репозитория: поднимаемся от папки сборки тестов до <c>Screeny.sln</c>.</summary>
+    /// <summary>Repo file: ascend from test build folder to <c>Screeny.sln</c>.</summary>
     internal static string RepoFile(params string[] parts)
     {
         for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir is not null; dir = dir.Parent)

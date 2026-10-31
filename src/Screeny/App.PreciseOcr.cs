@@ -7,27 +7,27 @@ using Screeny.Ocr.Paddle;
 namespace Screeny;
 
 /// <summary>
-/// Точное распознавание текста (скачиваемый модуль PaddleOCR). Отдельный файл, чтобы App.xaml.cs менялся минимально:
-/// оттуда вызываются <see cref="InitPreciseOcr"/> (при старте) и <see cref="DisposePreciseOcr"/> (при выходе).
+/// Precise text recognition (downloadable PaddleOCR module). Separate file so App.xaml.cs changes minimally:
+/// from there <see cref="InitPreciseOcr"/> (at startup) and <see cref="DisposePreciseOcr"/> (on exit) are called.
 /// </summary>
 public partial class App
 {
     private PreciseOcrController? _ocrModule;
     private PreciseOcrService? _preciseOcr;
     private bool _moduleUpdateHinted;
-    // Без общего таймаута: на медленной сети 30 МБ качаются дольше любого разумного предела. Зависание ловит таймаут
-    // бездействия в ModuleInstaller (ответ и каждый кусок данных — за 30 с).
+    // No overall timeout: on slow network 30 MB downloads longer than any reasonable limit. Hangs are caught by idle
+    // timeout in ModuleInstaller (response and each data chunk within 30 s).
     private static readonly Lazy<HttpClient> ModuleHttp = new(() => new HttpClient { Timeout = Timeout.InfiniteTimeSpan });
 
-    /// <summary>Модуль для окна настроек и мастера.</summary>
+    /// <summary>Module for settings window and wizard.</summary>
     internal IPreciseOcrHost? OcrModuleHost => _ocrModule;
 
-    /// <summary>Уточнение для режима текста (оверлей).</summary>
+    /// <summary>Refinement for text mode (overlay).</summary>
     internal IOcrRefiner? OcrRefiner => _preciseOcr;
 
     /// <summary>
-    /// <c>isOn</c> для списка изменений: метка <see cref="PreciseOcrRules.NotesTag"/> — по «точное распознавание активно»,
-    /// остальные — по выключенным функциям.
+    /// <c>isOn</c> for changelog: <see cref="PreciseOcrRules.NotesTag"/> label — for “precise recognition active”,
+    /// others — for disabled features.
     /// </summary>
     private Func<string, bool> NotesFilter => PreciseOcrRules.NotesFilter(Settings, () => _ocrModule?.InstalledVersion);
 
@@ -43,7 +43,7 @@ public partial class App
             {
                 ModuleSourceKind.Folder => new FolderModuleSource(Args.ModuleSource!, OcrModule.ZipName(OcrModule.Version)),
                 ModuleSourceKind.Github => new HttpModuleSource(ModuleHttp.Value, OcrModule.DownloadUrl(OcrModule.Version)),
-                _ => null, // dev без --module-source: никакой сети
+                _ => null, // dev without --module-source: no network
             },
             dir => OrtNative.LoadedFrom is { } loaded && string.Equals(Path.GetFullPath(loaded), Path.GetFullPath(dir), StringComparison.OrdinalIgnoreCase))
         {
@@ -56,8 +56,8 @@ public partial class App
     }
 
     /// <summary>
-    /// Загрузка закончилась. Успех — это и согласие: «Использовать» включается и сохраняется сразу (кнопку нажали ради этого).
-    /// Из мастера итог приходит уведомлением: его окно к этому времени уже закрыто.
+    /// Download finished. Success is also consent: “Use” is enabled and saved immediately (that's why button was pressed).
+    /// From wizard result comes as notification: its window is already closed by then.
     /// </summary>
     private void OnOcrModuleFinished(bool ok, string? error, bool notifyInTray)
     {
@@ -71,12 +71,12 @@ public partial class App
         Notify(ok ? Loc.T("PreciseOcr.Installed") : Loc.F("PreciseOcr.DownloadFailed", error));
     }
 
-    /// <summary>Мастер: «Скачать точное распознавание» отмечено и выбор применён.</summary>
+    /// <summary>Wizard: “Download precise recognition” checked and choice applied.</summary>
     private void DownloadPreciseOcrFromWizard() => _ocrModule?.StartDownload(notifyInTray: true);
 
     /// <summary>
-    /// Ctrl+T, а модуль устаревший (Screeny обновился, модулю нужна новая версия): один раз за запуск — подсказка в трее.
-    /// Сам модуль не перекачивается без нажатия.
+    /// Ctrl+T but module outdated (Screeny updated, module needs new version): once per run — tray hint.
+    /// Module itself is not re-downloaded without pressing.
     /// </summary>
     private void OnTextModeUsed()
     {
@@ -86,21 +86,21 @@ public partial class App
         Notify(Loc.T("PreciseOcr.NeedsUpdate"));
     }
 
-    /// <summary>Удалили модуль в настройках: согласие снимается (скачать снова — снова явным действием).</summary>
+    /// <summary>Deleted module in settings: consent removed (download again — explicit action again).</summary>
     private void OnOcrModuleRemoved()
     {
         _preciseOcr?.Reset();
         SetPreciseOcrConsent(false);
     }
 
-    /// <summary>«Не удалять» после «Удалить модуль»: удаление сняло согласие — возвращаем его вместе с модулем.</summary>
+    /// <summary>“Don't delete” after “Delete module”: deletion removed consent — we restore it together with module.</summary>
     private void OnOcrModuleRestored()
     {
         _preciseOcr?.Reset();
         SetPreciseOcrConsent(true);
     }
 
-    /// <summary>Согласие в настройках и галочка «Использовать» в открытом окне настроек — одно и то же значение.</summary>
+    /// <summary>Consent in settings and “Use” checkbox in open settings window are same value.</summary>
     private void SetPreciseOcrConsent(bool on)
     {
         if (Settings.PreciseOcr != on)

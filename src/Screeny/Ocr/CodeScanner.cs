@@ -6,10 +6,10 @@ using ZXing.Common;
 
 namespace Screeny.Ocr;
 
-/// <summary>Найденный QR- или штрихкод: содержимое, формат и рамка в пикселях картинки.</summary>
+/// <summary>Found QR or barcode: content, format and border in image pixels.</summary>
 public sealed record DetectedCode(string Text, BarcodeFormat Format, Rect Box)
 {
-    /// <summary>Подпись формата для плашки: «QR-код», «EAN-13» и т.п.</summary>
+    /// <summary>Format label for plaque: “QR code”, “EAN-13” etc.</summary>
     public string FormatName => Format switch
     {
         BarcodeFormat.QR_CODE => Localization.Loc.T("Codes.QrCode"),
@@ -22,13 +22,13 @@ public sealed record DetectedCode(string Text, BarcodeFormat Format, Rect Box)
         _ => Format.ToString(),
     };
 
-    /// <summary>Ссылку можно предложить открыть (только http/https; см. <see cref="CodeScanner.IsOpenableUrl"/>).</summary>
+    /// <summary>Link can be offered to open (only http/https; see <see cref="CodeScanner.IsOpenableUrl"/>).</summary>
     public bool IsOpenableUrl => CodeScanner.IsOpenableUrl(Text);
 }
 
 /// <summary>
-/// Поиск QR- и штрихкодов ZXing.Net (Apache-2.0) в пикселях Bgra32 — без System.Drawing.
-/// Чистая функция: не трогает UI и может работать вне UI-потока.
+/// QR/barcode search ZXing.Net (Apache-2.0) in Bgra32 pixels — without System.Drawing.
+/// Pure function: doesn't touch UI, can run outside UI thread.
 /// </summary>
 public static class CodeScanner
 {
@@ -38,7 +38,7 @@ public static class CodeScanner
         BarcodeFormat.CODE_128, BarcodeFormat.CODE_39, BarcodeFormat.UPC_A,
     ];
 
-    /// <summary>Пиксели картинки в Bgra32 (stride = ширина × 4) — снимаются в потоке картинки, распознаются где угодно.</summary>
+    /// <summary>Image pixels in Bgra32 (stride = width × 4) — captured on image thread, recognized anywhere.</summary>
     public static byte[] Pixels(BitmapSource image)
     {
         var src = image.Format == PixelFormats.Bgra32 ? image : new FormatConvertedBitmap(image, PixelFormats.Bgra32, null, 0);
@@ -50,16 +50,16 @@ public static class CodeScanner
     public static IReadOnlyList<DetectedCode> Scan(BitmapSource image) => Scan(Pixels(image), image.PixelWidth, image.PixelHeight);
 
     /// <summary>
-    /// Все коды в картинке (несколько сразу), включая светлые на тёмном. Рамки — в пикселях картинки,
-    /// по порядку чтения (сверху вниз, слева направо).
+    /// All codes in image (multiple), including light on dark. Borders in image pixels,
+    /// in reading order (top-down, left-right).
     /// </summary>
     public static IReadOnlyList<DetectedCode> Scan(byte[] bgra, int width, int height)
     {
         if (width <= 0 || height <= 0 || bgra.Length < width * height * 4) return [];
         var source = new RGBLuminanceSource(bgra, width, height, RGBLuminanceSource.BitmapFormat.BGRA32);
         var found = new List<DetectedCode>();
-        // Светлый код на тёмном фоне (тёмная тема) ZXing ищет сам: TryInverted повторяет поиск по инвертированной
-        // яркости, если в прямой ничего не нашлось.
+        // Light code on dark background (dark theme) ZXing finds itself: TryInverted repeats search on inverted
+        // brightness if direct found nothing.
         Collect(found, Decode(source), bgra, width, height);
         return found.OrderBy(c => Math.Round(c.Box.Top / 8)).ThenBy(c => c.Box.Left).ToList();
     }
@@ -68,8 +68,8 @@ public static class CodeScanner
     {
         var reader = new BarcodeReaderGeneric
         {
-            // Повёрнутые линейные коды TryHarder ищет сам и возвращает точки в координатах картинки;
-            // AutoRotate вернул бы их в координатах повёрнутой копии. QR от поворота не зависит.
+            // Rotated linear codes TryHarder finds itself and returns points in image coordinates;
+            // AutoRotate would return them in rotated copy coordinates. QR independent of rotation.
             AutoRotate = false,
             Options = new DecodingOptions
             {
@@ -81,7 +81,7 @@ public static class CodeScanner
         try { return reader.DecodeMultiple(source); }
         catch (Exception ex) when (ex is ArgumentException or IndexOutOfRangeException or InvalidOperationException)
         {
-            // ZXing на редких картинках бросает изнутри; отсутствие кода — не повод ломать режим текста.
+            // ZXing throws internally on rare images; absence of code is not reason to break text mode.
             Screeny.Logging.Log.Error("Barcode decode failed", ex);
             return null;
         }
@@ -102,8 +102,8 @@ public static class CodeScanner
     }
 
     /// <summary>
-    /// ResultPoints — не рамка: у QR это центры поисковых квадратов (≈3,5 модуля внутрь от края),
-    /// у линейного штрихкода — две точки на одной строке сканирования. Достраиваем рамку вокруг них.
+    /// ResultPoints are not border: for QR they are centers of finder squares (≈3.5 modules inward from edge),
+    /// for linear barcode — two points on one scanline. Build border around them.
     /// </summary>
     public static Rect BoxOf(Result r, int width, int height)
     {
@@ -115,7 +115,7 @@ public static class CodeScanner
         Rect box;
         if (linear)
         {
-            // Высоту строки сканирования не знаем: берём долю длины (у EAN/UPC штрихи ≈ 0,7 ширины), не меньше 16 px.
+            // Scanline height unknown: take fraction of length (EAN/UPC bars ≈ 0.7 width), at least 16 px.
             double len = Math.Max(w, h);
             double across = Math.Max(16, len * 0.35);
             double along = Math.Max(4, len * 0.04);
@@ -125,7 +125,7 @@ public static class CodeScanner
         }
         else
         {
-            // У QR версии 1 между центрами поисковых квадратов 14 модулей, а до края 3,5 → +25 % с каждой стороны.
+            // QR version 1 has 14 modules between finder centers, 3.5 to edge → +25% each side.
             double pad = Math.Max(4, Math.Max(w, h) * 0.25);
             box = new Rect(minX - pad, minY - pad, w + 2 * pad, h + 2 * pad);
         }
@@ -136,8 +136,8 @@ public static class CodeScanner
     private static bool IsLinear(Result r) => r.BarcodeFormat is not (BarcodeFormat.QR_CODE or BarcodeFormat.DATA_MATRIX);
 
     /// <summary>
-    /// Высота линейного штрихкода по пикселям: от строки сканирования вверх и вниз, пока строки повторяют
-    /// её рисунок штрихов (≥ 85 % совпадений после порога по яркости). Вертикальный код — то же по столбцам.
+    /// Linear barcode height by pixels: from scanline up/down while rows repeat its bar pattern (≥ 85% matches after brightness threshold). Vertical code — same by columns.
+    ///
     /// </summary>
     private static Rect FitLinear(Result r, Rect guess, byte[] bgra, int width, int height)
     {
@@ -168,7 +168,7 @@ public static class CodeScanner
         int lo = line, hi = line;
         while (lo > 0 && Matches(lo - 1)) lo--;
         while (hi < across - 1 && Matches(hi + 1)) hi++;
-        if (hi - lo < 4) return guess; // рисунок не повторяется — оставляем оценку
+        if (hi - lo < 4) return guess; // pattern not repeated — keep estimate
 
         const double pad = 4;
         var box = horizontal
@@ -179,8 +179,8 @@ public static class CodeScanner
     }
 
     /// <summary>
-    /// Ссылку из кода можно предложить открыть только с явной схемой http или https:
-    /// <c>javascript:</c>, <c>file:</c>, <c>ms-settings:</c> и прочие протоколы не открываются никогда.
+    /// Link from code can be offered only with explicit http/https scheme:
+    /// <c>javascript:</c>, <c>file:</c>, <c>ms-settings:</c> and other protocols never open.
     /// </summary>
     public static bool IsOpenableUrl(string? text)
     {

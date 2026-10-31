@@ -4,10 +4,10 @@ using System.Windows.Media.Imaging;
 
 namespace Screeny.Overlay;
 
-/// <summary>Цвет пикселя снимка (пипетка и лупа).</summary>
+/// <summary>Color of screenshot pixel (eyedropper and magnifier).</summary>
 public static class Pipette
 {
-    /// <summary>Непрозрачный цвет пикселя Bgra32; точка вне снимка прижимается к краю.</summary>
+    /// <summary>Opaque color of Bgra32 pixel; point outside screenshot clamped to edge.</summary>
     public static Color ColorAt(BitmapSource shot, PixelPoint p)
     {
         int x = Math.Clamp(p.X, 0, shot.PixelWidth - 1), y = Math.Clamp(p.Y, 0, shot.PixelHeight - 1);

@@ -4,20 +4,20 @@ using System.Windows.Media;
 
 namespace Screeny.Annotations;
 
-/// <summary>Вид стрелки.</summary>
+/// <summary>Arrow style.</summary>
 public enum ArrowStyle
 {
-    /// <summary>Линия со сплошным наконечником на конце.</summary>
+    /// <summary>Line with solid arrowhead at end.</summary>
     Normal,
-    /// <summary>Наконечники с обеих сторон.</summary>
+    /// <summary>Arrowheads on both sides.</summary>
     Double,
-    /// <summary>Пунктирная линия со сплошным наконечником.</summary>
+    /// <summary>Dashed line with solid arrowhead.</summary>
     Dashed,
-    /// <summary>«Баннерная» стрелка: тело-клин, расширяющееся от начала к широкому наконечнику.</summary>
+    /// <summary>“Banner” arrow: wedge body widening from start to wide arrowhead.</summary>
     Thick,
 }
 
-/// <summary>Выравнивание строк многострочного текста внутри его блока (левый верхний угол блока — якорь).</summary>
+/// <summary>Alignment of multiline text lines within its block (block top-left corner is anchor).</summary>
 public enum TextAlign
 {
     Left,
@@ -26,58 +26,58 @@ public enum TextAlign
 }
 
 /// <summary>
-/// Неизменяемый стиль аннотации. Равенство по значению: кэши кистей и перьев в <see cref="Annotation"/>
-/// сбрасываются только при реальной смене стиля, а <see cref="AnnotationDocument.Restyle"/> не пишет пустых шагов.
+/// Immutable annotation style. Value equality: brush and pen caches in <see cref="Annotation"/>
+/// are reset only on actual style change, and <see cref="AnnotationDocument.Restyle"/> does not record empty steps.
 /// <para>
-/// <see cref="Color"/> — основной цвет: обводка фигуры, цвет линии, карандаша, текста, метки.
-/// Дополнительные поля используют только те фигуры, к которым они относятся; для остальных инструментов
-/// они остаются по умолчанию (см. <see cref="Screeny.Overlay.StyleOptions.StyleFor"/>).
+/// <see cref="Color"/> is the main color: shape stroke, line color, pencil, text, label.
+/// Additional fields are used only by the shapes they apply to; for other tools
+/// they remain default (see <see cref="Screeny.Overlay.StyleOptions.StyleFor"/>).
 /// </para>
-/// <para>Сериализуется в JSON (<see cref="AnnotationStyleJsonConverter"/>): цвета — <c>"#AARRGGBB"</c>, стиль стрелки — строкой.</para>
+/// <para>Serialized to JSON (<see cref="AnnotationStyleJsonConverter"/>): colors — <c>"#AARRGGBB"</c>, arrow style — string.</para>
 /// </summary>
 [JsonConverter(typeof(AnnotationStyleJsonConverter))]
 public sealed record AnnotationStyle(Color Color, double Thickness)
 {
-    /// <summary>Рисовать ли обводку (прямоугольник, эллипс). Выключить можно, только если есть заливка.</summary>
+    /// <summary>Whether to draw stroke (rectangle, ellipse). Can be disabled only if fill exists.</summary>
     public bool StrokeEnabled { get; init; } = true;
 
-    /// <summary>Заливка прямоугольника/эллипса вместе с прозрачностью (альфа); null — без заливки.</summary>
+    /// <summary>Fill for rectangle/ellipse with opacity (alpha); null — no fill.</summary>
     public Color? Fill { get; init; }
 
     public ArrowStyle Arrow { get; init; } = ArrowStyle.Normal;
 
-    /// <summary>Скруглённая подложка под текстом; null — без подложки.</summary>
+    /// <summary>Rounded background behind text; null — no background.</summary>
     public Color? TextBackground { get; init; }
 
-    /// <summary>Выравнивание строк текста внутри блока; блок при смене выравнивания не сдвигается.</summary>
+    /// <summary>Alignment of text lines within block; block does not move when alignment changes.</summary>
     public TextAlign TextAlign { get; init; } = TextAlign.Left;
 
-    /// <summary>Цвет обводки или null, если обводка выключена.</summary>
+    /// <summary>Stroke color or null if stroke is off.</summary>
     public Color? StrokeColor => StrokeEnabled ? Color : null;
 
-    /// <summary>Включает/выключает обводку. Выключить последнюю видимую часть фигуры нельзя — стиль не меняется.</summary>
+    /// <summary>Toggles stroke. Cannot disable the last visible part of a shape — style unchanged.</summary>
     public AnnotationStyle WithStroke(bool enabled) => !enabled && Fill is null ? this : this with { StrokeEnabled = enabled };
 
-    /// <summary>Задаёт или убирает заливку. Убрать заливку у фигуры без обводки нельзя — стиль не меняется.</summary>
+    /// <summary>Sets or removes fill. Cannot remove fill from a shape without stroke — style unchanged.</summary>
     public AnnotationStyle WithFill(Color? fill) => fill is null && !StrokeEnabled ? this : this with { Fill = fill };
 
-    /// <summary>Можно ли выключить обводку (останется заливка).</summary>
+    /// <summary>Whether stroke can be disabled (fill remains).</summary>
     public bool CanDisableStroke => Fill is not null;
 
-    /// <summary>Можно ли убрать заливку (останется обводка).</summary>
+    /// <summary>Whether fill can be removed (stroke remains).</summary>
     public bool CanDisableFill => StrokeEnabled;
 }
 
-/// <summary>Цвет ↔ текст.</summary>
+/// <summary>Color ↔ text.</summary>
 public static class ColorHex
 {
-    /// <summary><c>#RRGGBB</c> — как в лупе и в буфер обмена (пипетка). Альфа отбрасывается.</summary>
+    /// <summary><c>#RRGGBB</c> — like in magnifier and clipboard (eyedropper). Alpha is discarded.</summary>
     public static string Rgb(Color c) => $"#{c.R:X2}{c.G:X2}{c.B:X2}";
 
-    /// <summary><c>#AARRGGBB</c> — для JSON, где прозрачность важна (заливка 40 %).</summary>
+    /// <summary><c>#AARRGGBB</c> — for JSON where transparency matters (40% fill).</summary>
     public static string Argb(Color c) => $"#{c.A:X2}{c.R:X2}{c.G:X2}{c.B:X2}";
 
-    /// <summary>Разбирает <c>#RRGGBB</c>, <c>#AARRGGBB</c> и имена цветов WPF; false — не цвет.</summary>
+    /// <summary>Parses <c>#RRGGBB</c>, <c>#AARRGGBB</c> and WPF color names; false — not a color.</summary>
     public static bool TryParse(string? text, out Color color)
     {
         color = default;
@@ -91,18 +91,18 @@ public static class ColorHex
         catch (Exception ex) when (ex is FormatException or NotSupportedException or ArgumentException) { return false; }
     }
 
-    /// <summary>Тот же цвет с прозрачностью в процентах (0…100).</summary>
+    /// <summary>Same color with opacity in percent (0…100).</summary>
     public static Color WithOpacity(Color c, int percent)
         => Color.FromArgb((byte)Math.Round(Math.Clamp(percent, 0, 100) * 255 / 100.0), c.R, c.G, c.B);
 
-    /// <summary>Прозрачность цвета в процентах, округлённая до целого.</summary>
+    /// <summary>Color opacity in percent rounded to integer.</summary>
     public static int OpacityPercent(Color c) => (int)Math.Round(c.A * 100 / 255.0);
 }
 
 /// <summary>
-/// JSON стиля: <c>{ "color": "#FFFF3B30", "thickness": 3, "stroke": true, "fill": "#66FF3B30" | null,
-/// "arrow": "Normal", "textBackground": null, "textAlign": "Left" }</c>. Неизвестные поля пропускаются, отсутствующие —
-/// по умолчанию (документы без <c>textAlign</c> — выравнивание влево), неверный цвет, стиль стрелки или выравнивание —
+/// Style JSON: <c>{ "color": "#FFFF3B30", "thickness": 3, "stroke": true, "fill": "#66FF3B30" | null,
+/// "arrow": "Normal", "textBackground": null, "textAlign": "Left" }</c>. Unknown fields are skipped, missing fields —
+/// default (documents without <c>textAlign</c> — left alignment), invalid color, arrow style or alignment —
 /// <see cref="JsonException"/>.
 /// </summary>
 public sealed class AnnotationStyleJsonConverter : JsonConverter<AnnotationStyle>
@@ -142,7 +142,7 @@ public sealed class AnnotationStyleJsonConverter : JsonConverter<AnnotationStyle
                 default: reader.Skip(); break;
             }
         }
-        // Невидимую фигуру не восстанавливаем: без заливки обводка обязательна.
+        // Do not restore invisible shape: without fill stroke is required.
         return new AnnotationStyle(color, thickness) { StrokeEnabled = stroke || fill is null, Fill = fill, Arrow = arrow, TextBackground = textBackground, TextAlign = align };
     }
 

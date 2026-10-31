@@ -28,7 +28,7 @@ public class PixelOpsTests
     {
         var px = Checker(5, 3);
         PixelOps.Pixelate(px, 5, 3, blockSize: 4);
-        // Правый столбец (x=4) — блок 1×3: значения 0,200,0 → 67
+        // Right column (x=4) — 1×3 block: values 0,200,0 → 67
         int i = (0 * 5 + 4) * 4; Assert.Equal(67, px[i]);
     }
 
@@ -53,7 +53,7 @@ public class PixelOpsTests
     [Fact]
     public void BoxBlur_VerticalPass_SmoothsHorizontalEdge()
     {
-        // Столбец 1×4: верх чёрный, низ белый — горизонтальный проход ничего не меняет, работает только вертикальный.
+        // 1×4 column: top black, bottom white — horizontal pass changes nothing, only vertical works.
         var px = new byte[1 * 4 * 4];
         for (int y = 0; y < 4; y++) { int i = y * 4; byte v = (byte)(y < 2 ? 0 : 255); px[i] = px[i + 1] = px[i + 2] = v; px[i + 3] = 255; }
         PixelOps.BoxBlur(px, 1, 4, radius: 1);
@@ -67,7 +67,7 @@ public class PixelOpsTests
     [Theory]
     [InlineData(1)]
     [InlineData(5)]
-    [InlineData(40)] // окно шире изображения
+    [InlineData(40)] // window wider than image
     public void BoxBlur_MatchesNaiveReference(int radius)
     {
         int w = 64, h = 48;
@@ -89,13 +89,13 @@ public class PixelOpsTests
         var rnd = new Random(7);
         var a = new byte[w * h * 4]; rnd.NextBytes(a);
         var b = (byte[])a.Clone();
-        var scratch = new byte[w * h * 4 + 100]; // буфер может быть длиннее нужного
+        var scratch = new byte[w * h * 4 + 100]; // buffer may be longer than needed
         PixelOps.BoxBlur(a, w, h, 3);
         PixelOps.BoxBlur(b, w, h, 3, scratch);
         Assert.Equal(a, b);
     }
 
-    /// <summary>Прежняя реализация O(w·h·r) — эталон.</summary>
+    /// <summary>Previous O(w·h·r) implementation — reference.</summary>
     private static void NaiveBoxBlur(byte[] px, int width, int height, int radius)
     {
         var tmp = new byte[px.Length];

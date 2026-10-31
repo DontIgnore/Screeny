@@ -3,11 +3,11 @@ using System.Windows;
 namespace Screeny.Annotations.Shapes;
 
 /// <summary>
-/// Геометрия стрелки без WPF-рендера: линия (если есть) и залитые многоугольники (наконечники или тело-клин).
+/// Arrow geometry without WPF rendering: line (if any) and filled polygons (arrowheads or wedge body).
 /// </summary>
-/// <param name="HasLine">Рисуется ли линия <paramref name="LineStart"/>→<paramref name="LineEnd"/> пером стиля.</param>
-/// <param name="Dashed">Линия пунктирная.</param>
-/// <param name="Polygons">Залитые многоугольники: наконечники (первая точка — острие) или тело «толстой» стрелки.</param>
+/// <param name="HasLine">Whether line <paramref name="LineStart"/>→<paramref name="LineEnd"/> is drawn with style pen.</param>
+/// <param name="Dashed">Line is dashed.</param>
+/// <param name="Polygons">Filled polygons: arrowheads (first point is tip) or body of “thick” arrow.</param>
 public sealed record ArrowShape(bool HasLine, Point LineStart, Point LineEnd, bool Dashed, IReadOnlyList<Point[]> Polygons)
 {
     public static readonly ArrowShape Empty = new(false, default, default, false, []);
@@ -15,7 +15,7 @@ public sealed record ArrowShape(bool HasLine, Point LineStart, Point LineEnd, bo
 
 public static class ArrowGeometry
 {
-    /// <summary>Длина наконечника обычной стрелки при данной толщине (у короткой стрелки — меньше).</summary>
+    /// <summary>Arrowhead length for normal arrow at given thickness (shorter for short arrow).</summary>
     public static double HeadLength(double thickness) => Math.Max(12, thickness * 4);
 
     public static ArrowShape Compute(Point start, Point end, double thickness, ArrowStyle style)
@@ -32,15 +32,15 @@ public static class ArrowGeometry
         };
     }
 
-    /// <summary>Обычная и пунктирная: линия до основания наконечника, чтобы она не торчала из острия.</summary>
+    /// <summary>Normal and dashed: line ends at arrowhead base so it doesn't stick out of tip.</summary>
     private static ArrowShape Single(Point start, Point end, Vector dir, double length, double thickness, bool dashed)
     {
-        // Короткая стрелка — уменьшаем наконечник, чтобы он не «выворачивался» за начало линии.
+        // Short arrow — reduce arrowhead so it doesn't “invert” past the line start.
         double head = Math.Min(HeadLength(thickness), length * 0.6);
         return new ArrowShape(true, start, end - dir * (head * 0.9), dashed, [Head(end, dir, head)]);
     }
 
-    /// <summary>Двусторонняя: наконечники на обоих концах, каждый не длиннее 40 % стрелки.</summary>
+    /// <summary>Double-ended: arrowheads on both ends, each no longer than 40% of arrow.</summary>
     private static ArrowShape Double(Point start, Point end, Vector dir, double length, double thickness)
     {
         double head = Math.Min(HeadLength(thickness), length * 0.4);
@@ -49,8 +49,8 @@ public static class ArrowGeometry
     }
 
     /// <summary>
-    /// «Баннерная» стрелка одним многоугольником: узкий хвост в начале, тело расширяется к шейке,
-    /// широкий наконечник. Порядок точек: хвост, шейка, крыло, острие, крыло, шейка, хвост.
+    /// “Banner” arrow as one polygon: narrow tail at start, body widens to neck,
+    /// wide arrowhead. Point order: tail, neck, wing, tip, wing, neck, tail.
     /// </summary>
     private static ArrowShape Thick(Point start, Point end, Vector dir, double length, double thickness)
     {
@@ -66,7 +66,7 @@ public static class ArrowGeometry
         return new ArrowShape(false, start, end, false, [polygon]);
     }
 
-    /// <summary>Треугольник наконечника: острие, левое и правое крыло.</summary>
+    /// <summary>Arrowhead triangle: tip, left and right wing.</summary>
     private static Point[] Head(Point tip, Vector dir, double head)
     {
         var basePt = tip - dir * head;
@@ -74,7 +74,7 @@ public static class ArrowGeometry
         return [tip, basePt - normal, basePt + normal];
     }
 
-    /// <summary>Охват всех точек фигуры, расширенный на половину толщины линии.</summary>
+    /// <summary>Bounds of all shape points expanded by half line thickness.</summary>
     public static Rect Bounds(ArrowShape shape, double thickness)
     {
         var r = Rect.Empty;
@@ -85,7 +85,7 @@ public static class ArrowGeometry
         return r;
     }
 
-    /// <summary>Попадание: в пределах <paramref name="tolerance"/> от линии или внутри многоугольника.</summary>
+    /// <summary>Hit test: within <paramref name="tolerance"/> of line or inside polygon.</summary>
     public static bool HitTest(ArrowShape shape, Point p, double tolerance)
     {
         if (shape.HasLine && DistanceToSegment(p, shape.LineStart, shape.LineEnd) <= tolerance) return true;
@@ -110,7 +110,7 @@ public static class ArrowGeometry
         return best;
     }
 
-    /// <summary>Точка внутри многоугольника (чётность пересечений луча).</summary>
+    /// <summary>Point inside polygon (ray crossing parity).</summary>
     public static bool Contains(Point[] poly, Point p)
     {
         bool inside = false;

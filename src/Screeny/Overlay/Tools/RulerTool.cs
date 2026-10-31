@@ -5,17 +5,17 @@ using Screeny.Annotations;
 namespace Screeny.Overlay.Tools;
 
 /// <summary>
-/// Линейка: тянете от точки к точке — показывается одно временное измерение (<see cref="Measurement"/>).
-/// Документ не меняется. Клик без протяжки или новый жест убирают прежнее измерение.
+/// Ruler: drag from point to point — one temporary measurement shown (<see cref="Measurement"/>).
+/// Document unchanged. Click without drag or new gesture removes previous measurement.
 /// </summary>
-/// <param name="constrain">Зажат ли Shift: шаг 45°.</param>
+/// <param name="constrain">Shift held: 45° step.</param>
 public sealed class RulerTool(Func<bool>? constrain = null) : ITool
 {
     private Point _start;
     private bool _active;
 
     public RulerMeasurement? Measurement { get; private set; }
-    /// <summary>Измерение появилось, изменилось или исчезло.</summary>
+    /// <summary>Measurement appeared, changed or disappeared.</summary>
     public event Action? Changed;
 
     public Cursor Cursor => Cursors.Cross;
@@ -39,7 +39,7 @@ public sealed class RulerTool(Func<bool>? constrain = null) : ITool
         if (!_active) return;
         Move(px);
         _active = false;
-        // Клик без протяжки — просто убрать прежнее измерение.
+        // Click without drag — just remove previous measurement.
         if (Measurement is { Length: < 1 }) Set(null);
     }
 
@@ -50,7 +50,7 @@ public sealed class RulerTool(Func<bool>? constrain = null) : ITool
         Set(null);
     }
 
-    /// <summary>Убрать измерение (Esc, смена инструмента, сброс выделения).</summary>
+    /// <summary>Remove measurement (Esc, tool change, selection reset).</summary>
     public void Clear()
     {
         _active = false;

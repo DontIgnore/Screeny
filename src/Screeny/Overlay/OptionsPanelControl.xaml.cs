@@ -7,16 +7,16 @@ using Screeny.Annotations;
 namespace Screeny.Overlay;
 
 /// <summary>
-/// Параметры одной секции (<see cref="OptionsSections.ForTool"/> / <see cref="OptionsSections.ForAnnotation"/>):
-/// обводка и заливка, стиль стрелки или текст. Содержимое flyout'а у кнопки инструмента или рядом с выбранной фигурой.
-/// Сама ничего не меняет — сообщает о кликах событиями, а состояние показывает по <see cref="Show"/>.
-/// Все кнопки Focusable=False: клавиатура остаётся у окна.
+/// Options of one section (<see cref="OptionsSections.ForTool"/> / <see cref="OptionsSections.ForAnnotation"/>):
+/// stroke and fill, arrow style or text. Flyout content at tool button or next to selected shape.
+/// Itself changes nothing — reports clicks via events, shows state by <see cref="Show"/>.
+/// All buttons Focusable=False: keyboard stays with window.
 /// </summary>
 public partial class OptionsPanelControl : UserControl, IFlyoutItems
 {
     private OptionsSectionKind? _shown;
 
-    /// <summary>Клик по образцу: сделать его активным (выключенная часть при этом включается).</summary>
+    /// <summary>Swatch click: make active (disabled part enables).</summary>
     public event Action<PaintTarget>? TargetClicked;
     public event Action? StrokeNoneClicked;
     public event Action? FillNoneClicked;
@@ -27,15 +27,15 @@ public partial class OptionsPanelControl : UserControl, IFlyoutItems
 
     public OptionsPanelControl() => InitializeComponent();
 
-    /// <summary>Показанная секция; null — показывать нечего.</summary>
+    /// <summary>Shown section; null — nothing to show.</summary>
     public OptionsSectionKind? Shown => _shown;
 
-    /// <summary>Строки (у стрелки — кнопки) показанной секции: при открытии flyout'а они появляются поочерёдно.</summary>
+    /// <summary>Rows (arrow — buttons) of shown section: appear one by one on flyout open.</summary>
     public IReadOnlyList<UIElement> FlyoutItems => SectionPanel(_shown) is { } panel ? panel.Children.Cast<UIElement>().ToList() : [];
 
     /// <summary>
-    /// Показать секцию и её состояние: <paramref name="style"/> — стиль выбранной фигуры или будущей,
-    /// <paramref name="active"/> — подсвеченный образец, <paramref name="fillOpacity"/> — подпись прозрачности заливки.
+    /// Show section and its state: <paramref name="style"/> — style of selected or future shape,
+    /// <paramref name="active"/> — highlighted swatch, <paramref name="fillOpacity"/> — fill opacity label.
     /// </summary>
     public void Show(OptionsSectionKind? section, AnnotationStyle style, PaintTarget active, int fillOpacity)
     {
@@ -100,7 +100,7 @@ public partial class OptionsPanelControl : UserControl, IFlyoutItems
 
     private static SolidColorBrush Brush(Color c) { var b = new SolidColorBrush(c); b.Freeze(); return b; }
 
-    /// <summary>ToggleButton сам переключает IsChecked; состояние задаёт редактор через Show.</summary>
+    /// <summary>ToggleButton toggles IsChecked itself; state set by editor via Show.</summary>
     private static void Revert(object sender) { if (sender is ToggleButton t) t.IsChecked = !t.IsChecked; }
 
     private void OnStrokeSwatch(object sender, RoutedEventArgs e) => TargetClicked?.Invoke(PaintTarget.Color);

@@ -5,17 +5,17 @@ using System.Reflection;
 
 namespace Screeny.Updates;
 
-/// <summary>Версия этой копии и ссылки раздела «О программе».</summary>
+/// <summary>Version of this copy and About links.</summary>
 public static class AppVersion
 {
     /// <summary>
-    /// Версия для показа: из пакета Velopack (её же видит проверка обновлений); у копии без пакета (dev, publish) — из
-    /// сборки, без <c>+хеш</c> коммита. Суффикс предрелиза (<c>-beta.1</c>) остаётся.
+    /// Version for display: from Velopack package (also seen by update check); without package (dev, publish) — from
+    /// assembly, without <c>+hash</c> of commit. Prerelease suffix (<c>-beta.1</c>) stays.
     /// </summary>
     public static string Choose(string? velopackVersion, string? informationalVersion)
         => !string.IsNullOrWhiteSpace(velopackVersion) ? velopackVersion.Trim() : Strip(informationalVersion) ?? "0.0.0";
 
-    /// <summary><c>0.2.1-beta.1+abc123</c> → <c>0.2.1-beta.1</c>; пустая — null.</summary>
+    /// <summary><c>0.2.1-beta.1+abc123</c> → <c>0.2.1-beta.1</c>; empty — null.</summary>
     public static string? Strip(string? informationalVersion)
     {
         if (string.IsNullOrWhiteSpace(informationalVersion)) return null;
@@ -24,11 +24,11 @@ public static class AppVersion
         return version.Length == 0 ? null : version;
     }
 
-    /// <summary>AssemblyInformationalVersion сборки Screeny (из <c>&lt;Version&gt;</c> в csproj, с <c>+хеш</c>).</summary>
+    /// <summary>AssemblyInformationalVersion of Screeny assembly (from <c>&lt;Version&gt;</c> in csproj, with <c>+hash</c>).</summary>
     public static string? Informational()
         => typeof(AppVersion).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
-    /// <summary>Страница релиза этой версии на GitHub («Что нового»).</summary>
+    /// <summary>Release page of this version on GitHub (“What's new”).</summary>
     public static string ReleasePageUrl(string version) => $"{VelopackUpdateClient.RepositoryUrl}/releases/tag/v{version}";
 
     public static string LicenseUrl => $"{VelopackUpdateClient.RepositoryUrl}/blob/main/LICENSE";
@@ -37,28 +37,28 @@ public static class AppVersion
 public enum AboutUpdateState { Idle, Checking, UpToDate, Available, Failed, NotUpdatable }
 
 /// <summary>
-/// Строка состояния под кнопкой «Проверить обновления» в настройках. Хранится состояние, а не текст: текст собирается
-/// заново при смене языка.
+/// Status string under “Check for updates” button in settings. State stored, not text: text rebuilt
+/// on language change.
 /// </summary>
-/// <param name="Update">Найденная версия (<see cref="AboutUpdateState.Available"/>): кнопка «Обновить» открывает её окно.</param>
-/// <param name="ReasonKey">Ключ понятной причины ошибки; null — показать <paramref name="ReasonText"/>.</param>
+/// <param name="Update">Found version (<see cref="AboutUpdateState.Available"/>): “Update” button opens its window.</param>
+/// <param name="ReasonKey">Key of clear error reason; null — show <paramref name="ReasonText"/>.</param>
 public sealed record AboutUpdateStatus(AboutUpdateState State, UpdateCandidate? Update = null, string? ReasonKey = null, string? ReasonText = null)
 {
     public static readonly AboutUpdateStatus Idle = new(AboutUpdateState.Idle);
     public static readonly AboutUpdateStatus Checking = new(AboutUpdateState.Checking);
 
-    /// <summary>До проверки: копия, которая не обновляется сама (dev, publish), сразу говорит об этом.</summary>
+    /// <summary>Before check: copy that can't update itself (dev, publish) says so immediately.</summary>
     public static AboutUpdateStatus Initial(bool canUpdate) => canUpdate ? Idle : new(AboutUpdateState.NotUpdatable);
 
     /// <summary>
-    /// Итог ручной проверки → состояние. null (проверки не было: выход или окно обновления уже открыто) и
-    /// <see cref="UpdateCheckResult.Busy"/> (идёт другая проверка, её итог сюда не придёт) возвращают
-    /// <paramref name="previous"/>, чтобы «Проверяю…» не повисло навсегда.
+    /// Manual check result → state. null (no check: exit or update window already open) and
+    /// <see cref="UpdateCheckResult.Busy"/> (another check running, its result won't come here) return
+    /// <paramref name="previous"/>, so “Checking…” doesn't hang forever.
     /// </summary>
     public static AboutUpdateStatus From(UpdateCheckResult? result, AboutUpdateStatus previous) => result switch
     {
         UpdateCheckResult.Available a => new(AboutUpdateState.Available, a.Update),
-        UpdateCheckResult.Skipped s => new(AboutUpdateState.Available, s.Update), // ручная проверка пропуск не учитывает
+        UpdateCheckResult.Skipped s => new(AboutUpdateState.Available, s.Update), // manual check ignores skip
         UpdateCheckResult.UpToDate => new(AboutUpdateState.UpToDate),
         UpdateCheckResult.NotUpdatable => new(AboutUpdateState.NotUpdatable),
         UpdateCheckResult.Failed f => Failed(f.Error),
@@ -69,8 +69,8 @@ public sealed record AboutUpdateStatus(AboutUpdateState State, UpdateCandidate? 
         => ReasonKeyFor(error) is { } key ? new(AboutUpdateState.Failed, ReasonKey: key) : new(AboutUpdateState.Failed, ReasonText: error.Message);
 
     /// <summary>
-    /// Понятная причина: нет связи, GitHub ограничил запросы или недоступен, нет ответа. Остальное — null (текст ошибки).
-    /// Ищется по цепочке InnerException: Velopack заворачивает ошибки загрузки.
+    /// Clear reason: no connection, GitHub rate-limited or unavailable, no response. Else — null (error text).
+    /// Searched via InnerException chain: Velopack wraps download errors.
     /// </summary>
     public static string? ReasonKeyFor(Exception error)
     {

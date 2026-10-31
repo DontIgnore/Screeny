@@ -5,21 +5,21 @@ using Screeny.Hotkeys;
 namespace Screeny.Settings;
 
 /// <summary>
-/// Приводит «сырой» JSON настроек к текущему формату (<see cref="AppSettings.CurrentVersion"/>) до десериализации.
-/// Чистая функция: не читает и не пишет файлы, вход не изменяет.
+/// Converts “raw” settings JSON to current format (<see cref="AppSettings.CurrentVersion"/>) before deserialization.
+/// Pure function: doesn't read/write files, doesn't modify input.
 /// <list type="bullet">
-/// <item>v1 (нет <c>SettingsVersion</c>): <c>Hotkey</c> = PrintScreen (или поле отсутствует/нераспознано) → запись
-/// PrintScreen включена; любое другое распознанное сочетание → PrintScreen выключен + своя запись с этим сочетанием.
-/// <c>FallbackHotkey</c> отбрасывается: запасной хоткей теперь не настраивается.</item>
-/// <item>Любая версия ≤ текущей: из <c>Hotkeys</c> выбрасываются записи, на которых упала бы десериализация (не объект,
-/// неизвестный <c>Kind</c>, <c>Spec</c> не строка, <c>Enabled</c> не true/false), — иначе одна битая запись сбросила бы весь файл.</item>
-/// <item>Любая версия ≤ текущей: из <c>DisabledFeatures</c> выбрасываются не строки, поле не массив — убирается.
-/// Само поле появилось без смены версии: в старом файле его нет, и все функции включены.</item>
-/// <item>Любая версия ≤ текущей: <c>Language</c> не строка — убирается (язык «как в системе»), а не сбрасывает весь файл.
-/// Поле появилось без смены версии: у старого файла его нет — тоже «как в системе».</item>
-/// <item>Любая версия ≤ текущей: <c>InstallId</c> не строка — убирается (создастся при следующей отправке сообщения).
-/// Поле появилось без смены версии.</item>
-/// <item>Версия новее текущей (файл от более новой Screeny): не трогаем.</item>
+/// <item>v1 (no <c>SettingsVersion</c>): <c>Hotkey</c> = PrintScreen (or missing/unrecognized) → PrintScreen entry
+/// enabled; any other recognized combo → PrintScreen disabled + custom entry with combo.
+/// <c>FallbackHotkey</c> dropped: fallback hotkey no longer configurable.</item>
+/// <item>Any version ≤ current: from <c>Hotkeys</c> drop entries where deserialization would fail (not object,
+/// unknown <c>Kind</c>, <c>Spec</c> not string, <c>Enabled</c> not true/false) — else one broken entry would reset whole file.</item>
+/// <item>Any version ≤ current: from <c>DisabledFeatures</c> drop non-strings, field not array — removed.
+/// Field appeared without version bump: old file lacks it, all features enabled.</item>
+/// <item>Any version ≤ current: <c>Language</c> not string — removed (language “as system”), not reset whole file.
+/// Field appeared without version bump: old file lacks it — also “as system”.</item>
+/// <item>Any version ≤ current: <c>InstallId</c> not string — removed (created at next message send).
+/// Field appeared without version bump.</item>
+/// <item>Version newer than current (file from newer Screeny): untouched.</item>
 /// </list>
 /// </summary>
 public static class SettingsMigrator
@@ -45,8 +45,8 @@ public static class SettingsMigrator
     }
 
     /// <summary>
-    /// Строковое поле другого типа (число, массив, null) убирается: остаётся значение по умолчанию. С <paramref name="allowNull"/>
-    /// null — допустимое значение (поле, которое сохраняется как null), его не трогаем, чтобы файл не переписывался при каждом запуске.
+    /// String field of other type (number, array, null) removed: default remains. With <paramref name="allowNull"/>
+    /// null — valid value (field saved as null), not touched, so file not rewritten every launch.
     /// </summary>
     private static bool SanitizeString(JsonObject obj, string name, bool allowNull = false)
     {
@@ -56,8 +56,8 @@ public static class SettingsMigrator
         return true;
     }
 
-    /// <summary>Список строк: не массив → поле убирается (значение по умолчанию), не строки выбрасываются.</summary>
-    /// <returns>true, если что-то выброшено.</returns>
+    /// <summary>String list: not array → field removed (default), non-strings dropped.</summary>
+    /// <returns>true if something dropped.</returns>
     private static bool SanitizeStringList(JsonObject obj, string name)
     {
         if (!obj.TryGetPropertyValue(name, out var node)) return false;
@@ -76,7 +76,7 @@ public static class SettingsMigrator
         return changed;
     }
 
-    /// <summary>Версия из файла; поле отсутствует или не число → 1.</summary>
+    /// <summary>Version from file; missing or not number → 1.</summary>
     public static int ReadVersion(JsonObject obj)
         => obj["SettingsVersion"] is JsonValue v && v.TryGetValue(out int n) ? n
          : obj["SettingsVersion"] is JsonValue s && s.TryGetValue(out string? text) && int.TryParse(text, out int parsed) ? parsed
@@ -87,14 +87,14 @@ public static class SettingsMigrator
         string? hotkey = obj["Hotkey"] is JsonValue v && v.TryGetValue(out string? text) ? text : null;
         obj.Remove("Hotkey");
         obj.Remove("FallbackHotkey");
-        if (obj.ContainsKey("Hotkeys")) return; // уже есть список (файл, собранный вручную) — не перетираем
+        if (obj.ContainsKey("Hotkeys")) return; // already a list (hand-assembled file) — don't overwrite
 
         var hotkeys = new JsonArray();
         bool custom = hotkey is not null && HotkeyParser.TryParse(hotkey, out var spec) && spec != HotkeySpec.PrintScreen;
         hotkeys.Add(Entry(HotkeyKind.PrintScreen, enabled: !custom));
         hotkeys.Add(Entry(HotkeyKind.WinShiftS, enabled: false));
-        // Недопустимое по HotkeyRules сочетание (например, «Shift+A») переносим как есть: Normalize выбросит его с записью
-        // в журнал и, раз других хоткеев нет, включит PrintScreen.
+        // Invalid by HotkeyRules combo (e.g., “Shift+A”) carried as-is: Normalize drops it with log
+        // and, since no other hotkeys, enables PrintScreen.
         if (custom) hotkeys.Add(Entry(HotkeyKind.Custom, enabled: true, hotkey!.Trim()));
         obj["Hotkeys"] = hotkeys;
     }
@@ -107,13 +107,13 @@ public static class SettingsMigrator
         return e;
     }
 
-    /// <returns>true, если что-то выброшено.</returns>
+    /// <returns>true if something dropped.</returns>
     private static bool SanitizeHotkeys(JsonObject obj)
     {
         if (!obj.TryGetPropertyValue("Hotkeys", out var node)) return false;
         if (node is not JsonArray array)
         {
-            obj.Remove("Hotkeys"); // null или не массив → значения по умолчанию
+            obj.Remove("Hotkeys"); // null or not array → defaults
             return true;
         }
         bool changed = false;
@@ -131,7 +131,7 @@ public static class SettingsMigrator
         if (item is not JsonObject e) return false;
         if (e["Kind"] is not JsonValue kind || !IsKnownKind(kind)) return false;
         if (e.TryGetPropertyValue("Spec", out var spec) && spec is not null && spec.GetValueKind() != JsonValueKind.String) return false;
-        // null в bool не десериализуется — такая запись тоже битая.
+        // null in bool doesn't deserialize — such entry broken too.
         if (e.TryGetPropertyValue("Enabled", out var enabled)
             && enabled?.GetValueKind() is not (JsonValueKind.True or JsonValueKind.False)) return false;
         return true;

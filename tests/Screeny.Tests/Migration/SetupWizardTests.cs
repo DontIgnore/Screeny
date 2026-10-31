@@ -17,7 +17,7 @@ public class SetupWizardTests
     [Fact]
     public void PassedFirstVersion_SeesWizardWithFeaturesOnce()
     {
-        Assert.True(SetupWizard.Version >= 2); // выбор функций появился во второй версии мастера
+        Assert.True(SetupWizard.Version >= 2); // feature choice appeared in wizard version 2
         var settings = new AppSettings { SetupWizardVersion = 1 };
         Assert.Equal(SetupWizard.StartupAction.ShowWizard, SetupWizard.OnStartup(isDev: false, wizardRequested: false, settings));
         settings.SetupWizardVersion = SetupWizard.Version;
@@ -30,7 +30,7 @@ public class SetupWizardTests
     public void NewBlockingConflicts_OnlyUnknownAndBlockingEnabledHotkey()
     {
         var hotkeys = new[] { HotkeyBinding.PrintScreen(true), HotkeyBinding.WinShiftS(false) };
-        // Snipaste хоткеи Screeny не занимает — не напоминаем; Lightshot уже известен.
+        // Snipaste doesn't take Screeny hotkeys — no reminder; Lightshot already known.
         var fresh = SetupWizard.NewBlockingConflicts(Conflicts(), hotkeys, ["lightshot"]);
         Assert.Equal(["sharex"], fresh.Select(c => c.Id));
         Assert.Empty(SetupWizard.NewBlockingConflicts(Conflicts(), hotkeys, ["lightshot", "sharex"]));
@@ -65,19 +65,19 @@ public class SetupWizardTests
     {
         var hotkeys = new[] { HotkeyBinding.PrintScreen(true) };
         var withLightshot = Conflicts().Where(c => c.Id == "lightshot").ToList();
-        // После мастера Lightshot ещё мешал — известен, уведомления нет.
+        // After wizard Lightshot still conflicted — known, no notification.
         var (fresh, known) = SetupWizard.CheckForNewConflicts(withLightshot, hotkeys, ["lightshot"]);
         Assert.Empty(fresh);
         Assert.Equal(["lightshot"], known);
-        // Его убрали — забываем.
+        // Removed — forgotten.
         (fresh, known) = SetupWizard.CheckForNewConflicts([], hotkeys, known);
         Assert.Empty(fresh);
         Assert.Empty(known);
-        // Вернулся — одно уведомление…
+        // Returned — one notification…
         (fresh, known) = SetupWizard.CheckForNewConflicts(withLightshot, hotkeys, known);
         Assert.Equal(["lightshot"], fresh.Select(c => c.Id));
         Assert.Equal(["lightshot"], known);
-        // …и не при каждом запуске.
+        // …and not every launch.
         (fresh, _) = SetupWizard.CheckForNewConflicts(withLightshot, hotkeys, known);
         Assert.Empty(fresh);
     }
@@ -112,7 +112,7 @@ public class SetupWizardTests
         Assert.False(SetupWizard.HasAnyHotkey(new WizardHotkeyChoice(false, false, null), AppSettings.DefaultHotkeys()));
     }
 
-    /// <summary>Применение хоткеев из мастера через настоящий <see cref="HotkeyManager"/> на подставном бэкенде.</summary>
+    /// <summary>Applying hotkeys from wizard via real <see cref="HotkeyManager"/> on fake backend.</summary>
     [Fact]
     public void WizardHotkeys_ApplyThroughHotkeyManager()
     {

@@ -7,10 +7,10 @@ using Screeny.Editing;
 namespace Screeny.Overlay.Tools;
 
 /// <summary>
-/// Выбор и перемещение аннотаций. Во время перетаскивания фигура двигается напрямую,
-/// а на отпускании уже применённый сдвиг записывается в undo одним шагом (без повторного применения).
-/// С <paramref name="snap"/> края и центр фигуры прилипают к другим фигурам и к области: сдвиг считается от точки
-/// нажатия (сырой сдвиг мыши + поправка прилипания), поэтому фигура не «залипает» и не накапливает ошибку.
+/// Annotation select and move. During drag shape moves directly,
+/// on release applied offset recorded into undo as one step (without re-applying).
+/// With <paramref name="snap"/> edges and center snap to other shapes and area: offset computed from press point
+/// (raw mouse offset + snap correction), so shape doesn't “stick” or accumulate error.
 /// </summary>
 public sealed class SelectTool(Snapper? snap = null) : ITool
 {
@@ -35,7 +35,7 @@ public sealed class SelectTool(Snapper? snap = null) : ITool
             _startBounds = _dragging.GeometryBounds;
             snap?.Begin(doc, exclude: _dragging);
         }
-        // Эффект при перетаскивании считается по уменьшенной копии, полный пересчёт — после отпускания.
+        // Effect during drag computed on downscaled copy, full recompute after release.
         if (_dragging is EffectAnnotation effect) effect.BeginLiveEdit();
         doc.NotifyChanged();
     }
@@ -63,8 +63,8 @@ public sealed class SelectTool(Snapper? snap = null) : ITool
         snap?.End();
         if (dragged is EffectAnnotation effect) { effect.EndLiveEdit(); _doc.NotifyChanged(); }
         if (total.LengthSquared == 0) return;
-        // Фигуру могли отменить (Ctrl+Z) посреди жеста: шаг не пишем, а сдвиг откатываем,
-        // чтобы Redo вернул её на прежнее место.
+        // Shape could be undone (Ctrl+Z) mid-gesture: no step, offset rolled back,
+        // so Redo returns it to previous place.
         if (!_doc.RecordMove(dragged, total))
         {
             dragged.Offset(-total);

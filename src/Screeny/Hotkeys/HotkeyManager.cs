@@ -1,31 +1,31 @@
 namespace Screeny.Hotkeys;
 
-/// <summary>Состояние одной записи хоткея после <see cref="HotkeyManager.Apply"/>.</summary>
+/// <summary>State of one hotkey entry after <see cref="HotkeyManager.Apply"/>.</summary>
 public enum HotkeyStatus
 {
-    /// <summary>Работает.</summary>
+    /// <summary>Works.</summary>
     Active,
-    /// <summary>Запись выключена в настройках.</summary>
+    /// <summary>Entry disabled in settings.</summary>
     Disabled,
-    /// <summary>Сочетание уже занято другим приложением (ERROR_HOTKEY_ALREADY_REGISTERED, 1409).</summary>
+    /// <summary>Combo already used by another app (ERROR_HOTKEY_ALREADY_REGISTERED, 1409).</summary>
     Busy,
-    /// <summary>Регистрация или установка хука не удалась по другой причине (код в <see cref="HotkeyState.Win32Error"/>).</summary>
+    /// <summary>Registration or hook install failed for other reason (code in <see cref="HotkeyState.Win32Error"/>).</summary>
     Failed,
-    /// <summary>PrintScreen забирает системный захват экрана Windows: WM_HOTKEY не придёт, регистрацию не пробуем.</summary>
+    /// <summary>PrintScreen taken by Windows system screen capture: WM_HOTKEY won't arrive, skip registration.</summary>
     ReservedBySystem,
-    /// <summary>Своё сочетание не распознано.</summary>
+    /// <summary>Custom combo not recognized.</summary>
     Invalid,
-    /// <summary>Не регистрируется в этом экземпляре (<c>--dev</c> без <c>--enable-ll-hook</c>).</summary>
+    /// <summary>Not registered in this instance (<c>--dev</c> without <c>--enable-ll-hook</c>).</summary>
     NotAllowed,
 }
 
-/// <remarks>Хранит вид проблемы и код ошибки, а текст <see cref="Message"/> собирает при каждом чтении — на текущем
-/// языке интерфейса, поэтому после смены языка подсказки в настройках и уведомления не устаревают.</remarks>
+/// <remarks>Stores problem kind and error code; text <see cref="Message"/> built on each read — in current
+/// UI language, so after language change settings hints and notifications don't go stale.</remarks>
 public sealed record HotkeyState(HotkeyBinding Binding, HotkeyStatus Status, int Win32Error = 0)
 {
     public bool IsActive => Status == HotkeyStatus.Active;
 
-    /// <summary>Текст проблемы для пользователя; null — проблемы нет.</summary>
+    /// <summary>Problem text for user; null — no problem.</summary>
     public string? Message => Status switch
     {
         HotkeyStatus.ReservedBySystem => Localization.Loc.T("Hotkeys.PrintScreenReserved"),
@@ -36,25 +36,25 @@ public sealed record HotkeyState(HotkeyBinding Binding, HotkeyStatus Status, int
     };
 }
 
-/// <summary>Итог применения списка хоткеев: состояние каждой записи и запасной хоткей, если он включён.</summary>
-/// <param name="FallbackErrorCode">Код ошибки Windows, если запасной хоткей не зарегистрировался.</param>
+/// <summary>Result of applying hotkey list: state of each entry and fallback hotkey if enabled.</summary>
+/// <param name="FallbackErrorCode">Windows error code if fallback hotkey didn't register.</param>
 public sealed record HotkeyReport(IReadOnlyList<HotkeyState> Entries, HotkeySpec? Fallback = null, int? FallbackErrorCode = null)
 {
-    /// <summary>Почему не включился запасной хоткей — текстом на текущем языке; null — не было ошибки.</summary>
+    /// <summary>Why fallback hotkey didn't enable — text in current language; null — no error.</summary>
     public string? FallbackError => FallbackErrorCode is { } code ? GlobalHotkey.DescribeFailure(HotkeySpec.Fallback, code) : null;
 
     public static readonly HotkeyReport Empty = new([]);
 
-    /// <summary>Подписи всех работающих хоткеев в порядке списка, запасной — последним.</summary>
+    /// <summary>Labels of all working hotkeys in list order, fallback last.</summary>
     public IReadOnlyList<string> ActiveNames =>
         [.. Entries.Where(e => e.IsActive).Select(e => e.Binding.DisplayName), .. Fallback is { } f ? [f.ToString()] : Array.Empty<string>()];
 
     public HotkeyState? Find(HotkeyKind kind) => Entries.FirstOrDefault(e => e.Binding.Kind == kind);
 
-    /// <summary>Все работающие хоткеи через « / » для меню и подсказки трея; «—», если нет ни одного.</summary>
+    /// <summary>All working hotkeys joined with / for menu and tray hints; an em dash if none work.</summary>
     public string ActiveText(int maxLength = 32) => FormatNames(ActiveNames, maxLength);
 
-    /// <summary>Имена через « / »; если длиннее <paramref name="maxLength"/> — первое и « / …».</summary>
+    /// <summary>Names joined with /; if longer than <paramref name="maxLength"/>, show the first followed by / and an ellipsis.</summary>
     public static string FormatNames(IReadOnlyList<string> names, int maxLength = 32)
     {
         if (names.Count == 0) return "—";
@@ -63,9 +63,9 @@ public sealed record HotkeyReport(IReadOnlyList<HotkeyState> Entries, HotkeySpec
     }
 
     /// <summary>
-    /// Текст уведомления о проблемах или null, если сообщать не о чем. Недоступный PrintScreen упоминается, только
-    /// когда из-за него включился запасной хоткей или не работает ничего: если работают другие сочетания, а PrintScreen
-    /// забирает Windows, пользователь видит это в настройках и не получает уведомление при каждом запуске.
+    /// Notification text about problems or null if nothing to report. Unavailable PrintScreen mentioned only
+    /// when because of it fallback hotkey enabled or nothing works: if other combos work and PrintScreen
+    /// is taken by Windows, user sees it in settings and doesn't get notification at every launch.
     /// </summary>
     public string? ProblemSummary()
     {
@@ -85,33 +85,33 @@ public sealed record HotkeyReport(IReadOnlyList<HotkeyState> Entries, HotkeySpec
     }
 }
 
-/// <summary>Результат <see cref="HotkeyManager.Apply"/>: при неудаче <see cref="Error"/> — запись, из-за которой всё откатили.</summary>
+/// <summary>Result of <see cref="HotkeyManager.Apply"/>: on failure <see cref="Error"/> — entry causing rollback.</summary>
 public sealed record HotkeyApplyResult(bool Success, HotkeyReport Report, HotkeyState? Error = null);
 
-/// <summary>Системные операции, которые нужны <see cref="HotkeyManager"/>; в тестах подменяются, чтобы не трогать реальные хоткеи.</summary>
+/// <summary>System operations needed by <see cref="HotkeyManager"/>; in tests substituted to not touch real hotkeys.</summary>
 public interface IHotkeyBackend
 {
-    /// <summary>RegisterHotKey; <paramref name="pressed"/> вызывается в UI-потоке.</summary>
+    /// <summary>RegisterHotKey; <paramref name="pressed"/> called in UI thread.</summary>
     bool TryRegister(HotkeySpec spec, Action pressed, out IDisposable? handle, out int win32Error);
 
-    /// <summary>Низкоуровневый хук Win+Shift+S; <paramref name="triggered"/> вызывается в UI-потоке.</summary>
+    /// <summary>Low-level Win+Shift+S hook; <paramref name="triggered"/> called in UI thread.</summary>
     bool TryInstallWinShiftSHook(Action triggered, out IDisposable? hook, out int win32Error);
 
-    /// <summary>Включён ли в Windows «PrintScreen открывает захват экрана».</summary>
+    /// <summary>Whether Windows “Open screen snipping with PrintScreen” is enabled.</summary>
     bool IsPrintScreenReservedBySystem();
 }
 
 /// <summary>
-/// Регистрирует все включённые хоткеи снимка: PrintScreen и свои сочетания — <c>RegisterHotKey</c> (каждый своим id),
-/// Win+Shift+S — низкоуровневым хуком. Вызывать из UI-потока.
+/// Registers all enabled screenshot hotkeys: PrintScreen and custom combos via <c>RegisterHotKey</c> (each own id),
+/// Win+Shift+S via low-level hook. Call from UI thread.
 /// <para>
-/// Запасной <see cref="HotkeySpec.Fallback"/> (<c>Ctrl+Alt+S</c>) регистрируется автоматически, если PrintScreen включён,
-/// но недоступен (системный захват Windows или ошибка регистрации), а ни один другой хоткей не работает.
+/// Fallback <see cref="HotkeySpec.Fallback"/> (<c>Ctrl+Alt+S</c>) registered automatically if PrintScreen enabled
+/// but unavailable (system Windows capture or registration error), and no other hotkey works.
 /// </para>
 /// <para>
-/// <see cref="Apply"/> атомарен в строгом режиме: уже зарегистрированные сочетания переиспользуются (повторная
-/// регистрация своего же сочетания дала бы 1409), новые регистрируются, и только если ни одна <em>вновь включённая</em>
-/// запись не провалилась, снимаются лишние. Иначе новые снимаются, прежнее состояние остаётся как было.
+/// <see cref="Apply"/> is atomic in strict mode: already registered combos reused (re-registering own combo would give 1409),
+/// New combinations are registered, and only if no <em>newly enabled</em> entry fails
+/// are extra registrations removed. Otherwise, new registrations are removed and the previous state is preserved.
 /// </para>
 /// </summary>
 public sealed class HotkeyManager(IHotkeyBackend backend, bool allowRegisterHotKey, bool allowHook) : IDisposable
@@ -120,21 +120,21 @@ public sealed class HotkeyManager(IHotkeyBackend backend, bool allowRegisterHotK
     private IDisposable? _hook;
     private IReadOnlyList<HotkeyBinding> _applied = [];
 
-    /// <summary>Нажат любой из хоткеев (в UI-потоке).</summary>
+    /// <summary>Any hotkey pressed (in UI thread).</summary>
     public event Action? Pressed;
 
-    /// <summary>Отчёт последнего успешного <see cref="Apply"/>.</summary>
+    /// <summary>Report of last successful <see cref="Apply"/>.</summary>
     public HotkeyReport Report { get; private set; } = HotkeyReport.Empty;
 
-    /// <summary>Применённый список (последний успешный <see cref="Apply"/>).</summary>
+    /// <summary>Applied list (last successful <see cref="Apply"/>).</summary>
     public IReadOnlyList<HotkeyBinding> Applied => _applied;
 
     public bool IsHookInstalled => _hook is not null;
 
     /// <param name="strict">
-    /// true (сохранение настроек, мастер): если вновь включённая запись не заработала (занята, ошибка, хук не поставился),
-    /// ничего не меняется и возвращается ошибка. Недоступный из-за Windows PrintScreen ошибкой не считается — работает
-    /// запасной хоткей. false (запуск): регистрируется всё, что получилось, проблемы — в отчёте.
+    /// true (settings save, wizard): if newly enabled entry didn't work (busy, error, hook not installed),
+    /// nothing changes and error returned. Windows-unavailable PrintScreen is not an error — fallback works.
+    /// false (startup): register everything that works, problems in report.
     /// </param>
     public HotkeyApplyResult Apply(IReadOnlyList<HotkeyBinding> bindings, bool strict)
     {
@@ -216,7 +216,7 @@ public sealed class HotkeyManager(IHotkeyBackend backend, bool allowRegisterHotK
         return new HotkeyState(b, HotkeyStatus.Failed, error);
     }
 
-    /// <summary>Первая вновь включённая запись, которая не заработала (Busy, Failed, Invalid).</summary>
+    /// <summary>First newly enabled entry that didn't work (Busy, Failed, Invalid).</summary>
     private HotkeyState? FirstNewFailure(List<HotkeyState> states)
         => states.FirstOrDefault(s => (s.Status is HotkeyStatus.Busy or HotkeyStatus.Failed or HotkeyStatus.Invalid)
                                       && !_applied.Any(a => a.Enabled && a.Kind == s.Binding.Kind && SameSpec(a, s.Binding)));

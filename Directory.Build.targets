@@ -1,6 +1,6 @@
 <Project>
   <ItemGroup>
-    <!-- WPF SDK убирает System.IO из implicit usings (конфликт с System.Windows.Shapes.Path); возвращаем -->
+    <!-- WPF SDK removes System.IO from implicit usings (conflict with System.Windows.Shapes.Path); we add it back -->
     <Using Include="System.IO" />
   </ItemGroup>
 </Project>

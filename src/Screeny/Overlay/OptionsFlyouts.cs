@@ -9,23 +9,23 @@ using Screeny.Overlay.Tools;
 
 namespace Screeny.Overlay;
 
-/// <summary>Что окно даёт всплывающим панелям: слой, рабочую область, сторону панели и рамку фигуры.</summary>
+/// <summary>What window gives flyouts: layer, work area, panel side and shape border.</summary>
 public interface IFlyoutHost
 {
-    /// <summary>Слой поверх всего (Canvas), в котором живут flyout'ы; в его координатах всё размещение.</summary>
+    /// <summary>Layer above everything (Canvas) where flyouts live; coordinates for placement.</summary>
     Canvas FlyoutLayer { get; }
-    /// <summary>Рабочая область в координатах слоя: flyout'ы за неё не выходят.</summary>
+    /// <summary>Work area in layer coordinates: flyouts don't leave it.</summary>
     Rect FlyoutWorkArea { get; }
-    /// <summary>Внешняя сторона панели — нижняя (панель под выделением): flyout'ы кнопок открываются вниз.</summary>
+    /// <summary>Panel outer side is bottom (panel below selection): button flyouts open down.</summary>
     bool ToolbarFlyoutsBelow { get; }
-    /// <summary>Видимая рамка фигуры в координатах слоя; null — фигура сейчас не видна.</summary>
+    /// <summary>Visible shape border in layer coordinates; null — shape not visible now.</summary>
     Rect? ShapeRect(Annotation shape);
 }
 
 /// <summary>
-/// Состояние, от которого зависят flyout'ы. <paramref name="Section"/> — секция инструмента или выбранной фигуры
-/// (null — параметров нет), <paramref name="Shape"/> — фигура, выбранная инструментом «Выбор» (её параметры
-/// показываются рядом с ней), <paramref name="ShapeHidden"/> — фигуру сейчас тащат.
+/// State flyouts depend on. <paramref name="Section"/> — tool or selected shape section
+/// (null — no options), <paramref name="Shape"/> — shape selected by Select tool (its options
+/// shown next to it), <paramref name="ShapeHidden"/> — shape currently dragged.
 /// </summary>
 public sealed record FlyoutState(bool Enabled, ToolKind Tool, OptionsSectionKind? Section, Annotation? Shape, bool ShapeHidden, bool BeautifyOn)
 {
@@ -33,22 +33,22 @@ public sealed record FlyoutState(bool Enabled, ToolKind Tool, OptionsSectionKind
 }
 
 /// <summary>
-/// Контекстные всплывающие панели параметров вместо нижней полосы:
+/// Contextual options flyouts instead of bottom strip:
 /// <list type="bullet">
-/// <item>оформление — у кнопки ✨, по наведению, пока оформление включено (и сразу после включения);</item>
-/// <item>параметры инструмента — у кнопки активного инструмента, у которого они есть, по наведению; при первом выборе
-/// такого инструмента в сессии открываются сами на <see cref="IntroMs"/> мс;</item>
-/// <item>параметры фигуры, выбранной инструментом «Выбор», — рядом с фигурой (над ней или под ней); пока фигуру тащат,
-/// панель скрыта.</item>
+/// <item>decoration — at ✨ button, on hover, while decoration enabled (and right after enabling);</item>
+/// <item>tool options — at active tool's button, if it has options, on hover; on first selection of such
+/// tool in session they open for <see cref="IntroMs"/> ms;</item>
+/// <item>options of shape selected by Select tool — next to shape (above/below); while dragged,
+/// panel hidden.</item>
 /// </list>
-/// Наведение с намерением: открыть через <see cref="HoverOpenMs"/> мс, закрыть через <see cref="HoverCloseMs"/> мс после
-/// ухода, пока курсор не на кнопке, не на панели и не в «мостике» между ними.
-/// Секции и события остаются прежними (<see cref="Options"/>, <see cref="Beautify"/>); меняется только место показа.
+/// Intentional hover: open after <see cref="HoverOpenMs"/> ms, close after <see cref="HoverCloseMs"/> ms after
+/// leaving, while cursor not on button, panel or “bridge” between them.
+/// Sections and events stay same (<see cref="Options"/>, <see cref="Beautify"/>); only display location changes.
 /// </summary>
 public sealed class OptionsFlyouts
 {
     public const int HoverOpenMs = 150, HoverCloseMs = 300, IntroMs = 1500;
-    /// <summary>Рамка выбора рисуется на 3 px шире фигуры — flyout отступает от неё.</summary>
+    /// <summary>Selection border drawn 3 px wider than shape — flyout steps away from it.</summary>
     private const double ShapeFrame = 4;
 
     private enum Anchor { None, Tool, Shape }
@@ -83,23 +83,23 @@ public sealed class OptionsFlyouts
         {
             flyout.MouseEnter += (_, _) => hover.FlyoutEnter();
             flyout.MouseLeave += (_, _) => hover.FlyoutLeave();
-            // Содержимое сменилось (другая секция) — размер другой: переставить, чтобы осталась по центру якоря.
+            // Content changed (other section) — different size: move to stay centered on anchor.
             flyout.SizeChanged += (_, _) => { if (flyout.IsOpen) Reposition(flyout); };
             flyout.Closing += () => RestoreTooltip(flyout);
         }
     }
 
-    /// <summary>Параметры инструмента или фигуры: события кликов и <see cref="OptionsPanelControl.Show"/>.</summary>
+    /// <summary>Tool or shape options: click events and <see cref="OptionsPanelControl.Show"/>.</summary>
     public OptionsPanelControl Options { get; } = new();
-    /// <summary>Параметры оформления: событие и <see cref="BeautifySection.Show"/>.</summary>
+    /// <summary>Decoration options: event and <see cref="BeautifySection.Show"/>.</summary>
     public BeautifySection Beautify { get; } = new();
     public FlyoutPanel OptionsFlyout { get; } = new();
     public FlyoutPanel BeautifyFlyout { get; } = new();
 
-    /// <summary>Flyout параметров сейчас стоит рядом с выбранной фигурой.</summary>
+    /// <summary>Options flyout currently next to selected shape.</summary>
     public bool OptionsAtShape => OptionsFlyout.IsOpen && _optionsAnchor == Anchor.Shape;
 
-    /// <summary>Добавить flyout'ы в слой окна. Без хоста они ведут состояние, но не показываются.</summary>
+    /// <summary>Add flyouts to window layer. Without host they manage state but don't show.</summary>
     public void Attach(IFlyoutHost host)
     {
         _host = host;
@@ -107,12 +107,12 @@ public sealed class OptionsFlyouts
         host.FlyoutLayer.Children.Add(BeautifyFlyout);
     }
 
-    /// <summary>Элемент — один из flyout'ов (клик по нему не должен уходить на холст).</summary>
+    /// <summary>Element is one of flyouts (click on it must not reach canvas).</summary>
     public bool Contains(DependencyObject? d) => ReferenceEquals(d, OptionsFlyout) || ReferenceEquals(d, BeautifyFlyout);
 
-    // ---------- Состояние ----------
+    // ---------- State ----------
 
-    /// <summary>Новое состояние редактора: открыть, закрыть или переставить flyout'ы.</summary>
+    /// <summary>New editor state: open, close or move flyouts.</summary>
     public void Update(FlyoutState state)
     {
         var prev = _state;
@@ -129,7 +129,7 @@ public sealed class OptionsFlyouts
         {
             _optionsHover.Cancel();
             if (state.ShapeHidden) { OptionsFlyout.Close(); return; }
-            // Другая фигура или переход от кнопки к фигуре — вылет заново из новой фигуры.
+            // Different shape or button→shape transition — fly out anew from new shape.
             if (OptionsFlyout.IsOpen && (_optionsAnchor != Anchor.Shape || !ReferenceEquals(prev.Shape, state.Shape))) OptionsFlyout.Close(animate: false);
             OpenOptionsAtShape();
             return;
@@ -143,13 +143,13 @@ public sealed class OptionsFlyouts
         }
     }
 
-    /// <summary>Выбран инструмент: при первом выборе инструмента с параметрами в сессии они открываются сами.</summary>
+    /// <summary>Tool selected: on first selection of tool with options in session they open automatically.</summary>
     public void OnToolPicked(ToolKind tool)
     {
         if (ToolAnchorButton is not { } button || _state.Tool != tool) return;
         if (!_introduced.Add(tool))
         {
-            // Инструмент выбрали кликом: курсор уже на его кнопке — дальше как при наведении.
+            // Tool selected by click: cursor already on its button — continue as hover.
             if (button.IsMouseOver) _optionsHover.AnchorEnter(button);
             return;
         }
@@ -157,16 +157,16 @@ public sealed class OptionsFlyouts
         StartIntro(OptionsFlyout);
     }
 
-    /// <summary>Оформление включили (кликом или B): его параметры открываются сразу, выключили — закрываются.</summary>
+    /// <summary>Decoration enabled (click or B): its options open immediately, disabled — close.</summary>
     public void OnBeautifyToggled(bool on)
     {
         if (!on || BeautifyAnchorButton is null) { BeautifyFlyout.Close(); return; }
         OpenBeautify();
-        // Курсор на кнопке — дальше решает наведение; нет (нажали B) — панель сама закроется, как подсказка.
+        // Cursor on button — hover decides; not (pressed B) — panel closes itself like tooltip.
         if (!BeautifyAnchorButton.IsMouseOver) StartIntro(BeautifyFlyout);
     }
 
-    /// <summary>Закрыть все flyout'ы (жест рамки, режим текста, закрытие окна).</summary>
+    /// <summary>Close all flyouts (border gesture, text mode, window close).</summary>
     public void CloseAll(bool animate = true)
     {
         _beautifyHover.Cancel();
@@ -177,22 +177,22 @@ public sealed class OptionsFlyouts
         _optionsAnchor = Anchor.None;
     }
 
-    /// <summary>Панель или вид сдвинулись (размещение панели, масштаб, размер окна): открытые flyout'ы переставляются.</summary>
+    /// <summary>Panel or view moved (panel placement, zoom, window size): open flyouts reposition.</summary>
     public void Reposition()
     {
         if (BeautifyFlyout.IsOpen) Reposition(BeautifyFlyout);
         if (OptionsFlyout.IsOpen) Reposition(OptionsFlyout);
     }
 
-    // ---------- Для тестового экземпляра ----------
+    // ---------- For test instance ----------
 
-    /// <summary>Открыть параметры оформления (сценарий): как после наведения.</summary>
+    /// <summary>Open decoration options (scenario): like after hover.</summary>
     public void DevOpenBeautify() { EndIntro(close: false); if (BeautifyAnchorButton is not null) OpenBeautify(); }
 
-    /// <summary>Открыть параметры инструмента у его кнопки (сценарий): как после наведения.</summary>
+    /// <summary>Open tool options at its button (scenario): like after hover.</summary>
     public void DevOpenTool() { EndIntro(close: false); if (ToolAnchorButton is not null) OpenOptionsAtTool(); }
 
-    /// <summary>Показать кадр открытия оформления через <paramref name="ms"/> мс и остановить анимацию (сценарий).</summary>
+    /// <summary>Show decoration opening frame after <paramref name="ms"/> ms and stop animation (scenario).</summary>
     public void DevFreezeBeautifyAt(double ms)
     {
         EndIntro(close: false);
@@ -200,7 +200,7 @@ public sealed class OptionsFlyouts
         if (ButtonPlacement(BeautifyFlyout, button) is { } p) BeautifyFlyout.FreezeOpeningAt(p.Origin, p.Below, ms);
     }
 
-    // ---------- Якоря ----------
+    // ---------- Anchors ----------
 
     private static bool ShapeAnchored(FlyoutState s) => s.Enabled && s.Shape is not null && s.Section is not null;
 
@@ -242,7 +242,7 @@ public sealed class OptionsFlyouts
         else flyout.Close();
     }
 
-    /// <param name="button">Кнопка-якорь: пока у неё открыт flyout, её подсказка не показывается (легла бы на flyout).</param>
+    /// <param name="button">Anchor button: while its flyout open, its tooltip not shown (would overlap flyout).</param>
     private void Show(FlyoutPanel flyout, (Point TopLeft, Point Origin, bool Below)? placement, FrameworkElement? button = null)
     {
         if (placement is not { } p) { flyout.Close(animate: false); return; }
@@ -263,19 +263,19 @@ public sealed class OptionsFlyouts
         button.ClearValue(ToolTipService.IsEnabledProperty);
     }
 
-    /// <summary>Подсказка кнопки отключена, пока у неё открыт flyout.</summary>
+    /// <summary>Button tooltip disabled while its flyout open.</summary>
     public static bool TooltipMuted(DependencyObject button) => !ToolTipService.GetIsEnabled(button);
 
-    /// <summary>Flyout кнопки панели: якорь — колонка кнопки во всю высоту панели, чтобы flyout был снаружи панели.</summary>
+    /// <summary>Panel button flyout: anchor is button column full panel height, so flyout outside panel.</summary>
     private (Point TopLeft, Point Origin, bool Below)? ButtonPlacement(FlyoutPanel flyout, FrameworkElement button)
     {
         if (_host is null) return null;
-        _host.FlyoutLayer.UpdateLayout(); // панель могли только что передвинуть
+        _host.FlyoutLayer.UpdateLayout(); // panel could have just moved
         if (BoundsInLayer(_toolbar) is not { } bar || BoundsInLayer(button) is not { } btn) return null;
         return Placement(flyout, new Rect(btn.Left, bar.Top, btn.Width, bar.Height), _host.ToolbarFlyoutsBelow, bar);
     }
 
-    /// <summary>Flyout фигуры: над её рамкой выбора (нет места — под ней), не на панели.</summary>
+    /// <summary>Shape flyout: above its selection border (no space — below), not on panel.</summary>
     private (Point TopLeft, Point Origin, bool Below)? ShapePlacement()
     {
         if (_host is null || _state.Shape is not { } shape || _host.ShapeRect(shape) is not { } rect) return null;
@@ -293,7 +293,7 @@ public sealed class OptionsFlyouts
         return (topLeft, new Point(Math.Clamp(ox, 0, 1), p.Below ? 0 : 1), p.Below);
     }
 
-    /// <summary>Размер flyout'а; скрытый (Collapsed) измеряется как Hidden — у Collapsed размер нулевой.</summary>
+    /// <summary>Flyout size; hidden (Collapsed) measured as Hidden — Collapsed has zero size.</summary>
     private static Size Measure(FlyoutPanel flyout)
     {
         bool collapsed = flyout.Visibility == Visibility.Collapsed;
@@ -305,8 +305,8 @@ public sealed class OptionsFlyouts
     }
 
     /// <summary>
-    /// Элемент и все его предки видимы (Visibility). Не IsVisible: тот ещё требует окна на экране, а размещение
-    /// должно работать и для дерева без окна (тесты).
+    /// Element and all ancestors visible (Visibility). Not IsVisible: that requires window on screen, placement
+    /// must work for windowless tree too (tests).
     /// </summary>
     private static bool Shown(DependencyObject element)
     {
@@ -319,10 +319,10 @@ public sealed class OptionsFlyouts
     {
         if (_host is null || !Shown(element)) return null;
         try { return element.TransformToVisual(_host.FlyoutLayer).TransformBounds(new Rect(element.RenderSize)); }
-        catch (InvalidOperationException) { return null; } // не в одном дереве с слоем
+        catch (InvalidOperationException) { return null; } // not in same tree as layer
     }
 
-    // ---------- Подсказка при первом показе ----------
+    // ---------- First-show tooltip ----------
 
     private void StartIntro(FlyoutPanel flyout)
     {
@@ -331,7 +331,7 @@ public sealed class OptionsFlyouts
         _introTimer.Start();
     }
 
-    /// <summary>Конец подсказки: панель закрывается, если курсор не на ней и не на кнопке (иначе ею управляет наведение).</summary>
+    /// <summary>Tooltip end: panel closes if cursor not on it and not on button (else hover manages).</summary>
     private void EndIntro(bool close = true)
     {
         _introTimer.Stop();
@@ -343,9 +343,9 @@ public sealed class OptionsFlyouts
     }
 
     /// <summary>
-    /// Наведение с намерением для пары «кнопка — flyout»: открыть через <see cref="HoverOpenMs"/> мс на кнопке, закрыть
-    /// через <see cref="HoverCloseMs"/> мс после ухода. Решение о закрытии принимается по положению курсора в момент
-    /// срабатывания таймера (кнопка ∪ мостик ∪ flyout), а не по порядку событий MouseEnter/MouseLeave соседних элементов.
+    /// Intentional hover for “button — flyout” pair: open after <see cref="HoverOpenMs"/> ms on button, close
+    /// after <see cref="HoverCloseMs"/> ms after leaving. Close decision by cursor position at timer
+    /// firing (button ∪ bridge ∪ flyout), not event order of neighboring MouseEnter/MouseLeave.
     /// </summary>
     private sealed class HoverIntent
     {
@@ -369,7 +369,7 @@ public sealed class OptionsFlyouts
                 _close.Stop();
                 if (!_flyout.IsOpen) return;
                 if (PointerInside()) { _close.Start(); return; }
-                if (_owner._introFlyout == _flyout) return; // подсказка закроется сама
+                if (_owner._introFlyout == _flyout) return; // tooltip will close itself
                 _flyout.Close();
             };
         }
@@ -395,7 +395,7 @@ public sealed class OptionsFlyouts
 
         private void RestartClose() { _close.Stop(); _close.Start(); }
 
-        /// <summary>Курсор на кнопке, на flyout'е или в зазоре между ними (невидимый «мостик» шириной в кнопку).</summary>
+        /// <summary>Cursor on button, flyout or gap between (invisible “bridge” of button width).</summary>
         public bool PointerInside()
         {
             if (_flyout.IsMouseOver) return true;
@@ -409,7 +409,7 @@ public sealed class OptionsFlyouts
             if (double.IsNaN(left) || double.IsNaN(top)) return false;
             var fly = new Rect(left, top, _flyout.ActualWidth, _flyout.ActualHeight);
             if (fly.Contains(p)) return true;
-            // От кнопки через край панели и зазор до flyout'а, шириной в кнопку.
+            // From button through panel edge and gap to flyout, button width.
             var bridge = _flyout.Below ? new Rect(b.Left - 4, b.Top, b.Width + 8, Math.Max(0, fly.Top - b.Top))
                                        : new Rect(b.Left - 4, fly.Bottom, b.Width + 8, Math.Max(0, b.Bottom - fly.Bottom));
             return bridge.Contains(p);

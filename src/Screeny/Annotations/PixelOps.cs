@@ -1,6 +1,6 @@
 namespace Screeny.Annotations;
 
-/// <summary>Операции над BGRA32-буфером (stride = width*4), на месте.</summary>
+/// <summary>Operations on BGRA32 buffer (stride = width*4), in place.</summary>
 public static class PixelOps
 {
     public static void Pixelate(byte[] px, int width, int height, int blockSize)
@@ -20,10 +20,10 @@ public static class PixelOps
     }
 
     /// <summary>
-    /// Два прохода (горизонталь + вертикаль) усреднения окном 2r+1; края — clamp.
-    /// Скользящая сумма: O(w·h) независимо от радиуса.
+    /// Two passes (horizontal + vertical) averaging with window 2r+1; edges — clamp.
+    /// Sliding sum: O(w·h) regardless of radius.
     /// </summary>
-    /// <param name="scratch">Временный буфер не короче width*height*4 для повторного использования между вызовами; null — выделить.</param>
+    /// <param name="scratch">Temporary buffer at least width*height*4 for reuse between calls; null — allocate.</param>
     public static void BoxBlur(byte[] px, int width, int height, int radius, byte[]? scratch = null)
     {
         if (radius <= 0 || width <= 0 || height <= 0) return;
@@ -56,7 +56,7 @@ public static class PixelOps
         }
     }
 
-    /// <summary>Построчно: суммы по столбцам в int[w*4] — последовательный доступ к памяти.</summary>
+    /// <summary>Row by row: column sums into int[w*4] — sequential memory access.</summary>
     private static void VerticalPass(byte[] src, byte[] dst, int w, int h, int r)
     {
         int n = 2 * r + 1, last = h - 1, rowLen = w * 4;

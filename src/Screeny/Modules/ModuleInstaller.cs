@@ -6,14 +6,14 @@ using Screeny.Logging;
 
 namespace Screeny.Modules;
 
-/// <summary>Откуда берётся архив модуля.</summary>
+/// <summary>Where module archive comes from.</summary>
 public interface IModuleSource
 {
-    /// <summary>Поток архива и его длина, если известна.</summary>
+    /// <summary>Archive stream and its length if known.</summary>
     Task<(Stream Body, long? Length)> OpenAsync(CancellationToken ct);
 }
 
-/// <summary>Архив по HTTP (релиз GitHub).</summary>
+/// <summary>Archive over HTTP (GitHub release).</summary>
 public sealed class HttpModuleSource(HttpClient http, Uri url) : IModuleSource
 {
     public Uri Url => url;
@@ -31,7 +31,7 @@ public sealed class HttpModuleSource(HttpClient http, Uri url) : IModuleSource
     }
 }
 
-/// <summary>Архив из локальной папки (<c>--dev --module-source &lt;папка&gt;</c>): в сеть не ходит.</summary>
+/// <summary>Archive from local folder (<c>--dev --module-source &lt;folder&gt;</c>): no network.</summary>
 public sealed class FolderModuleSource(string folder, string fileName) : IModuleSource
 {
     public Task<(Stream Body, long? Length)> OpenAsync(CancellationToken ct)
@@ -45,33 +45,33 @@ public sealed class FolderModuleSource(string folder, string fileName) : IModule
 
 public enum ModuleSourceKind { None, Github, Folder }
 
-/// <summary>Ошибка установки, понятная пользователю (показывается в настройках и в уведомлении).</summary>
+/// <summary>Installation error understandable to user (shown in settings and notification).</summary>
 public sealed class ModuleInstallException(string message) : Exception(message);
 
-/// <summary>Что ставится: id, версия и ожидаемые SHA256 архива и его <c>module.json</c> (зашиты в приложении, см.
-/// <see cref="OcrModule"/>; null у манифеста — не проверять, только для тестов).</summary>
+/// <summary>What is installed: id, version and expected SHA256 of archive and its <c>module.json</c> (hardcoded, see
+/// <see cref="OcrModule"/>; null manifest — don't check, only for tests).</summary>
 public sealed record ModuleSpec(string Id, int Version, string ZipSha256, string? ManifestSha256 = null,
     long MaxZipBytes = 200_000_000, long MaxUnpackedBytes = 400_000_000)
 {
     public string FolderName => $"{Id}-{Version}";
 
-    /// <summary>Сколько ждать ответа сервера и каждого следующего куска данных. Сервер замолчал дольше — «нет связи»,
-    /// а не вечное ожидание (у ответа с <c>ResponseHeadersRead</c> своего таймаута на чтение нет).</summary>
+    /// <summary>How long to wait for server response and each next data chunk. Server silent longer — “no connection”,
+    /// not eternal wait (response with <c>ResponseHeadersRead</c> has no read timeout).</summary>
     public TimeSpan ReadTimeout { get; init; } = TimeSpan.FromSeconds(30);
 }
 
 public enum RemoveResult { Removed, NotInstalled, PendingRestart }
 
 /// <summary>
-/// Установка модуля в <c>&lt;root&gt;\&lt;id&gt;-&lt;версия&gt;\</c>: скачать во временный файл (с прогрессом и отменой) → сверить
-/// SHA256 архива с зашитым → распаковать во временную папку, отвергая пути за её пределами (zip-slip) и абсолютные →
-/// сверить файлы с <c>module.json</c> → переименовать временную папку в итоговую. Временные файлы — в том же корне
-/// (тот же том, переименование атомарное) и удаляются при любой ошибке и отмене. Загружать что-либо из модуля можно
-/// только после успешной установки.
+/// Module install into <c>&lt;root&gt;\&lt;id&gt;-&lt;version&gt;\</c>: download to temp file (with progress and cancel) → verify
+/// archive SHA256 against hardcoded → unpack to temp folder, rejecting paths outside it (zip-slip) and absolute →
+/// verify files against <c>module.json</c> → rename temp folder to final. Temp files in same root
+/// (same volume, atomic rename) and removed on any error/cancel. Loading anything from module allowed
+/// only after successful install.
 /// </summary>
 public sealed class ModuleInstaller(string root, ModuleSpec spec)
 {
-    /// <summary>Метка в папке модуля: удалить при следующем запуске (файлы держит загруженная библиотека).</summary>
+    /// <summary>Marker in module folder: delete at next launch (files held by loaded library).</summary>
     public const string RemovedMarker = ".removed";
     private const string DownloadPrefix = ".download-", StagingPrefix = ".staging-";
 
@@ -79,13 +79,13 @@ public sealed class ModuleInstaller(string root, ModuleSpec spec)
     public ModuleSpec Spec => spec;
     public string TargetFolder => Path.Combine(root, spec.FolderName);
 
-    /// <summary>Источник по ключам запуска: <c>--module-source</c> (только dev) — папка; обычный запуск — GitHub;
-    /// тестовый экземпляр без папки — ниоткуда (как у обновлений: dev-запуски не ходят в сеть).</summary>
+    /// <summary>Source by startup keys: <c>--module-source</c> (only dev) — folder; normal launch — GitHub;
+    /// test instance without folder — nowhere (like updates: dev runs don't go to network).</summary>
     public static ModuleSourceKind ChooseSource(bool isDev, string? localSource)
         => localSource is not null ? ModuleSourceKind.Folder : isDev ? ModuleSourceKind.None : ModuleSourceKind.Github;
 
-    /// <summary>Установленная версия модуля: <paramref name="preferred"/>, если она есть, иначе самая новая; null — нет ни одной.
-    /// Файлы здесь не хешируются (это делает загрузка), проверяется только <c>module.json</c>.</summary>
+    /// <summary>Installed module version: <paramref name="preferred"/>, if present, else newest; null — none.
+    /// Files not hashed here (download does), only <c>module.json</c> checked.</summary>
     public static int? DetectInstalled(string root, string id, int preferred)
     {
         var versions = InstalledVersions(root, id);
@@ -106,8 +106,8 @@ public sealed class ModuleInstaller(string root, ModuleSpec spec)
     }
 
     /// <summary>
-    /// Полный путь для записи архива <paramref name="name"/> внутри <paramref name="folder"/> или null, если имя абсолютное,
-    /// с диском, с «..» или иначе выходит за пределы папки.
+    /// Full path for writing archive <paramref name="name"/> inside <paramref name="folder"/> or null if name absolute,
+    /// has drive, has “..” or otherwise escapes folder.
     /// </summary>
     public static string? SafeTarget(string folder, string name)
     {
@@ -123,9 +123,9 @@ public sealed class ModuleInstaller(string root, ModuleSpec spec)
     public static string NoConnection => Loc.T("Module.NoConnection");
 
     /// <summary>
-    /// Скачать и поставить. <paramref name="progress"/> — проценты загрузки (0–100). Возвращает папку модуля.
-    /// Временный архив открыт без общего доступа от первой записи до конца распаковки: между проверкой хеша и распаковкой
-    /// его никто не подменит.
+    /// Download and install. <paramref name="progress"/> — download percent (0–100). Returns module folder.
+    /// Temp archive open without sharing from first write to end of unpack: between hash check and unpack
+    /// nobody can swap it.
     /// </summary>
     public async Task<string> InstallAsync(IModuleSource source, Action<int>? progress, CancellationToken ct)
     {
@@ -154,7 +154,7 @@ public sealed class ModuleInstaller(string root, ModuleSpec spec)
                 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
                 {
                     Log.Error($"Previous module folder is in use: {target}", ex);
-                    Mark(target); // часть файлов могла уже удалиться: такую папку не считаем установленной
+                    Mark(target); // some files may already be deleted: such folder not counted as installed
                     throw new ModuleInstallException(Loc.T("Module.OldFilesBusy"));
                 }
             }
@@ -171,7 +171,7 @@ public sealed class ModuleInstaller(string root, ModuleSpec spec)
 
     private async Task<string> DownloadAsync(IModuleSource source, Stream output, Action<int>? progress, CancellationToken ct)
     {
-        // Таймаут бездействия: ответ сервера и каждый кусок данных должны прийти за ReadTimeout, отсчёт — заново после куска.
+        // Idle timeout: server response and each data chunk must arrive within ReadTimeout, countdown restarts after chunk.
         using var idle = CancellationTokenSource.CreateLinkedTokenSource(ct);
         idle.CancelAfter(spec.ReadTimeout);
         try
@@ -206,8 +206,8 @@ public sealed class ModuleInstaller(string root, ModuleSpec spec)
     }
 
     /// <summary>
-    /// Переименование распакованной папки в итоговую. Антивирус проверяет только что записанные DLL и держит их открытыми —
-    /// переименование на это время не проходит, поэтому несколько попыток с паузой; не вышло — понятное сообщение.
+    /// Renames unpacked folder to final. Antivirus checks just-written DLLs and holds them open —
+    /// rename fails during that, so several attempts with pause; failed — clear message.
     /// </summary>
     public static void MoveWithRetry(string from, string to, int attempts = 5, int delayMs = 200)
     {
@@ -226,7 +226,7 @@ public sealed class ModuleInstaller(string root, ModuleSpec spec)
         }
     }
 
-    /// <summary>Распаковка с защитой от zip-slip: каждый путь проверяется <see cref="SafeTarget"/>, общий размер ограничен.</summary>
+    /// <summary>Unpack with zip-slip protection: each path checked by <see cref="SafeTarget"/>, total size limited.</summary>
     public void Extract(Stream zip, string staging)
     {
         Directory.CreateDirectory(staging);
@@ -244,9 +244,9 @@ public sealed class ModuleInstaller(string root, ModuleSpec spec)
     }
 
     /// <summary>
-    /// Удалить модуль. Папка, из которой нативная библиотека уже загружена в этот процесс (<paramref name="inUse"/>), не
-    /// трогается, а помечается <see cref="RemovedMarker"/>: модуль считается удалённым сразу, а файлы стирает
-    /// <see cref="CleanupOnStartup"/>. Так же — если удалить не вышло по другой причине.
+    /// Delete module. Folder where native library is loaded into this process (<paramref name="inUse"/>) is not
+    /// touched but marked <see cref="RemovedMarker"/>: module considered deleted immediately, files removed by
+    /// <see cref="CleanupOnStartup"/>. Same if deletion fails for other reason.
     /// </summary>
     public RemoveResult Remove(Func<string, bool>? inUse = null)
     {
@@ -262,7 +262,7 @@ public sealed class ModuleInstaller(string root, ModuleSpec spec)
         return result;
     }
 
-    /// <summary>Отменить отложенное удаление: снять метку, если файлы нужной версии целы. false — целых файлов нет.</summary>
+    /// <summary>Cancel pending deletion: remove marker if files of needed version intact. false — no intact files.</summary>
     public bool Restore()
     {
         var marker = Path.Combine(TargetFolder, RemovedMarker);
@@ -273,10 +273,10 @@ public sealed class ModuleInstaller(string root, ModuleSpec spec)
         return false;
     }
 
-    /// <summary>Отложенное удаление есть: папка нужной версии помечена, но ещё не стёрта.</summary>
+    /// <summary>Pending deletion exists: folder of needed version marked but not yet erased.</summary>
     public bool RemovalPending => File.Exists(Path.Combine(TargetFolder, RemovedMarker));
 
-    /// <summary>При запуске: стереть помеченные папки и остатки прерванных установок.</summary>
+    /// <summary>At startup: erase marked folders and remnants of interrupted installs.</summary>
     public void CleanupOnStartup()
     {
         if (!Directory.Exists(root)) return;
@@ -293,9 +293,9 @@ public sealed class ModuleInstaller(string root, ModuleSpec spec)
     }
 
     /// <summary>
-    /// Удаление Screeny (хук Velopack): стереть всю папку модулей. Не вышло целиком (модуль держит работающая портативная
-    /// копия — папка у них общая) — стереть, что можно, а оставшиеся папки модулей пометить <see cref="RemovedMarker"/>:
-    /// следующий запуск любой копии их уберёт и считать установленными не будет.
+    /// Uninstall Screeny (Velopack hook): erase entire modules folder. If not fully (module held by running portable
+    /// copy — shared folder) — erase what's possible, mark remaining module folders <see cref="RemovedMarker"/>:
+    /// next launch of any copy removes them and won't count as installed.
     /// </summary>
     public static void DeleteRootOrMark(string root)
     {
@@ -307,7 +307,7 @@ public sealed class ModuleInstaller(string root, ModuleSpec spec)
             else TryDeleteDir(dir);
     }
 
-    /// <summary>После установки новой версии прежние не нужны.</summary>
+    /// <summary>After installing new version previous ones not needed.</summary>
     private void RemoveOtherVersions()
     {
         foreach (var v in InstalledVersions(root, spec.Id).Where(v => v != spec.Version))

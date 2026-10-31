@@ -1,41 +1,41 @@
 namespace Screeny.Modules;
 
 /// <summary>
-/// Скачиваемый модуль точного распознавания текста (PaddleOCR PP-OCRv5 на ONNX Runtime). Кто его не включал, ничего
-/// не скачивает, и exe остаётся прежнего размера. В модуле только данные и нативный рантайм: модели <c>det.onnx</c>
-/// (ch_PP-OCRv5_det_mobile) и <c>rec.onnx</c> (cyrillic_PP-OCRv5_rec_mobile), <c>onnxruntime.dll</c> 1.31.0 и рантайм
-/// Visual C++, лицензии и <c>module.json</c> с SHA256 каждого файла. Вся обработка — в приложении (<c>Ocr/Paddle</c>),
-/// поэтому новая версия модуля нужна редко.
+/// Downloadable precise text recognition module (PaddleOCR PP-OCRv5 on ONNX Runtime). Who didn't enable it downloads nothing,
+/// and exe stays same size. Module has only data and native runtime: models <c>det.onnx</c>
+/// (ch_PP-OCRv5_det_mobile) and <c>rec.onnx</c> (cyrillic_PP-OCRv5_rec_mobile), <c>onnxruntime.dll</c> 1.31.0 and runtime
+/// Visual C++, licenses and <c>module.json</c> with SHA256 of each file. All processing in app (<c>Ocr/Paddle</c>),
+/// so new module version rarely needed.
 /// <para>
-/// Версия, адрес и SHA256 архива зашиты здесь: приложение принимает только этот архив. Новая версия модуля —
-/// <c>tools/pack-ocr-module.ps1 -Version N</c>, затем <see cref="Version"/>, <see cref="ZipSha256"/>,
-/// <see cref="ManifestSha256"/> и <see cref="ZipSize"/> по выводу скрипта (см. tools/ocr-module/README.md). Архив лежит в релизе GitHub
-/// со своим тегом <c>ocr-module-N</c>, не связанным с версиями приложения.
+/// Version, address and SHA256 of archive hardcoded here: app accepts only this archive. New module version —
+/// <c>tools/pack-ocr-module.ps1 -Version N</c>, then <see cref="Version"/>, <see cref="ZipSha256"/>,
+/// <see cref="ManifestSha256"/> and <see cref="ZipSize"/> from script output (see tools/ocr-module/README.md). Archive in GitHub release
+/// with its own tag <c>ocr-module-N</c>, unrelated to app versions.
 /// </para>
 /// </summary>
 public static class OcrModule
 {
     public const string Id = "ocr-paddle";
-    /// <summary>Версия модуля, которая нужна этой сборке приложения.</summary>
+    /// <summary>Module version needed by this app build.</summary>
     public const int Version = 1;
     public const string ZipSha256 = "048d3afbebfaac00f5e617449f8b42b2bb1a0940a4fd7aff49f4a2c8cd29fa0c";
-    /// <summary>SHA256 <c>module.json</c> из этого архива: по нему проверяются уже установленные файлы (манифест на диске
-    /// сам по себе доверия не заслуживает).</summary>
+    /// <summary>SHA256 of <c>module.json</c> from this archive: installed files checked against it (manifest on disk
+    /// alone is untrustworthy).</summary>
     public const string ManifestSha256 = "39067fddbf4bcd286694536a82194552eeb442ec7ebd44ceb351ae0594ac760f";
-    /// <summary>Размер архива в байтах: для подписи «Скачать (N МБ)» и проверки длины ответа.</summary>
+    /// <summary>Archive size in bytes: for “Download (N MB)” label and response length check.</summary>
     public const long ZipSize = 31_290_305;
 
     public static string ZipName(int version) => $"Screeny-OcrModule-{version}.zip";
     public static Uri DownloadUrl(int version) => new($"https://github.com/DontIgnore/Screeny/releases/download/ocr-module-{version}/{ZipName(version)}");
     public static string FolderName(int version) => $"{Id}-{version}";
 
-    /// <summary>Что ставит и проверяет приложение.</summary>
+    /// <summary>What app installs and verifies.</summary>
     public static ModuleSpec Spec => new(Id, Version, ZipSha256, ManifestSha256);
 
     /// <summary>
-    /// Папка модулей: <c>%LocalAppData%\Screeny\Modules</c> — рядом с историей, но не в папке установки Velopack, поэтому
-    /// переживает обновления приложения; портативная версия пользуется той же. Тестовый экземпляр — своя папка
-    /// <c>%LocalAppData%\Screeny\Dev\Modules</c>, как и своя история.
+    /// Modules folder: <c>%LocalAppData%\Screeny\Modules</c> — near history but not in Velopack install folder, so
+    /// survives app updates; portable version uses same. Test instance has own folder
+    /// <c>%LocalAppData%\Screeny\Dev\Modules</c>, like own history.
     /// </summary>
     public static string ModulesRoot(bool dev)
     {
@@ -43,6 +43,6 @@ public static class OcrModule
         return dev ? Path.Combine(local, "Screeny", "Dev", "Modules") : Path.Combine(local, "Screeny", "Modules");
     }
 
-    /// <summary>Подпись размера: «30 МБ» — в двоичных мегабайтах, как размер файла показывает Проводник.</summary>
+    /// <summary>Size label: “30 MB” — binary megabytes, like Explorer shows file size.</summary>
     public static string SizeText => Localization.Loc.F("Units.Megabytes", Math.Max(1, (int)Math.Round(ZipSize / 1048576.0)));
 }

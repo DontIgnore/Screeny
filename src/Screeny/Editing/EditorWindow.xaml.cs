@@ -18,26 +18,26 @@ using Screeny.Themes;
 
 namespace Screeny.Editing;
 
-/// <summary>Что окну редактора нужно от приложения.</summary>
-/// <param name="Save">Фоновое кодирование и запись истории и выбранного файла.</param>
-/// <param name="Pin">Закрепить картинку на экране.</param>
-/// <param name="IsShuttingDown">Приложение завершается: не спрашивать про несохранённые пометки.</param>
+/// <summary>What editor window needs from application.</summary>
+/// <param name="Save">Background encoding and history/file save.</param>
+/// <param name="Pin">Pin image to screen.</param>
+/// <param name="IsShuttingDown">Application exiting: don't ask about unsaved marks.</param>
 public sealed record EditorServices(Func<BitmapSource, string, byte[]?, string?, Task<ImageSaveResult>> Save,
     Action<BitmapSource> Pin, Func<int> ReserveClipboard, Func<int, bool> IsCurrentClipboard,
     Action<Task> Track, Func<bool> IsShuttingDown);
 
 /// <summary>
-/// Повторное редактирование снимка из истории: тот же редактор аннотаций, что в оверлее, на холсте с масштабом.
-/// «Копировать», «Сохранить как…» и «Закрепить» добавляют новую запись в историю; исходная не меняется.
+/// Re-editing screenshot from history: same annotation editor as in overlay, on zoomable canvas.
+/// “Copy”, “Save As…” and “Pin” add new history entry; original unchanged.
 /// <para>
-/// Режим «Оригинал» (только если у записи есть <c>.orig.png</c>) — просмотр чистого снимка: пометки скрыты, рисовать
-/// нельзя, а «Начать заново с оригинала» удаляет пометки одним шагом undo и возвращает к рисованию. Действия в этом
-/// режиме сохраняют то, что видно: снимок без пометок (и пустой документ пометок у новой записи).
+/// “Original” mode (only if entry has <c>.orig.png</c>) — viewing clean screenshot: marks hidden, drawing
+/// disabled, and “Start over from original” deletes marks as one undo step and returns to drawing. Actions in this
+/// mode save what is visible: screenshot without marks (and empty marks document for new entry).
 /// </para>
 /// </summary>
 public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyoutHost
 {
-    private const double FitMargin = 24;      // поля вокруг снимка в режиме «вписать», DIP
+    private const double FitMargin = 24;      // margins around screenshot in “fit” mode, DIP
     private const double ZoomStep = 1.25;
     private const double MaxDeviceZoom = 8;   // 800 %
 
@@ -47,10 +47,10 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
     private readonly AnnotationEditor _editor;
     private readonly int _w, _h;
 
-    private double _zoom = 1;                 // DIP на пиксель снимка
-    private Vector _offset;                   // левый верхний угол снимка во вьюпорте, DIP
-    private bool _fit = true;                 // масштаб следует за размером окна
-    private Point? _panFrom;                  // панорама: точка нажатия во вьюпорте
+    private double _zoom = 1;                 // DIP per screenshot pixel
+    private Vector _offset;                   // top-left corner of screenshot in viewport, DIP
+    private bool _fit = true;                 // scale follows window size
+    private Point? _panFrom;                  // pan: press point in viewport
     private Vector _panOffset;
     private bool _spaceDown;
     private bool _originalMode;
@@ -73,11 +73,11 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
             layer.Width = _w;
             layer.Height = _h;
         }
-        // Фигуры документа из оверлея могут выходить за регион: на холсте видно ровно то, что попадёт в картинку.
+        // Document shapes from overlay may extend beyond region: canvas shows exactly what will enter image.
         Annotations.Clip = new RectangleGeometry(new Rect(0, 0, _w, _h));
         Annotations.Document.Load(session.Annotations);
 
-        // Оформление — из записи истории; настройки оверлея окно не трогает.
+        // Decoration from history entry; overlay settings untouched by window.
         var beautify = session.Beautify is { } b
             ? new BeautifyState(true, b, Persist: false)
             : new BeautifyState(false, BeautifyOptions.FromSettings(settings), Persist: false);
@@ -114,13 +114,13 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
     private bool Dirty => Document.Undo.Revision != _savedRevision || _beautifyEdits != _savedBeautifyEdits;
     private double Dpi => VisualTreeHelper.GetDpi(this).DpiScaleX;
 
-    /// <summary>Функции включили или выключили в настройках, пока окно открыто: панель и клавиши — по новым.</summary>
+    /// <summary>Features enabled/disabled in settings while window open: panel and keys per new ones.</summary>
     public void ApplyFeatures() => _editor.ApplyFeatures();
 
     /// <summary>
-    /// Тестовый запуск (<c>--dev --edit x.png --scenario имя</c>): <c>original</c> — сразу в режиме «Оригинал»,
-    /// <c>pin</c> — после открытия «Закрепить» (новая запись истории без буфера обмена), <c>select</c> — выбрана
-    /// первая фигура и есть измерение линейки.
+    /// Test launch (<c>--dev --edit x.png --scenario name</c>): <c>original</c> — immediately in “Original” mode,
+    /// <c>pin</c> — after open “Pin” (new history entry without clipboard), <c>select</c> — selected
+    /// first shape and ruler measurement exists.
     /// </summary>
     public void ApplyDevScenario(string? scenario)
     {
@@ -128,8 +128,8 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
         if (scenario == "pin") Dispatcher.BeginInvoke(() => Run(CaptureAction.Pin, null), DispatcherPriority.ApplicationIdle);
         if (scenario == "guides")
         {
-            // Масштаб 150 % и перетаскивание «Выбором» посреди жеста: правая рамка почти выровнена по верху левой —
-            // видна направляющая в 1 пиксель устройства (жест не завершён, мышь не захвачена: только для скриншота).
+            // Scale 150% and dragging with Select mid-gesture: right border almost aligned with top of left —
+            // guide visible at 1 device pixel (gesture unfinished, mouse not captured: only for screenshot).
             var style = new AnnotationStyle(ToolbarControl.Palette[0], 3);
             Document.Add(new Screeny.Annotations.Shapes.RectAnnotation(new Rect(_w * 0.1, _h * 0.2, _w * 0.25, _h * 0.3), style));
             var moving = new Screeny.Annotations.Shapes.RectAnnotation(new Rect(_w * 0.45, _h * 0.4, _w * 0.2, _h * 0.25), style with { Color = ToolbarControl.Palette[4] });
@@ -142,7 +142,7 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
                 if (_editor.BeginGesture(grip)) _editor.MoveGesture(grip + new Vector(0, _h * 0.2 - moving.Rect.Top + 3));
             }, DispatcherPriority.ApplicationIdle);
         }
-        // Flyout'ы параметров: оформление у ✨, «Прямоугольник» у его кнопки, выбранная фигура рядом с ней, рамка толстого карандаша.
+        // Options flyouts: decoration near ✨, “Rectangle” near its button, selected shape next to it, thick pencil border.
         if (scenario is "flyout-beautify")
         {
             _editor.SetBeautify(true);
@@ -170,7 +170,7 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
         }
         if (scenario == "select" && Document.Items.Count > 0 && _settings.ToolAllowed(ToolKind.Ruler))
         {
-            // Выбрана первая фигура и измерение линейкой поперёк снимка: рамка и подпись при масштабе «вписать».
+            // First shape selected and ruler measurement across screenshot: border and label at “fit” scale.
             Document.Selected = Document.Items[0];
             Document.NotifyChanged();
             _editor.Tool(ToolKind.Ruler).Down(new Point(_w * 0.1, _h * 0.8), Document, _editor.CurrentStyle);
@@ -178,7 +178,7 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
         }
     }
 
-    /// <summary>Карандаш толщиной 20 с резкими изгибами через весь снимок.</summary>
+    /// <summary>Pencil thickness 20 with sharp turns across whole screenshot.</summary>
     private Screeny.Annotations.Shapes.PenAnnotation DevPen()
     {
         var pen = new Screeny.Annotations.Shapes.PenAnnotation(new Point(_w * 0.1, _h * 0.25), new AnnotationStyle(ToolbarControl.Palette[0], 20));
@@ -187,10 +187,10 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
         return pen;
     }
 
-    // ---------- Масштаб и панорама ----------
+    // ---------- Scale and pan ----------
 
-    /// <summary>«Вписать»: целиком в окне, но не крупнее 100 % (мелкий снимок не растягивается). Оформление не учитывается:
-    /// превью нет, и включение оформления холст не сдвигает.</summary>
+    /// <summary>“Fit”: whole in window but not larger than 100% (small screenshot not stretched). Decoration not considered:
+    /// no preview, enabling decoration doesn't move canvas.</summary>
     private double FitZoom()
     {
         double vw = Math.Max(1, Viewport.ActualWidth - 2 * FitMargin), vh = Math.Max(1, Viewport.ActualHeight - 2 * FitMargin);
@@ -205,34 +205,34 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
         ApplyView();
     }
 
-    /// <summary>Меньше вьюпорта — по центру; больше — без пустых полей за краем.</summary>
+    /// <summary>Smaller than viewport — centered; larger — no empty margins beyond edge.</summary>
     private void ClampOffset()
     {
         double vw = Viewport.ActualWidth, vh = Viewport.ActualHeight;
         double sw = _w * _zoom, sh = _h * _zoom;
         double x = sw <= vw ? (vw - sw) / 2 : Math.Clamp(_offset.X, vw - sw, 0);
         double y = sh <= vh ? (vh - sh) / 2 : Math.Clamp(_offset.Y, vh - sh, 0);
-        // Сдвиг кратен пикселю устройства: на 100 % снимок не размывается.
+        // Offset multiple of device pixel: at 100% screenshot not blurred.
         double dpi = Dpi;
         _offset = new Vector(Math.Round(x * dpi) / dpi, Math.Round(y * dpi) / dpi);
     }
 
     private void ApplyView()
     {
-        _editor.CommitTextEdit(); // поле ввода поставлено по прежнему масштабу
+        _editor.CommitTextEdit(); // input field placed by previous scale
         ViewTransform.Matrix = new Matrix(_zoom, 0, 0, _zoom, _offset.X, _offset.Y);
         double device = _zoom * Dpi;
-        // Линейка (в DIP) и рамка выбора (в пикселях устройства) — постоянного размера на экране при любом масштабе, как в оверлее.
+        // Ruler (in DIP) and selection border (in device pixels) — constant on-screen size at any zoom, like in overlay.
         RulerOverlay.DpiScale = 1 / _zoom;
         Annotations.OutlineScale = 1 / device;
-        SnapGuides.PixelSize = 1 / device; // направляющие — 1 пиксель устройства при любом масштабе
+        SnapGuides.PixelSize = 1 / device; // guides — 1 device pixel at any zoom
         RenderOptions.SetBitmapScalingMode(BaseImage, device >= 1 ? BitmapScalingMode.NearestNeighbor : BitmapScalingMode.HighQuality);
         _zoomPercent = Math.Round(device * 100);
         ShowZoomText();
-        _editor.Flyouts.Reposition(); // flyout фигуры едет вместе с ней, у кнопок — за панелью
+        _editor.Flyouts.Reposition(); // shape flyout moves with it; button flyouts behind panel
     }
 
-    /// <summary>Масштаб вокруг точки вьюпорта: пиксель снимка под ней остаётся на месте.</summary>
+    /// <summary>Scale around viewport point: screenshot pixel under it stays in place.</summary>
     private void ZoomAt(double zoom, Point anchor)
     {
         double min = Math.Min(FitZoom(), 1 / Dpi), max = MaxDeviceZoom / Dpi;
@@ -265,7 +265,7 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
         Relayout();
     }
 
-    // ---------- Мышь ----------
+    // ---------- Mouse ----------
 
     private bool IsFromHud(object source)
     {
@@ -291,7 +291,7 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
         var p = e.GetPosition(PixelCanvas);
         bool inside = ImageRect.Contains(p);
         if (_editor.PipetteOn) { if (inside) _editor.PickColor(ToPixel(p)); return; }
-        // Рисовать можно только на снимке; клик мимо снимает выбор фигуры.
+        // Can draw only on screenshot; click outside deselects shape.
         if (!inside) { _editor.Deselect(); return; }
         if (_editor.BeginGesture(ClampToImage(p))) Viewport.CaptureMouse();
     }
@@ -319,7 +319,7 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
     private void OnViewportUp(object sender, MouseButtonEventArgs e)
     {
         if (_panFrom is not null) { EndPan(); return; }
-        // Состояние жеста сбрасывается до ReleaseMouseCapture: он синхронно вызывает LostMouseCapture.
+        // Gesture state reset before ReleaseMouseCapture: it synchronously calls LostMouseCapture.
         if (_editor.EndGesture(ClampToImage(e.GetPosition(PixelCanvas)))) Viewport.ReleaseMouseCapture();
     }
 
@@ -403,12 +403,12 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
         Canvas.SetTop(Magnifier, y);
     }
 
-    // ---------- Клавиатура ----------
+    // ---------- Keyboard ----------
 
     protected override void OnPreviewKeyDown(KeyEventArgs e)
     {
         base.OnPreviewKeyDown(e);
-        // Пока вводится текст, клавиши редактора (и пробел-панорама) не работают.
+        // While text entered, editor keys (and space-pan) don't work.
         if (_editor.IsTextEditing) return;
         var key = e.Key == Key.System ? e.SystemKey : e.Key;
         var mods = Keyboard.Modifiers;
@@ -417,7 +417,7 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
         switch (key)
         {
             case Key.LeftAlt or Key.RightAlt:
-                // Голый Alt выключает прилипание посреди жеста; системе не отдаём (режим меню окна уводит клавиатуру).
+                // Bare Alt disables snapping mid-gesture; not given to system (window menu mode steals keyboard).
                 RefreshSnapGestureSoon();
                 break;
             case Key.Space:
@@ -448,7 +448,7 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
                 ZoomAt(_zoom / ZoomStep, new Point(Viewport.ActualWidth / 2, Viewport.ActualHeight / 2));
                 break;
             default:
-                // Клавиши рисования (инструменты, I, B, Ctrl+Z/Y, Delete, стрелки); в «Оригинале» рисование выключено.
+                // Drawing keys (tools, I, B, Ctrl+Z/Y, Delete, arrows); in “Original” drawing disabled.
                 if (!_editor.HandleKey(key, mods, editing: true)) e.Handled = false;
                 break;
         }
@@ -473,10 +473,10 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
     protected override void OnDeactivated(EventArgs e)
     {
         base.OnDeactivated(e);
-        _spaceDown = false; // KeyUp пробела могло уйти в другое окно
+        _spaceDown = false; // Space KeyUp could go to another window
     }
 
-    /// <summary>Esc и правый клик снимают по одному слою: жест → пипетка → линейка → выбор/инструмент → (Esc) закрыть окно.</summary>
+    /// <summary>Esc and right-click remove one layer: gesture → eyedropper → ruler → select/tool → (Esc) close window.</summary>
     private void StepBack(bool closeWhenNothingLeft)
     {
         if (((IAnnotationEditorHost)this).HasGesture) { ResetInteraction(); return; }
@@ -491,7 +491,7 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
         if (closeWhenNothingLeft) Close();
     }
 
-    /// <summary>После смены состояния Alt (оно обновится к приоритету Input) жест пересчитывается в той же точке.</summary>
+    /// <summary>After Alt state changes (it updates to Input priority) gesture recalculated at same point.</summary>
     private void RefreshSnapGestureSoon() => Dispatcher.BeginInvoke(() =>
     {
         if (!_closing && _editor.ToolGestureActive) _editor.RefreshGesture(ClampToImage(Mouse.GetPosition(PixelCanvas)));
@@ -504,11 +504,11 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
         if (Viewport.IsMouseCaptured) Viewport.ReleaseMouseCapture();
     }
 
-    // ---------- Режимы ----------
+    // ---------- Modes ----------
 
     private void OnModeChecked(object sender, RoutedEventArgs e)
     {
-        if (_editor is null) return; // IsChecked из XAML во время InitializeComponent
+        if (_editor is null) return; // IsChecked from XAML during InitializeComponent
         SetOriginalMode(OriginalMode.IsChecked == true);
     }
 
@@ -517,7 +517,7 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
         if (_originalMode == on) return;
         ResetInteraction();
         _originalMode = on;
-        Annotations.Visibility = on ? Visibility.Hidden : Visibility.Visible; // скрыты, не удалены
+        Annotations.Visibility = on ? Visibility.Hidden : Visibility.Visible; // hidden, not removed
         _editor.DrawingEnabled = !on;
         if (on) _noticeDismissed = false;
         UpdateNotice();
@@ -533,7 +533,7 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
         Document.RemoveAll();
     }
 
-    /// <summary>«Начать заново с оригинала»: пометки удаляются одним шагом undo, рисование — на чистом снимке.</summary>
+    /// <summary>“Start over from original”: marks deleted as one undo step, drawing on clean screenshot.</summary>
     private void OnRestartFromOriginal(object sender, RoutedEventArgs e)
     {
         Document.RemoveAll();
@@ -561,8 +561,8 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
             : Localization.Loc.F("Editor.TitleFile", System.IO.Path.GetFileName(_session.Path));
 
     /// <summary>
-    /// Язык сменили в настройках, пока окно открыто: заголовок, масштаб и плашка собираются заново (подсказки панели
-    /// и оформления обновляют себя сами). Уже показанное сообщение о том, как открыт снимок, остаётся на прежнем языке.
+    /// Language changed in settings while window open: title, scale and plaque rebuilt (panel and decoration tooltips
+    /// update themselves). Already shown message about how screenshot opened remains in old language.
     /// </summary>
     private void OnLanguageChanged()
     {
@@ -599,7 +599,7 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
         _toastTimer.Start();
     }
 
-    // ---------- Сохранение ----------
+    // ---------- Saving ----------
 
     private void SaveAs()
     {
@@ -620,12 +620,12 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
     }
 
     /// <summary>
-    /// Копировать, сохранить или закрепить то, что видно (в режиме «Оригинал» — без пометок), и добавить это новой
-    /// записью истории со своими sidecar-файлами. Окно остаётся открытым.
+    /// Copy, save or pin what is visible (in “Original” mode — without marks), and add it as new
+    /// history entry with its sidecar files. Window stays open.
     /// </summary>
     private void Run(CaptureAction action, string? savePath)
     {
-        if (!_settings.ActionAllowed(action)) return; // закрепление выключено
+        if (!_settings.ActionAllowed(action)) return; // pin disabled
         _services.Track(RunAsync(action, savePath));
     }
 
@@ -652,7 +652,7 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
         int beautifyEdits = _beautifyEdits;
         int clipboard = action == CaptureAction.CopyExplicit ? _services.ReserveClipboard() : 0;
         if (!_closing) ShowToast(Localization.Loc.T("Editor.Saving"));
-        string? historyKey = null; // как дописать к итогу: новая запись или ошибка записи в историю
+        string? historyKey = null; // how to append to result: new entry or history write error
         try
         {
             var saved = await _services.Save(result.Image, result.AnnotationsJson, result.OriginalPng,
@@ -663,7 +663,7 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
                 _savedRevision = revision;
                 _savedBeautifyEdits = beautifyEdits;
             }
-            // Историю выключили, пока окно открыто: запись не пишется, и это не ошибка.
+            // History disabled while window open: entry not written, and that's not an error.
             historyKey = saved.InHistory ? "Editor.ToastNewEntry" : saved.HistoryError is null ? null : "Editor.ToastHistoryFailed";
             if (saved.SaveError is not null) throw saved.SaveError;
             switch (action)
@@ -708,7 +708,7 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
     }
 
     /// <summary>
-    /// Вопрос при закрытии с несохранёнными пометками — по текущим настройкам: историю могли выключить, пока окно открыто.
+    /// Question on close with unsaved marks — per current settings: history could be disabled while window open.
     /// </summary>
     public static string CloseWithoutSavingText(AppSettings settings)
     {
@@ -718,7 +718,7 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
         return Localization.Loc.T(pins ? "Editor.ClosePins" : "Editor.CloseLost");
     }
 
-    // ---------- Хост редактора ----------
+    // ---------- Editor host ----------
 
     bool IAnnotationEditorHost.OptionsEnabled => true;
     bool IAnnotationEditorHost.CanUsePipette => !_closing && !_originalMode;
@@ -733,15 +733,15 @@ public partial class EditorWindow : ChromeWindow, IAnnotationEditorHost, IFlyout
 
     Rect IAnnotationEditorHost.SnapArea => ImageRect;
 
-    void IAnnotationEditorHost.OnBeautifyChanged() => _beautifyEdits++; // оформление меняет итоговую картинку, холст не трогает
+    void IAnnotationEditorHost.OnBeautifyChanged() => _beautifyEdits++; // decoration changes final image, canvas untouched
 
-    // ---------- Хост flyout'ов ----------
+    // ---------- Flyout host ----------
 
     Canvas IFlyoutHost.FlyoutLayer => FlyoutLayer;
     Rect IFlyoutHost.FlyoutWorkArea => new(0, 0, FlyoutLayer.ActualWidth, FlyoutLayer.ActualHeight);
-    bool IFlyoutHost.ToolbarFlyoutsBelow => false; // панель внизу окна: flyout'ы её кнопок открываются вверх
+    bool IFlyoutHost.ToolbarFlyoutsBelow => false; // panel at bottom of window: its button flyouts open upward
 
-    /// <summary>Рамка фигуры на экране (с масштабом и сдвигом), обрезанная по вьюпорту; за кадром — null.</summary>
+    /// <summary>Shape border on screen (with scale and offset), clipped to viewport; off-screen — null.</summary>
     Rect? IFlyoutHost.ShapeRect(Annotation shape)
     {
         if (!Viewport.IsVisible) return null;

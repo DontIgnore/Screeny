@@ -6,26 +6,26 @@ public enum UpdateCheckKind { Automatic, Manual }
 
 public enum UpdateSourceKind { None, Github, Folder }
 
-/// <summary>Итог проверки.</summary>
+/// <summary>Check result.</summary>
 public abstract record UpdateCheckResult
 {
-    /// <summary>Новее нет.</summary>
+    /// <summary>No newer.</summary>
     public sealed record UpToDate(string? CurrentVersion) : UpdateCheckResult;
-    /// <summary>Есть новая версия, которую стоит показать.</summary>
+    /// <summary>New version worth showing.</summary>
     public sealed record Available(UpdateCandidate Update) : UpdateCheckResult;
-    /// <summary>Новая версия есть, но пользователь её пропустил (только автоматическая проверка).</summary>
+    /// <summary>New version exists but user skipped it (only automatic check).</summary>
     public sealed record Skipped(UpdateCandidate Update) : UpdateCheckResult;
-    /// <summary>Копия не умеет обновляться (собрана не через установщик или портативную сборку).</summary>
+    /// <summary>Copy can't update (not built via installer or portable).</summary>
     public sealed record NotUpdatable : UpdateCheckResult;
-    /// <summary>Проверка уже идёт.</summary>
+    /// <summary>Check already running.</summary>
     public sealed record Busy : UpdateCheckResult;
     public sealed record Failed(Exception Error) : UpdateCheckResult;
 }
 
 /// <summary>
-/// Проверка обновлений: при запуске (через <see cref="StartupDelay"/>) и затем раз в <see cref="Interval"/>, пока
-/// включена настройка «Проверять обновления»; ручная — из меню трея. Автоматическая проверка молчит об ошибках
-/// (только журнал) и о пропущенной версии; ручная показывает всё.
+/// Update check: at startup (via <see cref="StartupDelay"/>) then every <see cref="Interval"/>, while
+/// “Check for updates” setting enabled; manual — from tray menu. Automatic check silent on errors
+/// (only log) and skipped versions; manual shows everything.
 /// </summary>
 public sealed class UpdateService : IDisposable
 {
@@ -38,11 +38,11 @@ public sealed class UpdateService : IDisposable
     private readonly Func<TimeSpan, CancellationToken, Task> _delay;
     private readonly CancellationTokenSource _stop = new();
     private bool _checking;
-    // Один UpdateManager не умеет качать два обновления сразу (тихое в фоне и «Установить» из окна): загрузки по очереди.
+    // One UpdateManager can't download two updates at once (silent background and “Install” from window): downloads sequential.
     private readonly SemaphoreSlim _downloadLock = new(1, 1);
     private string? _downloadedVersion;
 
-    /// <summary>Автоматическая проверка нашла версию, которую пользователь не пропускал.</summary>
+    /// <summary>Automatic check found version user didn't skip.</summary>
     public event Action<UpdateCandidate>? UpdateFound;
 
     public UpdateService(IUpdateClient client, UpdateStateStore stateStore, Func<bool> enabled,
@@ -57,20 +57,20 @@ public sealed class UpdateService : IDisposable
     public IUpdateClient Client => _client;
 
     /// <summary>
-    /// Откуда брать обновления: <c>--update-source</c> (только dev) — папка; обычный запуск — GitHub; тестовый экземпляр
-    /// без папки — ниоткуда (ни автоматическая, ни ручная проверка не ходят в сеть).
+    /// Where to get updates: <c>--update-source</c> (only dev) — folder; normal — GitHub; test instance
+    /// without folder — nowhere (neither automatic nor manual check goes to network).
     /// </summary>
     public static UpdateSourceKind ChooseSource(bool isDev, string? localSource)
         => localSource is not null ? UpdateSourceKind.Folder : isDev ? UpdateSourceKind.None : UpdateSourceKind.Github;
 
     /// <summary>
-    /// Фоновая проверка вообще возможна: копия обновляемая, а тестовый экземпляр — только с явным локальным
-    /// источником (<c>--dev --update-source</c>), чтобы dev-запуски никогда не ходили в сеть.
+    /// Background check possible at all: copy updatable, test instance only with explicit local
+    /// source (<c>--dev --update-source</c>), so dev runs never go to network.
     /// </summary>
     public static bool AutomaticAllowed(bool isDev, bool hasLocalSource, bool canUpdate)
         => canUpdate && (!isDev || hasLocalSource);
 
-    /// <summary>Цикл: пауза после запуска, затем проверка раз в сутки. Настройку читает перед каждой проверкой.</summary>
+    /// <summary>Loop: pause after startup, then check daily. Setting read before each check.</summary>
     public async Task RunAsync()
     {
         var ct = _stop.Token;
@@ -84,7 +84,7 @@ public sealed class UpdateService : IDisposable
                 await _delay(Interval, ct);
             }
         }
-        catch (OperationCanceledException) { /* выход */ }
+        catch (OperationCanceledException) { /* exit */ }
     }
 
     public async Task<UpdateCheckResult> CheckAsync(UpdateCheckKind kind, CancellationToken ct = default)
@@ -102,7 +102,7 @@ public sealed class UpdateService : IDisposable
         catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
         catch (Exception ex)
         {
-            // Нет сети, репозиторий недоступен, лимит GitHub API — в журнал; ручная проверка покажет сообщение.
+            // No network, repo unavailable, GitHub API limit — log; manual check shows message.
             Log.Error($"Update check ({kind}) failed", ex);
             return new UpdateCheckResult.Failed(ex);
         }
@@ -110,8 +110,8 @@ public sealed class UpdateService : IDisposable
     }
 
     /// <summary>
-    /// Скачать обновление. Загрузки идут по очереди: вторая ждёт первую. Уже скачанная версия (например, тихой загрузкой)
-    /// второй раз не качается — сразу 100 %.
+    /// Download update. Downloads sequential: second waits first. Already downloaded version (e.g., by silent download)
+    /// not downloaded again — immediately 100%.
     /// </summary>
     public async Task DownloadAsync(UpdateCandidate update, Action<int>? progress, CancellationToken ct)
     {
@@ -132,7 +132,7 @@ public sealed class UpdateService : IDisposable
     public bool IsSkipped(string version)
         => string.Equals(_stateStore.Load().SkippedVersion, version, StringComparison.OrdinalIgnoreCase);
 
-    /// <summary>«Пропустить эту версию»: автоматическая проверка больше о ней не напоминает (о следующей — напомнит).</summary>
+    /// <summary>“Skip this version”: automatic check won't remind about it (next one will).</summary>
     public bool Skip(string version)
     {
         var state = _stateStore.Load();

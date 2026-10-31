@@ -3,20 +3,20 @@ using Microsoft.Win32;
 namespace Screeny.Migration;
 
 /// <summary>
-/// Флаг «Отключено» автозапуска, как его ставит Диспетчер задач: значение REG_BINARY с тем же именем, что у записи Run
-/// (или имя файла ярлыка), в <c>Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\{Run|Run32|StartupFolder}</c>.
-/// 12 байт: 4 байта флага (чётный первый байт, обычно 02, — включено; нечётный, обычно 03, — отключено) и 8 байт FILETIME
-/// момента отключения. Нет значения — запись включена. Сама запись Run не трогается, поэтому отключение обратимо
-/// (Диспетчер задач → Автозагрузка → «Включить»).
+/// Autostart “Disabled” flag as Task Manager sets: REG_BINARY with same name as Run entry
+/// (or shortcut file name), in <c>Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\{Run|Run32|StartupFolder}</c>.
+/// 12 bytes: 4 flag bytes (even first byte, usually 02 — enabled; odd, usually 03 — disabled) and 8 bytes FILETIME
+/// of disable moment. No value — enabled. Run entry itself untouched, so disable reversible
+/// (Task Manager → Startup → “Enable”).
 /// </summary>
 public static class StartupApproved
 {
     public const string BaseKey = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved";
 
-    /// <summary>Включена ли запись по байтам флага; null или пустой массив — включена.</summary>
+    /// <summary>Whether entry enabled by flag bytes; null or empty array — enabled.</summary>
     public static bool IsEnabled(byte[]? value) => value is not { Length: > 0 } || (value[0] & 1) == 0;
 
-    /// <summary>Значение «отключено пользователем» с отметкой времени, как пишет Диспетчер задач.</summary>
+    /// <summary>“Disabled by user” value with timestamp, as Task Manager writes.</summary>
     public static byte[] DisabledValue(DateTime utcNow)
     {
         var bytes = new byte[12];
@@ -26,8 +26,8 @@ public static class StartupApproved
     }
 
     /// <summary>
-    /// Раздел и подключ флага для места автозапуска. HKCU Run не перенаправляется WOW64, поэтому у пользователя <c>Run32</c>
-    /// не бывает; 32-битный HKLM Run (WOW6432Node) хранит флаг в <c>Run32</c>. Подключ открывается в 64-битном представлении.
+    /// Hive/subkey for autostart location. HKCU Run not redirected by WOW64, so user never has <c>Run32</c>;
+    /// 32-bit HKLM Run (WOW6432Node) has flag in <c>Run32</c>. Subkey opened in 64-bit view.
     /// </summary>
     public static (RegistryHive Hive, string SubKey) KeyFor(AutostartLocation location) => location switch
     {
@@ -41,14 +41,14 @@ public static class StartupApproved
 }
 
 /// <summary>
-/// Разбор строки <c>UninstallString</c> в файл и аргументы для запуска через ShellExecute. Тихие ключи не добавляются,
-/// <c>QuietUninstallString</c> не используется вовсе: пользователь видит родной деинсталлятор программы.
+/// Parses <c>UninstallString</c> into file and arguments for ShellExecute. Silent keys not added,
+/// <c>QuietUninstallString</c> never used: user sees program's native uninstaller.
 /// </summary>
 public static class UninstallCommand
 {
     /// <summary>
-    /// <c>"C:\…\unins000.exe" /x</c> → файл и аргументы; <c>MsiExec.exe /I{GUID}</c> или <c>/X{GUID}</c> → <c>msiexec.exe /X{GUID}</c>
-    /// (без других ключей); путь без кавычек — до «.exe». null — строку не удалось разобрать или это не exe.
+    /// <c>"C:\…\unins000.exe" /x</c> → file and args; <c>MsiExec.exe /I{GUID}</c> or <c>/X{GUID}</c> → <c>msiexec.exe /X{GUID}</c>
+    /// (no other keys); unquoted path — up to “.exe”. null — string unparsable or not exe.
     /// </summary>
     public static (string File, string Arguments)? Parse(string? command)
     {
@@ -70,7 +70,7 @@ public static class UninstallCommand
         return (exe, text[start..].Trim());
     }
 
-    /// <summary>Путь exe в начале команды: в кавычках или без них (до первого «.exe»). null, если exe не найден.</summary>
+    /// <summary>Exe path at command start: quoted or not (to first “.exe”). null if no exe found.</summary>
     public static string? ExtractExePath(string? command)
     {
         if (string.IsNullOrWhiteSpace(command)) return null;

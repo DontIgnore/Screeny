@@ -10,7 +10,7 @@
         UseLayoutRounding="True" SnapsToDevicePixels="True" ShowActivated="True"
         Left="0" Top="0" Width="1" Height="1">
   <Window.Resources>
-    <!-- Кнопки плашки кода: как на панели, без фокуса (клавиатура остаётся у оверлея) -->
+    <!-- Code plaque buttons: like on panel, without focus (keyboard stays with overlay) -->
     <Style x:Key="HudButton" TargetType="Button">
       <Setter Property="Focusable" Value="False"/>
       <Setter Property="Foreground" Value="{DynamicResource Overlay.Ink}"/>
@@ -36,22 +36,22 @@
     </Style>
   </Window.Resources>
   <Grid x:Name="Root">
-    <!-- Все слои внутри PixelCanvas рисуются в пикселях снимка; масштаб 1/dpi задаётся в code-behind -->
+    <!-- All layers inside PixelCanvas drawn in screenshot pixels; scale 1/dpi in code-behind -->
     <Canvas x:Name="PixelCanvas" HorizontalAlignment="Left" VerticalAlignment="Top">
       <Canvas.RenderTransform><ScaleTransform x:Name="PixelScale"/></Canvas.RenderTransform>
       <Image x:Name="ShotImage" Stretch="None" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
       <ann:AnnotationLayer x:Name="Annotations"/>
       <local:DimLayer x:Name="Dim"/>
-      <!-- Временное измерение линейки: не в документе и не в экспорте -->
+      <!-- Temporary ruler measurement: not in document or export -->
       <local:RulerLayer x:Name="RulerOverlay"/>
-      <!-- Режим текста (Ctrl+T): подсветка найденных слов и выделения -->
+      <!-- Text mode (Ctrl+T): found word highlight and selection -->
       <local:TextLayer x:Name="TextOverlay"/>
-      <!-- Направляющие прилипания фигур и рамки: только на время жеста, не в документе и не в экспорте -->
+      <!-- Snap guides for shapes and border: only during gesture, not in document or export -->
       <local:SnapGuideLayer x:Name="SnapGuides"/>
     </Canvas>
-    <!-- HUD в DIP: размер, лупа, панель инструментов -->
+    <!-- HUD in DIP: size, magnifier, toolbar -->
     <Canvas x:Name="Hud">
-      <!-- Размер выделения; ✨ — оформление включено (применится к результату, вокруг выделения ничего не рисуется) -->
+      <!-- Selection size; ✨ — decoration enabled (applies to result, nothing drawn around selection) -->
       <Border x:Name="SizeLabel" Background="#CC202020" CornerRadius="4" Padding="6,2" Visibility="Collapsed" IsHitTestVisible="False">
         <StackPanel Orientation="Horizontal">
           <TextBlock x:Name="SizeText" Foreground="White" FontSize="12" FontFamily="Segoe UI"/>
@@ -59,11 +59,11 @@
                 Data="M7,2 C7.5,6 9,7.5 13,8 C9,8.5 7.5,10 7,14 C6.5,10 5,8.5 1,8 C5,7.5 6.5,6 7,2 Z M13,0.5 C13.2,2 13.8,2.6 15.5,2.8 C13.8,3 13.2,3.6 13,5.1 C12.8,3.6 12.2,3 10.5,2.8 C12.2,2.6 12.8,2 13,0.5 Z"/>
         </StackPanel>
       </Border>
-      <!-- Состояние режима текста: «Распознаю…», подсказка по клавишам, «Текст не найден» -->
+      <!-- Text mode state: “Recognizing…”, key hint, “Text not found” -->
       <Border x:Name="TextHint" Background="#E6202020" CornerRadius="6" Padding="10,5" Visibility="Collapsed" IsHitTestVisible="False">
         <TextBlock x:Name="TextHintText" Foreground="White" FontSize="12" FontFamily="Segoe UI"/>
       </Border>
-      <!-- Режим текста: содержимое QR- или штрихкода по клику. Ссылка открывается только кнопкой «Открыть» -->
+      <!-- Text mode: QR/barcode content on click. Link opens only by “Open” button -->
       <Border x:Name="CodePopup" Background="{DynamicResource Overlay.Panel}" CornerRadius="10" Padding="12,10" Visibility="Collapsed"
               BorderBrush="{DynamicResource Overlay.ShotRing}" BorderThickness="1" Width="340" Cursor="Arrow">
         <Border.Effect><DropShadowEffect BlurRadius="18" ShadowDepth="4" Direction="270" Opacity="0.5"/></Border.Effect>
@@ -80,11 +80,11 @@
         </StackPanel>
       </Border>
       <local:MagnifierControl x:Name="Magnifier" IsHitTestVisible="False" Visibility="Collapsed"/>
-      <!-- Поле ввода текстового инструмента; шрифт и размер совпадают с TextAnnotation -->
+      <!-- Text tool input field; font and size match TextAnnotation -->
       <TextBox x:Name="TextEditor" Visibility="Collapsed" MinWidth="40" Padding="0" BorderThickness="1"
                BorderBrush="#AAFFFFFF" Background="#33000000" CaretBrush="White"
                FontFamily="Segoe UI" FontWeight="SemiBold" AcceptsReturn="True" Cursor="IBeam"/>
-      <!-- Пипетка при выделении (C): «#3078F6 скопирован» у лупы -->
+      <!-- Eyedropper on selection (C): “#3078F6 copied” at magnifier -->
       <Border x:Name="PipetteBadge" Background="#F2292524" CornerRadius="6" Padding="8,3" Visibility="Collapsed" IsHitTestVisible="False"
               BorderBrush="#33FFFFFF" BorderThickness="1">
         <StackPanel Orientation="Horizontal">
@@ -93,7 +93,7 @@
         </StackPanel>
       </Border>
       <local:ToolbarControl x:Name="Toolbar" Visibility="Collapsed"/>
-      <!-- Сюда добавляются flyout'ы параметров (OptionsFlyouts.Attach): поверх панели -->
+      <!-- Options flyouts added here (OptionsFlyouts.Attach): above panel -->
     </Canvas>
   </Grid>
 </Window>

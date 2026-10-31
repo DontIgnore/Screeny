@@ -5,7 +5,7 @@ using Screeny.Hotkeys;
 
 namespace Screeny.Settings;
 
-/// <summary>Поле записи хоткея: нажмите сочетание — оно отобразится; Backspace очищает.</summary>
+/// <summary>Hotkey entry field: press combo — displays; Backspace clears.</summary>
 public sealed class HotkeyBox : TextBox
 {
     private HotkeySpec? _spec;
@@ -31,13 +31,13 @@ public sealed class HotkeyBox : TextBox
     {
         var key = e.Key switch { Key.System => e.SystemKey, Key.ImeProcessed => e.ImeProcessedKey, _ => e.Key };
         var mods = Keyboard.Modifiers;
-        if (key is Key.Tab or Key.Escape && mods == ModifierKeys.None) return; // навигация и закрытие окна
+        if (key is Key.Tab or Key.Escape && mods == ModifierKeys.None) return; // navigation and window close
         e.Handled = true;
         if (key is Key.Back or Key.Delete && mods == ModifierKeys.None) { Spec = null; return; }
         if (HotkeyRules.FromKeys(key, mods) is { } spec) Spec = spec;
     }
 
-    /// <summary>PrintScreen система отдаёт приложению только как KeyUp.</summary>
+    /// <summary>PrintScreen system delivers to app only as KeyUp.</summary>
     protected override void OnPreviewKeyUp(KeyEventArgs e)
     {
         if (e.Key == Key.Snapshot) { e.Handled = true; Spec = HotkeyRules.FromKeys(Key.Snapshot, Keyboard.Modifiers); }

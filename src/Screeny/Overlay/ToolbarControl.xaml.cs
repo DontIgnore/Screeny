@@ -11,7 +11,7 @@ using Screeny.Settings;
 
 namespace Screeny.Overlay;
 
-/// <summary>Инлайн-панель: инструменты, палитра, толщина, undo/redo, действия завершения.</summary>
+/// <summary>Inline panel: tools, palette, thickness, undo/redo, completion actions.</summary>
 public partial class ToolbarControl : UserControl
 {
     public const int MinThickness = 1, MaxThickness = 20;
@@ -22,7 +22,7 @@ public partial class ToolbarControl : UserControl
         Color.FromRgb(0x00, 0x7A, 0xFF), Color.FromRgb(0xAF, 0x52, 0xDE), Colors.White, Colors.Black,
     ];
 
-    /// <summary>Инструмент, глиф, ключ подписи (<see cref="Loc"/>) и горячая клавиша — в порядке кнопок на панели.</summary>
+    /// <summary>Tool, glyph, label key (<see cref="Loc"/>) and hotkey — in panel button order.</summary>
     public static readonly (ToolKind Kind, string Glyph, string NameKey, Key Key, string KeyText)[] Tools =
     [
         (ToolKind.Select, "↖", "Tool.Select", Key.D1, "1"),
@@ -43,20 +43,20 @@ public partial class ToolbarControl : UserControl
     private readonly List<(Color Color, Border Swatch)> _swatches = new();
 
     public event Action<CaptureAction>? ActionRequested;
-    /// <summary>Кнопка OCR: войти в режим текста или выйти из него.</summary>
+    /// <summary>OCR button: enter or exit text mode.</summary>
     public event Action? TextModeRequested;
     public event Action? CancelRequested;
     public event Action? UndoRequested;
     public event Action? RedoRequested;
     public event Action<ToolKind>? ToolChanged;
     /// <summary>
-    /// Клик по цвету палитры. Сама панель свой цвет не меняет: оверлей решает, что красить
-    /// (основной цвет — <see cref="SetColor"/>, или заливку/фон в полосе параметров — <see cref="MarkSwatch"/>).
+    /// Palette color click. Panel itself doesn't change color: overlay decides what to paint
+    /// (main color — <see cref="SetColor"/>, or fill/background in options strip — <see cref="MarkSwatch"/>).
     /// </summary>
     public event Action<Color>? ColorPicked;
-    /// <summary>Кнопка пипетки (клавиша I).</summary>
+    /// <summary>Eyedropper button (I key).</summary>
     public event Action? PipetteRequested;
-    /// <summary>Кнопка ✨ (клавиша B): включить или выключить оформление.</summary>
+    /// <summary>✨ button (B key): enable or disable decoration.</summary>
     public event Action? BeautifyRequested;
     public event Action<int>? ThicknessChanged;
 
@@ -70,7 +70,7 @@ public partial class ToolbarControl : UserControl
                 Content = t.Glyph,
                 Style = (Style)FindResource("IconButton"),
             };
-            // У инструментов с параметрами — точка в правом нижнем углу: наведение на активный открывает параметры.
+            // Tools with options have dot bottom-right: hovering active opens options.
             if (OptionsSections.ForTool(t.Kind) is not null)
             {
                 var dot = new Ellipse { Width = 4, Height = 4, HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Bottom, Margin = new Thickness(0, 0, 4, 4), IsHitTestVisible = false };
@@ -78,7 +78,7 @@ public partial class ToolbarControl : UserControl
                 var glyph = new TextBlock { Text = t.Glyph, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
                 button.Content = new Grid { Width = 32, Height = 30, Children = { glyph, dot } };
             }
-            // Обычные Unicode-символы Segoe Fluent Icons «перехватывает» пустым глифом — берём их из Segoe UI Symbol.
+            // Plain Unicode symbols of Segoe Fluent Icons are “intercepted” by empty glyph — take from Segoe UI Symbol.
             if (t.Glyph[0] < '') { button.FontFamily = new FontFamily("Segoe UI Symbol"); button.FontSize = 16; }
             var kind = t.Kind;
             button.Click += (_, _) => { SetActiveTool(kind); ToolChanged?.Invoke(kind); };
@@ -99,15 +99,15 @@ public partial class ToolbarControl : UserControl
             ColorPanel.Children.Add(swatch);
         }
         ApplyTexts();
-        // Панель редактора живёт, пока в настройках меняют язык: подсказки из кода собираются заново.
-        // Loaded может прийти не один раз (вкладка, повторный показ): подписка без дублей.
+        // Editor panel lives while language changed in settings: code tooltips rebuilt.
+        // Loaded may come more than once (tab, re-show): subscribe without duplicates.
         Loaded += (_, _) => { Loc.Changed -= ApplyTexts; Loc.Changed += ApplyTexts; ApplyTexts(); };
         Unloaded += (_, _) => Loc.Changed -= ApplyTexts;
     }
 
     private AppSettings? _settings;
 
-    /// <summary>Подсказки и подписи, которые зависят от состояния панели (режим текста, редактор, история).</summary>
+    /// <summary>Tooltips and labels depending on panel state (text mode, editor, history).</summary>
     private void ApplyTexts()
     {
         foreach (var t in Tools) _toolButtons[t.Kind].ToolTip = Loc.F("Tool.WithKey", Loc.T(t.NameKey), t.KeyText);
@@ -119,13 +119,13 @@ public partial class ToolbarControl : UserControl
             : _settings?.IsFeatureOn(FeatureCatalog.History) == true ? "Toolbar.CopyEditorHistory" : "Toolbar.CopyEditor");
     }
 
-    /// <summary>Кнопки инструментов по порядку панели (якоря flyout'ов параметров).</summary>
+    /// <summary>Tool buttons in panel order (anchors of options flyouts).</summary>
     public IEnumerable<ButtonBase> ToolButtons => _toolButtons.Values;
 
-    /// <summary>Кнопка инструмента: к ней «пристёгивается» flyout его параметров.</summary>
+    /// <summary>Tool button: its options flyout “attaches” to it.</summary>
     public ButtonBase ToolButton(ToolKind kind) => _toolButtons[kind];
 
-    /// <summary>Кнопка ✨: к ней «пристёгивается» flyout оформления.</summary>
+    /// <summary>✨ button: decoration flyout “attaches” to it.</summary>
     public ButtonBase BeautifyToggle => BeautifyButton;
 
     public ToolKind CurrentTool { get; private set; }
@@ -140,7 +140,7 @@ public partial class ToolbarControl : UserControl
 
     private static readonly Brush SwatchRing = CreateFrozen(Color.FromArgb(0x50, 0xFF, 0xFF, 0xFF));
 
-    /// <summary>Основной цвет (обводка, линия, текст…): подсвечивает его на палитре и красит точку толщины.</summary>
+    /// <summary>Main color (stroke, line, text…): highlights on palette and paints thickness dot.</summary>
     public void SetColor(Color color)
     {
         CurrentColor = color;
@@ -148,17 +148,17 @@ public partial class ToolbarControl : UserControl
         ThicknessDot.Fill = new SolidColorBrush(color);
     }
 
-    /// <summary>Подсветить цвет на палитре, не меняя основной (активный образец полосы — заливка или фон). null — ничего.</summary>
+    /// <summary>Highlight color on palette without changing main (active swatch of strip — fill or background). null — nothing.</summary>
     public void MarkSwatch(Color? color)
     {
         foreach (var (c, swatch) in _swatches)
             swatch.BorderBrush = c == color ? Brushes.White : SwatchRing;
     }
 
-    /// <summary>Режим пипетки включён — кнопка нажата.</summary>
+    /// <summary>Eyedropper mode on — button pressed.</summary>
     public void SetPipette(bool on) => PipetteButton.IsChecked = on;
 
-    /// <summary>Оформление включено — кнопка ✨ нажата.</summary>
+    /// <summary>Decoration enabled — ✨ button pressed.</summary>
     public void SetBeautify(bool on) => BeautifyButton.IsChecked = on;
 
     private static SolidColorBrush CreateFrozen(Color c) { var b = new SolidColorBrush(c); b.Freeze(); return b; }
@@ -179,7 +179,7 @@ public partial class ToolbarControl : UserControl
         RedoButton.IsEnabled = canRedo && !_textMode && !_drawingDisabled;
     }
 
-    /// <summary>Инструменты, палитра, толщина, пипетка и undo доступны (окно редактора в режиме «Оригинал» их выключает).</summary>
+    /// <summary>Tools, palette, thickness, eyedropper and undo available (editor window “Original” mode disables).</summary>
     public void SetDrawingEnabled(bool on)
     {
         _drawingDisabled = !on;
@@ -195,8 +195,8 @@ public partial class ToolbarControl : UserControl
     }
 
     /// <summary>
-    /// Панель в окне повторного редактирования: без режима текста (OCR), ✕ закрывает окно, «Копировать» и прочие
-    /// действия добавляют новую запись в историю (если она включена), окно остаётся открытым.
+    /// Panel in re-edit window: without text mode (OCR), ✕ closes window, “Copy” and other actions add new history entry (if enabled), window stays open.
+    ///
     /// </summary>
     public void ConfigureForEditor(AppSettings settings)
     {
@@ -205,9 +205,9 @@ public partial class ToolbarControl : UserControl
     }
 
     /// <summary>
-    /// Кнопки выключенных функций (<see cref="FeatureCatalog"/>) скрываются целиком, вместе с подсказками; включённых —
-    /// показываются снова (окно редактора живёт, пока меняют настройки). OCR в окне редактора скрыт всегда.
-    /// Клавиши проверяют редактор и хост.
+    /// Disabled feature buttons (<see cref="FeatureCatalog"/>) hide entirely with tooltips; enabled — show again (editor window lives while settings change). OCR in editor window always hidden.
+    ///
+    /// Keys checked by editor and host.
     /// </summary>
     public void ApplyFeatures(AppSettings settings)
     {
@@ -224,8 +224,8 @@ public partial class ToolbarControl : UserControl
     private bool _forEditor;
 
     /// <summary>
-    /// Режим текста: рисование, палитра, толщина и undo недоступны (в нём ничего не рисуется),
-    /// OCR подсвечен, а главная кнопка копирует выбранный текст вместо картинки.
+    /// Text mode: drawing, palette, thickness and undo unavailable (nothing drawn),
+    /// OCR highlighted, main button copies selected text instead of image.
     /// </summary>
     public void SetTextMode(bool on)
     {
@@ -247,18 +247,18 @@ public partial class ToolbarControl : UserControl
     private void OnPin(object sender, RoutedEventArgs e) => ActionRequested?.Invoke(CaptureAction.Pin);
     private void OnOcr(object sender, RoutedEventArgs e)
     {
-        OcrButton.IsChecked = _textMode; // состояние задаёт оверлей через SetTextMode, а не сам клик
+        OcrButton.IsChecked = _textMode; // state set by overlay via SetTextMode, not click itself
         TextModeRequested?.Invoke();
     }
     private void OnCancel(object sender, RoutedEventArgs e) => CancelRequested?.Invoke();
     private void OnPipette(object sender, RoutedEventArgs e)
     {
-        PipetteButton.IsChecked = !PipetteButton.IsChecked; // состояние задаёт оверлей через SetPipette
+        PipetteButton.IsChecked = !PipetteButton.IsChecked; // state set by overlay via SetPipette
         PipetteRequested?.Invoke();
     }
     private void OnBeautify(object sender, RoutedEventArgs e)
     {
-        BeautifyButton.IsChecked = !BeautifyButton.IsChecked; // состояние задаёт оверлей через SetBeautify
+        BeautifyButton.IsChecked = !BeautifyButton.IsChecked; // state set by overlay via SetBeautify
         BeautifyRequested?.Invoke();
     }
     private void OnUndo(object sender, RoutedEventArgs e) => UndoRequested?.Invoke();

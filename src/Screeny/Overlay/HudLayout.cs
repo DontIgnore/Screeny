@@ -3,26 +3,26 @@ using System.Windows;
 namespace Screeny.Overlay;
 
 /// <summary>
-/// Размещение HUD (всё в DIP): панель инструментов вокруг выделения и всплывающие панели параметров (flyout)
-/// у якоря — кнопки панели или фигуры. Чистые функции: только прямоугольники и размеры.
+/// HUD layout (all in DIP): toolbar around selection and options flyouts
+/// at anchor — panel buttons or shape. Pure functions: only rectangles and sizes.
 /// </summary>
 public static class HudLayout
 {
-    /// <summary>Зазор панели от выделения и от краёв рабочей области.</summary>
+    /// <summary>Panel gap from selection and work area edges.</summary>
     public const double Gap = 8;
-    /// <summary>Зазор flyout'а от якоря.</summary>
+    /// <summary>Flyout gap from anchor.</summary>
     public const double FlyoutGap = 6;
 
-    /// <param name="Toolbar">Левый верхний угол панели.</param>
+    /// <param name="Toolbar">Panel top-left corner.</param>
     /// <param name="Below">
-    /// Панель под выделением: её внешняя сторона — нижняя, и flyout'ы кнопок открываются вниз. Над выделением
-    /// или внутри у нижнего края — вверх.
+    /// Panel below selection: its outer side is bottom, button flyouts open down. Above selection
+    /// or inside near bottom edge — up.
     /// </param>
     public readonly record struct Placement(Point Toolbar, bool Below);
 
     /// <summary>
-    /// Под выделением по левому краю; не влезает — над ним; нет места и там — внутри у нижнего края.
-    /// Панель целиком остаётся в рабочей области (если она выше области — побеждает верхняя граница).
+    /// Below selection along left edge; doesn't fit — above; no place there — inside at bottom edge.
+    /// Panel stays entirely in work area (if higher than area — top edge wins).
     /// </summary>
     public static Placement Place(Rect selection, Rect work, Size toolbar)
     {
@@ -42,8 +42,8 @@ public static class HudLayout
         return new Placement(new Point(x, y), chosen.below);
     }
 
-    /// <param name="TopLeft">Левый верхний угол flyout'а.</param>
-    /// <param name="Below">Flyout под якорем (анимация вылетает сверху вниз); false — над якорем.</param>
+    /// <param name="TopLeft">Flyout top-left corner.</param>
+    /// <param name="Below">Flyout below anchor (animation flies top-down); false — above.</param>
     public readonly record struct FlyoutPlacement(Point TopLeft, bool Below);
 
     /// <inheritdoc cref="PlaceFlyout(Rect, Size, Rect, bool, Rect?)"/>
@@ -51,13 +51,13 @@ public static class HudLayout
         => PlaceFlyout(anchor, flyoutSize, work, preferBelow, null);
 
     /// <summary>
-    /// Flyout у якоря: по центру якоря по горизонтали, с зазором <see cref="FlyoutGap"/> снизу (<paramref name="preferBelow"/>)
-    /// или сверху. Не влезает в рабочую область с этой стороны или перекрывает <paramref name="avoid"/> (панель) —
-    /// переворачивается на другую сторону. Не влезает нигде — встаёт туда, где места больше, и прижимается к области.
-    /// По горизонтали всегда прижат к рабочей области с отступом <see cref="Gap"/>.
+    /// Flyout at anchor: centered horizontally, gap <see cref="FlyoutGap"/> below (<paramref name="preferBelow"/>)
+    /// or above. Doesn't fit work area on that side or overlaps <paramref name="avoid"/> (panel) —
+    /// flipped to other side. Fits nowhere — placed where more space, pressed to area.
+    /// Horizontally always pressed to work area with <see cref="Gap"/> margin.
     /// </summary>
-    /// <param name="anchor">Кнопка (по высоте — вся панель, чтобы flyout был снаружи панели) или рамка фигуры.</param>
-    /// <param name="avoid">Что нельзя перекрывать (панель инструментов); null — ничего.</param>
+    /// <param name="anchor">Button (height — whole panel, so flyout outside panel) or shape border.</param>
+    /// <param name="avoid">What cannot be overlapped (toolbar); null — nothing.</param>
     public static FlyoutPlacement PlaceFlyout(Rect anchor, Size flyoutSize, Rect work, bool preferBelow, Rect? avoid)
     {
         double w = flyoutSize.Width, h = flyoutSize.Height;
@@ -77,9 +77,9 @@ public static class HudLayout
         return new FlyoutPlacement(new Point(x, clamped), roomier);
     }
 
-    /// <summary>Прямоугольники перекрываются по площади (касание краями — не перекрытие).</summary>
+    /// <summary>Rectangles overlap by area (edge touch not overlap).</summary>
     public static bool Overlaps(Rect a, Rect b) => a.Left < b.Right && b.Left < a.Right && a.Top < b.Bottom && b.Top < a.Bottom;
 
-    /// <summary>Clamp, при котором нижняя граница выигрывает, если элемент шире/выше доступного места.</summary>
+    /// <summary>Clamp where bottom edge wins if element wider/taller than available space.</summary>
     public static double ClampInto(double v, double min, double max) => Math.Max(min, Math.Min(v, max));
 }

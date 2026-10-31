@@ -14,60 +14,60 @@ using Screeny.Settings;
 namespace Screeny.Editing;
 
 /// <summary>
-/// Что хост (оверлей или окно повторного редактирования) даёт редактору аннотаций: состояние своих режимов,
-/// пересчёт координат для поля ввода текста и реакции HUD на изменения редактора.
+/// What host (overlay or re-edit window) provides to annotation editor: state of its modes,
+/// coordinate conversion for text input field and HUD reactions to editor changes.
 /// </summary>
 public interface IAnnotationEditorHost
 {
-    /// <summary>Доступны ли параметры вообще (оверлей: есть выделение, режим рисования, не режим текста).</summary>
+    /// <summary>Whether options are available at all (overlay: has selection, drawing mode, not text mode).</summary>
     bool OptionsEnabled { get; }
-    /// <summary>Можно ли сейчас включить пипетку.</summary>
+    /// <summary>Whether eyedropper can be enabled now.</summary>
     bool CanUsePipette { get; }
-    /// <summary>Хост закрывается: курсор и подсказки уже не обновляются.</summary>
+    /// <summary>Host closes: cursor and tooltips no longer updated.</summary>
     bool IsClosing { get; }
-    /// <summary>Идёт ли любой жест мыши хоста (включая жест инструмента редактора).</summary>
+    /// <summary>Whether any host mouse gesture is running (including editor tool gesture).</summary>
     bool HasGesture { get; }
-    /// <summary>Точка снимка (пиксели) → координаты HUD-холста, где лежит поле ввода текста.</summary>
+    /// <summary>Screenshot point (pixels) → HUD canvas coordinates where text input field lies.</summary>
     Point PixelToHud(Point px);
-    /// <summary>Длина в пикселях снимка → длина в HUD (размер шрифта поля ввода).</summary>
+    /// <summary>Length in screenshot pixels → length in HUD (text field font size).</summary>
     double PixelsToHud(double length);
-    /// <summary>Вернуть клавиатуру поверхности после ввода текста.</summary>
+    /// <summary>Return keyboard to surface after text input.</summary>
     void FocusSurface();
-    /// <summary>Сбросить текущий жест мыши хоста целиком (пипетка включается посреди жеста).</summary>
+    /// <summary>Reset host's current mouse gesture entirely (eyedropper enabled mid-gesture).</summary>
     void ResetInteraction();
-    /// <summary>Пересчитать курсор и подсветку под мышью.</summary>
+    /// <summary>Recalculate cursor and highlight under mouse.</summary>
     void RefreshHover();
-    /// <summary>Пипетка включена или выключена (оверлей прячет лупу).</summary>
+    /// <summary>Eyedropper enabled or disabled (overlay hides magnifier).</summary>
     void OnPipetteChanged(bool on);
-    /// <summary>Оформление включено/выключено или сменились его параметры (превью нет: оформление меняет только результат).</summary>
+    /// <summary>Decoration enabled/disabled or its parameters changed (no preview: decoration affects only result).</summary>
     void OnBeautifyChanged();
-    /// <summary>Область снимка в пикселях: её края и центр — цели прилипания фигур (оверлей — выделение, редактор — холст).</summary>
+    /// <summary>Screenshot region in pixels: its edges and center are snap targets for shapes (overlay — selection, editor — canvas).</summary>
     Rect SnapArea => Rect.Empty;
 }
 
-/// <summary>Элементы HUD, которыми управляет редактор: панель, всплывающие панели параметров, поле ввода текста, слои снимка.</summary>
-/// <param name="Flyouts">Flyout'ы параметров (у кнопок панели и рядом с фигурой); показываются после <see cref="OptionsFlyouts.Attach"/>.</param>
-/// <param name="Guides">Слой направляющих прилипания (необязателен: без него прилипание работает, но линий не видно).</param>
+/// <summary>HUD elements controlled by editor: panel, options flyouts, text input field, screenshot layers.</summary>
+/// <param name="Flyouts">Options flyouts (near panel buttons and next to shape); shown after <see cref="OptionsFlyouts.Attach"/>.</param>
+/// <param name="Guides">Snap guide layer (optional: without it snapping works but lines invisible).</param>
 public sealed record AnnotationEditorParts(ToolbarControl Toolbar, OptionsFlyouts Flyouts, TextBox TextEditor, AnnotationLayer Layer, RulerLayer Ruler,
     SnapGuideLayer? Guides = null);
 
-/// <param name="Enabled">Включено ли оформление при открытии.</param>
-/// <param name="Options">Параметры оформления при открытии.</param>
+/// <param name="Enabled">Whether decoration is enabled on open.</param>
+/// <param name="Options">Decoration parameters on open.</param>
 /// <param name="Persist">
-/// Записывать ли включение и параметры в настройки. Оверлей запоминает их для следующих снимков; окно повторного
-/// редактирования берёт оформление из записи истории и настройки пользователя не трогает.
+/// Whether to write enabling and parameters to settings. Overlay remembers them for next screenshots; re-edit window
+/// takes decoration from history entry and does not touch user settings.
 /// </param>
 public sealed record BeautifyState(bool Enabled, BeautifyOptions Options, bool Persist);
 
 /// <summary>
-/// Редактор аннотаций без своего окна: диспетчер инструментов, жест текущего инструмента, поле ввода текста,
-/// выбор, параметры (flyout'ы) и палитра, пипетка, линейка, undo/redo, оформление и клавиши рисования.
-/// Его используют оверлей (поверх замороженного экрана) и окно повторного редактирования из истории.
-/// Все точки — в пикселях снимка; хост сам ограничивает их областью редактирования.
+/// Annotation editor without own window: tool dispatcher, current tool gesture, text input field,
+/// selection, options (flyouts) and palette, eyedropper, ruler, undo/redo, decoration and drawing keys.
+/// Used by overlay (over frozen screen) and re-edit window from history.
+/// All points are in screenshot pixels; host itself limits them to editing region.
 /// </summary>
 public sealed class AnnotationEditor
 {
-    /// <summary>Порог прилипания фигур в экранных пикселях (DIP); в пиксели снимка пересчитывается через масштаб хоста.</summary>
+    /// <summary>Shape snap threshold in screen pixels (DIP); converted to screenshot pixels via host scale.</summary>
     public const double SnapThresholdDip = 6;
 
     private readonly AnnotationEditorParts _parts;
@@ -78,13 +78,13 @@ public sealed class AnnotationEditor
     private readonly Snapper _snapper;
     private readonly RulerTool _ruler;
     private readonly bool _persistBeautify;
-    private bool _pipette;                    // режим пипетки: следующий клик по снимку берёт цвет
-    private ITool? _activeTool;               // инструмент, который сейчас ведёт мышь (между Down и Up)
+    private bool _pipette;                    // eyedropper mode: next click on screenshot picks color
+    private ITool? _activeTool;               // tool currently driving mouse (between Down and Up)
     private (Point At, AnnotationStyle Style)? _textEdit;
-    private Brush? _editorBackground;         // фон поля ввода из XAML, когда у текста нет подложки
-    private double? _editorMinWidth;          // минимальная ширина поля из XAML (для выравнивания влево)
-    private string? _stripKey;                // что сейчас показано в параметрах: без изменений Show не вызывается
-    private bool _gestureStarting;            // идёт Down инструмента: выбранную фигуру уже тащат, её flyout не показываем
+    private Brush? _editorBackground;         // text field background from XAML when text has no background
+    private double? _editorMinWidth;          // minimum field width from XAML (for left alignment)
+    private string? _stripKey;                // what's shown in options now: without changes Show not called
+    private bool _gestureStarting;            // tool Down ongoing: selected shape already being dragged, its flyout not shown
     private bool _beautifyOn;
     private BeautifyOptions _beautify;
     private bool _drawingEnabled = true;
@@ -96,7 +96,7 @@ public sealed class AnnotationEditor
         parts.Layer.Source = source;
 
         Func<bool> shift = () => Keyboard.Modifiers.HasFlag(ModifierKeys.Shift);
-        // Прилипание: настройка включена и Alt не зажат; порог — 6 экранных пикселей при текущем масштабе хоста.
+        // Snapping: setting enabled and Alt not held; threshold — 6 screen pixels at current host scale.
         _snapper = new Snapper(
             enabled: () => _settings.SnapEnabled && !Keyboard.Modifiers.HasFlag(ModifierKeys.Alt),
             threshold: () => SnapThresholdDip / Math.Max(1e-6, _host.PixelsToHud(1)),
@@ -123,8 +123,8 @@ public sealed class AnnotationEditor
         _textTool.EditRequested += BeginTextEdit;
 
         var toolbar = parts.Toolbar;
-        toolbar.ApplyFeatures(settings); // кнопки выключенных функций скрыты; их клавиши отсекают HandleKey и Set*
-        // Начальный инструмент — выбор, чтобы случайный клик ничего не рисовал.
+        toolbar.ApplyFeatures(settings); // disabled feature buttons hidden; their keys cut off by HandleKey and Set*
+        // Initial tool is Select, so accidental click draws nothing.
         toolbar.SetActiveTool(ToolKind.Select);
         var color = ParseColor(settings.LastColor);
         toolbar.SetColor(color);
@@ -140,7 +140,7 @@ public sealed class AnnotationEditor
         Document.Changed += () =>
         {
             toolbar.SetUndoState(Document.Undo.CanUndo, Document.Undo.CanRedo);
-            RefreshOptions(); // выбор фигуры и undo/redo меняют параметры и место их flyout'а
+            RefreshOptions(); // shape selection and undo/redo change options and their flyout location
         };
         var strip = parts.Flyouts.Options;
         strip.TargetClicked += OnTargetClicked;
@@ -152,7 +152,7 @@ public sealed class AnnotationEditor
         strip.TextAlignClicked += a => EditStyle(s => StyleOptions.WithTextAlign(s, a));
 
         _persistBeautify = beautify.Persist;
-        // Без функции «Оформление» снимок не оформляется, даже если оно включено в настройках (их значение не трогаем).
+        // Without Decoration feature screenshot not decorated even if enabled in settings (its value untouched).
         _beautifyOn = beautify.Enabled && BeautifyAllowed;
         _beautify = beautify.Options;
         toolbar.SetBeautify(_beautifyOn);
@@ -164,10 +164,10 @@ public sealed class AnnotationEditor
         parts.TextEditor.LostKeyboardFocus += (_, _) => CommitTextEdit();
     }
 
-    /// <summary>Источник пикселей для эффектов (пикселизация, размытие) и пипетки.</summary>
+    /// <summary>Pixel source for effects (pixelate, blur) and eyedropper.</summary>
     public BitmapSource Source { get; }
     public AnnotationDocument Document => _parts.Layer.Document;
-    /// <summary>Обводка/заливка, стиль стрелки, фон текста, активный образец.</summary>
+    /// <summary>Stroke/fill, arrow style, text background, active swatch.</summary>
     public StyleOptions Options { get; }
     public ToolKind CurrentTool => _parts.Toolbar.CurrentTool;
     public AnnotationStyle CurrentStyle => StyleForTool(CurrentTool);
@@ -175,23 +175,23 @@ public sealed class AnnotationEditor
     public ITool Tool(ToolKind kind) => _tools[kind];
     public Cursor CursorFor(ToolKind kind) => _tools[kind].Cursor;
     public RulerTool Ruler => _ruler;
-    /// <summary>Прилипание фигур: текущие направляющие и цели жеста.</summary>
+    /// <summary>Shape snapping: current guides and gesture targets.</summary>
     public Snapper Snapper => _snapper;
     public bool PipetteOn => _pipette;
     public bool IsTextEditing => _textEdit is not null;
-    /// <summary>Инструмент ведёт мышь (между Down и Up).</summary>
+    /// <summary>Tool is driving mouse (between Down and Up).</summary>
     public bool HasGesture => _activeTool is not null;
-    /// <summary>Жест инструмента реально идёт: undo/redo и перекраска запрещены.</summary>
+    /// <summary>Tool gesture actually running: undo/redo and repaint forbidden.</summary>
     public bool ToolGestureActive => _activeTool?.IsActive == true;
     public bool BeautifyOn => _beautifyOn;
     private bool BeautifyAllowed => _settings.IsFeatureOn(FeatureCatalog.Beautify);
-    /// <summary>Flyout'ы параметров: оформление у кнопки ✨, инструмент у его кнопки, фигура рядом с ней.</summary>
+    /// <summary>Options flyouts: decoration near ✨ button, tool near its button, shape next to it.</summary>
     public OptionsFlyouts Flyouts => _parts.Flyouts;
     public BeautifyOptions Beautify => _beautify;
 
     /// <summary>
-    /// Можно ли рисовать и править (окно редактора в режиме «Оригинал» выключает это): инструменты, палитра,
-    /// толщина, undo и клавиши рисования. Выключение сбрасывает инструмент на «Выбор» и снимает выбор фигуры.
+    /// Whether drawing and editing allowed (editor window in “Original” mode disables): tools, palette,
+    /// thickness, undo and drawing keys. Disabling resets tool to Select and deselects shape.
     /// </summary>
     public bool DrawingEnabled
     {
@@ -215,9 +215,9 @@ public sealed class AnnotationEditor
         }
     }
 
-    // ---------- Жест инструмента ----------
+    // ---------- Tool gesture ----------
 
-    /// <summary>Нажатие текущим инструментом. true — начался жест (хосту нужно захватить мышь).</summary>
+    /// <summary>Press with current tool. true — gesture started (host needs to capture mouse).</summary>
     public bool BeginGesture(Point px)
     {
         if (!_drawingEnabled) return false;
@@ -233,22 +233,22 @@ public sealed class AnnotationEditor
     public void MoveGesture(Point px) => _activeTool?.Move(px);
 
     /// <summary>
-    /// Alt нажат или отпущен посреди жеста: тот же жест в той же точке пересчитывается, и прилипание
-    /// с направляющими включается или выключается сразу, без движения мыши.
+    /// Alt pressed or released mid-gesture: same gesture at same point recalculated, and snapping
+    /// with guides enabled or disabled immediately, without mouse movement.
     /// </summary>
     public void RefreshGesture(Point px) { if (ToolGestureActive) _activeTool?.Move(px); }
 
-    /// <summary>Отпускание. true — жест был (хосту отпустить захват мыши).</summary>
+    /// <summary>Release. true — there was gesture (host release mouse capture).</summary>
     public bool EndGesture(Point px)
     {
         if (_activeTool is not { } tool) return false;
         _activeTool = null;
         tool.Up(px);
-        RefreshOptions(); // фигуру отпустили: её flyout появляется на новом месте
+        RefreshOptions(); // shape released: its flyout appears at new location
         return true;
     }
 
-    /// <summary>Прервать жест без следа: живая фигура отбрасывается, сдвиг откатывается.</summary>
+    /// <summary>Abort gesture without trace: live shape discarded, offset rolled back.</summary>
     public void CancelGesture()
     {
         var tool = _activeTool;
@@ -257,11 +257,11 @@ public sealed class AnnotationEditor
         if (tool is not null) RefreshOptions();
     }
 
-    /// <summary>Пока инструмент ведёт жест, undo/redo запрещены: иначе отменится чужой шаг под живой фигурой.</summary>
+    /// <summary>While tool drives gesture, undo/redo forbidden: otherwise foreign step under live shape would be undone.</summary>
     public void Undo() { if (!ToolGestureActive && _drawingEnabled) Document.Undo.Undo(); }
     public void Redo() { if (!ToolGestureActive && _drawingEnabled) Document.Undo.Redo(); }
 
-    /// <summary>Колесо мыши: толщина ±1, запоминается.</summary>
+    /// <summary>Mouse wheel: thickness ±1, remembered.</summary>
     public void AdjustThickness(int delta)
     {
         if (!_drawingEnabled) return;
@@ -276,12 +276,12 @@ public sealed class AnnotationEditor
         Document.NotifyChanged();
     }
 
-    // ---------- Клавиши ----------
+    // ---------- Keys ----------
 
     /// <summary>
-    /// Клавиши рисования: Ctrl+Z/Ctrl+Y, Delete/Backspace и стрелки для выбранной фигуры, а в режиме рисования
-    /// (<paramref name="editing"/>) ещё I (пипетка), B (оформление) и клавиши инструментов. false — не наша клавиша.
-    /// Клавиши выключенных функций (пипетка, оформление, линейка) — тоже не наши.
+    /// Drawing keys: Ctrl+Z/Ctrl+Y, Delete/Backspace and arrows for selected shape, and in drawing mode
+    /// (<paramref name="editing"/>) also I (eyedropper), B (decoration) and tool keys. false — not our key.
+    /// Keys of disabled features (eyedropper, decoration, ruler) — also not ours.
     /// </summary>
     public bool HandleKey(Key key, ModifierKeys mods, bool editing)
     {
@@ -325,7 +325,7 @@ public sealed class AnnotationEditor
         return null;
     }
 
-    // ---------- Текст ----------
+    // ---------- Text ----------
 
     private void BeginTextEdit(Point px, AnnotationDocument doc, AnnotationStyle style)
     {
@@ -335,26 +335,26 @@ public sealed class AnnotationEditor
         editor.Text = "";
         editor.FontSize = _host.PixelsToHud(TextAnnotation.FontSizeFor(style.Thickness));
         ShowTextEditorStyle(style);
-        // Компенсируем рамку и внутренний отступ TextBox, чтобы текст встал туда же, где будет нарисован.
+        // Compensate TextBox border and inner padding so text sits where it will be drawn.
         Canvas.SetLeft(editor, hud.X - 3);
         Canvas.SetTop(editor, hud.Y - 1);
         editor.Visibility = Visibility.Visible;
-        // Пока вводится текст, параметры и палитра правят его, а не выбранную ранее фигуру.
+        // While text is being entered, options and palette edit it, not previously selected shape.
         Deselect();
         editor.Focus();
         Keyboard.Focus(editor);
     }
 
-    /// <summary>Поле ввода показывает цвет текста и подложку будущей аннотации.</summary>
+    /// <summary>Input field shows text color and background of future annotation.</summary>
     private void ShowTextEditorStyle(AnnotationStyle style)
     {
         var editor = _parts.TextEditor;
         _editorBackground ??= editor.Background;
         editor.Foreground = new SolidColorBrush(style.Color);
         editor.Background = style.TextBackground is { } bg ? new SolidColorBrush(bg) : _editorBackground;
-        // Поле растёт по самой длинной строке, как блок аннотации, и выравнивает строки так же. Минимальная ширина
-        // из XAML — только для выравнивания влево: иначе короткая строка встала бы по центру (вправо) пустого поля
-        // и после Enter прыгнула бы к левому краю блока.
+        // Field grows by longest line like annotation block, and aligns lines same. Minimum width
+        // from XAML is only for left alignment: otherwise short line would center (right) in empty field
+        // and after Enter jump to left edge of block.
         _editorMinWidth ??= editor.MinWidth;
         editor.MinWidth = style.TextAlign == TextAlign.Left ? _editorMinWidth.Value : 0;
         editor.TextAlignment = style.TextAlign switch
@@ -389,20 +389,20 @@ public sealed class AnnotationEditor
         else if (e.Key == Key.Enter && !Keyboard.Modifiers.HasFlag(ModifierKeys.Shift)) { e.Handled = true; CommitTextEdit(); }
     }
 
-    // ---------- Параметры и палитра ----------
+    // ---------- Options and palette ----------
 
-    /// <summary>Фигура, к которой применяются параметры и палитра: выбранная и ещё лежащая в документе.</summary>
+    /// <summary>Shape to which options and palette apply: selected and still in document.</summary>
     private Annotation? OptionsSubject => Document.Selected is { } s && Document.Items.Contains(s) ? s : null;
 
     private IReadOnlyList<OptionsSectionKind> CurrentSections()
     {
         if (!_host.OptionsEnabled) return [];
         var sections = OptionsSections.For(new OptionsContext(CurrentTool, OptionsSubject) { Beautify = _beautifyOn });
-        // Без рисования остаётся только оформление: оно меняет итог, а не пометки.
+        // Without drawing only decoration remains: it changes result, not marks.
         return _drawingEnabled ? sections : sections.Where(s => s == OptionsSectionKind.Beautify).ToList();
     }
 
-    /// <summary>Стиль, который правят параметры и палитра: выбранной фигуры, вводимого текста или будущей фигуры инструмента.</summary>
+    /// <summary>Style edited by options and palette: selected shape, entering text or future shape of tool.</summary>
     private AnnotationStyle EffectiveStyle()
     {
         if (OptionsSubject is { } s) return s.Style;
@@ -411,8 +411,8 @@ public sealed class AnnotationEditor
     }
 
     /// <summary>
-    /// Показывает в параметрах секцию инструмента или фигуры и стиль, подсвечивает на палитре цвет активного образца
-    /// и сообщает flyout'ам новое состояние (открыть у фигуры, закрыть, переставить).
+    /// Shows in options tool or shape section and style, highlights active swatch color on palette
+    /// and tells flyouts new state (open near shape, close, move).
     /// </summary>
     public void RefreshOptions()
     {
@@ -428,19 +428,19 @@ public sealed class AnnotationEditor
             _parts.Flyouts.Options.Show(main, style, target, opacity);
             _parts.Toolbar.MarkSwatch(StyleOptions.SwatchColor(style, target));
         }
-        // Параметры фигуры рядом с ней — только при явном выборе инструментом «Выбор»; пока её тащат, они скрыты.
+        // Shape options next to it — only on explicit Select tool selection; while dragged, hidden.
         var shape = CurrentTool == ToolKind.Select ? OptionsSubject : null;
         _parts.Flyouts.Update(new FlyoutState(_host.OptionsEnabled && !_host.IsClosing, CurrentTool, main, shape,
             ShapeHidden: ToolGestureActive || _gestureStarting, BeautifyOn: _beautifyOn));
     }
 
     /// <summary>
-    /// Правка из параметров или палитры: новый стиль применяется к выбранной фигуре одним шагом undo
-    /// (или к вводимому тексту) и запоминается как параметры будущих фигур.
+    /// Edit from options or palette: new style applied to selected shape as one undo step
+    /// (or to entering text) and remembered as future shape options.
     /// </summary>
     private void EditStyle(Func<AnnotationStyle, AnnotationStyle> op)
     {
-        if (ToolGestureActive || !_drawingEnabled) return; // не перекрашиваем фигуру под живым жестом
+        if (ToolGestureActive || !_drawingEnabled) return; // don't repaint shape under live gesture
         var sections = CurrentSections();
         var subject = OptionsSubject;
         var before = EffectiveStyle();
@@ -461,14 +461,14 @@ public sealed class AnnotationEditor
         RefreshOptions();
     }
 
-    /// <summary>Клик по палитре (и цвет из пипетки) красит активный образец или основной цвет.</summary>
+    /// <summary>Palette click (and eyedropper color) paints active swatch or main color.</summary>
     private void OnColorPicked(Color c)
     {
         var target = OptionsSections.EffectiveTarget(CurrentSections(), Options.ActiveTarget);
         EditStyle(s => Options.Paint(s, target, c));
     }
 
-    /// <summary>Клик по образцу делает его активным; выключенная часть (заливка, фон, обводка) при этом включается.</summary>
+    /// <summary>Swatch click makes it active; disabled part (fill, background, stroke) gets enabled.</summary>
     private void OnTargetClicked(PaintTarget target)
     {
         Options.ActiveTarget = target;
@@ -480,11 +480,11 @@ public sealed class AnnotationEditor
         else { _stripKey = null; RefreshOptions(); }
     }
 
-    /// <summary>Сбросить кэш параметров: следующий RefreshOptions покажет их заново.</summary>
+    /// <summary>Reset options cache: next RefreshOptions will show them anew.</summary>
     public void InvalidateOptions() => _stripKey = null;
 
-    /// <summary>Единая смена инструмента: кнопка, клавиша, Esc. Пипетка выключается, измерение линейки убирается.
-    /// Инструмент выключенной функции (линейка) не выбирается.</summary>
+    /// <summary>Unified tool change: button, key, Esc. Eyedropper disabled, ruler measurement removed.
+    /// Tool of disabled feature (ruler) not selected.</summary>
     public void SetTool(ToolKind kind)
     {
         if (!_settings.ToolAllowed(kind)) return;
@@ -503,8 +503,8 @@ public sealed class AnnotationEditor
     }
 
     /// <summary>
-    /// Функции включили или выключили, пока хост открыт (окно редактора): кнопки панели по новым настройкам,
-    /// выключенные пипетка, линейка и оформление снимаются. Сохранённое BeautifyEnabled при этом не меняется.
+    /// Features enabled/disabled while host open (editor window): panel buttons per new settings,
+    /// disabled eyedropper, ruler and decoration removed. Saved BeautifyEnabled unchanged.
     /// </summary>
     public void ApplyFeatures()
     {
@@ -514,11 +514,11 @@ public sealed class AnnotationEditor
         if (_beautifyOn && !BeautifyAllowed) ApplyBeautify(false, persist: false);
     }
 
-    // ---------- Пипетка ----------
+    // ---------- Eyedropper ----------
 
     public void TogglePipette() => SetPipette(!_pipette);
 
-    /// <summary>Режим пипетки (кнопка или I): курсор-перекрестие с лупой, следующий клик по снимку берёт цвет. Одноразовый.</summary>
+    /// <summary>Eyedropper mode (button or I): crosshair cursor with magnifier, next click on screenshot picks color. One-shot.</summary>
     public void SetPipette(bool on)
     {
         if (on && (!_host.CanUsePipette || !_drawingEnabled || !_settings.IsFeatureOn(FeatureCatalog.Pipette))) on = false;
@@ -530,7 +530,7 @@ public sealed class AnnotationEditor
         if (!_host.IsClosing) _host.RefreshHover();
     }
 
-    /// <summary>Клик пипеткой: цвет пикселя снимка — в активный образец, режим выключается.</summary>
+    /// <summary>Eyedropper click: screenshot pixel color → active swatch, mode off.</summary>
     public void PickColor(PixelPoint p)
     {
         var c = Pipette.ColorAt(Source, p);
@@ -538,13 +538,13 @@ public sealed class AnnotationEditor
         OnColorPicked(c);
     }
 
-    // ---------- Оформление ----------
+    // ---------- Decoration ----------
 
     public void ToggleBeautify() => SetBeautify(!_beautifyOn);
 
     public void SetBeautify(bool on)
     {
-        if (on && !BeautifyAllowed) return; // и настройку BeautifyEnabled не трогаем
+        if (on && !BeautifyAllowed) return; // and BeautifyEnabled setting untouched
         ApplyBeautify(on, _persistBeautify);
     }
 
@@ -555,7 +555,7 @@ public sealed class AnnotationEditor
         if (persist) _settings.BeautifyEnabled = on;
         _parts.Toolbar.SetBeautify(on);
         RefreshOptions();
-        _parts.Flyouts.OnBeautifyToggled(on); // включили — параметры оформления сразу у кнопки ✨
+        _parts.Flyouts.OnBeautifyToggled(on); // enabled — decoration options immediately at ✨ button
         _host.OnBeautifyChanged();
     }
 
@@ -570,7 +570,7 @@ public sealed class AnnotationEditor
     public static Color ParseColor(string? text)
     {
         try { if (text is not null && ColorConverter.ConvertFromString(text) is Color c) return c; }
-        catch (Exception) { /* битая настройка — цвет по умолчанию */ }
+        catch (Exception) { /* broken setting — default color */ }
         return ToolbarControl.Palette[0];
     }
 }

@@ -3,21 +3,21 @@ using System.Windows.Media;
 
 namespace Screeny.Annotations.Shapes;
 
-/// <summary>Стрелка одного из стилей <see cref="ArrowStyle"/>; геометрию считает <see cref="ArrowGeometry"/>.</summary>
+/// <summary>Arrow of one of <see cref="ArrowStyle"/> styles; geometry computed by <see cref="ArrowGeometry"/>.</summary>
 public sealed class ArrowAnnotation(Point start, Point end, AnnotationStyle style) : LineAnnotation(start, end, style)
 {
-    // Кэши сбрасываются при изменении концов или стиля.
+    // Caches reset when ends or style change.
     private ArrowShape? _shape;
     private StreamGeometry? _fill;
     private Pen? _edgePen, _dashPen;
 
-    /// <summary>Текущая геометрия (для отрисовки и тестов).</summary>
+    /// <summary>Current geometry (for rendering and tests).</summary>
     public ArrowShape Shape => _shape ??= ArrowGeometry.Compute(Start, End, Style.Thickness, Style.Arrow);
 
     public override Rect Bounds => Shape.Polygons.Count == 0 ? base.Bounds : ArrowGeometry.Bounds(Shape, Style.Thickness);
     public override Rect GeometryBounds => Bounds;
 
-    /// <summary>Совместимость: крылья треугольного наконечника на конце <paramref name="to"/>.</summary>
+    /// <summary>Compatibility: triangular arrowhead wings at end <paramref name="to"/>.</summary>
     public static (Point Left, Point Right) HeadWings(Point from, Point to, double headLength, double headWidth)
     {
         var dir = to - from; if (dir.Length < 1e-6) return (to, to);
@@ -37,13 +37,13 @@ public sealed class ArrowAnnotation(Point start, Point end, AnnotationStyle styl
         var shape = Shape;
         if (shape.Polygons.Count == 0) return;
         if (shape.HasLine) dc.DrawLine(shape.Dashed ? DashPen() : MakePen(), shape.LineStart, shape.LineEnd);
-        // Тонкое перо по краю скругляет углы наконечников.
+        // Thin pen along edge rounds arrowhead corners.
         dc.DrawGeometry(StyleBrush, _edgePen ??= Freeze(new Pen(StyleBrush, 1) { LineJoin = PenLineJoin.Round }), FillGeometry(shape));
     }
 
     private Pen DashPen() => _dashPen ??= Freeze(new Pen(StyleBrush, Style.Thickness)
     {
-        // Штрих 3 толщины, промежуток 2: круглые концы съедают часть промежутка.
+        // Dash 3 widths, gap 2: round caps eat part of gap.
         DashStyle = new DashStyle([3, 2.2], 0), DashCap = PenLineCap.Round,
         StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round, LineJoin = PenLineJoin.Round,
     });

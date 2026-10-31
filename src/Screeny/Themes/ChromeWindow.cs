@@ -11,9 +11,9 @@ using Screeny.Native;
 namespace Screeny.Themes;
 
 /// <summary>
-/// Окно без системной рамки: свой заголовок 40 px (иконка, название, «свернуть» и «закрыть») из стиля в Theme.xaml.
-/// Перетаскивание и двойной клик по заголовку обрабатывает система через WindowChrome.CaptionHeight;
-/// разворачивание двойным кликом работает только у окон с изменяемым размером (у остальных нет WS_MAXIMIZEBOX).
+/// Window without system frame: own 40 px title (icon, name, minimize/close) from style in Theme.xaml.
+/// Dragging and double-click on title handled by system via WindowChrome.CaptionHeight;
+/// double-click maximize works only for resizable windows (others lack WS_MAXIMIZEBOX).
 /// </summary>
 public class ChromeWindow : Window
 {
@@ -30,7 +30,7 @@ public class ChromeWindow : Window
 
     public ChromeWindow()
     {
-        // Неявный стиль по типу не применяется к наследникам (SettingsWindow и т. п.) — подключаем явно.
+        // Implicit style by type doesn't apply to descendants (SettingsWindow etc.) — add explicitly.
         SetResourceReference(StyleProperty, typeof(ChromeWindow));
         CaptionIcon = _appIcon ??= LoadAppIcon();
         Loaded += (_, _) => FitToMonitor(center: WindowStartupLocation == WindowStartupLocation.CenterScreen);
@@ -38,22 +38,22 @@ public class ChromeWindow : Window
     }
 
     /// <summary>
-    /// Естественный предел высоты, DIP: окно с прокруткой (настройки, мастер) не растёт выше, даже если монитор позволяет.
-    /// Итоговый <see cref="FrameworkElement.MaxHeight"/> — меньшее из него и рабочей области монитора (<see cref="WindowFit.CapHeight"/>).
+    /// Natural height limit, DIP: scrollable window (settings, wizard) doesn't grow higher even if monitor allows.
+    /// Final <see cref="FrameworkElement.MaxHeight"/> — min of it and monitor work area (<see cref="WindowFit.CapHeight"/>).
     /// </summary>
     public double NaturalMaxHeight { get; set; } = double.PositiveInfinity;
 
     /// <summary>
-    /// Только для тестового экземпляра: рабочая область в пикселях устройства вместо настоящей (проверка маленького
-    /// монитора без второго монитора; переменная окружения <c>SCREENY_DEV_WORKAREA=x,y,w,h</c>, читает App).
+    /// Only for test instance: work area in device pixels instead of real (small monitor check without second monitor; environment variable <c>SCREENY_DEV_WORKAREA=x,y,w,h</c>, read by App).
+    ///
     /// </summary>
     public static Rect? DevWorkAreaOverride { get; set; }
 
     private IntPtr _monitor;
 
     /// <summary>
-    /// Монитор окна. До показа окно, открываемое по центру экрана, ещё не на своём месте — берём монитор под курсором,
-    /// где Windows его и откроет; после — монитор, на котором окно больше всего.
+    /// Window monitor. Before show, window centered on screen not yet in place — take monitor under cursor,
+    /// where Windows will open it; after — monitor with most of window.
     /// </summary>
     private IntPtr CurrentMonitor()
     {
@@ -65,9 +65,9 @@ public class ChromeWindow : Window
     }
 
     /// <summary>
-    /// Окно по монитору, на котором оно на самом деле (а не по основному, как <c>SystemParameters.WorkArea</c>): высота не
-    /// больше рабочей области этого монитора минус поле, окно целиком внутри неё — по центру (при открытии по центру
-    /// экрана) или ближайшее к прежнему месту. Повторяется при переходе на другой монитор и смене DPI.
+    /// Window per monitor it actually is on (not primary like <c>SystemParameters.WorkArea</c>): height no
+    /// larger than that monitor work area minus margin, window entirely inside — centered (when opened centered on screen)
+    /// or nearest to previous place. Repeated on monitor change and DPI change.
     /// </summary>
     private void FitToMonitor(bool center)
     {
@@ -88,7 +88,7 @@ public class ChromeWindow : Window
         if (Math.Abs(MaxHeight - cap) > 0.5)
         {
             MaxHeight = cap;
-            UpdateLayout(); // SizeToContent пересчитывает высоту под новый предел до того, как окно ставится на место
+            UpdateLayout(); // SizeToContent recalculates height under new limit before window placement
         }
         if (!User32.GetWindowRect(hwnd, out var r)) return;
         var current = new Rect(r.Left, r.Top, r.Right - r.Left, r.Bottom - r.Top);
@@ -105,14 +105,14 @@ public class ChromeWindow : Window
         if (IsLoaded) Dispatcher.BeginInvoke(() => FitToMonitor(center: false));
     }
 
-    /// <summary>Показывать название окна в заголовке (диалоги показывают заголовок в теле).</summary>
+    /// <summary>Show window name in title (dialogs show title in body).</summary>
     public bool ShowCaptionTitle
     {
         get => (bool)GetValue(ShowCaptionTitleProperty);
         set => SetValue(ShowCaptionTitleProperty, value);
     }
 
-    /// <summary>Свои элементы в заголовке, слева от кнопок окна (кликабельны: не перетаскивают окно).</summary>
+    /// <summary>Custom title elements, left of window buttons (clickable: don't drag window).</summary>
     public object? CaptionContent
     {
         get => GetValue(CaptionContentProperty);
@@ -137,16 +137,16 @@ public class ChromeWindow : Window
         base.OnSourceInitialized(e);
         ApplyNativeTheme();
         HwndSource.FromHwnd(new WindowInteropHelper(this).Handle)?.AddHook(WndProc);
-        // Предел высоты — до первой раскладки, чтобы окно не открылось башней выше экрана; место уточняется в Loaded.
+        // Height limit before first layout so window doesn't open as tower above screen; place refined in Loaded.
         FitToMonitor(center: WindowStartupLocation == WindowStartupLocation.CenterScreen);
     }
 
     private const int WM_GETMINMAXINFO = 0x0024;
 
     /// <summary>
-    /// Без системного заголовка Windows разворачивает окно на весь монитор с выходом за края на толщину рамки
-    /// (стандартная проблема WindowChrome) и перекрывает панель задач. Задаём развёрнутому окну ровно рабочую
-    /// область его монитора — тогда и отступ-компенсация в шаблоне не нужна.
+    /// Without system title, Windows maximizes window to entire monitor with edges beyond border thickness
+    /// (standard WindowChrome issue) and covers taskbar. Set maximized window exactly work area of its monitor — then no offset compensation in template needed.
+    ///
     /// </summary>
     private static IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
@@ -160,10 +160,10 @@ public class ChromeWindow : Window
         mmi.ptMaxPosition = new User32.POINT { X = work.Left - area.Left, Y = work.Top - area.Top };
         mmi.ptMaxSize = new User32.POINT { X = work.Right - work.Left, Y = work.Bottom - work.Top };
         Marshal.StructureToPtr(mmi, lParam, true);
-        return IntPtr.Zero; // не помечаем handled: WPF дополнит MinWidth/MinHeight окна
+        return IntPtr.Zero; // don't mark handled: WPF adds MinWidth/MinHeight to window
     }
 
-    /// <summary>Alt+F4: без системного заголовка закрываем сами, не полагаясь на системное меню.</summary>
+    /// <summary>Alt+F4: without system title close ourselves, not relying on system menu.</summary>
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
@@ -175,8 +175,8 @@ public class ChromeWindow : Window
     }
 
     /// <summary>
-    /// Атрибуты DWM: скругление (Windows 11), тёмные системные элементы в тёмной теме, цвет обводки окна.
-    /// На Windows 10 атрибуты 33/34 не поддерживаются — ошибки игнорируем.
+    /// DWM attributes: rounding (Windows 11), dark system elements in dark theme, window border color.
+    /// On Windows 10 attributes 33/34 unsupported — errors ignored.
     /// </summary>
     internal void ApplyNativeTheme()
     {
@@ -194,7 +194,7 @@ public class ChromeWindow : Window
         }
     }
 
-    /// <summary>Кадр 32 px из screeny.ico: чёткий при 16 DIP на 100–200 % масштаба.</summary>
+    /// <summary>32 px frame from screeny.ico: crisp at 16 DIP on 100–200% scale.</summary>
     private static ImageSource? LoadAppIcon()
     {
         try

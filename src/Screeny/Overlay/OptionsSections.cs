@@ -5,47 +5,47 @@ using Screeny.Overlay.Tools;
 namespace Screeny.Overlay;
 
 /// <summary>
-/// Секция параметров. Секции инструмента и фигуры показывает <see cref="OptionsPanelControl"/> во flyout'е у кнопки
-/// инструмента или рядом с фигурой; оформление — <see cref="BeautifySection"/> во flyout'е у кнопки ✨.
+/// Options section. Tool and shape sections shown by <see cref="OptionsPanelControl"/> in flyout at tool button
+/// or next to shape; decoration — <see cref="BeautifySection"/> in flyout at ✨ button.
 /// </summary>
 public enum OptionsSectionKind
 {
-    /// <summary>Прямоугольник и эллипс: образцы «Обводка» и «Заливка».</summary>
+    /// <summary>Rectangle and ellipse: “Stroke” and “Fill” swatches.</summary>
     Shape,
-    /// <summary>Стрелка: четыре стиля.</summary>
+    /// <summary>Arrow: four styles.</summary>
     Arrow,
-    /// <summary>Текст: образцы «Текст» и «Фон».</summary>
+    /// <summary>Text: “Text” and “Background” swatches.</summary>
     Text,
-    /// <summary>Оформление (beautify): фон-градиент, отступ, скругление, тень. Показывается, пока оформление включено.</summary>
+    /// <summary>Decoration (beautify): background gradient, margin, rounding, shadow. Shown while decoration enabled.</summary>
     Beautify,
 }
 
-/// <summary>Что красит клик по палитре (и пипетка).</summary>
+/// <summary>What palette click (and eyedropper) paints.</summary>
 public enum PaintTarget
 {
-    /// <summary>Основной цвет: обводка фигуры, цвет текста, линия и т.п.</summary>
+    /// <summary>Main color: shape stroke, text color, line etc.</summary>
     Color,
-    /// <summary>Заливка прямоугольника/эллипса.</summary>
+    /// <summary>Rectangle/ellipse fill.</summary>
     Fill,
-    /// <summary>Подложка текста.</summary>
+    /// <summary>Text background.</summary>
     Background,
 }
 
 /// <summary>
-/// Всё, от чего зависит набор секций. Расширяется полями (например, <c>bool Beautify</c>) без смены сигнатуры
+/// Everything section set depends on. Extends with fields (e.g., <c>bool Beautify</c>) without signature change.
 /// <see cref="OptionsSections.For"/>.
 /// </summary>
 public sealed record OptionsContext(ToolKind Tool, Annotation? Selected)
 {
-    /// <summary>Оформление включено: его секция идёт после секции инструмента или фигуры.</summary>
+    /// <summary>Decoration enabled: its section goes after tool or shape section.</summary>
     public bool Beautify { get; init; }
 }
 
 public static class OptionsSections
 {
     /// <summary>
-    /// Секции по порядку. Выбранная фигура важнее инструмента: выбрана линия при активном
-    /// прямоугольнике — секций нет. Пустой список — параметров нет (палитра красит основной цвет).
+    /// Sections in order. Selected shape beats tool: line selected with active rectangle — no sections. Empty list — no options (palette paints main color).
+    ///
     /// </summary>
     public static IReadOnlyList<OptionsSectionKind> For(OptionsContext context)
     {
@@ -64,7 +64,7 @@ public static class OptionsSections
         _ => null,
     };
 
-    /// <summary>Только прямоугольник и эллипс, а не любые <see cref="BoxAnnotation"/>: у эффектов цвета нет.</summary>
+    /// <summary>Only rectangle and ellipse, not any <see cref="BoxAnnotation"/>: effects have no color.</summary>
     public static OptionsSectionKind? ForAnnotation(Annotation a) => a switch
     {
         RectAnnotation or EllipseAnnotation => OptionsSectionKind.Shape,
@@ -73,7 +73,7 @@ public static class OptionsSections
         _ => null,
     };
 
-    /// <summary>Образцы цвета, которые есть у секции.</summary>
+    /// <summary>Color swatches section has.</summary>
     public static IReadOnlyList<PaintTarget> Targets(OptionsSectionKind kind) => kind switch
     {
         OptionsSectionKind.Shape => [PaintTarget.Color, PaintTarget.Fill],
@@ -81,7 +81,7 @@ public static class OptionsSections
         _ => [],
     };
 
-    /// <summary>Активный образец, если он есть в показанных секциях; иначе палитра красит основной цвет.</summary>
+    /// <summary>Active swatch if present in shown sections; else palette paints main color.</summary>
     public static PaintTarget EffectiveTarget(IReadOnlyList<OptionsSectionKind> sections, PaintTarget active)
         => active == PaintTarget.Color || sections.Any(s => Targets(s).Contains(active)) ? active : PaintTarget.Color;
 }

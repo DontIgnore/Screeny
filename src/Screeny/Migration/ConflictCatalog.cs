@@ -3,15 +3,15 @@ using Screeny.Hotkeys;
 namespace Screeny.Migration;
 
 /// <summary>
-/// Программа, которая может забирать хоткеи Screeny.
+/// Program that may take Screeny hotkeys.
 /// </summary>
-/// <param name="Id">Короткий id (белый список для <c>--elevated-action</c>): только латиница и цифры.</param>
-/// <param name="ExeNames">Имена exe: по ним ищутся процессы (без «.exe»), записи Run (по команде) и ярлыки автозагрузки (по цели).</param>
-/// <param name="AutostartNames">Известные имена значения Run или файла ярлыка («ShareX.lnk») — второй признак, если exe в команде другой.</param>
-/// <param name="UninstallNames">Начало DisplayName в «Программы и компоненты» (дальше — конец строки, пробел, «-» или «(»).</param>
-/// <param name="TypicalKeys">Какие хоткеи Screeny программа занимает в настройках по умолчанию.</param>
-/// <param name="KeysText">Её клавиши по умолчанию — для подписи в мастере (у PowerToys подпись своя, из строк интерфейса).</param>
-/// <param name="DetectByRemapOnly">PowerToys: мешает только переназначение клавиш в Keyboard Manager, а не сам запуск.</param>
+/// <param name="Id">Short id (whitelist for <c>--elevated-action</c>): only Latin letters and digits.</param>
+/// <param name="ExeNames">Exe names: processes found by them (without “.exe”), Run entries (by command) and startup shortcuts (by target).</param>
+/// <param name="AutostartNames">Known Run value names or shortcut file names (“ShareX.lnk”) — second sign if exe in command differs.</param>
+/// <param name="UninstallNames">Start of DisplayName in Programs and Features (further — end of string, space, “-” or “(”).</param>
+/// <param name="TypicalKeys">Which Screeny hotkeys the program occupies in default settings.</param>
+/// <param name="KeysText">Its default keys — for wizard label (PowerToys has own label from UI strings).</param>
+/// <param name="DetectByRemapOnly">PowerToys: only Keyboard Manager key remapping interferes, not launch itself.</param>
 public sealed record ConflictProgram(
     string Id,
     string DisplayName,
@@ -31,7 +31,7 @@ public sealed record ConflictProgram(
     public bool MatchesAutostart(AutostartEntry entry)
         => MatchesExe(entry.ExeFileName) || AutostartNames.Any(n => string.Equals(n, entry.Name, StringComparison.OrdinalIgnoreCase));
 
-    /// <summary>«Lightshot-5.5.0.7», «Greenshot 1.2.10.6», «PowerToys (Preview) x64» — да; «Greenshotter» — нет.</summary>
+    /// <summary>“Lightshot-5.5.0.7”, “Greenshot 1.2.10.6”, “PowerToys (Preview) x64” — yes; “Greenshotter” — no.</summary>
     public bool MatchesUninstall(string displayName)
     {
         foreach (var name in UninstallNames)
@@ -46,8 +46,8 @@ public sealed record ConflictProgram(
 }
 
 /// <summary>
-/// Таблица программ, которые мешают хоткеям Screeny. Признаки сверены с исходниками программ и с установленным
-/// Lightshot (подробности — в комментариях у каждой записи).
+/// Table of programs interfering with Screeny hotkeys. Signs cross-checked with program sources and installed
+/// Lightshot (details in comments near each entry).
 /// </summary>
 public sealed class ConflictCatalog(IReadOnlyList<ConflictProgram> programs)
 {
@@ -60,22 +60,22 @@ public sealed class ConflictCatalog(IReadOnlyList<ConflictProgram> programs)
 
     public static ConflictCatalog Default { get; } = new(
     [
-        // Типичная установка: HKLM WOW6432Node Run, значение «Lightshot» → «…\Skillbrains\lightshot\Lightshot.exe»;
-        // запущенный процесс — «…\lightshot\5.5.0.7\Lightshot.exe»; Uninstall: «Lightshot-5.5.0.7» (Inno Setup, unins000.exe).
+        // Typical install: HKLM WOW6432Node Run, value “Lightshot” → “…\Skillbrains\lightshot\Lightshot.exe”;
+        // running process — “…\lightshot\5.5.0.7\Lightshot.exe”; Uninstall: “Lightshot-5.5.0.7” (Inno Setup, unins000.exe).
         new("lightshot", "Lightshot", ["Lightshot.exe"], ["Lightshot"], ["Lightshot"], PrintScreenOnly, "PrintScreen"),
-        // ShareX/StartupManager.cs: ярлык «ShareX.lnk» в папке «Автозагрузка» с ключом -silent, флаг — HKCU StartupApproved\StartupFolder.
-        // По умолчанию: PrintScreen — весь экран, Ctrl+PrintScreen — область, Alt+PrintScreen — окно.
+        // ShareX/StartupManager.cs: shortcut “ShareX.lnk” in Startup folder with -silent key, flag — HKCU StartupApproved\StartupFolder.
+        // Defaults: PrintScreen — full screen, Ctrl+PrintScreen — region, Alt+PrintScreen — window.
         new("sharex", "ShareX", ["ShareX.exe"], ["ShareX.lnk", "ShareX"], ["ShareX"], PrintScreenOnly, "PrintScreen, Ctrl+PrintScreen, Alt+PrintScreen"),
-        // Greenshot/Helpers/StartupHelper.cs: значение Run «Greenshot» (HKCU, HKLM и WOW6432Node) или ярлык «Greenshot.lnk».
+        // Greenshot/Helpers/StartupHelper.cs: Run value “Greenshot” (HKCU, HKLM and WOW6432Node) or shortcut “Greenshot.lnk”.
         new("greenshot", "Greenshot", ["Greenshot.exe"], ["Greenshot", "Greenshot.lnk"], ["Greenshot"], PrintScreenOnly, "PrintScreen, Alt+PrintScreen, Ctrl+PrintScreen"),
-        // Snipaste: процесс Snipaste.exe; F1 — снимок, F3 — закрепить. С хоткеями Screeny по умолчанию не пересекается,
-        // но это второй инструмент снимков. Имя записи автозапуска не подтверждено — ищем по exe в команде.
+        // Snipaste: process Snipaste.exe; F1 — snapshot, F3 — pin. Doesn't intersect Screeny defaults,
+        // but is second screenshot tool. Autostart entry name not confirmed — search by exe in command.
         new("snipaste", "Snipaste", ["Snipaste.exe"], ["Snipaste"], ["Snipaste"], None, "F1, F3"),
-        // PicPick (NGWIN): PrintScreen — весь экран, Alt/Ctrl/Shift+PrintScreen — окно и область. Имя записи автозапуска
-        // не подтверждено — ищем по exe в команде или цели ярлыка.
+        // PicPick (NGWIN): PrintScreen — full screen, Alt/Ctrl/Shift+PrintScreen — window and region. Autostart entry name
+        // not confirmed — search by exe in command or shortcut target.
         new("picpick", "PicPick", ["picpick.exe"], ["PicPick", "PicPick.lnk"], ["PicPick"], PrintScreenOnly, "PrintScreen, Alt+PrintScreen, Shift+PrintScreen"),
-        // PowerToys: PrintScreen и Win+Shift+S по умолчанию не занимает; мешает только переназначение этих клавиш
-        // в Keyboard Manager. Автозапуск — задача планировщика, его отключают в настройках самого PowerToys.
+        // PowerToys: doesn't take PrintScreen/Win+Shift+S by default; only remapping those keys
+        // in Keyboard Manager interferes. Autostart is scheduler task, disabled in PowerToys settings itself.
         new("powertoys", "PowerToys", ["PowerToys.exe"], [], ["PowerToys"], None, "Keyboard Manager", DetectByRemapOnly: true),
     ]);
 }

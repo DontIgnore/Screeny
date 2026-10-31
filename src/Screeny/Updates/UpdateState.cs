@@ -4,8 +4,8 @@ using Screeny.Logging;
 namespace Screeny.Updates;
 
 /// <summary>
-/// Состояние обновлений вне настроек: версия, которую пользователь пропустил («Пропустить эту версию»).
-/// Отдельный маленький файл, чтобы не добавлять поле в <c>settings.json</c>.
+/// Update state outside settings: version user skipped (“Skip this version”).
+/// Separate small file not to add field to <c>settings.json</c>.
 /// </summary>
 public sealed class UpdateState
 {
@@ -20,12 +20,12 @@ public sealed class UpdateStateStore
 
     public UpdateStateStore(string filePath) => FilePath = filePath;
 
-    /// <summary><c>%LocalAppData%\Screeny\update-state.json</c>; у тестового экземпляра — <c>update-state.dev.json</c>.</summary>
+    /// <summary><c>%LocalAppData%\Screeny\update-state.json</c>; test instance — <c>update-state.dev.json</c>.</summary>
     public static UpdateStateStore Default(bool dev) => new(Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Screeny",
         dev ? "update-state.dev.json" : "update-state.json"));
 
-    /// <summary>Никогда не бросает: нет файла или он битый — пустое состояние.</summary>
+    /// <summary>Never throws: no file or corrupted — empty state.</summary>
     public UpdateState Load()
     {
         try
@@ -40,7 +40,7 @@ public sealed class UpdateStateStore
         }
     }
 
-    /// <summary>false — не удалось записать (причина в журнале).</summary>
+    /// <summary>false — write failed (reason in log).</summary>
     public bool Save(UpdateState state)
     {
         try

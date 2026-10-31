@@ -6,7 +6,7 @@ using Screeny.Modules;
 
 namespace Screeny.Tests.Modules;
 
-/// <summary>Временная папка и сборка тестовых архивов модуля (настоящий формат, данные — свои).</summary>
+/// <summary>Temp folder and build of test module archives (real format, own data).</summary>
 public sealed class ModuleTestFiles : IDisposable
 {
     public string Dir { get; } = Path.Combine(Path.GetTempPath(), "screeny-module-tests-" + Guid.NewGuid().ToString("N"));
@@ -28,7 +28,7 @@ public sealed class ModuleTestFiles : IDisposable
         => JsonSerializer.SerializeToUtf8Bytes(new ModuleManifest(id, version,
             files.Select(f => new ModuleFile(f.Key, f.Value.Length, Sha(f.Value))).ToList()));
 
-    /// <summary>Архив модуля: module.json по <paramref name="files"/> (или свой <paramref name="manifest"/>) и сами файлы.</summary>
+    /// <summary>Module archive: module.json per <paramref name="files"/> (or own <paramref name="manifest"/>) and files.</summary>
     public static byte[] Zip(IReadOnlyDictionary<string, byte[]> files, byte[]? manifest = null, string id = "ocr-paddle", int version = 1,
         IEnumerable<KeyValuePair<string, byte[]>>? extra = null)
     {
@@ -45,7 +45,7 @@ public sealed class ModuleTestFiles : IDisposable
 
     public static ModuleSpec SpecFor(byte[] zip, int version = 1) => new("ocr-paddle", version, Sha(zip));
 
-    /// <summary>Папка модуля как после установки.</summary>
+    /// <summary>Module folder as after install.</summary>
     public string Installed(string root, int version, IReadOnlyDictionary<string, byte[]>? files = null)
     {
         files ??= DefaultFiles;

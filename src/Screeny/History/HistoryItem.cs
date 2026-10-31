@@ -1,11 +1,11 @@
 namespace Screeny.History;
 
-/// <param name="Path">Снимок истории.</param>
+/// <param name="Path">Screenshot in the history.</param>
 public sealed record HistoryItem(string Path, DateTime CreatedAt)
 {
-    /// <summary>Документ аннотаций <c>&lt;stamp&gt;.screeny.json</c>, если он есть.</summary>
+    /// <summary>Annotation document <c>&lt;stamp&gt;.screeny.json</c>, if present.</summary>
     public string? JsonPath { get; init; }
 
-    /// <summary>Оригинал региона без пометок <c>&lt;stamp&gt;.orig.png</c>, если он есть (настройка «Хранить оригиналы»).</summary>
+    /// <summary>Unannotated original region <c>&lt;stamp&gt;.orig.png</c>, if saved using the Keep Originals setting.</summary>
     public string? OriginalPath { get; init; }
 }

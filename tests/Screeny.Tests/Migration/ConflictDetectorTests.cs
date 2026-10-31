@@ -38,7 +38,7 @@ public class ConflictDetectorTests
     {
         var env = new FakeEnvironmentSnapshot();
         env.ProcessList.Add(new ProcessEntry("PowerToys", @"C:\Users\u\AppData\Local\PowerToys\PowerToys.exe", 5));
-        // Как на машине разработки: переназначены только PageUp/PageDown.
+        // Like dev machine: only PageUp/PageDown remapped.
         env.PowerToysKeyboardConfig = """{"remapKeys":{"inProcess":[{"originalKeys":"33","newRemapKeys":"35"},{"originalKeys":"34","newRemapKeys":"46"}]},"remapShortcuts":{"global":[],"appSpecific":[]}}""";
         Assert.Empty(Detect(env));
     }
@@ -89,7 +89,7 @@ public class ConflictDetectorTests
     public void AutostartDisabledByStartupApproved_IsNotConflict()
     {
         var env = new FakeEnvironmentSnapshot();
-        // Значение, которое пишет Диспетчер задач при «Отключить»: 03 00 00 00 + FILETIME.
+        // Value Task Manager writes on “Disable”: 03 00 00 00 + FILETIME.
         env.AutostartList.Add(new AutostartEntry(AutostartLocation.RunMachine32, "Lightshot", @"C:\x\Lightshot.exe",
             [3, 0, 0, 0, 0x39, 0x96, 0x33, 0xF4, 0x2A, 0xD6, 0xD9, 0x01]));
         env.UninstallList.Add(new UninstallEntry("k", "Lightshot-5.5.0.7", "\"C:\\x\\unins000.exe\"", null, true));

@@ -14,22 +14,22 @@ using Screeny.Themes;
 
 namespace Screeny.Migration;
 
-/// <summary>Что мастеру нужно от приложения.</summary>
-/// <param name="Hotkeys">Текущий список хоткеев (из настроек).</param>
-/// <param name="CheckForUpdates">Текущее значение галочки обновлений.</param>
-/// <param name="DisabledFeatures">Выключенные функции (<see cref="AppSettings.DisabledFeatures"/>): их галочки сняты.</param>
-/// <param name="Language">Текущая настройка языка (<see cref="AppSettings.Language"/>). Выбор в мастере сразу меняет язык
-/// интерфейса для просмотра, а сохраняется вместе с остальным выбором; простой «Пропустить» возвращает прежний.</param>
-/// <param name="ApplyHotkeys">Применить и сохранить хоткеи (<see cref="App.ApplyHotkeys"/>).</param>
+/// <summary>What wizard needs from application.</summary>
+/// <param name="Hotkeys">Current hotkey list (from settings).</param>
+/// <param name="CheckForUpdates">Current updates checkbox value.</param>
+/// <param name="DisabledFeatures">Disabled features (<see cref="AppSettings.DisabledFeatures"/>): their checkboxes unchecked.</param>
+/// <param name="Language">Current language setting (<see cref="AppSettings.Language"/>). Wizard choice immediately changes UI
+/// language for viewing, and is saved with rest; plain “Skip” restores previous.</param>
+/// <param name="ApplyHotkeys">Apply and save hotkeys (<see cref="App.ApplyHotkeys"/>).</param>
 /// <param name="Finish">
-/// Мастер пройден: true/false — сохранить «Проверять обновления», null — «Пропустить»; второй аргумент — id показанных
-/// конфликтов; третий — переключённые в мастере функции (id → включена) или null («Пропустить» их не меняет);
-/// четвёртый — выбранный язык или null («Пропустить»: вернуть сохранённый).
-/// «Пропустить» (и крестик) после «Применить», на котором не заработал хоткей, передаёт выбранные функции и галочку
-/// обновлений, как «Применить»: их пользователь уже подтвердил, а хоткеи остаются прежними.
+/// Wizard passed: true/false — save “Check for updates”, null — “Skip”; second arg — ids of shown
+/// conflicts; third — toggled features (id → enabled) or null (“Skip” doesn't change);
+/// fourth — selected language or null (“Skip”: restore saved).
+/// “Skip” (and X) after “Apply” where hotkey didn't work passes selected features and updates checkbox
+/// like “Apply”: user already confirmed them, hotkeys remain previous.
 /// </param>
-/// <param name="DownloadPreciseOcr">Скачать модуль точного распознавания в фоне (итог — уведомлением в трее); null — модуль
-/// уже стоит, галочки «Скачать точное распознавание» нет.</param>
+/// <param name="DownloadPreciseOcr">Download precise recognition module in background (result — tray notification); null — module
+/// already installed, “Download precise recognition” checkbox absent.</param>
 public sealed record SetupWizardHost(
     IReadOnlyList<HotkeyBinding> Hotkeys,
     bool CheckForUpdates,
@@ -42,20 +42,20 @@ public sealed record SetupWizardHost(
     Action? DownloadPreciseOcr = null);
 
 /// <summary>
-/// Мастер первого запуска: один экран. Если найдены мешающие программы — карточки с действиями («Закрыть сейчас»,
-/// «Убрать из автозапуска», «Удалить программу…», для записей всех пользователей — «Отключить с правами администратора»)
-/// и системный захват PrintScreen; затем выбор хоткеев, функций (<see cref="FeatureCatalog"/>: у Velopack-установщика нет
-/// экрана компонентов, поэтому модули выбираются здесь, сразу после установки) и «Проверять обновления». Без согласия ничего не меняется:
-/// действия выполняются по «Применить» (или по своей кнопке), результат каждого виден в карточке.
+/// First-run wizard: one screen. If conflicting programs found — cards with actions (“Close now”,
+/// “Remove from autostart”, “Uninstall program…”, for all-users entries — “Disable with admin rights”)
+/// and system PrintScreen capture; then hotkey choice, features (<see cref="FeatureCatalog"/>: Velopack installer has no
+/// components screen, so modules chosen here right after install) and “Check for updates”. Without consent nothing changes:
+/// actions run on “Apply” (or own button), each result visible in card.
 /// </summary>
 public partial class SetupWizardWindow : ChromeWindow
 {
     private readonly SetupWizardHost _host;
     private readonly IConflictActions _actions;
     private readonly List<Card> _cards = new();
-    /// <summary>Результаты действий по id программы: переживают пересканирование.</summary>
+    /// <summary>Action results by program id: survive re-scan.</summary>
     private readonly Dictionary<string, List<ActionResult>> _results = new();
-    /// <summary>Путь exe для иконки — и после того, как программа перестала мешать.</summary>
+    /// <summary>Exe path for icon — even after program stopped conflicting.</summary>
     private readonly Dictionary<string, string> _exePaths = new();
     private IReadOnlyList<Conflict> _conflicts = [];
     private bool _systemPrintScreen;
@@ -71,7 +71,7 @@ public partial class SetupWizardWindow : ChromeWindow
     public SetupWizardWindow(SetupWizardHost host, IEnvironmentSnapshot initial)
     {
         InitializeComponent();
-        // Нижняя панель с «Применить» всегда на экране: не выше 820 DIP и рабочей области своего монитора (ChromeWindow).
+        // Bottom bar with “Apply” always on screen: not higher than 820 DIP and work area of its monitor (ChromeWindow).
         NaturalMaxHeight = 820;
         _host = host;
         _actions = host.Services.Actions;
@@ -90,8 +90,8 @@ public partial class SetupWizardWindow : ChromeWindow
     private bool _applyingLanguage;
 
     /// <summary>
-    /// Выбор в списке сразу показывает язык (сохраняется он вместе с остальным выбором). Повторный вход — из
-    /// обработчика <see cref="Loc.Changed"/>, пока язык уже применяется, — и пустой выбор ничего не делают.
+    /// List selection immediately shows language (saved with rest). Re-entry from
+    /// <see cref="Loc.Changed"/> handler while language already applied — and empty selection do nothing.
     /// </summary>
     private void OnLanguagePicked(object sender, SelectionChangedEventArgs e)
     {
@@ -107,8 +107,8 @@ public partial class SetupWizardWindow : ChromeWindow
     }
 
     /// <summary>
-    /// Язык сменили (здесь или в настройках): подписи из XAML обновились сами, собранное в коде — заголовок, карточки
-    /// (с выбором в них) и галочка модуля — строится заново. Уже показанные итоги проверки хоткеев остаются как были.
+    /// Language changed (here or in settings): XAML labels updated themselves, code-built — title, cards
+    /// (with selection inside) and module checkbox — rebuilt. Already shown hotkey check results stay.
     /// </summary>
     private void OnLanguageChanged()
     {
@@ -120,7 +120,7 @@ public partial class SetupWizardWindow : ChromeWindow
         if (_appliedOnce) ApplyButton.Content = Loc.T("Wizard.Done");
     }
 
-    /// <summary>Конфликты, найденные при последнем сканировании (для тестов и App).</summary>
+    /// <summary>Conflicts found at last scan (for tests and App).</summary>
     public IReadOnlyList<Conflict> Conflicts => _conflicts;
 
     private void Present(IEnvironmentSnapshot env)
@@ -142,7 +142,7 @@ public partial class SetupWizardWindow : ChromeWindow
         IntroText.Text = Loc.T(any ? "Wizard.IntroConflicts" : "Wizard.IntroReady");
     }
 
-    /// <summary>Галочки карточек на время перестройки при смене языка (id программы → «Закрыть», «Убрать из автозапуска»).</summary>
+    /// <summary>Card checkboxes during rebuild on language change (id → “Close”, “Remove from autostart”).</summary>
     private Dictionary<string, (bool? Close, bool? Autostart)>? _keptChoices;
 
     private void RebuildCards(bool keepChoices = false)
@@ -152,7 +152,7 @@ public partial class SetupWizardWindow : ChromeWindow
         _cards.Clear();
         var hotkeys = CurrentChoiceHotkeys();
         foreach (var conflict in _conflicts) ConflictPanel.Children.Add(BuildCard(conflict, hotkeys));
-        // Программы, которые после действий больше не мешают, остаются с результатом.
+        // Programs that after actions no longer conflict remain with result.
         foreach (var (id, results) in _results)
         {
             if (_conflicts.Any(c => c.Id == id) || _host.Catalog.Find(id) is not { } program) continue;
@@ -171,7 +171,7 @@ public partial class SetupWizardWindow : ChromeWindow
         var body = new StackPanel();
         body.Children.Add(new TextBlock { Text = conflict.Program.DisplayName, Style = Res<Style>("Body"), FontWeight = FontWeights.SemiBold });
         body.Children.Add(Caption(DescribeFound(conflict)));
-        // Клавиши сравниваются в записи каталога («PrintScreen, Ctrl+PrintScreen»), показываются с разделителем языка.
+        // Keys compared in catalog entry (“PrintScreen, Ctrl+PrintScreen”), shown with language separator.
         var names = conflict.Keys.Select(KeyName).ToList();
         bool sameAsUsual = !conflict.Program.DetectByRemapOnly && string.Join(", ", names) == conflict.Program.KeysText;
         var keys = string.Join(Loc.ListSeparator, names);
@@ -187,7 +187,7 @@ public partial class SetupWizardWindow : ChromeWindow
         var buttons = new WrapPanel();
         if (conflict.IsRunning)
         {
-            // Завершение процесса — только по явной галочке пользователя; отключение автозапуска обратимо и отмечено заранее.
+            // Process kill only on explicit user checkbox; autostart disable reversible and pre-checked.
             close = new CheckBox { Content = Loc.T("Wizard.CloseNow"), IsChecked = kept?.Close ?? false, Margin = new Thickness(0, 10, 0, 0) };
             close.ToolTip = Loc.T("Wizard.CloseNowTip");
             body.Children.Add(close);
@@ -309,7 +309,7 @@ public partial class SetupWizardWindow : ChromeWindow
         return border;
     }
 
-    /// <summary>Иконка из exe (если файл есть) или первая буква / символ в круге.</summary>
+    /// <summary>Icon from exe (if file exists) or first letter/symbol in circle.</summary>
     private FrameworkElement ProgramIcon(string? exePath, string name, string? glyph)
     {
         if (exePath is not null && ExeIcon.Load(exePath) is { } image)
@@ -386,7 +386,7 @@ public partial class SetupWizardWindow : ChromeWindow
         SetBusy(true);
         var result = await _actions.DisableAutostartElevatedAsync(conflict);
         await Rescan();
-        // Код выхода повышенного экземпляра — не доказательство: верим только пересканированию.
+        // Elevated instance exit code is not proof: only re-scan is trusted.
         if (result.Success && _conflicts.FirstOrDefault(c => c.Id == conflict.Id) is { NeedsAdminForAutostart: true })
             result = new ActionResult(ActionOutcome.Failed, Loc.F("Wizard.StillMachineAutostart", conflict.Program.DisplayName));
         Record(conflict.Id, result);
@@ -410,7 +410,7 @@ public partial class SetupWizardWindow : ChromeWindow
         Close();
     }
 
-    /// <summary>Закрытие крестиком — как «Пропустить»: мастер не появится снова при следующем запуске.</summary>
+    /// <summary>Closing via X — like “Skip”: wizard won't appear again next launch.</summary>
     protected override void OnClosed(EventArgs e)
     {
         Loc.Changed -= OnLanguageChanged;
@@ -419,8 +419,8 @@ public partial class SetupWizardWindow : ChromeWindow
     }
 
     /// <summary>
-    /// «Пропустить» ничего не меняет, кроме случая, когда «Применить» уже нажимали, но хоткей не заработал: тогда функции
-    /// и обновления сохраняются как выбраны (их уже подтвердили), а хоткеи остаются прежними.
+    /// “Skip” changes nothing, except when “Apply” was pressed but hotkey didn't work: then features
+    /// and updates are saved as chosen (already confirmed), hotkeys remain previous.
     /// </summary>
     private void FinishSkipped()
     {
@@ -432,18 +432,18 @@ public partial class SetupWizardWindow : ChromeWindow
     {
         if (_finished) return;
         _finished = true;
-        // Дальше язык меняет только App (сохранённый или возвращённый): окно больше не откликается на смену.
+        // Further language changed only by App (saved or restored): window no longer reacts.
         Loc.Changed -= OnLanguageChanged;
         _host.Finish(checkForUpdates, _conflicts.Select(c => c.Id).ToList(), features, features is null ? null : LanguagePicker.Selected(LanguageInput));
-        // Выбор подтверждён (не простой «Пропустить»): загрузка — в фоне, итог придёт уведомлением.
+        // Choice confirmed (not plain “Skip”): download in background, result via notification.
         if (features is not null && _preciseOcrInput is { IsChecked: true } && _features.IsOn(FeatureCatalog.Ocr)) _host.DownloadPreciseOcr?.Invoke();
     }
 
     private CheckBox? _preciseOcrInput;
 
     /// <summary>
-    /// «Скачать точное распознавание текста» под «Распознаванием текста и QR»: по умолчанию снята (без согласия ничего не
-    /// скачивается), видна, только пока отмечено распознавание, и только если модуля ещё нет.
+    /// “Download precise text recognition” under “Text and QR recognition”: unchecked by default (without consent nothing
+    /// downloaded), visible only while recognition checked and only if module not yet installed.
     /// </summary>
     private void AddPreciseOcrChoice()
     {
@@ -502,7 +502,7 @@ public partial class SetupWizardWindow : ChromeWindow
             _appliedOnce = true;
             ApplyButton.Content = Loc.T("Wizard.Done");
             SkipButton.Visibility = Visibility.Collapsed;
-            // Выбор уже применён, а «Готово» только закрывает окно: менять его дальше нечем.
+            // Choice already applied, “Done” only closes window: nothing left to change.
             PrintScreenInput.IsEnabled = WinShiftSInput.IsEnabled = CustomInput.IsEnabled = false;
             FeaturesPanel.IsEnabled = UpdatesInput.IsEnabled = LanguageInput.IsEnabled = false;
         }
@@ -510,7 +510,7 @@ public partial class SetupWizardWindow : ChromeWindow
     }
 
     private bool _appliedOnce;
-    /// <summary>Последнее «Применить» не смогло включить хоткей (см. <see cref="FinishSkipped"/>).</summary>
+    /// <summary>Last “Apply” failed to enable a hotkey (see <see cref="FinishSkipped"/>).</summary>
     private bool _hotkeysFailed;
 
     private WizardHotkeyChoice? CollectChoice()
@@ -531,8 +531,8 @@ public partial class SetupWizardWindow : ChromeWindow
     }
 
     /// <summary>
-    /// Что реально работает после применения. Успех <see cref="App.ApplyHotkeys"/> не значит, что PrintScreen свободен:
-    /// запись, которая не работала и раньше, применение не блокирует. Поэтому смотрим статус каждой записи в отчёте.
+    /// What actually works after apply. Success of <see cref="App.ApplyHotkeys"/> doesn't mean PrintScreen free:
+    /// entry that didn't work before doesn't block apply. So look at each entry status in report.
     /// </summary>
     private void ShowHotkeyStatuses(HotkeyReport report)
     {
@@ -580,7 +580,7 @@ public partial class SetupWizardWindow : ChromeWindow
     }
 }
 
-/// <summary>Иконка exe через SHGetFileInfo (только чтение файла).</summary>
+/// <summary>Exe icon via SHGetFileInfo (read-only).</summary>
 internal static class ExeIcon
 {
     public static ImageSource? Load(string path)

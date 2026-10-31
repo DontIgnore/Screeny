@@ -56,7 +56,7 @@ public class HistoryStoreTests : IDisposable
         Assert.Empty(new HistoryStore(_dir, 10).List());
     }
 
-    /// <summary>Чужие PNG, сортирующиеся по имени и выше цифр штампа, и ниже, и с похожим префиксом.</summary>
+    /// <summary>Foreign PNGs sorting by name above/below stamp digits and with similar prefix.</summary>
     private static readonly string[] ForeignPngs =
         ["vacation.png", "2019-01-01.png", "IMG_0001.png", "20260101_000000_000_copy.png", "20260101_000000_000x.png"];
 
@@ -99,7 +99,7 @@ public class HistoryStoreTests : IDisposable
         var t = new DateTime(2026, 10, 25, 3, 30, 0);
         store.Save(MakeBitmap(), t);
         var newest = store.Save(MakeBitmap(), t.AddMinutes(30));
-        var rolledBack = store.Save(MakeBitmap(), t.AddMinutes(-30)); // часы переведены назад
+        var rolledBack = store.Save(MakeBitmap(), t.AddMinutes(-30)); // clock set back
 
         Assert.True(File.Exists(rolledBack));
         Assert.True(File.Exists(newest));
@@ -137,7 +137,7 @@ public class HistoryStoreTests : IDisposable
         File.WriteAllText(file, "x");
         var store = new HistoryStore(file, 10);
         Assert.Empty(store.List());
-        store.Clear(); // не бросает
+        store.Clear(); // doesn't throw
     }
 
     [Fact]
@@ -146,7 +146,7 @@ public class HistoryStoreTests : IDisposable
         Directory.CreateDirectory(_dir);
         var file = Path.Combine(_dir, "not-a-folder");
         File.WriteAllText(file, "x");
-        Assert.ThrowsAny<IOException>(() => new HistoryStore(file, 10).ListOrThrow()); // окну истории нужна причина
+        Assert.ThrowsAny<IOException>(() => new HistoryStore(file, 10).ListOrThrow()); // history window needs reason
         Assert.Empty(new HistoryStore(Path.Combine(_dir, "missing"), 10).ListOrThrow());
     }
 

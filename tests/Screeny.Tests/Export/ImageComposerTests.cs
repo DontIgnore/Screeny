@@ -34,9 +34,9 @@ public class ImageComposerTests
 
         Assert.Equal(30, result.PixelWidth);
         Assert.Equal(30, result.PixelHeight);
-        Assert.Equal(Colors.Red, PixelAt(result, 5, 15));                 // левая сторона рамки: x = 10 − 5
-        Assert.Equal(Color.FromRgb(128, 128, 128), PixelAt(result, 15, 15)); // внутри рамки — исходный снимок
-        Assert.Equal(255, PixelAt(result, 0, 0).A);                          // без прозрачности
+        Assert.Equal(Colors.Red, PixelAt(result, 5, 15));                 // left border side: x = 10 − 5
+        Assert.Equal(Color.FromRgb(128, 128, 128), PixelAt(result, 15, 15)); // inside border — original screenshot
+        Assert.Equal(255, PixelAt(result, 0, 0).A);                          // without transparency
     }
 
     private static BitmapSource Gradient(int w, int h)
@@ -81,7 +81,7 @@ public class ImageComposerTests
     [Fact]
     public void Compose_EffectUsesSnapshotCoordinates()
     {
-        // Шахматка: пикселизация внутри региона даёт серый, снаружи эффекта пиксели не тронуты.
+        // Checkerboard: pixelate inside region gives gray, outside effect pixels untouched.
         int w = 60, h = 40;
         var px = new byte[w * h * 4];
         for (int y = 0; y < h; y++) for (int x = 0; x < w; x++)
@@ -92,8 +92,8 @@ public class ImageComposerTests
 
         var result = ImageComposer.Compose(shot, new PixelRect(10, 5, 40, 30), doc);
 
-        Assert.InRange(PixelAt(result, 12, 7).R, 100, 155);  // (22, 12) снимка — внутри эффекта
-        var outside = PixelAt(result, 2, 2).R;              // (12, 7) снимка — вне эффекта
+        Assert.InRange(PixelAt(result, 12, 7).R, 100, 155);  // (22, 12) of screenshot — inside effect
+        var outside = PixelAt(result, 2, 2).R;              // (12, 7) of screenshot — outside effect
         Assert.True(outside == 0 || outside == 255);
     }
 }

@@ -21,7 +21,7 @@ public class UpdateServiceTests : IDisposable
             return Error is not null ? Task.FromException<UpdateCandidate?>(Error) : Task.FromResult(Next);
         }
 
-        /// <summary>Загрузка ждёт этой задачи (null — завершается сразу).</summary>
+        /// <summary>Download waits for this task (null — completes immediately).</summary>
         public Func<UpdateCandidate, Task>? Download { get; set; }
         public List<string> Downloads { get; } = [];
         public int Running { get; private set; }
@@ -40,16 +40,16 @@ public class UpdateServiceTests : IDisposable
     }
 
     [Theory]
-    [InlineData(false, false, true, true)]   // обычный запуск установленной копии
-    [InlineData(false, false, false, false)] // publish\Screeny.exe, bin: не обновляемая
-    [InlineData(true, false, true, false)]   // dev без источника — никогда в сеть
-    [InlineData(true, true, true, true)]     // dev с --update-source
+    [InlineData(false, false, true, true)]   // normal installed copy launch
+    [InlineData(false, false, false, false)] // publish\Screeny.exe, bin: non-updatable
+    [InlineData(true, false, true, false)]   // dev without source — never network
+    [InlineData(true, true, true, true)]     // dev with --update-source
     public void AutomaticAllowed(bool dev, bool localSource, bool canUpdate, bool expected)
         => Assert.Equal(expected, UpdateService.AutomaticAllowed(dev, localSource, canUpdate));
 
     [Theory]
     [InlineData(false, null, UpdateSourceKind.Github)]
-    [InlineData(true, null, UpdateSourceKind.None)]               // dev без папки: ни фоновой, ни ручной проверки в сеть
+    [InlineData(true, null, UpdateSourceKind.None)]               // dev without folder: neither background nor manual check to network
     [InlineData(true, @"C:\rel", UpdateSourceKind.Folder)]
     public void ChooseSource(bool dev, string? folder, UpdateSourceKind expected)
         => Assert.Equal(expected, UpdateService.ChooseSource(dev, folder));
@@ -87,7 +87,7 @@ public class UpdateServiceTests : IDisposable
         Assert.IsType<UpdateCheckResult.Skipped>(await service.CheckAsync(UpdateCheckKind.Automatic));
         Assert.IsType<UpdateCheckResult.Available>(await service.CheckAsync(UpdateCheckKind.Manual));
 
-        client.Next = new("0.2.2", null); // следующая версия снова показывается
+        client.Next = new("0.2.2", null); // next version shows again
         Assert.IsType<UpdateCheckResult.Available>(await service.CheckAsync(UpdateCheckKind.Automatic));
     }
 
@@ -111,7 +111,7 @@ public class UpdateServiceTests : IDisposable
         Task Delay(TimeSpan span, CancellationToken ct)
         {
             delays.Add(span);
-            if (delays.Count == 2) enabled = true; // пользователь включил настройку между проверками
+            if (delays.Count == 2) enabled = true; // user enabled setting between checks
             if (delays.Count == 3) service!.Dispose();
             ct.ThrowIfCancellationRequested();
             return Task.CompletedTask;
@@ -122,7 +122,7 @@ public class UpdateServiceTests : IDisposable
         await service.RunAsync();
 
         Assert.Equal([UpdateService.StartupDelay, UpdateService.Interval, UpdateService.Interval], delays);
-        Assert.Equal(1, client.Checks); // первая проверка пропущена: настройка была выключена
+        Assert.Equal(1, client.Checks); // first check skipped: setting was disabled
         Assert.Equal(["0.2.1"], found);
     }
 
@@ -134,15 +134,15 @@ public class UpdateServiceTests : IDisposable
         using var service = new UpdateService(client, Store, () => true);
         var update = new UpdateCandidate("0.2.1", null);
 
-        var silent = service.DownloadAsync(update, null, CancellationToken.None); // тихая загрузка в фоне
+        var silent = service.DownloadAsync(update, null, CancellationToken.None); // silent background download
         var progress = new List<int>();
-        var manual = service.DownloadAsync(new UpdateCandidate("0.2.1", null), progress.Add, CancellationToken.None); // «Установить»
-        Assert.False(manual.IsCompleted); // ждёт тихую, а не качает параллельно
+        var manual = service.DownloadAsync(new UpdateCandidate("0.2.1", null), progress.Add, CancellationToken.None); // “Install”
+        Assert.False(manual.IsCompleted); // waits for silent, not parallel download
 
         gate.SetResult();
         await Task.WhenAll(silent, manual);
         Assert.Equal(1, client.MaxRunning);
-        Assert.Equal(["0.2.1"], client.Downloads); // вторая загрузка той же версии — уже скачанное
+        Assert.Equal(["0.2.1"], client.Downloads); // second download same version — already downloaded
         Assert.Equal([100], progress);
 
         client.Download = null;
@@ -172,7 +172,7 @@ public class UpdateServiceTests : IDisposable
         var first = service.DownloadAsync(new UpdateCandidate("0.2.1", null), null, CancellationToken.None);
         using var cts = new CancellationTokenSource();
         var second = service.DownloadAsync(new UpdateCandidate("0.2.2", null), null, cts.Token);
-        cts.Cancel(); // «Отмена» в окне, пока ждём тихую загрузку
+        cts.Cancel(); // “Cancel” in window while waiting silent download
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => second);
         gate.SetResult();
         await first;

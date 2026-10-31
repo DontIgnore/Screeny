@@ -13,7 +13,7 @@ using Screeny.Themes;
 
 namespace Screeny.History;
 
-/// <summary>Сетка миниатюр последних снимков: копировать, закрепить, открыть, показать в папке, удалить.</summary>
+/// <summary>Grid of recent screenshot thumbnails: copy, pin, open, show in folder, delete.</summary>
 public partial class HistoryWindow : ChromeWindow
 {
     private readonly Func<HistoryStore> _store;
@@ -23,9 +23,9 @@ public partial class HistoryWindow : ChromeWindow
     private bool _closed;
     private readonly ObservableCollection<HistoryItemViewModel> _items = new();
 
-    /// <param name="store">Текущее хранилище (может смениться после изменения настроек).</param>
-    /// <param name="pin">Закрепить картинку на экране.</param>
-    /// <param name="edit">Открыть снимок в окне повторного редактирования.</param>
+    /// <param name="store">Current storage (may change after settings).</param>
+    /// <param name="pin">Pin image to screen.</param>
+    /// <param name="edit">Open screenshot in re-edit window.</param>
     public HistoryWindow(Func<HistoryStore> store, Action<BitmapSource> pin, Action<string> edit, BackgroundQueue queue)
     {
         InitializeComponent();
@@ -36,13 +36,13 @@ public partial class HistoryWindow : ChromeWindow
         Items.ItemsSource = _items;
         PreviewKeyDown += (_, e) => { if (e.Key == Key.Escape) Close(); };
         Closed += (_, _) => { _closed = true; _refreshGeneration++; Loc.Changed -= Refresh; };
-        // Заголовок и пустое состояние собираются в коде: при смене языка — заново.
+        // Title and empty state built in code: rebuilt on language change.
         Loc.Changed += Refresh;
     }
 
     private bool _canPin = true;
 
-    /// <summary>Функцию «Закрепление» включили или выключили: кнопки и пункты «Закрепить» карточек — следом.</summary>
+    /// <summary>Pin feature enabled/disabled: card buttons and items “Pin” follow.</summary>
     public bool CanPin
     {
         get => _canPin;
@@ -60,8 +60,8 @@ public partial class HistoryWindow : ChromeWindow
     private int _refreshGeneration;
 
     /// <summary>
-    /// Перечитывает папку. Карточки появляются сразу, миниатюры декодируются в фоне и подставляются по мере готовности;
-    /// новый Refresh отменяет догрузку предыдущего.
+    /// Re-reads folder. Cards appear immediately, thumbnails decoded in background and inserted as ready;
+    /// new Refresh cancels previous loading.
     /// </summary>
     public void Refresh() => _ = RefreshAsync();
 
@@ -112,17 +112,17 @@ public partial class HistoryWindow : ChromeWindow
             try
             {
                 var path = vm.Path;
-                var thumb = await Task.Run(() => HistoryItemViewModel.LoadThumbnail(path)); // продолжение — в UI-потоке
+                var thumb = await Task.Run(() => HistoryItemViewModel.LoadThumbnail(path)); // continuation in UI thread
                 if (generation != _refreshGeneration) return;
                 vm.SetThumbnail(thumb);
             }
-            catch (Exception ex) { Log.Error($"History thumbnail failed: {vm.Path}", ex); } // один битый файл не останавливает остальные
+            catch (Exception ex) { Log.Error($"History thumbnail failed: {vm.Path}", ex); } // one bad file doesn't stop others
         }
     }
 
     /// <summary>
-    /// Карточка, к которой относится событие. Контекстное меню из стиля общее для всех карточек и не всегда
-    /// получает их DataContext, поэтому для него берём выделенную карточку (правый клик её выделяет).
+    /// Card the event belongs to. Context menu from style is common for all cards and doesn't always
+    /// get their DataContext, so take selected card (right-click selects it).
     /// </summary>
     private HistoryItemViewModel? ItemOf(object sender)
         => sender is FrameworkElement { DataContext: HistoryItemViewModel vm } ? vm : Items.SelectedItem as HistoryItemViewModel;
@@ -153,7 +153,7 @@ public partial class HistoryWindow : ChromeWindow
         }
     }
 
-    /// <summary>File.Delete минует корзину, поэтому спрашиваем подтверждение.</summary>
+    /// <summary>File.Delete bypasses Recycle Bin, so ask confirmation.</summary>
     private async void Delete(HistoryItemViewModel vm)
     {
         if (!Dialogs.Confirm(this, Loc.T("History.DeleteTitle"), Loc.T("History.DeleteText"), Loc.T("Common.Delete"), danger: true)) return;
@@ -173,7 +173,7 @@ public partial class HistoryWindow : ChromeWindow
     private void OnItemClick(object sender, MouseButtonEventArgs e) { if (!IsFromButton(e) && ItemOf(sender) is { } vm) Copy(vm); }
     private void OnItemDoubleClick(object sender, MouseButtonEventArgs e) { if (!IsFromButton(e) && ItemOf(sender) is { } vm) Open(vm); }
 
-    /// <summary>Клик по кнопке действия на карточке не должен ещё и копировать или открывать снимок.</summary>
+    /// <summary>Click on card action button must not also copy or open screenshot.</summary>
     private static bool IsFromButton(RoutedEventArgs e)
     {
         for (var d = e.OriginalSource as DependencyObject; d is not null and not ListBoxItem;
@@ -191,7 +191,7 @@ public partial class HistoryWindow : ChromeWindow
         else if (e.Key == Key.E && Keyboard.Modifiers == ModifierKeys.None) { _edit(vm.Path); e.Handled = true; }
     }
 
-    /// <summary>Тестовый запуск (<c>--dev --history --scenario hover</c>): кнопки действий первой карточки видны без наведения.</summary>
+    /// <summary>Test launch (<c>--dev --history --scenario hover</c>): first card action buttons visible without hover.</summary>
     public bool DevShowFirstCardActions { get; init; }
 
     private void OnMenuEdit(object sender, RoutedEventArgs e)
@@ -215,7 +215,7 @@ public partial class HistoryWindow : ChromeWindow
     private void OnMenuShowInFolder(object sender, RoutedEventArgs e)
     {
         if (ItemOf(sender) is not { } vm) return;
-        // ArgumentList сам расставит кавычки: путь с пробелами и запятыми не разобьётся на аргументы
+        // ArgumentList quotes properly: path with spaces and commas won't split
         StartExplorer("History show in folder failed", "/select," + vm.Path);
     }
 
@@ -262,7 +262,7 @@ public partial class HistoryWindow : ChromeWindow
         if (snapshots.Count == 0) { Refresh(); return; }
         if (!Dialogs.Confirm(this, Loc.T("History.ClearTitle"), Loc.F("History.ClearText", store.Folder, snapshots.Count),
                 Loc.T("History.DeleteAll"), danger: true)) return;
-        // Удаляем только показанный при подтверждении набор, даже если пока диалог открыт появились новые снимки.
+        // Delete only the set shown at confirmation, even if new screenshots appear while dialog open.
         try { await _queue.Enqueue(() => { foreach (var snapshot in snapshots) store.Delete(snapshot.Path); return true; }); }
         catch (Exception ex) { Log.Error("History clear failed", ex); }
         if (!_closed) Refresh();

@@ -14,7 +14,7 @@ using Screeny.Settings;
 
 namespace Screeny.Tests.Editing;
 
-/// <summary>Контроллер редактора без окна: настоящие контролы HUD в STA-потоке, хост-заглушка.</summary>
+/// <summary>Windowless editor controller: real HUD controls in STA thread, stub host.</summary>
 [Collection(WpfControls.Name)]
 public class AnnotationEditorTests
 {
@@ -85,7 +85,7 @@ public class AnnotationEditorTests
         Assert.Equal(ToolKind.Rect, editor.CurrentTool);
         Assert.True(editor.HandleKey(Key.NumPad3, ModifierKeys.None, editing: true));
         Assert.Equal(ToolKind.Ellipse, editor.CurrentTool);
-        Assert.False(editor.HandleKey(Key.D2, ModifierKeys.Control, editing: true)); // Ctrl+цифра — не инструмент
+        Assert.False(editor.HandleKey(Key.D2, ModifierKeys.Control, editing: true)); // Ctrl+number — not tool
         Assert.True(editor.HandleKey(Key.Z, ModifierKeys.Control, editing: false));
         Assert.False(editor.HandleKey(Key.Q, ModifierKeys.None, editing: true));
     });
@@ -96,11 +96,11 @@ public class AnnotationEditorTests
         var (editor, host, _, _) = Create();
         var rect = new RectAnnotation(new Rect(5, 5, 10, 10), new AnnotationStyle(Colors.Red, 3));
         editor.Document.Add(rect);
-        Assert.False(editor.HandleKey(Key.Delete, ModifierKeys.None, editing: true)); // ничего не выбрано
+        Assert.False(editor.HandleKey(Key.Delete, ModifierKeys.None, editing: true)); // nothing selected
         editor.Document.Selected = rect;
         Assert.True(editor.HandleKey(Key.Right, ModifierKeys.Control, editing: true));
         Assert.Equal(new Rect(15, 5, 10, 10), rect.Rect);
-        host.HasGesture = true; // посреди жеста хоста стрелки фигуру не двигают
+        host.HasGesture = true; // mid-host-gesture arrows don't move shape
         Assert.True(editor.HandleKey(Key.Down, ModifierKeys.None, editing: true));
         Assert.Equal(new Rect(15, 5, 10, 10), rect.Rect);
         Assert.True(editor.HandleKey(Key.Delete, ModifierKeys.None, editing: true));
@@ -114,7 +114,7 @@ public class AnnotationEditorTests
         editor.SetTool(ToolKind.Rect);
         editor.Document.Add(new RectAnnotation(new Rect(1, 1, 5, 5), new AnnotationStyle(Colors.Red, 3)));
         editor.DrawingEnabled = false;
-        Assert.Equal(ToolKind.Select, editor.CurrentTool); // выключение сбрасывает инструмент
+        Assert.Equal(ToolKind.Select, editor.CurrentTool); // disabling resets tool
         Assert.False(editor.BeginGesture(new Point(2, 2)));
         Assert.False(editor.HandleKey(Key.D2, ModifierKeys.None, editing: true));
         editor.Undo();
@@ -140,7 +140,7 @@ public class AnnotationEditorTests
         Assert.Equal(record, local.Beautify);
         local.SetBeautify(false);
         local.SetBeautifyOptions(BeautifyOptions.Default);
-        Assert.False(localSettings.BeautifyEnabled);                    // по умолчанию — выключено, не тронуто
+        Assert.False(localSettings.BeautifyEnabled);                    // default — disabled, not touched
         Assert.Equal(BeautifyOptions.Default.Preset, localSettings.BeautifyPreset);
         Assert.False(local.BeautifyOn);
     });
@@ -157,7 +157,7 @@ public class AnnotationEditorTests
     [Fact]
     public void TextEdit_DeselectsShape_PaletteColorsTextNotShape() => Sta(() =>
     {
-        // Чёрная непрозрачная основа: пипетка даёт цвет, отличный от красного по умолчанию.
+        // Black opaque base: eyedropper gives color different from default red.
         var px = new byte[40 * 30 * 4];
         for (int i = 3; i < px.Length; i += 4) px[i] = 255;
         var bmp = BitmapSource.Create(40, 30, 96, 96, PixelFormats.Bgra32, null, px, 40 * 4);
@@ -176,7 +176,7 @@ public class AnnotationEditorTests
         editor.SetTool(ToolKind.Text);
         editor.BeginGesture(new Point(5, 20));
         Assert.True(editor.IsTextEditing);
-        Assert.Null(editor.Document.Selected); // полоса и палитра теперь про вводимый текст
+        Assert.Null(editor.Document.Selected); // strip and palette now about entering text
 
         editor.PickColor(new PixelPoint(1, 1));
         text.Text = "Hi";
@@ -203,7 +203,7 @@ public class AnnotationEditorTests
         editor.BeginGesture(new Point(5, 5));
         Assert.True(editor.IsTextEditing);
         Assert.Equal(TextAlignment.Right, text.TextAlignment);
-        Assert.Equal(0, text.MinWidth); // короткая строка не уезжает вправо пустого поля
+        Assert.Equal(0, text.MinWidth); // short line doesn't shift right of empty field
         text.Text = "Hi";
         editor.CommitTextEdit();
         Assert.Equal(TextAlign.Right, Assert.Single(editor.Document.Items.OfType<TextAnnotation>()).Style.TextAlign);
@@ -217,7 +217,7 @@ public class AnnotationEditorTests
         Assert.Equal(40, leftText.MinWidth);
         left.CancelTextEdit();
     });
-    // ---------- Выключенные функции ----------
+    // ---------- Disabled features ----------
 
     private static AppSettings Without(params string[] features)
     {
@@ -240,7 +240,7 @@ public class AnnotationEditorTests
         Assert.Equal(Visibility.Collapsed, toolbar.ToolButton(ToolKind.Ruler).Visibility);
         Assert.Equal(Visibility.Collapsed, toolbar.BeautifyToggle.Visibility);
         Assert.Equal(Visibility.Collapsed, ((UIElement)toolbar.FindName("PipetteButton")).Visibility);
-        Assert.True(editor.HandleKey(Key.D2, ModifierKeys.None, editing: true)); // остальные инструменты работают
+        Assert.True(editor.HandleKey(Key.D2, ModifierKeys.None, editing: true)); // other tools work
         Assert.Equal(ToolKind.Rect, editor.CurrentTool);
     });
 
@@ -263,8 +263,8 @@ public class AnnotationEditorTests
         var settings = Without(FeatureCatalog.Beautify);
         settings.BeautifyEnabled = true;
         var (editor, _, _, toolbar) = Create(new BeautifyState(true, BeautifyOptions.Default, Persist: true), settings);
-        Assert.False(editor.BeautifyOn); // снимок не оформляется
-        Assert.True(settings.BeautifyEnabled); // сохранённое значение не тронуто
+        Assert.False(editor.BeautifyOn); // screenshot not decorated
+        Assert.True(settings.BeautifyEnabled); // saved value untouched
         Assert.NotEqual(true, ((System.Windows.Controls.Primitives.ToggleButton)toolbar.BeautifyToggle).IsChecked);
     });
 

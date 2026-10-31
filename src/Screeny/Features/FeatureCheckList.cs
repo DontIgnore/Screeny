@@ -6,18 +6,18 @@ using Screeny.Localization;
 namespace Screeny.Features;
 
 /// <summary>
-/// Галочки функций (<see cref="FeatureCatalog"/>) для окна настроек и мастера первого запуска: название, под ним пояснение
-/// стилем Caption — как у остальных галочек с подписью. Отмечены все, кроме выключенных; сохраняет окно, которое их показывает.
+/// Feature checkboxes (<see cref="FeatureCatalog"/>) for settings window and first-run wizard: name, description below
+/// in Caption style — like other checkboxes with caption. All checked except disabled; saving window does it.
 /// </summary>
 public sealed class FeatureCheckList
 {
     private readonly Dictionary<string, CheckBox> _boxes = new();
     private readonly Dictionary<string, bool> _initial = new();
 
-    /// <summary>Любую галочку переключили (окно настроек прячет поля выключенной функции сразу).</summary>
+    /// <summary>Any checkbox toggled (settings window hides disabled feature fields immediately).</summary>
     public event Action? Changed;
 
-    /// <param name="disabled">Выключенные функции (<see cref="Settings.AppSettings.DisabledFeatures"/>).</param>
+    /// <param name="disabled">Disabled features (<see cref="Settings.AppSettings.DisabledFeatures"/>).</param>
     public FeatureCheckList(Panel panel, IEnumerable<string> disabled)
     {
         var off = disabled.ToHashSet();
@@ -44,8 +44,8 @@ public sealed class FeatureCheckList
 
     public bool IsOn(string id) => _boxes[id].IsChecked == true;
 
-    /// <summary>Вложенный блок под пояснением функции (точное распознавание под «Распознаванием текста»); видимостью
-    /// управляет вызывающий — по <see cref="IsOn"/> и <see cref="Changed"/>.</summary>
+    /// <summary>Nested block under feature description (precise recognition under “Text recognition”); visibility
+    /// controlled by caller — by <see cref="IsOn"/> and <see cref="Changed"/>.</summary>
     public void AddBelow(string id, UIElement element)
     {
         var panel = (Panel)_boxes[id].Parent;
@@ -53,8 +53,8 @@ public sealed class FeatureCheckList
     }
 
     /// <summary>
-    /// Функции поменяли в другом окне (мастер, открытый из настроек): нетронутые здесь галочки принимают новое значение,
-    /// переключённые остаются как есть; <see cref="Changes"/> дальше считается от новых настроек.
+    /// Features changed in another window (wizard opened from settings): untouched checkboxes here take new value,
+    /// toggled ones stay; <see cref="Changes"/> computed from new settings.
     /// </summary>
     public void Sync(IEnumerable<string> disabled)
     {
@@ -68,8 +68,8 @@ public sealed class FeatureCheckList
     }
 
     /// <summary>
-    /// Только переключённые галочки — для <see cref="FeatureGate.MergeDisabled"/> поверх текущих настроек. Так окно настроек
-    /// и открытый из него мастер не затирают выбор друг друга: каждое меняет лишь то, что в нём трогали.
+    /// Only toggled checkboxes — for <see cref="FeatureGate.MergeDisabled"/> over current settings. So settings window
+    /// and wizard opened from it don't overwrite each other's choices: each changes only what was touched.
     /// </summary>
     public IReadOnlyList<KeyValuePair<string, bool>> Changes
         => _boxes.Select(kv => new KeyValuePair<string, bool>(kv.Key, kv.Value.IsChecked == true)).Where(c => c.Value != _initial[c.Key]).ToList();

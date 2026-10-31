@@ -3,12 +3,12 @@ using Screeny.Ocr.Paddle;
 
 namespace Screeny.Tests.Ocr;
 
-/// <summary>Пре- и постобработка PaddleOCR без моделей: синтетические вероятности, карты и картинки.</summary>
+/// <summary>PaddleOCR pre/post-processing without models: synthetic probabilities, maps and images.</summary>
 public class PaddlePipelineTests
 {
-    private static readonly string[] Dict = ["a", "b", "c"]; // классы: 0 — blank, 1..3 — a,b,c, 4 — пробел
+    private static readonly string[] Dict = ["a", "b", "c"]; // classes: 0 — blank, 1..3 — a,b,c, 4 — space
 
-    /// <summary>Вероятности CTC: на каждом шаге один класс с вероятностью <paramref name="p"/>, остальное поровну.</summary>
+    /// <summary>CTC probabilities: each step one class with probability <paramref name="p"/>, rest equally.</summary>
     private static float[] Probs(int[] classes, int C, float p = 0.9f)
     {
         var data = new float[classes.Length * C];
@@ -36,7 +36,7 @@ public class PaddlePipelineTests
     {
         var r = PaddlePipeline.Decode(Probs([0, 1, 1, 0, 2], 5), 5, 5, Dict, stepPx: 4);
         Assert.Equal("ab", r.Text);
-        Assert.Equal([4.0, 16.0], r.CharLeft);   // шаг 1 и шаг 4
+        Assert.Equal([4.0, 16.0], r.CharLeft);   // step 1 and step 4
         Assert.Equal([8.0, 20.0], r.CharRight);
     }
 
@@ -44,7 +44,7 @@ public class PaddlePipelineTests
     public void Decode_ConfidenceIsMeanOfEmittedSteps()
     {
         var data = Probs([1, 2], 5, 0.8f);
-        data[5 + 2] = 0.6f; // второй шаг: класс 2 с 0,6
+        data[5 + 2] = 0.6f; // second step: class 2 with 0.6
         var r = PaddlePipeline.Decode(data, 2, 5, Dict, 1);
         Assert.Equal(0.7f, r.Confidence, 3);
     }
@@ -61,7 +61,7 @@ public class PaddlePipelineTests
     public void ParseDict_DropsTrailingEmptyLine()
         => Assert.Equal(["a", "b", " "], PaddlePipeline.ParseDict("a\nb\n \n"));
 
-    /// <summary>Белая картинка с чёрными «словами» — столбцы [x0, x1) по всей высоте строки.</summary>
+    /// <summary>White image with black “words” — columns [x0, x1) across line height.</summary>
     private static OcrImage Line(int w, int h, params (int X0, int X1)[] words)
     {
         var px = new byte[w * h * 4];
@@ -87,18 +87,18 @@ public class PaddlePipelineTests
     [Fact]
     public void Split_LongLine_CutsInGapsBetweenWords()
     {
-        // Высота 48: предел 480 px. Слова по 150 px с промежутками по 30 px (больше четверти высоты).
+        // Height 48: limit 480 px. Words 150 px with 30 px gaps (more than quarter height).
         var words = Enumerable.Range(0, 8).Select(i => (10 + i * 180, 160 + i * 180)).ToArray();
         var img = Line(1450, 48, words);
         var parts = PaddlePipeline.Split(img, new Int32Rect(0, 0, 1450, 48), PaddlePipeline.MaxRecWidth);
         Assert.True(parts.Count > 1);
         Assert.All(parts, p => Assert.True(p.Box.Width <= 480));
-        Assert.Equal(1450, parts.Sum(p => p.Box.Width)); // куски без пропусков и наложений
+        Assert.Equal(1450, parts.Sum(p => p.Box.Width)); // chunks without gaps and overlaps
         Assert.False(parts[0].SpaceBefore);
         foreach (var (box, space) in parts.Skip(1))
         {
-            Assert.True(space); // рез по промежутку — пробел перед куском
-            // Рез — посреди промежутка, не по слову.
+            Assert.True(space); // cut at gap — space before chunk
+            // Cut mid-gap, not word.
             Assert.DoesNotContain(words, w => box.X > w.Item1 && box.X < w.Item2);
         }
     }
@@ -115,7 +115,7 @@ public class PaddlePipelineTests
     [Fact]
     public void Split_ScalesLimitWithLineHeight()
     {
-        // Строка высотой 24: предел 480 при высоте 48 — это 240 px исходной картинки.
+        // Line height 24: limit 480 at height 48 — 240 px original.
         var img = Line(400, 24, (0, 400));
         var parts = PaddlePipeline.Split(img, new Int32Rect(0, 0, 400, 24), PaddlePipeline.MaxRecWidth);
         Assert.Equal([240, 160], parts.Select(p => p.Box.Width));
@@ -144,23 +144,23 @@ public class PaddlePipelineTests
     }
 
     [Theory]
-    [InlineData("•", 0.3f, false)]       // иконка, принятая за текст
+    [InlineData("•", 0.3f, false)]       // icon taken for text
     [InlineData("8 ел", 0.59f, false)]
     [InlineData("8 ел", 0.6f, true)]
     [InlineData("Ник", 0.95f, true)]
-    [InlineData("длинный текст", 0.2f, true)] // порог только для коротких
+    [InlineData("длинный текст", 0.2f, true)] // threshold only for short
     public void Keep_DropsOnlyShortUnsureFragments(string text, float conf, bool keep)
         => Assert.Equal(keep, PaddlePipeline.Keep(new RecResult(text, conf, [], [])));
 
     [Fact]
     public void Boxes_FindsComponentAndUnclips()
     {
-        // Карта 40×20, «строка» 20×6 с вероятностью 0,9; картинка того же размера.
+        // Map 40×20, “line” 20×6 with probability 0.9; image same size.
         int mw = 40, mh = 20;
         var prob = new float[mw * mh];
         for (int y = 7; y < 13; y++) for (int x = 10; x < 30; x++) prob[y * mw + x] = 0.9f;
         var box = Assert.Single(PaddlePipeline.Boxes(prob, mw, mh, mw, mh));
-        // w=19, h=5 (по крайним пикселям), d = 19·5·1,5 / (2·24) ≈ 2,97 → рамка шире компоненты на ≈3 px с каждой стороны.
+        // w=19, h=5 (by extreme pixels), d = 19·5·1.5 / (2·24) ≈ 2.97 → border wider than component by ≈3 px each side.
         Assert.Equal(new Int32Rect(7, 4, 25, 11), box);
     }
 
@@ -169,12 +169,12 @@ public class PaddlePipelineTests
     {
         int mw = 64, mh = 32;
         var prob = new float[mw * mh];
-        for (int y = 10; y < 20; y++) for (int x = 4; x < 28; x++) prob[y * mw + x] = 0.95f;   // строка
-        for (int y = 10; y < 20; y++) for (int x = 36; x < 60; x++) prob[y * mw + x] = 0.4f;   // выше порога 0,3, но оценка < 0,6
-        prob[2 * mw + 50] = 0.99f;                                                                // точка-шум
+        for (int y = 10; y < 20; y++) for (int x = 4; x < 28; x++) prob[y * mw + x] = 0.95f;   // line
+        for (int y = 10; y < 20; y++) for (int x = 36; x < 60; x++) prob[y * mw + x] = 0.4f;   // above threshold 0.3 but score < 0.6
+        prob[2 * mw + 50] = 0.99f;                                                                // noise dot
         var boxes = PaddlePipeline.Boxes(prob, mw, mh, mw * 2, mh * 2);
         var box = Assert.Single(boxes);
-        Assert.True(box.X < 8 && box.X + box.Width > 54); // координаты картинки ×2
+        Assert.True(box.X < 8 && box.X + box.Width > 54); // image coordinates ×2
         Assert.True(box.Y < 20 && box.Y + box.Height > 38);
     }
 
@@ -200,11 +200,11 @@ public class PaddlePipelineTests
         Assert.Equal(2, layout.Lines.Count);
         Assert.Equal("ab cd ef", layout.Lines[0].Text);
         Assert.Equal("gh", layout.Lines[1].Text);
-        // «cd»: от левой границы «c» (40) до правой «d» (58), в координатах ×0,5.
+        // “cd”: from left edge of “c” (40) to right of “d” (58), at ×0.5.
         Assert.Equal(new Rect((10 + 40) * 0.5, 5, 18 * 0.5, 10), layout.Lines[0].Words[1].Box);
     }
 
-    /// <summary>Белая картинка 100×<paramref name="h"/>, чёрные строки пикселей <paramref name="rows"/> по ширине 10..90.</summary>
+    /// <summary>White 100×<paramref name="h"/>, black rows <paramref name="rows"/> across width 10..90.</summary>
     private static OcrImage Rows(int h, params int[] rows)
     {
         var img = Line(100, h);
@@ -216,14 +216,14 @@ public class PaddlePipelineTests
     [Fact]
     public void InkRows_TightensToTextWithSmallPad()
     {
-        var img = Rows(32, Enumerable.Range(10, 10).ToArray()); // текст в строках 10..19
+        var img = Rows(32, Enumerable.Range(10, 10).ToArray()); // text in rows 10..19
         Assert.Equal((9, 12), PaddlePipeline.InkRows(img, new Int32Rect(0, 0, 100, 32)));
     }
 
     [Fact]
     public void InkRows_IgnoresNeighbourTailsAtBoxEdge()
     {
-        // Строки 1..2 — хвосты букв строки выше, отделены 7 пустыми строками (больше восьмой части высоты).
+        // Rows 1..2 — descenders of line above, separated by 7 empty rows (more than eighth height).
         var img = Rows(32, [1, 2, .. Enumerable.Range(10, 10)]);
         Assert.Equal((9, 12), PaddlePipeline.InkRows(img, new Int32Rect(0, 0, 100, 32)));
     }
@@ -231,7 +231,7 @@ public class PaddlePipelineTests
     [Fact]
     public void InkRows_KeepsDotsAboveLetters()
     {
-        var img = Rows(32, [8, .. Enumerable.Range(11, 9)]); // точка над «і» через 2 пустые строки
+        var img = Rows(32, [8, .. Enumerable.Range(11, 9)]); // dot over “і” after 2 empty rows
         Assert.Equal((7, 14), PaddlePipeline.InkRows(img, new Int32Rect(0, 0, 100, 32)));
     }
 
@@ -263,9 +263,9 @@ public class PaddlePipelineTests
         => Assert.Equal((par, threads), PaddlePipeline.ThreadSplit(cores));
 
     [Theory]
-    [InlineData(800, 400, 800, 384)]     // стороны кратны 32 (12,5 → 12: округление к чётному)
-    [InlineData(40, 20, 128, 64)]        // короткая сторона не меньше 64
-    [InlineData(8000, 1000, 4000, 512)]  // длинная не больше 4000
+    [InlineData(800, 400, 800, 384)]     // sides multiple of 32 (12.5 → 12: round to even)
+    [InlineData(40, 20, 128, 64)]        // short side not less than 64
+    [InlineData(8000, 1000, 4000, 512)]  // long side not more than 4000
     public void DetInputSize_Rounds(int w, int h, int ew, int eh) => Assert.Equal((ew, eh), PaddlePipeline.DetInputSize(w, h));
 
     [Theory]

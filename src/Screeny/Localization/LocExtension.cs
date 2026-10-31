@@ -3,8 +3,8 @@ using System.Windows.Markup;
 namespace Screeny.Localization;
 
 /// <summary>
-/// <c>Text="{l:Loc Settings.Title}"</c>: привязка к строке <see cref="Loc"/>, которая обновляется при смене языка.
-/// Работает и в <c>Setter.Value</c>, шаблонах и <c>Run.Text</c> — значение отдаёт сама привязка.
+/// <c>Text="{l:Loc Settings.Title}"</c>: binding to <see cref="Loc"/> string that updates on language change.
+/// Works in <c>Setter.Value</c>, templates and <c>Run.Text</c> — value provided by binding itself.
 /// </summary>
 [MarkupExtensionReturnType(typeof(object))]
 public sealed class LocExtension : MarkupExtension

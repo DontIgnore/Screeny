@@ -5,7 +5,7 @@ using Screeny.Annotations.Shapes;
 
 namespace Screeny.Overlay.Tools;
 
-/// <summary>Штрих рисуется как живая аннотация и попадает в документ одним шагом undo на Up (клик — точка).</summary>
+/// <summary>Stroke drawn as live annotation and enters document as one undo step on Up (click — dot).</summary>
 public sealed class PenTool(bool highlighter) : ITool
 {
     private const double MinStep = 1.5;

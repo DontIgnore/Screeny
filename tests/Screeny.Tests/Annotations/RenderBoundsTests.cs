@@ -7,8 +7,8 @@ using Screeny.Annotations.Shapes;
 namespace Screeny.Tests.Annotations;
 
 /// <summary>
-/// Рамка выбора строится по <see cref="Annotation.Bounds"/>: каждый непрозрачный пиксель отрисовки фигуры
-/// должен лежать внутри Bounds (допуск 1 пиксель на сглаживание).
+/// Selection border built from <see cref="Annotation.Bounds"/>: every opaque rendering pixel of shape
+/// must be inside Bounds (1 px tolerance for antialiasing).
 /// </summary>
 public class RenderBoundsTests
 {
@@ -33,7 +33,7 @@ public class RenderBoundsTests
         return bmp;
     }
 
-    /// <summary>Пиксели с ненулевой альфой вне Bounds (расширенного на допуск).</summary>
+    /// <summary>Pixels with nonzero alpha outside Bounds (expanded by tolerance).</summary>
     private static List<(int X, int Y)> Outside(Annotation a, double tolerance = 1)
     {
         var visual = new DrawingVisual();
@@ -51,7 +51,7 @@ public class RenderBoundsTests
         {
             if (px[(y * W + x) * 4 + 3] == 0) continue;
             painted++;
-            // Пиксель [x, x+1) целиком внутри рамки.
+            // Pixel [x, x+1) fully inside border.
             if (x < bounds.Left || x + 1 > bounds.Right || y < bounds.Top || y + 1 > bounds.Bottom) outside.Add((x, y));
         }
         Assert.True(painted > 0, $"{a.GetType().Name}: ничего не нарисовано");
@@ -74,7 +74,7 @@ public class RenderBoundsTests
     public void Pen_ThickStrokeWithBends_InsideBounds(double thickness) => Sta(() =>
     {
         var pen = new PenAnnotation(new Point(60, 60), Style(thickness));
-        // Изгибы с острыми углами и петля: швы и концы не должны выходить за рамку.
+        // Sharp turns with loops: seams and ends must not exit border.
         foreach (var p in new[] { (200, 70), (90, 120), (260, 200), (120, 250), (300, 90), (310, 240), (180, 160), (330, 260) })
             pen.AddPoint(new Point(p.Item1, p.Item2));
         AssertInside(pen, $"pen {thickness}");
@@ -86,7 +86,7 @@ public class RenderBoundsTests
     [InlineData(12, 3)]
     public void Pen_DenseJitteryStroke_InsideBounds(double thickness, int seed) => Sta(() =>
     {
-        // Как настоящая мышь: точки через 1,5–4 px, резкие развороты и дрожание.
+        // Like real mouse: points every 1.5–4 px, sharp turns and jitter.
         var rnd = new Random(seed);
         var at = new Point(150, 150);
         var pen = new PenAnnotation(at, Style(thickness));

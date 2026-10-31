@@ -38,22 +38,22 @@ public partial class App : Application, INotifyPropertyChanged
     private bool _capturing;
     private readonly ImageSaveWorker _imageSaver = new();
     private readonly HashSet<Task> _pendingOperations = new();
-    /// <summary>Номер последней операции, писавшей в буфер обмена: устаревший результат OCR его не перезаписывает.</summary>
+    /// <summary>Number of last operation that wrote to clipboard: outdated OCR result does not overwrite it.</summary>
     private int _clipboardOperation;
 
-    /// <summary>Любая запись картинки в буфер (pin, история) делает незавершённый OCR устаревшим.</summary>
+    /// <summary>Any image write to clipboard (pin, history) makes unfinished OCR outdated.</summary>
     public void NoteClipboardWrite() => _clipboardOperation++;
     private int ReserveClipboardWrite() => ++_clipboardOperation;
     private bool IsCurrentClipboardWrite(int operation) => operation == _clipboardOperation;
 
-    /// <summary>Ключи запуска; <see cref="StartupArgs.Dev"/> — тестовый экземпляр, который не мешает рабочему.</summary>
+    /// <summary>Startup keys; <see cref="StartupArgs.Dev"/> — test instance that doesn't interfere with working.</summary>
     public StartupArgs Args { get; private set; } = StartupArgs.Parse([]);
     public bool IsDev => Args.Dev;
     public SettingsStore SettingsStore { get; private set; } = SettingsStore.Default();
     public AppSettings Settings { get; private set; } = new();
-    /// <summary>Папка истории; null — функция «История» выключена (снимки только копируются, папка не читается).</summary>
+    /// <summary>History folder; null — History feature disabled (screenshots only copied, folder not read).</summary>
     public HistoryStore? History { get; private set; }
-    /// <summary>Пункты трея «История…» и «Открыть папку истории».</summary>
+    /// <summary>Tray items “History…” and “Open history folder”.</summary>
     public bool HistoryFeatureOn => Settings.IsFeatureOn(FeatureCatalog.History);
 
     public ICommand CaptureCommand { get; private set; } = null!;
@@ -61,35 +61,35 @@ public partial class App : Application, INotifyPropertyChanged
     public ICommand OpenFolderCommand { get; private set; } = null!;
     public ICommand SettingsCommand { get; private set; } = null!;
     public ICommand ExitCommand { get; private set; } = null!;
-    /// <summary>Все работающие хоткеи снимка через « / » (длинный список — первый и «…»); «—», если ни одного.</summary>
+    /// <summary>All working screenshot hotkeys joined by “ / ” (long list — first and “…”); “—” if none.</summary>
     public string HotkeyText => HotkeyReport.ActiveText();
 
-    /// <summary>Состояние хоткеев после последнего применения: что работает, что занято, включён ли запасной.</summary>
+    /// <summary>Hotkey state after last apply: what works, what's busy, whether fallback enabled.</summary>
     public HotkeyReport HotkeyReport => _hotkeys?.Report ?? HotkeyReport.Empty;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>
-    /// Любая ошибка старта — сообщение и выход, а не процесс без трея и хоткея, держащий mutex
-    /// (из-за которого все следующие запуски молча завершались бы как «второй экземпляр»).
+    /// Any startup error — message and exit, not process without tray/hotkey holding mutex
+    /// (due to which all subsequent launches would silently exit as “second instance”).
     /// </summary>
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
-        // Повышенный экземпляр мастера: одно действие из белого списка и выход — до mutex, трея и хоткеев.
+        // Elevated wizard instance: one whitelisted action and exit — before mutex, tray, hotkeys.
         if (ElevatedAction.IsRequested(e.Args)) { RunElevatedActionAndExit(e.Args); return; }
         try
         {
-            Args = StartupArgs.FromProcess(e.Args); // --dev или SCREENY_DEV=1
-            // Событие создаём до mutex: иначе второй экземпляр мог создать его, взвести и закрыть
-            // раньше, чем первый успел открыть, — и сигнал терялся вместе с объектом ядра.
+            Args = StartupArgs.FromProcess(e.Args); // --dev or SCREENY_DEV=1
+            // Create event before mutex: otherwise second instance could create it, signal and close
+            // before first opened — signal lost with kernel object.
             _captureEvent = new EventWaitHandle(false, EventResetMode.AutoReset, CaptureEventName + Args.Suffix);
             _mutex = new Mutex(true, MutexName + Args.Suffix, out _ownsMutex);
             if (!_ownsMutex)
             {
-                // Тестовый экземпляр никогда не просит первый сделать снимок: тот сделал бы настоящий снимок экрана.
+                // Test instance never asks first to take screenshot: it would take real screenshot.
                 if (IsDev) { Log.Error("Dev instance is already running; exiting"); Shutdown(3); return; }
-                // Разрешаем первому экземпляру вывести оверлей на передний план — иначе он не получит клавиатуру.
+                // Allow first instance to bring overlay to front — otherwise it won't get keyboard.
                 User32.AllowSetForegroundWindow(-1 /* ASFW_ANY */);
                 _captureEvent.Set();
                 Shutdown();
@@ -99,14 +99,14 @@ public partial class App : Application, INotifyPropertyChanged
             DispatcherUnhandledException += (_, ex) => { Log.Error("Unhandled", ex.Exception); ex.Handled = true; };
             ThemeManager.Initialize(this);
             if (IsDev) SettingsStore = SettingsStore.Dev();
-            // Проверка маленького монитора без второго монитора: окна подгоняются под эту рабочую область (пиксели устройства).
+            // Small monitor check without second monitor: windows fit into this work area (device pixels).
             if (IsDev && WindowFit.ParseWorkArea(Environment.GetEnvironmentVariable("SCREENY_DEV_WORKAREA")) is { } work) ChromeWindow.DevWorkAreaOverride = work;
             bool firstDevRun = IsDev && !File.Exists(SettingsStore.FilePath);
             Settings = SettingsStore.Load();
             Loc.Apply(Settings.Language);
             ApplyLanguageFonts();
             Loc.Changed += OnLanguageChanged;
-            // Тестовый экземпляр не пишет в историю пользователя: своя папка по умолчанию.
+            // Test instance does not write to user history: own default folder.
             if (firstDevRun) Settings.HistoryFolder = SettingsStore.DevHistoryFolder();
             UpdateHistoryStore();
 
@@ -118,11 +118,11 @@ public partial class App : Application, INotifyPropertyChanged
 
             _tray = (TaskbarIcon)FindResource("TrayIcon");
             _tray.DataContext = this;
-            _tray.ForceCreate(enablesEfficiencyMode: false); // EcoQoS замедлил бы показ оверлея
+            _tray.ForceCreate(enablesEfficiencyMode: false); // EcoQoS would slow overlay display
 
             InitHotkeys();
             ListenForSecondInstance();
-            InitPreciseOcr(); // App.PreciseOcr.cs; до окон из ключей: настройкам нужно состояние модуля
+            InitPreciseOcr(); // App.PreciseOcr.cs; before windows from keys: settings need module state
             OpenWindowsFromArgs();
             InitUpdates(); // App.Updates.cs
             CheckSetupWizardOnStartup(); // App.SetupWizard.cs
@@ -135,7 +135,7 @@ public partial class App : Application, INotifyPropertyChanged
         }
     }
 
-    /// <summary>Приложение завершается: окна редактора не спрашивают про несохранённые пометки.</summary>
+    /// <summary>Application is exiting: editor windows don't ask about unsaved marks.</summary>
     public bool IsShuttingDown { get; private set; }
 
     private async void ExitApp()
@@ -143,7 +143,7 @@ public partial class App : Application, INotifyPropertyChanged
         if (await PrepareForExitAsync()) Shutdown();
     }
 
-    /// <summary>Запрещает новые действия и дожидается незаконченных операций и сохранений. false — выход уже идёт.</summary>
+    /// <summary>Forbids new actions and waits for unfinished operations and saves. false — exit already in progress.</summary>
     private async Task<bool> PrepareForExitAsync()
     {
         if (IsShuttingDown) return false;
@@ -165,17 +165,17 @@ public partial class App : Application, INotifyPropertyChanged
     protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
     {
         IsShuttingDown = true;
-        _sessionEnding = true; // App.Updates.cs: тихое обновление при таком выходе не применяется
-        // При завершении сеанса Windows не гарантирует время на ожидание или продолжения UI.
+        _sessionEnding = true; // App.Updates.cs: silent update not applied on such exit
+        // On Windows session end no guarantee of time to wait or continue UI.
         if (!_imageSaver.Queue.DrainAsync().Wait(TimeSpan.FromSeconds(5)))
             Log.Error("Timed out waiting for image saves during session ending");
         base.OnSessionEnding(e);
     }
 
     /// <summary>
-    /// Ручная проверка окон: <c>--settings</c> и <c>--history</c> открывают окно сразу после старта,
-    /// <c>--dev --overlay-test x.png</c> — оверлей по картинке, <c>--dev --edit x.png</c> — редактор снимка.
-    /// Работает только у первого экземпляра — второй, как обычно, лишь просит первый сделать снимок.
+    /// Manual window check: <c>--settings</c> and <c>--history</c> open window right after startup,
+    /// <c>--dev --overlay-test x.png</c> — overlay on picture, <c>--dev --edit x.png</c> — screenshot editor.
+    /// Works only on first instance — second, as usual, only asks first to take screenshot.
     /// </summary>
     private void OpenWindowsFromArgs()
     {
@@ -187,9 +187,9 @@ public partial class App : Application, INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Регистрирует все включённые хоткеи из настроек; проблемы (занято, PrintScreen у Windows, запасной Ctrl+Alt+S) —
-    /// одним уведомлением. Тестовый экземпляр не регистрирует ни одного <c>RegisterHotKey</c> (они у рабочего), а хук
-    /// Win+Shift+S ставит только с <c>--enable-ll-hook</c>.
+    /// Registers all enabled hotkeys from settings; problems (busy, Windows PrintScreen, fallback Ctrl+Alt+S) —
+    /// one notification. Test instance registers no <c>RegisterHotKey</c> (they are on working), and hook
+    /// Win+Shift+S only with <c>--enable-ll-hook</c>.
     /// </summary>
     private void InitHotkeys()
     {
@@ -205,10 +205,10 @@ public partial class App : Application, INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Применяет новый список хоткеев (для мастера первого запуска и окна настроек): нормализует, атомарно
-    /// перерегистрирует и при успехе сохраняет в настройки. При неудаче прежние хоткеи продолжают работать,
-    /// а <see cref="HotkeyApplyResult.Error"/> называет запись, которая не заработала.
-    /// Вызывать из UI-потока после запуска (<see cref="OnStartup"/> уже создал менеджер хоткеев).
+    /// Applies new hotkey list (for first-run wizard and settings window): normalizes, atomically
+    /// re-registers, and on success saves to settings. On failure previous hotkeys keep working,
+    /// and <see cref="HotkeyApplyResult.Error"/> names entry that didn't work.
+    /// Call from UI thread after startup (<see cref="OnStartup"/> already created hotkey manager).
     /// </summary>
     public HotkeyApplyResult ApplyHotkeys(IEnumerable<HotkeyBinding> hotkeys)
     {
@@ -223,7 +223,7 @@ public partial class App : Application, INotifyPropertyChanged
         return result;
     }
 
-    /// <summary>Строгое применение нормализованного списка; о вновь включившемся запасном хоткее — уведомление.</summary>
+    /// <summary>Strict apply of normalized list; about newly enabled fallback hotkey — notification.</summary>
     private HotkeyApplyResult ApplyHotkeyList(IReadOnlyList<HotkeyBinding> normalized)
     {
         bool hadFallback = HotkeyReport.Fallback is not null;
@@ -253,9 +253,9 @@ public partial class App : Application, INotifyPropertyChanged
     }
 
     /// <summary>
-    /// <c>--dev --settings --scenario hotkey-problems</c>: окно настроек так, будто PrintScreen забирает Windows, первое
-    /// своё сочетание занято, хук Win+Shift+S не поставился и работает запасной хоткей — для проверки подсказок без
-    /// настоящей регистрации.
+    /// <c>--dev --settings --scenario hotkey-problems</c>: settings window as if PrintScreen is taken by Windows, first
+    /// own combo busy, Win+Shift+S hook not installed and fallback hotkey works — to check hints without
+    /// real registration.
     /// </summary>
     private HotkeyReport DevHotkeyProblems()
     {
@@ -278,24 +278,24 @@ public partial class App : Application, INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Применяет и сохраняет настройки из окна. Возвращает ошибку или null.
-    /// Порядок: папка → автозапуск → хоткеи последними (атомарно; при неудаче откатывается и автозапуск), и только потом
-    /// изменения переносятся в текущий объект Settings. Так при ошибке ничего не применено наполовину,
-    /// а LastColor/LastThickness, которые мог поменять оверлей, не затираются значениями с момента открытия окна.
-    /// Хоткеи перерегистрируются и без изменений в списке: так PrintScreen подхватывается после отключения системного
-    /// захвата Windows. Запись, которая не работала и раньше, сохранение не блокирует — блокирует только вновь включённая.
+    /// Applies and saves settings from window. Returns error or null.
+    /// Order: folder → autostart → hotkeys last (atomically; on failure autostart rolled back), and only then
+    /// changes transferred to current Settings object. So on error nothing is half-applied,
+    /// and LastColor/LastThickness that overlay might have changed are not overwritten by values from window open time.
+    /// Hotkeys re-register even without list changes: so PrintScreen is picked up after disabling Windows system
+    /// capture. Entry that didn't work before doesn't block saving — only newly enabled one does.
     /// </summary>
     private SettingsApplyError? ApplySettings(AppSettings updated)
     {
-        // Без истории папка не нужна и не создаётся (её поля в окне скрыты и приходят без изменений).
+        // Without history folder not needed and not created (its window fields hidden and arrive unchanged).
         if (updated.IsFeatureOn(FeatureCatalog.History))
         {
             try { Directory.CreateDirectory(updated.HistoryFolder); }
             catch (Exception ex) { Log.Error("History folder failed", ex); return new(Loc.F("App.HistoryFolderCreateFailed", ex.Message)); }
         }
 
-        // Тестовый экземпляр не трогает автозапуск: он принадлежит рабочему. Хоткеи — через HotkeyManager,
-        // который в dev сам ничего не регистрирует (кроме хука с --enable-ll-hook).
+        // Test instance does not touch autostart: it belongs to working. Hotkeys via HotkeyManager,
+        // which in dev registers nothing itself (except hook with --enable-ll-hook).
         bool startupWas = !IsDev && SafeIsStartupEnabled();
         if (!IsDev && startupWas != updated.StartWithWindows)
         {
@@ -316,13 +316,13 @@ public partial class App : Application, INotifyPropertyChanged
         return CopyUserSettings(updated) ? null : new(Loc.T("App.SettingsSaveFailed"));
     }
 
-    /// <summary>Переносит поля окна настроек в текущие настройки (последние цвет/толщину оверлея не трогает) и сохраняет.</summary>
+    /// <summary>Transfers settings window fields to current settings (doesn't touch overlay's last color/thickness) and saves.</summary>
     private bool CopyUserSettings(AppSettings updated)
     {
-        // Оригиналы писались в прежнюю папку истории: при выключении настройки предлагаем удалить их оттуда.
-        // Только если история была и осталась включённой: выключение самой истории файлы не трогает и ничего не предлагает.
-        // Хранилище — прежнее (прежняя папка); если история была выключена и включается этим же сохранением — то, что
-        // появится после ApplyFeatures.
+        // Originals were written to previous history folder: when setting disabled, offer to delete them from there.
+        // Only if history was and remains enabled: disabling history itself doesn't touch files and offers nothing.
+        // Storage is previous (previous folder); if history was disabled and enabled by same save — what
+        // appears after ApplyFeatures.
         bool offerDeleteOriginals = Settings.KeepOriginals && !updated.KeepOriginals && updated.IsFeatureOn(FeatureCatalog.History);
         var originalsStore = offerDeleteOriginals ? History : null;
         Settings.DisabledFeatures = [.. updated.DisabledFeatures];
@@ -347,18 +347,18 @@ public partial class App : Application, INotifyPropertyChanged
         return saved;
     }
 
-    /// <summary>Хранилище истории по текущим настройкам; без функции «История» его нет (файлы в папке не трогаются).</summary>
+    /// <summary>History storage per current settings; without History feature it's absent (files in folder untouched).</summary>
     private void UpdateHistoryStore()
         => History = Settings.IsFeatureOn(FeatureCatalog.History) ? new HistoryStore(Settings.HistoryFolder, Settings.HistoryLimit) : null;
 
     /// <summary>
-    /// Функции (<see cref="FeatureCatalog"/>) изменились в настройках или мастере: выключенная исчезает сразу — окно истории
-    /// закрывается, хранилище убирается, закреплённые снимки закрываются, пункты трея прячутся, открытые редакторы
-    /// перестраивают панель. Включённая обратно просто работает: история — со старой папкой.
+    /// Features (<see cref="FeatureCatalog"/>) changed in settings or wizard: disabled disappears immediately — history window
+    /// closes, storage removed, pinned screenshots close, tray items hide, open editors
+    /// rebuild panel. Re-enabled simply works: history with old folder.
     /// </summary>
     private void ApplyFeatures()
     {
-        if (!HistoryFeatureOn) _historyWindow?.Close(); // до того, как хранилище станет null
+        if (!HistoryFeatureOn) _historyWindow?.Close(); // before storage becomes null
         UpdateHistoryStore();
         bool pins = Settings.ActionAllowed(CaptureAction.Pin);
         if (!pins) foreach (var pin in Pins.ToList()) pin.Close();
@@ -369,8 +369,8 @@ public partial class App : Application, INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Настройку хранения оригиналов выключили: уже сохранённые <c>.orig.png</c> всё ещё содержат то, что было
-    /// скрыто размытием. Спрашиваем, удалить ли их; «Оставить» ничего не трогает (настройка всё равно выключена).
+    /// Original storage setting disabled: already saved <c>.orig.png</c> files still contain what was
+    /// hidden by blur. Ask whether to delete them; “Keep” touches nothing (setting still off).
     /// </summary>
     private async void OfferDeleteOriginals(HistoryStore store)
     {
@@ -399,7 +399,7 @@ public partial class App : Application, INotifyPropertyChanged
         {
             var names = HotkeyReport.ActiveNames;
             var version = CurrentVersion;
-            // Подсказка трея ограничена 127 символами: длинный список сокращается так же, как в меню (и короче на длину версии).
+            // Tray hint limited to 127 chars: long list shortened same as in menu (and shorter by version length).
             _tray.ToolTipText = IsDev ? $"Screeny {version} (dev)"
                 : names.Count == 0 ? Loc.F("Tray.TipClick", version)
                 : Loc.F("Tray.TipHotkeys", version, HotkeyReport.FormatNames(names, maxLength: Math.Max(40, 89 - version.Length)));
@@ -408,8 +408,8 @@ public partial class App : Application, INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Язык сменили в настройках или мастере. Подписи из XAML (меню трея, окна) обновились сами; здесь — шрифт для
-    /// иероглифов и собранная в коде подсказка трея. Окна с текстом из кода подписаны на <see cref="Loc.Changed"/> сами.
+    /// Language changed in settings or wizard. XAML labels (tray menu, windows) updated themselves; here — font for
+    /// CJK and tray hint built in code. Windows with code-built text subscribe to <see cref="Loc.Changed"/> themselves.
     /// </summary>
     private void OnLanguageChanged()
     {
@@ -418,14 +418,14 @@ public partial class App : Application, INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Шрифт интерфейса с запасным для японского или китайского: у Segoe UI нет иероглифов, а без явного шрифта WPF может
-    /// взять начертания другого языка (японские знаки китайскими глифами).
+    /// UI font with fallback for Japanese/Chinese: Segoe UI has no CJK glyphs, and without explicit font WPF can
+    /// take another language's glyphs (Japanese glyphs as Chinese).
     /// </summary>
     private void ApplyLanguageFonts() => Resources["Font.UI"] = new System.Windows.Media.FontFamily(Loc.UiFontFamily);
 
     public void Notify(string message)
     {
-        _updateBalloon = null; // клик по этому уведомлению не открывает окно обновления
+        _updateBalloon = null; // click on this notification does not open update window
         _tray?.ShowNotification(IsDev ? DevTrayText : "Screeny", message);
     }
 
@@ -446,7 +446,7 @@ public partial class App : Application, INotifyPropertyChanged
         }
     }
 
-    /// <summary>Сигнал от второго экземпляра. Поток завершается по _stopListening при выходе; ошибки не роняют процесс.</summary>
+    /// <summary>Signal from second instance. Thread ends via _stopListening on exit; errors don't crash process.</summary>
     private void ListenForSecondInstance()
     {
         var capture = _captureEvent!;
@@ -461,7 +461,7 @@ public partial class App : Application, INotifyPropertyChanged
                     Dispatcher.BeginInvoke(new Action(StartCapture));
                 }
             }
-            catch (ObjectDisposedException) { /* выход */ }
+            catch (ObjectDisposedException) { /* exit */ }
             catch (Exception ex) { Log.Error("Second-instance listener failed", ex); }
         }) { IsBackground = true, Name = "Screeny.SecondInstanceListener" };
         thread.Start();
@@ -470,7 +470,7 @@ public partial class App : Application, INotifyPropertyChanged
     public void StartCapture()
     {
         if (_capturing || IsShuttingDown) return;
-        // Тестовый экземпляр никогда не снимает экран: только картинку из --overlay-test.
+        // Test instance never captures screen: only picture from --overlay-test.
         if (IsDev && Args.OverlayTest is null) { Notify("Dev instance never captures the screen: start it with --overlay-test <png>."); return; }
         _capturing = true;
         try
@@ -492,7 +492,7 @@ public partial class App : Application, INotifyPropertyChanged
             var overlay = new OverlayWindow(shot, windows, Settings, dev, OcrRefiner);
             overlay.Completed += OnCaptureCompleted;
             overlay.DisplaysChanged += () => Notify(Loc.T("App.DisplaysChanged"));
-            overlay.Closed += (_, _) => { _capturing = false; SaveSettings(); }; // последний цвет и толщина
+            overlay.Closed += (_, _) => { _capturing = false; SaveSettings(); }; // last color and thickness
             overlay.Show();
         }
         catch (Exception ex)
@@ -503,7 +503,7 @@ public partial class App : Application, INotifyPropertyChanged
         }
     }
 
-    /// <summary>Наши окна (pin, история, настройки) не должны подсвечиваться автодетектом.</summary>
+    /// <summary>Our windows (pin, history, settings) must not be highlighted by auto-detect.</summary>
     private HashSet<IntPtr> OwnWindowHandles()
     {
         var set = new HashSet<IntPtr>();
@@ -516,8 +516,8 @@ public partial class App : Application, INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Сначала снимок в историю (своя защита от ошибок), затем действие в своём try: ошибка действия
-    /// сообщается с причиной, а снимок уже не теряется.
+    /// First screenshot to history (own error protection), then action in its own try: action error
+    /// reported with reason, and screenshot is already not lost.
     /// </summary>
     private void OnCaptureCompleted(CaptureResult r)
     {
@@ -526,7 +526,7 @@ public partial class App : Application, INotifyPropertyChanged
 
     private async Task CompleteCaptureAsync(CaptureResult r)
     {
-        _capturing = false; // оверлей уже скрыт; следующий хоткей не должен зависеть от действия
+        _capturing = false; // overlay already hidden; next hotkey must not depend on action
         bool inHistory = false;
         bool copy = r.Action == CaptureAction.CopyExplicit || (r.Action == CaptureAction.Copy && Settings.CopyOnEnter());
         int clipboardOperation = copy ? ReserveClipboardWrite() : 0;
@@ -534,7 +534,7 @@ public partial class App : Application, INotifyPropertyChanged
         {
             if (r.Action == CaptureAction.CopyText)
             {
-                CopyRecognizedText(r.Text ?? ""); // текст, а не снимок: в историю не попадает
+                CopyRecognizedText(r.Text ?? ""); // text, not screenshot: doesn't enter history
                 return;
             }
             var result = await SaveImageAsync(r.Image, r.AnnotationsJson, r.Original, null,
@@ -582,12 +582,12 @@ public partial class App : Application, INotifyPropertyChanged
 
     private void CopyImage(BitmapSource image, byte[] png, bool inHistory)
     {
-        // Занятый буфер — частый случай: ClipboardService возвращает false, остальные ошибки пробрасывает.
+        // Busy clipboard is common: ClipboardService returns false, other errors propagate.
         if (!ClipboardService.CopyImage(image, png))
             Notify(Loc.T(inHistory ? "App.ClipboardBusyInHistory" : "App.ClipboardBusyNotCopied"));
     }
 
-    /// <summary>Загрузка и кодирование копии выполняются в общей очереди; запись в буфер — в UI-потоке.</summary>
+    /// <summary>Loading and encoding of copy happen in shared queue; clipboard write in UI thread.</summary>
     public Task<bool?> CopyImageInBackground(Func<BitmapSource> load)
     {
         if (IsShuttingDown) return Task.FromResult<bool?>(null);
@@ -607,7 +607,7 @@ public partial class App : Application, INotifyPropertyChanged
         return IsCurrentClipboardWrite(operation) ? ClipboardService.CopyImage(encoded.Image, encoded.Png) : null;
     }
 
-    /// <summary>Текст, выбранный в режиме текста оверлея (Ctrl+T), — в буфер обмена с превью в уведомлении.</summary>
+    /// <summary>Text selected in overlay text mode (Ctrl+T) goes to clipboard with preview in notification.</summary>
     private void CopyRecognizedText(string text)
     {
         _clipboardOperation++;
@@ -618,13 +618,13 @@ public partial class App : Application, INotifyPropertyChanged
 
     private HistoryWindow? _historyWindow;
 
-    /// <summary>Окно истории одно: повторный вызов обновляет и активирует существующее.</summary>
+    /// <summary>One history window: repeated call updates and activates existing.</summary>
     public void ShowHistory()
     {
-        if (History is null) return; // функция «История» выключена
+        if (History is null) return; // History feature disabled
         if (_historyWindow is null)
         {
-            // Окно закрывается раньше, чем хранилище убирается (ApplyFeatures), поэтому History здесь не null.
+            // Window closes before storage removed (ApplyFeatures), so History not null here.
             _historyWindow = new HistoryWindow(() => History!, PinAtCursor, path => OpenEditor(path), _imageSaver.Queue)
             {
                 DevShowFirstCardActions = IsDev && Args.Scenario == "hover",
@@ -639,12 +639,12 @@ public partial class App : Application, INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Окно повторного редактирования снимка истории. Каждое действие в нём («Копировать», «Сохранить как…»,
-    /// «Закрепить») добавляет новую запись; исходная не меняется. null — снимок не открылся (сообщение уже показано).
+    /// Re-editing window of history screenshot. Each action in it (“Copy”, “Save As…”,
+    /// “Pin”) adds new entry; original unchanged. null — screenshot did not open (message already shown).
     /// </summary>
     public EditorWindow? OpenEditor(string pngPath)
     {
-        if (History is null) return null; // повторное редактирование — часть истории
+        if (History is null) return null; // re-editing is part of history
         EditSession session;
         try { session = EditSession.Load(pngPath); }
         catch (Exception ex)
@@ -656,7 +656,7 @@ public partial class App : Application, INotifyPropertyChanged
         var services = new EditorServices((image, json, original, path) => SaveImageAsync(image, json, null, original, path),
             PinAtCursor, ReserveClipboardWrite, IsCurrentClipboardWrite, TrackOperation, () => IsShuttingDown);
         var editor = new EditorWindow(session, Settings, services);
-        editor.Closed += (_, _) => SaveSettings(); // последний цвет, толщина, обводка/заливка
+        editor.Closed += (_, _) => SaveSettings(); // last color, thickness, stroke/fill
         editor.Show();
         editor.Activate();
         return editor;
@@ -664,14 +664,14 @@ public partial class App : Application, INotifyPropertyChanged
 
     private async Task<ImageSaveResult> SaveImageAsync(BitmapSource image, string? json, BitmapSource? original, byte[]? originalPng, string? path)
     {
-        var store = History; // настройки папки могут измениться до окончания операции
+        var store = History; // folder settings may change before operation ends
         var result = await _imageSaver.SaveAsync(store, image, json, original, originalPng, path, DateTime.Now);
         if (result.HistoryError is { } error) Log.Error("History save failed", error);
         if (result.InHistory && ReferenceEquals(store, History)) _historyWindow?.Refresh();
         return result;
     }
 
-    /// <summary>Закрепить картинку по центру монитора, на котором курсор (для снимков из истории).</summary>
+    /// <summary>Pin image to center of monitor under cursor (for history screenshots).</summary>
     public void PinAtCursor(BitmapSource image)
     {
         User32.GetCursorPos(out var cursor);
@@ -682,7 +682,7 @@ public partial class App : Application, INotifyPropertyChanged
         ShowPin(image, new PixelRect(Math.Max(work.Left, x), Math.Max(work.Top, y), image.PixelWidth, image.PixelHeight));
     }
 
-    /// <summary>Все открытые закреплённые снимки — закрываются при выходе.</summary>
+    /// <summary>All open pinned screenshots close on exit.</summary>
     public List<PinWindow> Pins { get; } = new();
 
     public void ShowPin(BitmapSource image, PixelRect screenRegion)
@@ -722,7 +722,7 @@ public partial class App : Application, INotifyPropertyChanged
         DisposeFeedback();
         DisposeUpdates();
         DisposePreciseOcr();
-        _hotkeys?.Dispose(); // снимает RegisterHotKey и низкоуровневый хук
+        _hotkeys?.Dispose(); // unregisters RegisterHotKey and low-level hook
         _tray?.Dispose();
         try { if (_ownsMutex) _mutex?.ReleaseMutex(); }
         catch (Exception ex) { Log.Error("Mutex release failed", ex); }

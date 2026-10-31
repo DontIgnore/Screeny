@@ -11,7 +11,7 @@ public class RectAnnotationHitTests
     [Fact]
     public void SmallShape_CenterHits()
     {
-        // Внутренняя область после учёта половины толщины и допуска пуста.
+        // Inner area after half thickness and tolerance is empty.
         var a = new RectAnnotation(new Rect(0, 0, 10, 10), new AnnotationStyle(Colors.Red, 3));
         Assert.True(a.HitTest(new Point(5, 5)));
     }
@@ -43,14 +43,14 @@ public class PenAnnotationTests
     public void AddPoint_ExtendsBoundsAndHitTest()
     {
         var pen = new PenAnnotation(new Point(10, 10), Style);
-        Assert.True(pen.HitTest(new Point(10, 10)));     // одиночная точка ловится
+        Assert.True(pen.HitTest(new Point(10, 10)));     // single point caught
         Assert.False(pen.HitTest(new Point(100, 10)));
         pen.AddPoint(new Point(100, 10));
         pen.AddPoint(new Point(100, 100));
         Assert.True(pen.HitTest(new Point(55, 11)));
         Assert.True(pen.HitTest(new Point(101, 60)));
-        Assert.False(pen.HitTest(new Point(50, 60)));    // внутри bounds, но мимо линии
-        Assert.False(pen.HitTest(new Point(300, 300)));  // вне bounds
+        Assert.False(pen.HitTest(new Point(50, 60)));    // inside bounds but off line
+        Assert.False(pen.HitTest(new Point(300, 300)));  // outside bounds
         Assert.True(pen.Bounds.Contains(new Point(10, 10)) && pen.Bounds.Contains(new Point(100, 100)));
         Assert.Equal(3, pen.Points.Count);
     }
@@ -69,7 +69,7 @@ public class PenAnnotationTests
     [Fact]
     public void Highlighter_BoundsCoverSquareCaps()
     {
-        var hl = new HighlighterAnnotation(new Point(20, 20), Style); // ширина 16
+        var hl = new HighlighterAnnotation(new Point(20, 20), Style); // width 16
         hl.AddPoint(new Point(60, 20));
         Assert.True(hl.Bounds.Contains(new Point(12, 12)));
         Assert.True(hl.Bounds.Contains(new Point(68, 28)));
@@ -126,8 +126,8 @@ public class StyleCacheTests
         var t = new TextAnnotation(new Point(2, 2), "Hi", new AnnotationStyle(Colors.Red, 3));
         var w1 = t.Bounds.Width;
         var px = Pixels(Render(t));
-        Assert.True(Any(px, (b, g, r, al) => r == 255 && g == 0 && b == 0 && al == 255)); // текст цвета стиля
-        Assert.True(Any(px, (b, g, r, al) => r == 0 && al > 0));                           // тёмная тень
+        Assert.True(Any(px, (b, g, r, al) => r == 255 && g == 0 && b == 0 && al == 255)); // style color text
+        Assert.True(Any(px, (b, g, r, al) => r == 0 && al > 0));                           // dark shadow
         t.Text = "Hello world";
         Assert.True(t.Bounds.Width > w1);
         t.Style = new AnnotationStyle(Colors.Red, 10);
@@ -141,7 +141,7 @@ public class StyleCacheTests
         Render(a);
         a.End = new Point(70, 30);
         var px = Pixels(Render(a));
-        int i = (30 * 80 + 66) * 4; // у острия на новом конце
+        int i = (30 * 80 + 66) * 4; // at tip on new end
         Assert.Equal(255, px[i + 2]);
         Assert.Equal(0, px[i + 1]);
     }
@@ -207,7 +207,7 @@ public class EffectAnnotationCacheTests
         var preview = DrawnImage(e, src, forExport: false);
         Assert.Equal(40, preview.PixelWidth);
         Assert.Equal(25, preview.PixelHeight);
-        Assert.Equal(160, DrawnImage(e, src, forExport: true).PixelWidth); // экспорт никогда не берёт превью
+        Assert.Equal(160, DrawnImage(e, src, forExport: true).PixelWidth); // export never uses preview
 
         e.EndLiveEdit();
         Assert.False(e.IsLive);
@@ -221,7 +221,7 @@ public class EffectAnnotationCacheTests
         var e = new PixelateAnnotation(new Rect(3, 3, 50, 50), new AnnotationStyle(Colors.Red, 3));
         e.BeginLiveEdit();
         Assert.Equal(12, DrawnImage(e, src, forExport: false).PixelWidth);
-        e.Rect = new Rect(3, 3, 5, 5); // слишком мало для уменьшения — считаем полностью
+        e.Rect = new Rect(3, 3, 5, 5); // too small for reduction — compute fully
         Assert.Equal(5, DrawnImage(e, src, forExport: false).PixelWidth);
     }
 }

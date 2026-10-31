@@ -8,7 +8,7 @@
         UseLayoutRounding="True" SnapsToDevicePixels="True" Cursor="SizeAll">
   <Grid x:Name="Root">
     <Image x:Name="PinImage" Stretch="Fill"/>
-    <!-- Рамка поверх края картинки: снимок остаётся ровно там, где был на экране -->
+    <!-- Border over image edge: screenshot stays exactly where it was on screen -->
     <Rectangle x:Name="Frame" Stroke="{DynamicResource Overlay.PinFrame}" StrokeThickness="1" IsHitTestVisible="False"/>
     <Border x:Name="ZoomBadge" Background="{DynamicResource Overlay.Panel}" BorderBrush="{DynamicResource Overlay.ShotRing}" BorderThickness="1"
             CornerRadius="6" Padding="7,3" Margin="8"

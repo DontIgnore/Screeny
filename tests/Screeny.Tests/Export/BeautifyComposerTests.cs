@@ -8,7 +8,7 @@ namespace Screeny.Tests.Export;
 
 public class BeautifyComposerTests
 {
-    /// <summary>Снимок с узнаваемыми пикселями: цвет зависит от координат.</summary>
+    /// <summary>Screenshot with recognizable pixels: color depends on coordinates.</summary>
     private static BitmapSource Content(int w, int h, double dpi = 96)
     {
         var px = new byte[w * h * 4];
@@ -78,7 +78,7 @@ public class BeautifyComposerTests
         var o = new BeautifyOptions(BeautifyPreset.Mint, BeautifyPadding.S, 16, true);
         var result = BeautifyComposer.Compose(content, o);
         var px = Pixels(result);
-        // Вдали от скруглённых углов каждый пиксель снимка — ровно на месте со сдвигом на отступ.
+        // Away from rounded corners every screenshot pixel exactly in place with margin offset.
         for (int y = 16; y < 60 - 16; y++)
             for (int x = 0; x < 100; x++)
                 Assert.Equal(At(src, 100, x, y), At(px, result.PixelWidth, x + 24, y + 24));
@@ -102,11 +102,11 @@ public class BeautifyComposerTests
         var o = new BeautifyOptions(BeautifyPreset.Light, BeautifyPadding.M, 16, false);
         var result = BeautifyComposer.Compose(Content(100, 60), o);
         var px = Pixels(result);
-        var corner = At(px, result.PixelWidth, 48, 48); // левый верхний пиксель снимка срезан скруглением
+        var corner = At(px, result.PixelWidth, 48, 48); // screenshot top-left pixel cut by rounding
         var from = BeautifyOptions.Colors(BeautifyPreset.Light).From;
         Assert.True(corner.R > 200 && corner.G > 200 && corner.B > 200, $"corner {corner} must be the light background");
         Assert.NotEqual(At(Pixels(Content(100, 60)), 100, 0, 0), corner);
-        Near(from, At(px, result.PixelWidth, 0, 0)); // угол холста — начало градиента
+        Near(from, At(px, result.PixelWidth, 0, 0)); // canvas corner — gradient start
     }
 
     [Theory]
@@ -133,7 +133,7 @@ public class BeautifyComposerTests
         var a = Pixels(BeautifyComposer.Compose(Content(100, 60), with));
         var b = Pixels(BeautifyComposer.Compose(Content(100, 60), with with { Shadow = false }));
         int w = 100 + 96;
-        // Сразу под снимком тень есть, далеко в углу холста — нет.
+        // Right under screenshot shadow exists, far in canvas corner — no.
         Assert.True(At(a, w, 48 + 50, 48 + 60 + 4).R < At(b, w, 48 + 50, 48 + 60 + 4).R - 10);
         Assert.Equal(At(b, w, 2, 2), At(a, w, 2, 2));
     }
@@ -141,7 +141,7 @@ public class BeautifyComposerTests
     [Fact]
     public void ShadowAndCorners_OnLightBackground_StayLight_NoBlackPixels()
     {
-        // Тень и углы поверх светлого фона, а не поверх пустоты: при DIB-вставке не должно быть чёрного.
+        // Shadow and corners over light background, not void: DIB paste must not be black.
         var o = new BeautifyOptions(BeautifyPreset.Light, BeautifyPadding.M, 16, true);
         var result = BeautifyComposer.Compose(Content(100, 60), o);
         var px = Pixels(result);
@@ -154,7 +154,7 @@ public class BeautifyComposerTests
                 var c = At(px, w, x, y);
                 Assert.True(c.R > 120 && c.G > 120 && c.B > 120, $"({x},{y}) = {c}");
             }
-        // Срезанный скруглением угол снимка — тоже фон.
+        // Screenshot corner cut by rounding — also background.
         var corner = At(px, w, p, p);
         Assert.True(corner.R > 120, $"corner {corner}");
     }

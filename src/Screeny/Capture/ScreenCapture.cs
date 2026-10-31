@@ -28,11 +28,11 @@ public static class ScreenCapture
 
             if (!Gdi32.BitBlt(memDc, 0, 0, w, h, screenDc, x, y, Gdi32.SRCCOPY | Gdi32.CAPTUREBLT))
                 throw new InvalidOperationException("BitBlt failed");
-            Gdi32.SelectObject(memDc, old); // GetDIBits требует, чтобы битмап не был выбран в DC
+            Gdi32.SelectObject(memDc, old); // GetDIBits requires bitmap not selected into DC
             old = IntPtr.Zero;
 
-            // DPI 96: дальше везде работаем в пикселях и масштабируем сами.
-            // GetDIBits пишет сразу в back buffer — без промежуточного byte[] и копии в BitmapSource.Create.
+            // DPI 96: further everything works in pixels and we scale ourselves.
+            // GetDIBits writes directly to back buffer — without intermediate byte[] and copy in BitmapSource.Create.
             var bitmap = new WriteableBitmap(w, h, 96, 96, PixelFormats.Bgra32, null);
             bitmap.Lock();
             try
@@ -46,7 +46,7 @@ public static class ScreenCapture
                 };
                 if (Gdi32.GetDIBits(memDc, hBitmap, 0, (uint)h, bitmap.BackBuffer, ref header, Gdi32.DIB_RGB_COLORS) != h)
                     throw new InvalidOperationException("GetDIBits failed");
-                // GDI оставляет альфу нулевой — без этого PNG получился бы прозрачным.
+                // GDI leaves alpha zero — without this PNG would be transparent.
                 SetOpaque(bitmap.BackBuffer, (long)w * h);
                 bitmap.AddDirtyRect(new Int32Rect(0, 0, w, h));
             }

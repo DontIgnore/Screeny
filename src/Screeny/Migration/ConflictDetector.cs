@@ -4,12 +4,12 @@ using Screeny.Hotkeys;
 namespace Screeny.Migration;
 
 /// <summary>
-/// Найденная мешающая программа.
+/// Found conflicting program.
 /// </summary>
-/// <param name="Processes">Запущенные процессы программы (их закрывает «Закрыть сейчас»).</param>
-/// <param name="Autostarts">Включённые записи автозапуска (выключенные через StartupApproved сюда не попадают).</param>
-/// <param name="Uninstaller">Запись «Программы и компоненты» с родным деинсталлятором или null (портативная версия).</param>
-/// <param name="Keys">Хоткеи Screeny, которые она обычно занимает (у PowerToys — по переназначениям Keyboard Manager).</param>
+/// <param name="Processes">Running processes (closed by “Close now”).</param>
+/// <param name="Autostarts">Enabled autostart entries (disabled via StartupApproved not included).</param>
+/// <param name="Uninstaller">Programs and Features entry with native uninstaller or null (portable).</param>
+/// <param name="Keys">Screeny hotkeys it usually takes (PowerToys — by Keyboard Manager remaps).</param>
 public sealed record Conflict(
     ConflictProgram Program,
     IReadOnlyList<ProcessEntry> Processes,
@@ -22,18 +22,18 @@ public sealed record Conflict(
     public IEnumerable<AutostartEntry> UserAutostarts => Autostarts.Where(a => !a.IsMachineWide);
     public IEnumerable<AutostartEntry> MachineAutostarts => Autostarts.Where(a => a.IsMachineWide);
 
-    /// <summary>Хотя бы одна запись автозапуска — для всех пользователей: отключить её можно только с правами администратора.</summary>
+    /// <summary>At least one autostart entry for all users: can disable only with admin rights.</summary>
     public bool NeedsAdminForAutostart => Autostarts.Any(a => a.IsMachineWide);
 
-    /// <summary>Путь exe для иконки: запущенный процесс или команда автозапуска.</summary>
+    /// <summary>Exe path for icon: running process or autostart command.</summary>
     public string? ExePath => Processes.Select(p => p.Path).FirstOrDefault(p => p is not null)
                               ?? Autostarts.Select(a => UninstallCommand.ExtractExePath(a.Command)).FirstOrDefault(p => p is not null);
 
-    /// <summary>Мешает ли выбранным хоткеям (пересечение с включёнными PrintScreen / Win+Shift+S).</summary>
+    /// <summary>Whether it conflicts with selected hotkeys (intersection with enabled PrintScreen / Win+Shift+S).</summary>
     public bool Blocks(IEnumerable<HotkeyBinding> hotkeys) => hotkeys.Any(h => h.Enabled && Keys.Contains(h.Kind));
 }
 
-/// <summary>Поиск мешающих программ по снимку среды. Чистая функция: ничего не читает сама и ничего не меняет.</summary>
+/// <summary>Search conflicting programs from environment snapshot. Pure function: reads nothing itself, changes nothing.</summary>
 public static class ConflictDetector
 {
     public static IReadOnlyList<Conflict> Detect(IEnvironmentSnapshot env, ConflictCatalog catalog)
@@ -43,7 +43,7 @@ public static class ConflictDetector
         {
             var uninstaller = env.Uninstall
                 .Where(u => program.MatchesUninstall(u.DisplayName) && UninstallCommand.Parse(u.UninstallString) is not null)
-                // У PowerToys две записи (MSI и пакет установщика): пакет .exe /uninstall удаляет всё вместе.
+                // PowerToys has two entries (MSI and installer package): package .exe /uninstall removes all together.
                 .OrderBy(u => u.UninstallString!.Contains("msiexec", StringComparison.OrdinalIgnoreCase) ? 1 : 0)
                 .FirstOrDefault();
             if (program.DetectByRemapOnly)
@@ -57,21 +57,21 @@ public static class ConflictDetector
 
             var processes = env.Processes.Where(p => program.MatchesProcess(p.Name)).OrderBy(p => p.Pid).ToList();
             var autostarts = env.Autostart.Where(a => a.IsEnabled && program.MatchesAutostart(a)).ToList();
-            if (processes.Count == 0 && autostarts.Count == 0) continue; // установлена, но не запущена и не стартует сама
+            if (processes.Count == 0 && autostarts.Count == 0) continue; // installed but not running and doesn't autostart
             result.Add(new Conflict(program, processes, autostarts, uninstaller, program.TypicalKeys));
         }
         return result;
     }
 
-    /// <summary>PrintScreen открывает системный захват экрана Windows (значение 1 или нет значения на Windows 11).</summary>
+    /// <summary>PrintScreen opens Windows system screen capture (value 1 or no value on Windows 11).</summary>
     public static bool IsSystemPrintScreenOn(IEnvironmentSnapshot env)
         => PrintScreenPolicy.IsSnippingKeyEnabled(env.PrintScreenKeyForSnippingEnabled, env.OsBuild);
 }
 
 /// <summary>
-/// Переназначения Keyboard Manager из PowerToys, которые задевают хоткеи Screeny. Формат файла конфигурации:
-/// <c>remapKeys.inProcess[].originalKeys</c> — код VK одной клавиши десятичным числом («44» — PrintScreen),
-/// <c>remapShortcuts.global[].originalKeys</c> — коды через «;» («91;16;83» — Win+Shift+S).
+/// Keyboard Manager remaps from PowerToys touching Screeny hotkeys. Config file format:
+/// <c>remapKeys.inProcess[].originalKeys</c> — VK code of one key as decimal (“44” — PrintScreen),
+/// <c>remapShortcuts.global[].originalKeys</c> — codes joined by “;” (“91;16;83” — Win+Shift+S).
 /// </summary>
 public static class PowerToysRemaps
 {
@@ -98,7 +98,7 @@ public static class PowerToysRemaps
                     if (codes.Count == 1 && codes[0] == VkSnapshot) keys.Add(HotkeyKind.PrintScreen);
                 }
         }
-        catch (JsonException) { /* повреждённый файл — считаем, что переназначений нет */ }
+        catch (JsonException) { /* corrupted file — assume no remaps */ }
         return keys;
     }
 

@@ -4,10 +4,10 @@ using System.Windows.Media.Imaging;
 
 namespace Screeny.Ocr.Paddle;
 
-/// <summary>Картинка BGRA (как отдаёт WPF CopyPixels при Bgra32).</summary>
+/// <summary>BGRA image (as WPF CopyPixels gives for Bgra32).</summary>
 public sealed record OcrImage(byte[] Bgra, int W, int H)
 {
-    /// <summary>Пиксели замороженной картинки; вызывать можно с любого потока.</summary>
+    /// <summary>Pixels of frozen image; callable from any thread.</summary>
     public static OcrImage FromBitmap(BitmapSource bmp)
     {
         BitmapSource src = bmp.Format == PixelFormats.Bgra32 ? bmp : new FormatConvertedBitmap(bmp, PixelFormats.Bgra32, null, 0);
@@ -17,37 +17,37 @@ public sealed record OcrImage(byte[] Bgra, int W, int H)
     }
 }
 
-/// <summary>Распознанный фрагмент строки: текст, уверенность CTC и горизонтальные границы каждого символа
-/// в пикселях от левого края выреза (по шагам CTC).</summary>
+/// <summary>Recognized line fragment: text, CTC confidence and horizontal bounds of each character
+/// in pixels from crop left edge (by CTC steps).</summary>
 public sealed record RecResult(string Text, float Confidence, double[] CharLeft, double[] CharRight);
 
 /// <summary>
-/// Пре- и постобработка PP-OCR (DB-детектор + SVTR-распознаватель с CTC) без OpenCV и без ONNX Runtime: всё, что можно
-/// проверить тестами без моделей. Параметры ниже — лучшая конфигурация из замеров качества и скорости на наборе мелкого
-/// экранного текста (кириллица и латиница). Модуль с моделями содержит только данные и нативный
-/// рантайм, поэтому правки здесь не требуют новой версии модуля.
+/// PP-OCR pre/post-processing (DB detector + SVTR recognizer with CTC) without OpenCV and ONNX Runtime: everything
+/// testable without models. Parameters below are best config from quality/speed measurements on small
+/// screen text set (Cyrillic and Latin). Module with models contains only data and native
+/// runtime, so edits here don't require new module version.
 /// </summary>
 public static class PaddlePipeline
 {
-    // DB-постобработка как в PaddleX 3.x (OCR.yaml).
+    // DB post-processing as in PaddleX 3.x (OCR.yaml).
     public const double Thresh = 0.3, BoxThresh = 0.6, Unclip = 1.5;
-    /// <summary>Строка шире этого (после приведения к высоте 48) режется на куски по промежуткам между словами.</summary>
+    /// <summary>Line wider than this (after resize to height 48) split into chunks by word gaps.</summary>
     public const int MaxRecWidth = 480;
-    /// <summary>Области до 0,25 Мп увеличиваются ×2 перед детекцией: иначе детектор теряет начало мелкой строки.</summary>
+    /// <summary>Areas up to 0.25 MP upscaled ×2 before detection: otherwise detector loses start of small line.</summary>
     public const long UpscaleMaxPixels = 250_000;
     /// <summary>
-    /// Фрагмент до <see cref="ShortFragmentLength"/> символов с уверенностью CTC ниже порога отбрасывается: обычно это иконка
-    /// или рамка, принятая детектором за текст. Порог подобран на одном реальном снимке со списком ников (от 0,6 до 0,9
-    /// результат не менялся) — это риск подгонки; на новых примерах его стоит перепроверить.
+    /// Fragment up to <see cref="ShortFragmentLength"/> chars with CTC confidence below threshold discarded: usually icon
+    /// or border taken for text. Threshold tuned on one real screenshot with nick list (0.6 to 0.9
+    /// unchanged) — overfitting risk; recheck on new samples.
     /// </summary>
     public const double MinShortConfidence = 0.6;
     public const int ShortFragmentLength = 4;
     public const int RecHeight = 48;
 
     /// <summary>
-    /// Схема потоков: <c>par</c> строк распознаются параллельно, у каждой сессии <c>threads</c> потоков ORT. По замерам
-    /// (13700K, 24 логических ядра) лучшая — 4×4: потоков всего примерно две трети логических ядер, поровну между
-    /// параллельными строками, не больше 4×4 (дальше выигрыша нет). На 8 логических — 2×2, на 4 — 1×2, на 2 — 1×1.
+    /// Thread scheme: <c>par</c> lines parallel, each session <c>threads</c> ORT threads. By measurements
+    /// (13700K, 24 logical cores) best is 4×4: total threads about two-thirds logical cores, equal between
+    /// parallel lines, no more than 4×4 (no gain beyond). On 8 logical — 2×2, on 4 — 1×2, on 2 — 1×1.
     /// </summary>
     public static (int Par, int Threads) ThreadSplit(int processorCount)
     {
@@ -56,10 +56,10 @@ public static class PaddlePipeline
         return (par, Math.Clamp(n / par, 1, 4));
     }
 
-    /// <summary>Множитель перед детекцией: ×2 для небольших областей.</summary>
+    /// <summary>Multiplier before detection: ×2 for small areas.</summary>
     public static double DetScaleFor(int w, int h) => (long)w * h <= UpscaleMaxPixels ? 2 : 1;
 
-    /// <summary>Размер входа детектора: родное разрешение (короткая сторона не меньше 64, длинная не больше 4000), стороны кратны 32.</summary>
+    /// <summary>Detector input size: native resolution (short side ≥ 64, long ≤ 4000), sides multiple of 32.</summary>
     public static (int W, int H) DetInputSize(int w, int h)
     {
         double ratio = Math.Min(w, h) < 64 ? 64.0 / Math.Min(w, h) : 1;
@@ -72,8 +72,8 @@ public static class PaddlePipeline
     public static readonly float[] DetBias = DetMean.Zip(DetStd, (m, s) => -m / s).ToArray();
     public static readonly float[] RecScale = [1 / 127.5f, 1 / 127.5f, 1 / 127.5f], RecBias = [-1f, -1f, -1f];
 
-    /// <summary>DB-постобработка: бинаризация, связные компоненты (8-связность), оценка, unclip, перевод в координаты картинки.
-    /// Экранный текст горизонтальный, поэтому вместо minAreaRect и контуров — прямоугольники компонент.</summary>
+    /// <summary>DB post-processing: binarization, connected components (8-connectivity), score, unclip, to image coordinates.
+    /// Screen text is horizontal, so instead of minAreaRect and contours — component rectangles.</summary>
     public static List<Int32Rect> Boxes(float[] prob, int mw, int mh, int dw, int dh)
     {
         var seen = new bool[prob.Length];
@@ -116,10 +116,10 @@ public static class PaddlePipeline
     }
 
     /// <summary>
-    /// Режет вырез на куски не шире <paramref name="maxRecWidth"/> (в масштабе высоты 48) по столбцам без «чернил»:
-    /// фон — медиана яркости по краю выреза, промежуток — не меньше четверти высоты строки. Если промежутка нет,
-    /// режет где придётся (без пробела). В rec-модели PP-OCRv5 есть глобальное внимание вдоль строки: время и память
-    /// растут быстрее ширины, а вход шире 3200 ещё и сжимается.
+    /// Splits crop into chunks no wider than <paramref name="maxRecWidth"/> (at height 48 scale) by columns without ink:
+    /// background — median brightness along crop edge, gap — at least quarter of line height. If no gap,
+    /// splits anywhere (no space). In rec-model PP-OCRv5 there's global attention along line: time/memory
+    /// grow faster than width, and input wider than 3200 is also squeezed.
     /// </summary>
     public static List<(Int32Rect Box, bool SpaceBefore)> Split(OcrImage img, Int32Rect r, int maxRecWidth)
     {
@@ -137,7 +137,7 @@ public static class PaddlePipeline
             for (int y = r.Y; y < r.Y + r.Height && !ink; y++) ink = Math.Abs(Lum(r.X + x, y) - bg) > 48;
             empty[x] = !ink;
         }
-        // Середины промежутков между словами.
+        // Midpoints of word gaps.
         var cuts = new List<int>();
         int minGap = Math.Max(2, r.Height / 4);
         for (int x = 0; x < r.Width;)
@@ -162,11 +162,11 @@ public static class PaddlePipeline
         return result;
     }
 
-    /// <summary>Ширина входа rec для выреза: пропорционально высоте 48.</summary>
+    /// <summary>Rec input width for crop: proportional to height 48.</summary>
     public static int RecWidth(Int32Rect crop) => Math.Max(1, (int)Math.Ceiling((double)RecHeight * crop.Width / Math.Max(1, crop.Height)));
 
-    /// <summary>CTC greedy: 0 — blank, k — dict[k−1], класс после словаря — пробел.</summary>
-    /// <param name="stepPx">Ширина шага CTC в пикселях выреза.</param>
+    /// <summary>CTC greedy: 0 — blank, k — dict[k−1], class after dictionary — space.</summary>
+    /// <param name="stepPx">CTC step width in crop pixels.</param>
     public static RecResult Decode(ReadOnlySpan<float> probs, int T, int C, string[] dict, double stepPx)
     {
         var sb = new System.Text.StringBuilder();
@@ -186,12 +186,12 @@ public static class PaddlePipeline
         return new RecResult(sb.ToString(), n > 0 ? (float)(conf / n) : 0, left.ToArray(), right.ToArray());
     }
 
-    /// <summary>Словарь rec-модели из метаданных ONNX (ключ <c>character</c>): кончается переводом строки, последний пустой
-    /// элемент — не символ.</summary>
+    /// <summary>Rec-model dictionary from ONNX metadata (key <c>character</c>): ends with newline, last empty
+    /// element is not character.</summary>
     public static string[] ParseDict(string character) => character.TrimEnd('\n').Split('\n');
 
-    /// <summary>Куски одной строки (<see cref="Split"/>) обратно в строку: пробел на месте реза по промежутку, рамки символов
-    /// — в пикселях от левого края исходного выреза, уверенность — средняя по символам.</summary>
+    /// <summary>Chunks of one line (<see cref="Split"/>) back to line: space at gap cut, character borders
+    /// — in pixels from original crop left edge, confidence — average over characters.</summary>
     public static RecResult Join(Int32Rect crop, IReadOnlyList<(Int32Rect Box, bool SpaceBefore, RecResult R)> chunks)
     {
         var text = new System.Text.StringBuilder();
@@ -209,12 +209,12 @@ public static class PaddlePipeline
         return new RecResult(text.ToString(), n > 0 ? (float)(conf / n) : 0, left.ToArray(), right.ToArray());
     }
 
-    /// <summary>Фрагмент оставляется: не короткий или уверенный (см. <see cref="MinShortConfidence"/>). Порог — на фрагмент
-    /// целиком, а не на отдельные символы.</summary>
+    /// <summary>Fragment kept: not short or confident (see <see cref="MinShortConfidence"/>). Threshold on fragment
+    /// as whole, not individual characters.</summary>
     public static bool Keep(RecResult r) => r.Text.Trim().Length > ShortFragmentLength || r.Confidence >= MinShortConfidence;
 
-    /// <summary>Билинейный ресайз области в стиле cv2.INTER_LINEAR (центры пикселей) прямо в тензор CHW:
-    /// dst[off + c·plane + y·stride + x] = v·scale[c] + bias[c], каналы B,G,R.</summary>
+    /// <summary>Bilinear area resize in cv2.INTER_LINEAR style (pixel centers) straight into CHW tensor:
+    /// dst[off + c·plane + y·stride + x] = v·scale[c] + bias[c], channels B,G,R.</summary>
     public static void ResizeInto(OcrImage img, Int32Rect r, int dw, int dh, float[] dst, int off, int stride, int plane, float[] scale, float[] bias)
     {
         double sx = (double)r.Width / dw, sy = (double)r.Height / dh;
@@ -243,9 +243,9 @@ public static class PaddlePipeline
     }
 
     /// <summary>
-    /// Строки рамки, где есть «чернила» (как в <see cref="Split"/>: яркость отличается от медианы края больше чем на 48),
-    /// с запасом в пиксель-два. Рамка детектора после unclip примерно в полтора раза выше текста, и подсветка слов
-    /// соседних строк в режиме текста наезжала бы друг на друга. Чернил нет — рамка как есть.
+    /// Border rows with ink (like <see cref="Split"/>: brightness differs from edge median by > 48),
+    /// with 1-2 px margin. Detector border after unclip is ~1.5× text height, and word highlighting of neighboring
+    /// lines in text mode would overlap. No ink — border as is.
     /// </summary>
     public static (int Y, int Height) InkRows(OcrImage img, Int32Rect r)
     {
@@ -258,8 +258,8 @@ public static class PaddlePipeline
         var ink = new bool[r.Height];
         for (int y = 0; y < r.Height; y++)
             for (int x = r.X; x < r.X + r.Width && !ink[y]; x++) ink[y] = Math.Abs(Lum(x, r.Y + y) - bg) > 48;
-        // Полоса чернил вокруг середины рамки: края рамки могут задевать хвосты букв соседних строк. Разрывы до восьмой
-        // части высоты — точки над «і», «ё» и т. п. — полосу не прерывают.
+        // Ink band around border middle: border edges may touch descenders of neighboring lines. Gaps up to eighth
+        // of height — dots over “і”, “ё” etc. — don't break band.
         int center = r.Height / 2, seed = -1;
         for (int d = 0; d <= r.Height / 2 && seed < 0; d++)
         {
@@ -276,10 +276,10 @@ public static class PaddlePipeline
         return (y0, y1 - y0);
     }
 
-    /// <summary>Фрагменты строк → раскладка Screeny: фрагменты одной высоты склеиваются в строку, текст режется на слова
-    /// по пробелам, рамка слова — по шагам CTC его первой и последней буквы. <paramref name="k"/> — перевод координат
-    /// картинки детектора в пиксели исходной (после увеличения ×2 — 0,5). <paramref name="wordRows"/> — вертикальные границы
-    /// рамок слов (<see cref="InkRows"/>); строки при этом всё равно группируются по рамкам детектора.</summary>
+    /// <summary>Line fragments → Screeny layout: fragments of same height glued into line, text split into words
+    /// by spaces, word border by CTC steps of its first/last letter. <paramref name="k"/> — coordinate translation
+    /// from detector image to original pixels (after ×2 upscale — 0.5). <paramref name="wordRows"/> — vertical bounds
+    /// of word borders (<see cref="InkRows"/>); lines still grouped by detector borders.</summary>
     public static OcrLayout ToLayout(IEnumerable<(Int32Rect Box, RecResult R)> items, double k, Func<Int32Rect, (int Y, int Height)>? wordRows = null)
     {
         var rows = new List<(double Cy, List<(Int32Rect Box, RecResult R)> Items)>();

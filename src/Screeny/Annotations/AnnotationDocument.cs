@@ -5,8 +5,8 @@ using Screeny.Annotations.Shapes;
 namespace Screeny.Annotations;
 
 /// <summary>
-/// Список аннотаций + undo. Фигура, которую сейчас рисуют, живёт в <see cref="Live"/>: она рисуется поверх
-/// <see cref="Items"/>, но не участвует ни в списке, ни в undo, пока инструмент не вызовет Add на отпускании мыши.
+/// Annotation list + undo. The shape currently being drawn lives in <see cref="Live"/>: it is drawn on top of
+/// <see cref="Items"/>, but is not in the list or undo until the tool calls Add on mouse up.
 /// </summary>
 public sealed class AnnotationDocument
 {
@@ -17,7 +17,7 @@ public sealed class AnnotationDocument
     public Annotation? Selected { get; set; }
     public event Action? Changed;
 
-    /// <summary>«Живая» аннотация текущего жеста: рендерится поверх Items, но не входит в Items, hit-test и undo.</summary>
+    /// <summary>“Live” annotation of the current gesture: rendered over Items, but not part of Items, hit-test or undo.</summary>
     public Annotation? Live
     {
         get => _live;
@@ -35,8 +35,8 @@ public sealed class AnnotationDocument
     public void Move(Annotation a, Vector delta) => Undo.Execute(new MoveAction(a, delta));
 
     /// <summary>
-    /// Записывает в undo сдвиг, который уже применён к фигуре напрямую (перетаскивание).
-    /// Возвращает false, если фигуры в документе нет (её отменили посреди жеста), — тогда шаг не записывается.
+    /// Records into undo the offset already applied directly to the shape (dragging).
+    /// Returns false if the shape is not in the document (it was undone mid-gesture), then no step is recorded.
     /// </summary>
     public bool RecordMove(Annotation a, Vector delta)
     {
@@ -45,7 +45,7 @@ public sealed class AnnotationDocument
         return true;
     }
 
-    /// <summary>Смена цвета/толщины существующей аннотации — отдельный шаг undo.</summary>
+    /// <summary>Changing color/thickness of an existing annotation is a separate undo step.</summary>
     public void Restyle(Annotation a, AnnotationStyle style)
     {
         if (a.Style == style || !_items.Contains(a)) return;
@@ -59,8 +59,8 @@ public sealed class AnnotationDocument
     }
 
     /// <summary>
-    /// Загружает готовые аннотации (документ из истории) без шагов undo: открытый документ не «грязный»,
-    /// и Ctrl+Z не удаляет пометки, которые уже были на снимке.
+    /// Loads ready-made annotations (document from history) without undo steps: the opened document is not “dirty”,”
+    /// and Ctrl+Z does not remove marks that were already on the screenshot.
     /// </summary>
     public void Load(IEnumerable<Annotation> annotations)
     {
@@ -68,7 +68,7 @@ public sealed class AnnotationDocument
         Changed?.Invoke();
     }
 
-    /// <summary>Удаляет все аннотации одним шагом undo (отмена возвращает их в прежнем порядке). Пустой документ — без шага.</summary>
+    /// <summary>Deletes all annotations in one undo step (undo restores them in original order). Empty document — no step.</summary>
     public void RemoveAll()
     {
         if (_items.Count == 0) return;
@@ -76,7 +76,7 @@ public sealed class AnnotationDocument
         Undo.Execute(new RemoveAllAction(_items));
     }
 
-    /// <summary>Удаляет всё без возможности отмены.</summary>
+    /// <summary>Deletes everything without undo.</summary>
     public void Clear()
     {
         _items.Clear();

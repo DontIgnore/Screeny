@@ -4,13 +4,13 @@ using System.Windows.Media;
 
 namespace Screeny.Annotations.Shapes;
 
-/// <summary>Нумерованная метка: залитый круг цвета стиля с белой цифрой.</summary>
+/// <summary>Numbered label: filled circle in style color with white number.</summary>
 public sealed class NumberAnnotation(Point center, int number, AnnotationStyle style) : Annotation(style)
 {
     private static readonly Typeface Face = new(new FontFamily("Segoe UI"), FontStyles.Normal, FontWeights.Bold, FontStretches.Normal);
     private static readonly Brush OutlineBrush = Freeze(new SolidColorBrush(Color.FromArgb(0xCC, 0xFF, 0xFF, 0xFF)));
 
-    private Pen? _outline;            // зависят от радиуса, т.е. от стиля
+    private Pen? _outline;            // depend on radius, i.e. style
     private FormattedText? _formatted;
 
     public Point Center { get; private set; } = center;
@@ -20,7 +20,7 @@ public sealed class NumberAnnotation(Point center, int number, AnnotationStyle s
 
     private double OutlineWidth => Math.Max(1.5, Radius / 8);
 
-    /// <summary>Круг плюс половина белой обводки по его краю.</summary>
+    /// <summary>Circle plus half white stroke along its edge.</summary>
     public override Rect Bounds => GeometryBounds.InflateCopy(OutlineWidth / 2);
     public override Rect GeometryBounds => new(Center.X - Radius, Center.Y - Radius, Radius * 2, Radius * 2);
 

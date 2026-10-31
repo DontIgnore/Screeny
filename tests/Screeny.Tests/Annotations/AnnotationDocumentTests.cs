@@ -23,7 +23,7 @@ public class AnnotationDocumentTests
     [Fact]
     public void HitTest_ReturnsTopmost()
     {
-        // Прямоугольник ловит клик только по рамке, поэтому точка лежит на рамках обоих.
+        // Rectangle catches click only on border, so point lies on both borders.
         var doc = new AnnotationDocument();
         doc.Add(new RectAnnotation(new Rect(0, 0, 100, 100), Style));
         var top = new RectAnnotation(new Rect(0, 0, 20, 20), Style);
@@ -77,8 +77,8 @@ public class AnnotationDocumentTests
         doc.Add(new TextAnnotation(new Point(5, 5), "Hi", Style));
         doc.Add(new NumberAnnotation(new Point(30, 30), 1, Style));
         doc.Add(new PixelateAnnotation(new Rect(10, 10, 30, 30), Style));
-        doc.Add(new BlurAnnotation(new Rect(50, 50, 40, 40), Style)); // частично за краем снимка
-        doc.Add(new PixelateAnnotation(new Rect(10, 10, 0, 0), Style)); // нулевой размер (момент MouseDown)
+        doc.Add(new BlurAnnotation(new Rect(50, 50, 40, 40), Style)); // partially beyond screenshot edge
+        doc.Add(new PixelateAnnotation(new Rect(10, 10, 0, 0), Style)); // zero size (MouseDown moment)
 
         var dv = new DrawingVisual();
         using (var dc = dv.RenderOpen()) doc.Render(dc, new RenderContext(source, ForExport: true));
@@ -102,7 +102,7 @@ public class LiveAnnotationTests
         Assert.Equal(1, changed);
         Assert.Empty(doc.Items);
         Assert.False(doc.Undo.CanUndo);
-        Assert.Null(doc.HitTest(new Point(10, 20))); // живая фигура не ловится выбором
+        Assert.Null(doc.HitTest(new Point(10, 20))); // live shape not caught by selection
 
         var dv = new DrawingVisual();
         using (var dc = dv.RenderOpen()) doc.Render(dc, new RenderContext(source, ForExport: false));
@@ -137,7 +137,7 @@ public class LiveAnnotationTests
         doc.Add(a);
         a.Offset(new Vector(5, 5));
         Assert.True(doc.RecordMove(a, new Vector(5, 5)));
-        Assert.Equal(new Rect(5, 5, 10, 10), a.GeometryBounds); // не сдвинуто второй раз
+        Assert.Equal(new Rect(5, 5, 10, 10), a.GeometryBounds); // not moved second time
         doc.Undo.Undo();
         Assert.Equal(new Rect(0, 0, 10, 10), a.GeometryBounds);
     }
@@ -201,7 +201,7 @@ public class NumberAnnotationTests
         Assert.Equal(1, ((NumberAnnotation)doc.Items[0]).Number);
         Assert.Equal(2, ((NumberAnnotation)doc.Items[1]).Number);
         doc.Undo.Undo();
-        Assert.Equal(2, doc.NextNumber()); // после отмены номер переиспользуется
+        Assert.Equal(2, doc.NextNumber()); // after undo number reused
     }
 }
 
@@ -222,7 +222,7 @@ public class EffectAnnotationTests
         Assert.Equal(20, processed!.PixelWidth);
         var outPx = new byte[20 * 20 * 4];
         processed.CopyPixels(outPx, 20 * 4, 0);
-        // Блок 9×9 шахматки усредняется в серый, а не остаётся 0/255.
+        // 9×9 checkerboard block averages to gray, not 0/255.
         Assert.InRange(outPx[0], 100, 155);
     }
 }

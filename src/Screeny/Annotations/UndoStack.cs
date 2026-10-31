@@ -7,14 +7,14 @@ public sealed class UndoStack
     private readonly record struct Entry(IUndoableAction Action, long Before, long After);
     private readonly Stack<Entry> _undo = new(), _redo = new();
     private long _nextRevision;
-    /// <summary>Идентификатор текущего состояния; undo/redo возвращают прежний идентификатор, новая ветка получает свой.</summary>
+    /// <summary>Identifier of current state; undo/redo restore previous identifier, new branch gets its own.</summary>
     public long Revision { get; private set; }
     public bool CanUndo => _undo.Count > 0;
     public bool CanRedo => _redo.Count > 0;
     public event Action? Changed;
 
     public void Execute(IUndoableAction action) { action.Do(); Record(action); }
-    /// <summary>Кладёт в стек уже применённое действие (например, перетаскивание, которое шло напрямую), не вызывая Do.</summary>
+    /// <summary>Pushes already-applied action (e.g., dragging that happened directly) onto stack without calling Do.</summary>
     public void Record(IUndoableAction action)
     {
         var entry = new Entry(action, Revision, ++_nextRevision);

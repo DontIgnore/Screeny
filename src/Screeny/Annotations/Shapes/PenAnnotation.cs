@@ -4,8 +4,8 @@ using System.Windows.Media;
 namespace Screeny.Annotations.Shapes;
 
 /// <summary>
-/// Свободная линия карандашом. Геометрия наращивается на AddPoint (PolyLineSegment.Points.Add),
-/// а не пересобирается из всех точек; StreamGeometry для этого не годится — Open() стирает содержимое.
+/// Freehand pencil line. Geometry grows on AddPoint (PolyLineSegment.Points.Add),
+/// not rebuilt from all points; StreamGeometry is unsuitable — Open() clears content.
 /// </summary>
 public class PenAnnotation : Annotation
 {
@@ -13,14 +13,14 @@ public class PenAnnotation : Annotation
     private readonly PathFigure _figure;
     private readonly PolyLineSegment _segment;
     private readonly PathGeometry _geometry;
-    private Rect _pointBounds;      // охват самих точек, без толщины пера
+    private Rect _pointBounds;      // bounds of points themselves, without pen thickness
     private Pen? _strokePen, _hitPen;
 
     public PenAnnotation(Point start, AnnotationStyle style) : base(style)
     {
         _points = [start];
         _pointBounds = new Rect(start, start);
-        // Одна точка — рисуем микроотрезок, чтобы клик карандашом оставлял точку.
+        // Single point — draw micro-segment so pencil click leaves a dot.
         _segment = new PolyLineSegment([start + new Vector(0.01, 0)], isStroked: true) { IsSmoothJoin = true };
         _figure = new PathFigure { StartPoint = start, IsFilled = false, IsClosed = false };
         _figure.Segments.Add(_segment);
@@ -31,13 +31,13 @@ public class PenAnnotation : Annotation
 
     public void AddPoint(Point p)
     {
-        if (_points.Count == 1) _segment.Points[0] = p; // микроотрезок больше не нужен
+        if (_points.Count == 1) _segment.Points[0] = p; // micro-segment no longer needed
         else _segment.Points.Add(p);
         _points.Add(p);
         _pointBounds.Union(p);
     }
 
-    /// <summary>Перо штриха; создаётся один раз до смены стиля.</summary>
+    /// <summary>Stroke pen; created once until style change.</summary>
     protected virtual Pen CreateStrokePen() => MakePen();
 
     protected Pen StrokePen => _strokePen ??= CreateStrokePen();
@@ -47,7 +47,7 @@ public class PenAnnotation : Annotation
 
     protected Geometry Geometry => _geometry;
 
-    /// <summary>O(1): охват точек плюс половина толщины (у квадратных концов — по диагонали).</summary>
+    /// <summary>O(1): bounds of points plus half thickness (for square caps — diagonal).</summary>
     public override Rect Bounds
     {
         get
@@ -63,7 +63,7 @@ public class PenAnnotation : Annotation
     public override bool HitTest(Point p)
     {
         var hit = StrokeHitPen;
-        // Дешёвый предфильтр по охвату, затем точная проверка по геометрии.
+        // Cheap bounds prefilter, then exact geometry check.
         return Rect.Inflate(_pointBounds, hit.Thickness / 2, hit.Thickness / 2).Contains(p) && _geometry.StrokeContains(hit, p);
     }
 

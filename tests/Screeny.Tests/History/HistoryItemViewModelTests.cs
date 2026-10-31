@@ -6,7 +6,7 @@ namespace Screeny.Tests.History;
 
 public class HistoryItemViewModelTests : IDisposable
 {
-    // '#' и '%20' ломали new Uri(path): '#' уходил во фрагмент, файл «не находился».
+    // '#' and '%20' broke new Uri(path): '#' went to fragment, file “not found”.
     private readonly string _dir = Path.Combine(Path.GetTempPath(), "ScreenyTests", Guid.NewGuid().ToString("N"), "C# shots %20");
 
     private string SavePng(int w, int h)
@@ -23,7 +23,7 @@ public class HistoryItemViewModelTests : IDisposable
         var path = SavePng(800, 400);
         var t = HistoryItemViewModel.LoadThumbnail(path);
         Assert.NotNull(t.Image);
-        Assert.True(t.Image!.IsFrozen); // создаётся в фоне, используется в UI-потоке
+        Assert.True(t.Image!.IsFrozen); // created in background, used in UI thread
         Assert.Equal(HistoryItemViewModel.ThumbnailWidth, t.Image.PixelWidth);
         Assert.Equal((800, 400), (t.Width, t.Height));
     }
@@ -81,7 +81,7 @@ public class HistoryItemViewModelTests : IDisposable
         var vm = new HistoryItemViewModel(new HistoryItem(path, DateTime.Now));
         var full = vm.LoadFull();
         Assert.Equal(30, full.PixelWidth);
-        File.Delete(path); // файл не удерживается
+        File.Delete(path); // file not held
         Assert.False(File.Exists(path));
     }
 

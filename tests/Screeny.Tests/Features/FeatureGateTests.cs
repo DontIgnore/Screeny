@@ -42,20 +42,20 @@ public class FeatureGateTests
         Assert.False(s.ActionAllowed(action));
         Assert.True(s.ActionAllowed(CaptureAction.Copy));
         Assert.True(s.ActionAllowed(CaptureAction.CopyExplicit));
-        Assert.True(s.ActionAllowed(CaptureAction.Save)); // «Сохранить как» — не история
+        Assert.True(s.ActionAllowed(CaptureAction.Save)); // “Save As” — not history
     }
 
     [Theory]
     [InlineData(true, true, true)]
     [InlineData(true, false, false)]
-    [InlineData(false, false, true)] // без истории Enter копирует всегда
+    [InlineData(false, false, true)] // without history Enter always copies
     [InlineData(false, true, true)]
     public void CopyOnEnter_ForcedWithoutHistory(bool history, bool copyOnCapture, bool expected)
     {
         var s = history ? new AppSettings() : Without(FeatureCatalog.History);
         s.CopyOnCapture = copyOnCapture;
         Assert.Equal(expected, s.CopyOnEnter());
-        Assert.Equal(copyOnCapture, s.CopyOnCapture); // сохранённое значение не меняется
+        Assert.Equal(copyOnCapture, s.CopyOnCapture); // saved value not changed
     }
 
     [Fact]
@@ -75,9 +75,9 @@ public class FeatureGateTests
         FeatureGate.KeepHiddenSettings(updated, current);
         Assert.Equal(@"C:\old", updated.HistoryFolder);
         Assert.Equal(42, updated.HistoryLimit);
-        Assert.True(updated.KeepOriginals); // выключение истории не выглядит как выключение оригиналов
+        Assert.True(updated.KeepOriginals); // disabling history doesn't look like disabling originals
         Assert.True(updated.CopyOnCapture);
-        Assert.True(updated.ExcludePinsFromCapture); // закрепление включено — его поле из окна
+        Assert.True(updated.ExcludePinsFromCapture); // pin enabled — its field from window
     }
 
     [Fact]
@@ -92,7 +92,7 @@ public class FeatureGateTests
     }
 }
 
-/// <summary>Галочки функций окна настроек и мастера; кнопки панели по функциям.</summary>
+/// <summary>Feature checkboxes of settings window and wizard; panel buttons by features.</summary>
 [Collection(WpfControls.Name)]
 public class FeatureControlsTests
 {
@@ -126,9 +126,9 @@ public class FeatureControlsTests
         list.Changed += () => changes++;
         boxes[FeatureCatalog.All.ToList().FindIndex(f => f.Id == FeatureCatalog.History)].IsChecked = false;
         Assert.Equal(1, changes);
-        Assert.Equal([new(FeatureCatalog.History, false)], list.Changes); // только переключённое
+        Assert.Equal([new(FeatureCatalog.History, false)], list.Changes); // only toggled
         boxes[FeatureCatalog.All.ToList().FindIndex(f => f.Id == FeatureCatalog.History)].IsChecked = true;
-        Assert.Empty(list.Changes); // вернули как было — изменений нет
+        Assert.Empty(list.Changes); // reverted — no changes
     });
 
     [Fact]
@@ -147,15 +147,15 @@ public class FeatureControlsTests
 
         toolbar.ConfigureForEditor(s);
         string CopyTip() => (string)((FrameworkElement)Named("CopyButton")).ToolTip;
-        Assert.DoesNotContain("истори", CopyTip()); // история выключена: «Копировать» запись не добавляет
+        Assert.DoesNotContain("истори", CopyTip()); // history disabled: “Copy” doesn't add entry
         s.DisabledFeatures.Clear();
         toolbar.ApplyFeatures(s);
         foreach (var name in new[] { "PinButton", "BeautifyButton", "PipetteButton" })
             Assert.Equal(Visibility.Visible, Named(name).Visibility);
         Assert.Equal(Visibility.Visible, toolbar.ToolButton(ToolKind.Ruler).Visibility);
-        Assert.Equal(Visibility.Collapsed, Named("OcrButton").Visibility); // в окне редактора OCR нет никогда
+        Assert.Equal(Visibility.Collapsed, Named("OcrButton").Visibility); // editor window never has OCR
         Assert.Contains("истори", CopyTip());
-        s.SetFeature(FeatureCatalog.History, false); // выключили, пока редактор открыт
+        s.SetFeature(FeatureCatalog.History, false); // disabled while editor open
         toolbar.ApplyFeatures(s);
         Assert.DoesNotContain("истори", CopyTip());
     });
@@ -163,21 +163,21 @@ public class FeatureControlsTests
     [Fact]
     public void CheckList_Sync_TakesLiveValuesButKeepsOwnToggles() => Sta(() =>
     {
-        // Окно настроек открыто, из него запущен мастер: тот выключил OCR и историю. В окне до этого сняли «Линейку».
+        // Settings window open, wizard launched from it: disabled OCR and history. Window had unchecked “Ruler” before.
         var panel = new StackPanel();
         var list = new FeatureCheckList(panel, []);
         var boxes = panel.Children.OfType<CheckBox>().ToList();
         CheckBox Box(string id) => boxes[FeatureCatalog.All.ToList().FindIndex(f => f.Id == id)];
         Box(FeatureCatalog.Ruler).IsChecked = false;
-        Box(FeatureCatalog.History).IsChecked = false; // и здесь, и в мастере
+        Box(FeatureCatalog.History).IsChecked = false; // both here and in wizard
 
         list.Sync([FeatureCatalog.Ocr, FeatureCatalog.History]);
 
-        Assert.False(list.IsOn(FeatureCatalog.Ocr));    // нетронутая — как в живых настройках
+        Assert.False(list.IsOn(FeatureCatalog.Ocr));    // untouched — as in live settings
         Assert.False(list.IsOn(FeatureCatalog.History));
-        Assert.False(list.IsOn(FeatureCatalog.Ruler));  // своё переключение не теряется
+        Assert.False(list.IsOn(FeatureCatalog.Ruler));  // own toggle not lost
         Assert.True(list.IsOn(FeatureCatalog.Pins));
-        Assert.Equal([new(FeatureCatalog.Ruler, false)], list.Changes); // от новых настроек: только линейка
+        Assert.Equal([new(FeatureCatalog.Ruler, false)], list.Changes); // from new settings: only ruler
     });
 
     [Fact]

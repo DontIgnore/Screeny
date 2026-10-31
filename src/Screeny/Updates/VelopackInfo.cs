@@ -3,17 +3,17 @@ using Velopack.Locators;
 
 namespace Screeny.Updates;
 
-/// <summary>Как запущена эта копия: из установщика, из портативной сборки Velopack или просто exe (publish, bin).</summary>
-/// <param name="RootDir">Корень Velopack: <c>%LocalAppData%\DontIgnore.Screeny</c> у установленной, папка распаковки у портативной.</param>
-/// <param name="StubPath">Стаб <c>&lt;корень&gt;\Screeny.exe</c>: не меняется между обновлениями, на него указывают ярлыки.</param>
+/// <summary>How this copy runs: from installer, Velopack portable build or plain exe (publish, bin).</summary>
+/// <param name="RootDir">Velopack root: <c>%LocalAppData%\DontIgnore.Screeny</c> for installed, unpack folder for portable.</param>
+/// <param name="StubPath">Stub <c>&lt;root&gt;\Screeny.exe</c>: unchanged across updates, shortcuts point to it.</param>
 public sealed record VelopackInfo(bool IsManaged, bool IsPortable, string? RootDir, string? StubPath)
 {
     public static readonly VelopackInfo None = new(false, false, null, null);
 
-    /// <summary>Установлена через Setup.exe (не портативная).</summary>
+    /// <summary>Installed via Setup.exe (not portable).</summary>
     public bool IsInstalled => IsManaged && !IsPortable;
 
-    /// <summary>После <c>VelopackApp.Run()</c>. Никогда не бросает.</summary>
+    /// <summary>After <c>VelopackApp.Run()</c>. Never throws.</summary>
     public static VelopackInfo Detect()
     {
         try
@@ -30,7 +30,7 @@ public sealed record VelopackInfo(bool IsManaged, bool IsPortable, string? RootD
         }
     }
 
-    /// <summary>Стаб в корне с тем же именем, что и exe процесса; null, если его нет.</summary>
+    /// <summary>Stub in root with same name as process exe; null if absent.</summary>
     public static string? StubFor(string rootDir, string? processPath)
     {
         if (string.IsNullOrEmpty(processPath)) return null;

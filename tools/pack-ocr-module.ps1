@@ -1,12 +1,12 @@
-﻿# Сборка скачиваемого модуля точного распознавания (PaddleOCR PP-OCRv5 на ONNX Runtime): Screeny-OcrModule-<N>.zip.
-#   powershell -File tools/pack-ocr-module.ps1                 — версия 1, модели из tools/ocr-module/models
+﻿# Build the downloadable precise OCR module (PaddleOCR PP-OCRv5 on ONNX Runtime): Screeny-OcrModule-<N>.zip.
+#   powershell -File tools/pack-ocr-module.ps1                 — version 1, models from tools/ocr-module/models
 #   powershell -File tools/pack-ocr-module.ps1 -Version 2 -OutputDir C:\tmp\ocr
-# Результат в releases/ocr-module/ (git-ignored, как releases/): архив и рядом .sha256.
-# Архив детерминирован: тот же набор файлов даёт тот же SHA256 (порядок имён, время записей, без сжатия, module.json
-# с постоянным порядком полей). Этот SHA256 и размер вписываются в src/Screeny/Modules/OcrModule.cs (см.
-# tools/ocr-module/README.md), затем архив прикладывается к релизу GitHub с тегом ocr-module-<N>.
-# Модели качаются заранее только из источника в tools/ocr-module/README.md (ModelScope RapidOCR v3.10.0); их SHA256
-# сверяются ниже, при расхождении сборка прерывается.
+# Output in releases/ocr-module/ (git-ignored, like releases/): the archive and a .sha256 file.
+# The archive is deterministic: the same files produce the same SHA256 (name order, entry timestamps, no compression,
+# fixed field order in module.json). Record this SHA256 and size in src/Screeny/Modules/OcrModule.cs (see
+# tools/ocr-module/README.md), then attach the archive to the GitHub release tagged ocr-module-<N>.
+# Download models in advance only from the source in tools/ocr-module/README.md (ModelScope RapidOCR v3.10.0); their SHA256
+# values are verified below, and a mismatch aborts the build.
 param(
     [int]$Version = 1,
     [string]$ModelsDir,
@@ -19,12 +19,12 @@ if (-not $ModelsDir) { $ModelsDir = Join-Path $root 'tools/ocr-module/models' }
 if (-not $OutputDir) { $OutputDir = Join-Path $root 'releases/ocr-module' }
 if ($Version -lt 1) { throw "Версия модуля — целое число от 1." }
 
-# ONNX Runtime — ровно та версия, что у Microsoft.ML.OnnxRuntime.Managed в src/Screeny/Screeny.csproj.
+# ONNX Runtime must match Microsoft.ML.OnnxRuntime.Managed in src/Screeny/Screeny.csproj exactly.
 $ortVersion = '1.31.0'
 $ort = Join-Path $env:USERPROFILE ".nuget/packages/microsoft.ml.onnxruntime/$ortVersion"
 if (-not (Test-Path $ort)) { throw "Нет пакета Microsoft.ML.OnnxRuntime $ortVersion в кэше NuGet. Скачайте его так (см. tools/ocr-module/README.md): dotnet new console -o `$env:TEMP\ort-restore; dotnet add `$env:TEMP\ort-restore package Microsoft.ML.OnnxRuntime --version $ortVersion" }
 
-# Рантайм Visual C++ (от него зависит onnxruntime.dll): распространяемые файлы из установленной Visual Studio.
+# Visual C++ runtime (required by onnxruntime.dll): redistributable files from the installed Visual Studio.
 if (-not $CrtDir) {
     $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
     if (-not (Test-Path $vswhere)) { throw 'Не найден vswhere.exe: укажите -CrtDir <папка Microsoft.VC14x.CRT (x64)>.' }
@@ -35,14 +35,14 @@ if (-not $CrtDir) {
     if (-not $CrtDir) { throw 'Не найден рантайм Visual C++ (VC/Redist/MSVC/*/x64/Microsoft.VC*.CRT): укажите -CrtDir.' }
 }
 
-# Имя в архиве → исходный файл и (если зафиксирован) ожидаемый SHA256.
+# Archive name → source file and expected SHA256 (if pinned).
 $files = [ordered]@{
     'det.onnx'                                = @((Join-Path $ModelsDir 'ch_PP-OCRv5_det_mobile.onnx'), '4d97c44a20d30a81aad087d6a396b08f786c4635742afc391f6621f5c6ae78ae')
     'rec.onnx'                                = @((Join-Path $ModelsDir 'cyrillic_PP-OCRv5_rec_mobile.onnx'), '90f761b4bfcce0c8c561c0cb5c887b0971d3ec01c32164bdf7374a35b0982711')
     'onnxruntime.dll'                         = @((Join-Path $ort 'runtimes/win-x64/native/onnxruntime.dll'), '0c42dc4e278f0968fdf9ebf1b1e54a74c657a9942e70803e453c91993451cf4c')
     'onnxruntime_providers_shared.dll'        = @((Join-Path $ort 'runtimes/win-x64/native/onnxruntime_providers_shared.dll'), 'e45d471ea2a842b268c51291b96d53568b0dae10807f43d1fb7dc0eb84e83723')
-    # Рантайм VC++ 14.50.35710 (Visual Studio 18). Обновилась Visual Studio — хеши не сойдутся: это новый модуль
-    # (новая версия, новые хеши здесь и в OcrModule.cs), а не тихая пересборка того же номера.
+    # VC++ runtime 14.50.35710 (Visual Studio 18). A Visual Studio update changes the hashes: it requires a new module
+    # (new version and new hashes here and in OcrModule.cs), not a silent rebuild of the same version.
     'vcruntime140.dll'                        = @((Join-Path $CrtDir 'vcruntime140.dll'), '184146852727a9db4eea06178716bec3cdbb1015c911f6b0f915b184ad7775b2')
     'vcruntime140_1.dll'                      = @((Join-Path $CrtDir 'vcruntime140_1.dll'), 'e6bfb3662ab4b1969a73441dbe35c96d51441b6bff8cf1fe7430bd5b246ca605')
     'msvcp140.dll'                            = @((Join-Path $CrtDir 'msvcp140.dll'), 'def46aa6a8f72f27bafac0c43334419486a4d1dcdb6c479a8ef7034b3e1fa4cb')
@@ -66,13 +66,13 @@ foreach ($name in $files.Keys) {
     }
     $entries += [pscustomobject]@{ Name = $name; Source = (Resolve-Path -LiteralPath $src).Path; Size = (Get-Item -LiteralPath $src).Length; Sha = $hash }
 }
-# Порядок имён — ординальный, не зависит от культуры.
+# Names use ordinal ordering, independent of culture.
 $sorted = [System.Collections.Generic.List[object]]::new()
 $names = [string[]]($entries | ForEach-Object Name)
 [Array]::Sort($names, [StringComparer]::Ordinal)
 foreach ($n in $names) { $sorted.Add(($entries | Where-Object Name -eq $n)) }
 
-# module.json: постоянный порядок полей, LF, UTF-8 без BOM.
+# module.json: fixed field order, LF, UTF-8 without BOM.
 $lines = @('{', "  `"id`": `"ocr-paddle`",", "  `"version`": $Version,", '  "files": [')
 for ($i = 0; $i -lt $sorted.Count; $i++) {
     $e = $sorted[$i]
@@ -82,9 +82,9 @@ for ($i = 0; $i -lt $sorted.Count; $i++) {
 $lines += @('  ]', '}', '')
 $manifest = [System.Text.UTF8Encoding]::new($false).GetBytes(($lines -join "`n"))
 
-# Zip пишется своим кодом, а не ZipArchive: тот в .NET Framework и в .NET 8+ кладёт записи без сжатия по-разному, и
-# Windows PowerShell и pwsh давали бы разные архивы. Здесь формат один: записи «stored» (без сжатия — модели и
-# библиотеки почти не сжимаются), имена в UTF-8, постоянное DOS-время 2026-01-01 00:00, без дополнительных полей.
+# The ZIP is written manually rather than with ZipArchive: .NET Framework and .NET 8+ store uncompressed entries differently,
+# so Windows PowerShell and pwsh would produce different archives. This format uses stored entries (no compression: models and
+# libraries compress poorly), UTF-8 names, a fixed DOS timestamp of 2026-01-01 00:00, and no extra fields.
 if (-not ('StoredZip' -as [type])) {
     Add-Type -TypeDefinition @'
 using System; using System.IO; using System.Text;

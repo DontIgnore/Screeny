@@ -16,7 +16,7 @@ public class ScreenCaptureTests
         Assert.Equal(shot.VirtualRect.Width, bmp.PixelWidth);
         Assert.Equal(shot.VirtualRect.Height, bmp.PixelHeight);
 
-        // Альфа проставлена во всём буфере: проверяем первую, последнюю строку и середину.
+        // Alpha set across entire buffer: check first, last row and middle.
         int w = bmp.PixelWidth, h = bmp.PixelHeight;
         var row = new byte[w * 4];
         foreach (int y in new[] { 0, h / 2, h - 1 })

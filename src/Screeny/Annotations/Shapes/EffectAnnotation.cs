@@ -5,19 +5,19 @@ using System.Windows.Media.Imaging;
 namespace Screeny.Annotations.Shapes;
 
 /// <summary>
-/// Эффект над пикселями снимка в прямоугольнике (пикселизация, размытие).
-/// Результат кэшируется по (фактическому прямоугольнику пикселей, толщине, снимку).
+/// Effect over screenshot pixels in rectangle (pixelate, blur).
+/// Result cached by (actual pixel rectangle, thickness, screenshot).
 /// <para>
-/// Живое редактирование: пока фигуру тянут мышью, инструмент вызывает <see cref="BeginLiveEdit"/>,
-/// и на экране рисуется дешёвое превью — область, уменьшенная в <see cref="PreviewFactor"/> раз,
-/// с тем же эффектом и растянутая обратно. После <see cref="EndLiveEdit"/> считается полный результат.
-/// Экспорт (<see cref="RenderContext.ForExport"/>) всегда получает полный результат, даже если
-/// EndLiveEdit забыли вызвать. Без вызова live-API поведение прежнее: всегда полный расчёт.
+/// Live editing: while shape is dragged, tool calls <see cref="BeginLiveEdit"/>,
+/// and screen shows cheap preview — area downscaled by <see cref="PreviewFactor"/>,
+/// with same effect and stretched back. After <see cref="EndLiveEdit"/> full result is computed.
+/// Export (<see cref="RenderContext.ForExport"/>) always gets full result even if
+/// EndLiveEdit was forgotten. Without live API calls behavior is unchanged: always full computation.
 /// </para>
 /// </summary>
 public abstract class EffectAnnotation(Rect rect, AnnotationStyle style) : BoxAnnotation(rect, style)
 {
-    /// <summary>Во сколько раз уменьшается область для превью.</summary>
+    /// <summary>Factor by which preview area is downscaled.</summary>
     public const int PreviewFactor = 4;
 
     private readonly record struct CacheKey(Int32Rect Area, double Thickness, BitmapSource Source);
@@ -25,22 +25,22 @@ public abstract class EffectAnnotation(Rect rect, AnnotationStyle style) : BoxAn
     private BitmapSource? _full, _preview;
     private CacheKey _fullKey, _previewKey;
 
-    /// <summary>Идёт ли сейчас изменение геометрии (протяжка мышью).</summary>
+    /// <summary>Whether geometry is being changed now (mouse drag).</summary>
     public bool IsLive { get; private set; }
 
-    /// <summary>Начать живое редактирование: Render на экране рисует дешёвое превью.</summary>
+    /// <summary>Begin live editing: Render on screen draws cheap preview.</summary>
     public void BeginLiveEdit() => IsLive = true;
 
-    /// <summary>Закончить живое редактирование: следующий Render посчитает эффект полностью и сбросит превью.</summary>
+    /// <summary>End live editing: next Render computes effect fully and discards preview.</summary>
     public void EndLiveEdit() { IsLive = false; _preview = null; }
 
-    /// <param name="scale">Масштаб буфера относительно снимка (1 — полный размер, 1/PreviewFactor — превью):
-    /// размер блока/радиус эффекта умножается на него.</param>
+    /// <param name="scale">Buffer scale relative to screenshot (1 — full size, 1/PreviewFactor — preview):
+    /// effect block size/radius is multiplied by it.</param>
     protected abstract void Apply(byte[] bgra, int width, int height, double scale);
 
     public override bool HitTest(Point p) => Bounds.InflateCopy(2).Contains(p);
 
-    /// <summary>Пиксели прямоугольника снимка с применённым эффектом; null, если прямоугольник пуст или вне снимка.</summary>
+    /// <summary>Pixels of screenshot rectangle with effect applied; null if rectangle empty or outside screenshot.</summary>
     public BitmapSource? Process(BitmapSource source)
     {
         var area = PixelArea(source);
@@ -59,8 +59,8 @@ public abstract class EffectAnnotation(Rect rect, AnnotationStyle style) : BoxAn
     }
 
     /// <summary>
-    /// Дешёвое превью: каждый PreviewFactor-й пиксель каждой PreviewFactor-й строки → эффект с уменьшенным параметром.
-    /// Для маленьких областей возвращает полный результат.
+    /// Cheap preview: every PreviewFactor-th pixel of every PreviewFactor-th row → effect with reduced parameter.
+    /// For small areas returns full result.
     /// </summary>
     public BitmapSource? ProcessPreview(BitmapSource source)
     {
@@ -88,7 +88,7 @@ public abstract class EffectAnnotation(Rect rect, AnnotationStyle style) : BoxAn
 
     private static void EnsureFormat(BitmapSource source)
     {
-        // Снимок экрана всегда Bgra32 (ScreenCapture); эффекты работают с этим буфером напрямую.
+        // Screenshot is always Bgra32 (ScreenCapture); effects operate directly on this buffer.
         if (source.Format != PixelFormats.Bgra32)
             throw new ArgumentException($"Expected a Bgra32 image, got {source.Format}.", nameof(source));
     }
@@ -100,7 +100,7 @@ public abstract class EffectAnnotation(Rect rect, AnnotationStyle style) : BoxAn
         return result;
     }
 
-    /// <summary>Rect ∩ границы снимка, округлённый до целых пикселей.</summary>
+    /// <summary>Rect ∩ screenshot bounds, rounded to integer pixels.</summary>
     private Int32Rect PixelArea(BitmapSource source)
     {
         if (Rect.IsEmpty) return Int32Rect.Empty;
@@ -130,7 +130,7 @@ public sealed class BlurAnnotation(Rect rect, AnnotationStyle style) : EffectAnn
     protected override void Apply(byte[] bgra, int width, int height, double scale)
     {
         int radius = Math.Max(1, (int)Math.Round((int)Math.Max(3, Style.Thickness * 2) * scale));
-        // Два прохода box blur ≈ гауссово размытие: текст под ним не читается. Временный буфер общий.
+        // Two box blur passes ≈ Gaussian blur: text under it is unreadable. Shared temporary buffer.
         var scratch = new byte[bgra.Length];
         PixelOps.BoxBlur(bgra, width, height, radius, scratch);
         PixelOps.BoxBlur(bgra, width, height, radius, scratch);

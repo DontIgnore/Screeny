@@ -46,7 +46,7 @@ public class UndoStackTests
     public void UndoStack_Record_PushesWithoutExecuting()
     {
         var s = new UndoStack(); var a = new Counter(); int n = 0;
-        s.Execute(new Counter()); s.Undo(); // есть redo
+        s.Execute(new Counter()); s.Undo(); // redo exists
         s.Changed += () => n++;
         s.Record(a);
         Assert.Equal(0, a.Value);

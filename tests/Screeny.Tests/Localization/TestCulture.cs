@@ -4,9 +4,9 @@ using Screeny.Localization;
 namespace Screeny.Tests.Localization;
 
 /// <summary>
-/// Тесты, которые проверяют тексты интерфейса, написаны по русскому тексту. Язык строк фиксируется до первого теста,
-/// чтобы результат не зависел от языка Windows на машине, где они запускаются. Тесты, которые меняют язык, — в
-/// <see cref="LanguageSwitchCollection"/> и возвращают его обратно.
+/// Tests checking UI texts are written against Russian. String language fixed before first test,
+/// so result independent of Windows language on machine. Tests that change language are in
+/// <see cref="LanguageSwitchCollection"/> and restore it.
 /// </summary>
 internal static class TestCulture
 {
@@ -16,7 +16,7 @@ internal static class TestCulture
     internal static void Pin() => Loc.Apply(Language);
 }
 
-/// <summary>Тесты, переключающие язык: идут не параллельно с остальными.</summary>
+/// <summary>Language-switching tests: don't run parallel with others.</summary>
 [CollectionDefinition(Name, DisableParallelization = true)]
 public sealed class LanguageSwitchCollection
 {

@@ -2,24 +2,24 @@ using System.Windows;
 
 namespace Screeny.Ocr;
 
-/// <summary>Слово с рамкой в пикселях снимка.</summary>
+/// <summary>Word with border in screenshot pixels.</summary>
 public sealed record OcrWord(string Text, Rect Box);
 
-/// <summary>Строка в порядке чтения движка. <see cref="Text"/> — строка целиком так, как её собрал движок.
-/// <see cref="NoSpaces"/> — язык строки пишется без пробелов (японский, китайский): части строки склеиваются слитно.</summary>
+/// <summary>Line in engine reading order. <see cref="Text"/> — whole line as engine assembled.
+/// <see cref="NoSpaces"/> — line language has no spaces (Japanese, Chinese): parts joined without space.</summary>
 public sealed record OcrLine(IReadOnlyList<OcrWord> Words, string Text, bool NoSpaces = false);
 
 /// <summary>
-/// Распознанный текст с геометрией: строки, слова и их рамки. Слова пронумерованы сквозным индексом
-/// в порядке чтения (строка за строкой), выделение — набор этих индексов.
+/// Recognized text with geometry: lines, words and their borders. Words numbered with through index
+/// in reading order (line by line), selection is set of these indices.
 /// </summary>
 public sealed class OcrLayout
 {
     private readonly (int Line, int Word)[] _index;
 
-    /// <param name="noSpaces">Письменность без пробелов между словами (японский, китайский): движок отдаёт
-    /// иероглифы отдельными «словами», и склеивать их надо без пробела.</param>
-    /// <param name="language">Язык движка, распознавшего раскладку (BCP-47), если известен.</param>
+    /// <param name="noSpaces">Script without spaces (Japanese, Chinese): engine returns characters as separate
+    /// “words”, join without space.</param>
+    /// <param name="language">Engine language that recognized layout (BCP-47), if known.</param>
     public OcrLayout(IReadOnlyList<OcrLine> lines, bool noSpaces = false, string? language = null)
     {
         Lines = lines.Where(l => l.Words.Count > 0).Select(l => noSpaces && !l.NoSpaces ? l with { NoSpaces = true } : l).ToList();
@@ -43,8 +43,8 @@ public sealed class OcrLayout
     public int LineOf(int i) => _index[i].Line;
 
     /// <summary>
-    /// Перевод рамок из координат распознанной картинки в пиксели снимка: картинку могли уменьшить
-    /// под предел движка (<paramref name="scale"/> &lt; 1), а сама она — вырез области (<paramref name="offset"/>).
+    /// Translates borders from recognized image coordinates to screenshot pixels: image may be downscaled
+    /// for engine limit (<paramref name="scale"/> &lt; 1), and itself may be region crop (<paramref name="offset"/>).
     /// </summary>
     public OcrLayout Map(double scale, Vector offset)
     {
@@ -53,7 +53,7 @@ public sealed class OcrLayout
         return new OcrLayout(Lines.Select(l => l with { Words = l.Words.Select(w => w with { Box = M(w.Box) }).ToList() }).ToList(), NoSpaces, Language);
     }
 
-    /// <summary>Слово под точкой (с допуском в пикселях снимка) или null.</summary>
+    /// <summary>Word under point (with tolerance in screenshot pixels) or null.</summary>
     public int? WordAt(Point p, double tolerance = 3)
     {
         int? best = null;
@@ -70,14 +70,14 @@ public sealed class OcrLayout
         return best;
     }
 
-    /// <summary>Все слова от <paramref name="a"/> до <paramref name="b"/> включительно в порядке чтения.</summary>
+    /// <summary>All words from <paramref name="a"/> to <paramref name="b"/> inclusive in reading order.</summary>
     public HashSet<int> Range(int a, int b)
     {
         int lo = Math.Min(a, b), hi = Math.Max(a, b);
         return Enumerable.Range(lo, hi - lo + 1).ToHashSet();
     }
 
-    /// <summary>Слова, рамка которых пересекает прямоугольник: выделить «только этот угол картинки».</summary>
+    /// <summary>Words whose border intersects rectangle: select “only this corner of image”.</summary>
     public HashSet<int> InRect(Rect area)
     {
         var set = new HashSet<int>();
@@ -86,7 +86,7 @@ public sealed class OcrLayout
         return set;
     }
 
-    /// <summary>Все слова строки, в которой стоит слово <paramref name="i"/>.</summary>
+    /// <summary>All words of line containing word <paramref name="i"/>.</summary>
     public HashSet<int> LineRange(int i)
     {
         int line = LineOf(i), first = i, last = i;
@@ -97,7 +97,7 @@ public sealed class OcrLayout
 
     public HashSet<int> All() => Enumerable.Range(0, _index.Length).ToHashSet();
 
-    /// <summary>Рамка строки: объединение рамок её слов.</summary>
+    /// <summary>Line border: union of its word borders.</summary>
     public static Rect LineBox(OcrLine line)
     {
         var r = line.Words[0].Box;
@@ -106,12 +106,12 @@ public sealed class OcrLayout
     }
 
     /// <summary>
-    /// Смешанный текст (русский и английский на одной картинке) один движок читает только наполовину.
-    /// Берём раскладку лучшего движка и каждую её строку заменяем строкой другого движка на том же месте,
-    /// если та правдоподобнее по <paramref name="score"/>. Строки сопоставляются по перекрытию рамок.
+    /// Mixed text (Russian and English in one image) one engine reads only half.
+    /// Take best engine layout and replace each line with line of other engine at same place,
+    /// if that is more plausible by <paramref name="score"/>. Lines matched by border overlap.
     /// </summary>
-    /// <param name="fits">При равной оценке выигрывает движок, чей язык подходит письменности строки
-    /// (латинскую «Invoice» читает английская модель, а не русская, у которой выходит «lnvoice»).</param>
+    /// <param name="fits">On equal score, engine whose language suits line script wins
+    /// (Latin “Invoice” read by English model, not Russian giving “lnvoice”).</param>
     public static OcrLayout MergeBest(IReadOnlyList<OcrLayout> layouts, int baseIndex, Func<string, int> score, Func<string, string?, bool>? fits = null)
     {
         var basis = layouts[baseIndex];
@@ -128,8 +128,8 @@ public sealed class OcrLayout
                 if (k == baseIndex) continue;
                 foreach (var other in layouts[k].Lines)
                 {
-                    // Та же строка, а не соседняя или объемлющая: иначе одна длинная строка другого движка
-                    // подменила бы несколько строк и текст задвоился бы.
+                    // Same line, not neighbor or containing: else one long line of other engine
+                    // would replace multiple lines and text would duplicate.
                     if (used.Contains(other) || Overlap(box, LineBox(other)) < 0.6) continue;
                     int sc = score(other.Text);
                     bool otherFits = fits?.Invoke(other.Text, layouts[k].Language) ?? false;
@@ -143,9 +143,9 @@ public sealed class OcrLayout
     }
 
     /// <summary>
-    /// Голосование проходов на разных масштабах: для каждой строки основы берётся текст, который совпал
-    /// у большинства проходов на том же месте (сравнение без учёта пробелов). При равенстве остаётся строка основы.
-    /// Одиночный сбой на одном масштабе («вызываюпцне» при 2,4×) так не проходит, если два других прочли верно.
+    /// Voting of passes at different scales: for each base line, text that matched
+    /// in majority of passes at same place (comparison ignoring spaces). On tie base line stays.
+    /// Single glitch at one scale (“вызываюпцне” at 2.4×) doesn't pass if two others read correctly.
     /// </summary>
     public static OcrLayout Consensus(IReadOnlyList<OcrLayout> passes, int baseIndex)
     {
@@ -173,7 +173,7 @@ public sealed class OcrLayout
         return new OcrLayout(lines, false, basis.Language);
     }
 
-    /// <summary>Пересечение к объединению (IoU): строки совпадают, только если почти одно и то же место.</summary>
+    /// <summary>Intersection over union (IoU): lines match only if nearly same place.</summary>
     private static double Overlap(Rect a, Rect b)
     {
         var i = Rect.Intersect(a, b);
@@ -183,8 +183,8 @@ public sealed class OcrLayout
     }
 
     /// <summary>
-    /// Текст выделения: строки через перевод строки, слова через пробел (или слитно для письменности без пробелов).
-    /// Целиком выделенная строка берётся в написании движка. Пустое выделение означает весь текст.
+    /// Selection text: lines by newline, words by space (or joined for no-space script).
+    /// Fully selected line taken in engine's spelling. Empty selection means all text.
     /// </summary>
     public string TextOf(IReadOnlySet<int>? selection)
     {
@@ -203,8 +203,8 @@ public sealed class OcrLayout
     }
 
     /// <summary>
-    /// Подряд идущие выделенные слова одной строки сливаются в один прямоугольник: подсветка читается как
-    /// выделенный текст, а не как набор отдельных плашек.
+    /// Consecutive selected words of one line merge into one rectangle: highlight reads as
+    /// selected text, not set of separate plaques.
     /// </summary>
     public IEnumerable<Rect> SelectionRuns(IReadOnlySet<int> selection)
     {

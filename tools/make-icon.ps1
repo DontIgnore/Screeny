@@ -1,5 +1,5 @@
-# Генерирует src/Screeny/Assets/screeny.ico: кадры 16/32/48 (32bpp DIB) и 256 (PNG).
-# Запускается один раз: powershell -File tools/make-icon.ps1
+# Generates src/Screeny/Assets/screeny.ico: 16/32/48 frames (32bpp DIB) and 256 (PNG).
+# Run once: powershell -File tools/make-icon.ps1
 Add-Type -AssemblyName System.Drawing
 
 function New-IconBitmap([int]$size) {
@@ -10,7 +10,7 @@ function New-IconBitmap([int]$size) {
     $g.ScaleTransform($size / 256.0, $size / 256.0)
     $pen = New-Object System.Drawing.Pen ([System.Drawing.Color]::FromArgb(255, 52, 120, 246)), 26
     $pen.StartCap = 'Round'; $pen.EndCap = 'Round'; $pen.LineJoin = 'Round'
-    # четыре уголка рамки выделения
+    # Four corners of the selection frame
     $g.DrawLines($pen, [System.Drawing.Point[]]@((New-Object Drawing.Point 36, 100), (New-Object Drawing.Point 36, 36), (New-Object Drawing.Point 100, 36)))
     $g.DrawLines($pen, [System.Drawing.Point[]]@((New-Object Drawing.Point 156, 36), (New-Object Drawing.Point 220, 36), (New-Object Drawing.Point 220, 100)))
     $g.DrawLines($pen, [System.Drawing.Point[]]@((New-Object Drawing.Point 220, 156), (New-Object Drawing.Point 220, 220), (New-Object Drawing.Point 156, 220)))
@@ -25,7 +25,7 @@ function Get-DibBytes([System.Drawing.Bitmap]$bmp) {
     $size = $bmp.Width
     $ms = New-Object System.IO.MemoryStream
     $bw = New-Object System.IO.BinaryWriter $ms
-    # BITMAPINFOHEADER; высота удвоена (XOR + AND маски)
+    # BITMAPINFOHEADER; height is doubled (XOR + AND masks)
     $bw.Write([uint32]40); $bw.Write([int32]$size); $bw.Write([int32]($size * 2))
     $bw.Write([uint16]1); $bw.Write([uint16]32); $bw.Write([uint32]0)
     $bw.Write([uint32]($size * $size * 4)); $bw.Write([int32]0); $bw.Write([int32]0); $bw.Write([uint32]0); $bw.Write([uint32]0)
@@ -35,7 +35,7 @@ function Get-DibBytes([System.Drawing.Bitmap]$bmp) {
             $bw.Write([byte]$c.B); $bw.Write([byte]$c.G); $bw.Write([byte]$c.R); $bw.Write([byte]$c.A)
         }
     }
-    # AND-маска: всё нули (прозрачность берётся из альфы), строки выровнены по 4 байта
+    # AND mask: all zeros (alpha supplies transparency); rows are aligned to 4 bytes
     $maskStride = [int]([Math]::Ceiling($size / 32.0) * 4)
     $bw.Write((New-Object byte[] ($maskStride * $size)))
     $bw.Flush()

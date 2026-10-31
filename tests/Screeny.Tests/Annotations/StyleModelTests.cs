@@ -43,15 +43,15 @@ public class AnnotationStyleTests
     {
         var strokeOnly = new AnnotationStyle(Red, 3);
         Assert.False(strokeOnly.CanDisableStroke);
-        Assert.Same(strokeOnly, strokeOnly.WithStroke(false));    // отказ: стиль не меняется
+        Assert.Same(strokeOnly, strokeOnly.WithStroke(false));    // refusal: style unchanged
 
         var filled = strokeOnly.WithFill(Fill40);
         var fillOnly = filled.WithStroke(false);
         Assert.False(fillOnly.StrokeEnabled);
         Assert.Null(fillOnly.StrokeColor);
         Assert.False(fillOnly.CanDisableFill);
-        Assert.Same(fillOnly, fillOnly.WithFill(null));            // последнюю видимую часть убрать нельзя
-        Assert.Null(filled.WithFill(null).Fill);                   // с обводкой — можно
+        Assert.Same(fillOnly, fillOnly.WithFill(null));            // cannot remove last visible part
+        Assert.Null(filled.WithFill(null).Fill);                   // with stroke — can
     }
 
     [Fact]
@@ -132,7 +132,7 @@ public class ColorHexTests
     [Fact]
     public void Pipette_ReadsPixel_AsOpaqueColor_AndClampsToEdge()
     {
-        var px = new byte[2 * 1 * 4] { 0xF6, 0x78, 0x30, 0xFF, 0x00, 0x00, 0xFF, 0x80 }; // BGRA: #3078F6, полупрозрачный красный
+        var px = new byte[2 * 1 * 4] { 0xF6, 0x78, 0x30, 0xFF, 0x00, 0x00, 0xFF, 0x80 }; // BGRA: #3078F6, semi-transparent red
         var bmp = BitmapSource.Create(2, 1, 96, 96, PixelFormats.Bgra32, null, px, 8);
         Assert.Equal("#3078F6", ColorHex.Rgb(Pipette.ColorAt(bmp, new PixelPoint(0, 0))));
         Assert.Equal(Color.FromRgb(0xFF, 0, 0), Pipette.ColorAt(bmp, new PixelPoint(5, 3)));
@@ -164,9 +164,9 @@ public class FilledShapeTests
     {
         var filled = new EllipseAnnotation(new Rect(0, 0, 100, 100), Filled);
         Assert.True(filled.HitTest(new Point(50, 50)));
-        Assert.False(filled.HitTest(new Point(3, 3)));   // угол охвата вне эллипса
+        Assert.False(filled.HitTest(new Point(3, 3)));   // bounds corner outside ellipse
         var outline = new EllipseAnnotation(new Rect(0, 0, 100, 100), new AnnotationStyle(Colors.Red, 3));
-        Assert.False(outline.HitTest(new Point(50, 50))); // без заливки — только контур
+        Assert.False(outline.HitTest(new Point(50, 50))); // without fill — outline only
         Assert.True(outline.HitTest(new Point(100, 50)));
     }
 
@@ -182,7 +182,7 @@ public class FilledShapeTests
         Assert.NotNull(a.Style.Fill);
         doc.Undo.Undo();
         Assert.Equal(before, a.Style);
-        Assert.Single(doc.Items);                           // откатился только стиль
+        Assert.Single(doc.Items);                           // only style rolled back
         doc.Undo.Redo();
         Assert.False(a.Style.StrokeEnabled);
     }
@@ -194,9 +194,9 @@ public class FilledShapeTests
         var a = new RectAnnotation(new Rect(0, 0, 50, 50), Filled);
         doc.Add(a);
         doc.Undo.Undo(); doc.Undo.Redo();
-        doc.Restyle(a, Filled); // равный по значению, но другой экземпляр
+        doc.Restyle(a, Filled); // value-equal but different instance
         doc.Undo.Undo();
-        Assert.Empty(doc.Items); // единственный шаг — добавление
+        Assert.Empty(doc.Items); // single step — addition
     }
 
     [Fact]
@@ -210,9 +210,9 @@ public class FilledShapeTests
         var result = new FormatConvertedBitmap(ImageComposer.Compose(shot, new PixelRect(0, 0, 40, 40), doc), PixelFormats.Bgra32, null, 0);
         var one = new byte[4];
         result.CopyPixels(new Int32Rect(20, 20, 1, 1), one, 4, 0);
-        Assert.Equal(new byte[] { 255, 0, 0, 255 }, one);  // синий внутри
+        Assert.Equal(new byte[] { 255, 0, 0, 255 }, one);  // blue inside
         result.CopyPixels(new Int32Rect(10, 20, 1, 1), one, 4, 0);
-        Assert.Equal(0, one[2]);                             // на краю тоже заливка, не красная рамка
+        Assert.Equal(0, one[2]);                             // on edge also fill, not red border
     }
 }
 
@@ -239,7 +239,7 @@ public class ArrowStyleGeometryTests
         Assert.Equal(2, s.Polygons.Count);
         Assert.Contains(s.Polygons, p => p[0] == B);
         Assert.Contains(s.Polygons, p => p[0] == A);
-        // Крылья наконечника у начала смотрят внутрь стрелки.
+        // Arrowhead wings at start face inside arrow.
         var startHead = s.Polygons.Single(p => p[0] == A);
         Assert.True(startHead[1].X > 0 && startHead[2].X > 0);
         Assert.True(s.LineStart.X > A.X && s.LineEnd.X < B.X);
@@ -251,7 +251,7 @@ public class ArrowStyleGeometryTests
         var s = ArrowGeometry.Compute(A, new Point(20, 0), 10, ArrowStyle.Double);
         var end = s.Polygons.Single(p => p[0].X == 20);
         var start = s.Polygons.Single(p => p[0].X == 0);
-        Assert.True(start[1].X <= end[1].X); // основания не пересекаются
+        Assert.True(start[1].X <= end[1].X); // bases don't intersect
     }
 
     [Fact]
@@ -269,10 +269,10 @@ public class ArrowStyleGeometryTests
         Assert.False(s.HasLine);
         var poly = Assert.Single(s.Polygons);
         Assert.Equal(7, poly.Length);
-        Assert.Equal(B, poly[3]);                                   // острие
+        Assert.Equal(B, poly[3]);                                   // tip
         double tail = Math.Abs(poly[0].Y - poly[6].Y), neck = Math.Abs(poly[1].Y - poly[5].Y), wings = Math.Abs(poly[2].Y - poly[4].Y);
         Assert.True(tail < neck && neck < wings);
-        Assert.True(ArrowGeometry.HitTest(s, new Point(120, 0), 4));  // тело
+        Assert.True(ArrowGeometry.HitTest(s, new Point(120, 0), 4));  // body
         Assert.False(ArrowGeometry.HitTest(s, new Point(100, 40), 4));
     }
 
@@ -290,7 +290,7 @@ public class ArrowStyleGeometryTests
         {
             var a = new ArrowAnnotation(new Point(10, 10), new Point(120, 70), new AnnotationStyle(Colors.Red, 6) { Arrow = style });
             foreach (var poly in a.Shape.Polygons) foreach (var p in poly) Assert.True(a.Bounds.Contains(p), $"{style}: {p}");
-            Assert.True(a.HitTest(new Point(65, 40)), style.ToString()); // середина
+            Assert.True(a.HitTest(new Point(65, 40)), style.ToString()); // middle
             Assert.False(a.HitTest(new Point(10, 70)), style.ToString());
         }
     }

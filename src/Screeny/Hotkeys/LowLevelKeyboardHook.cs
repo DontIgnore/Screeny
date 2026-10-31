@@ -4,16 +4,16 @@ using Screeny.Logging;
 namespace Screeny.Hotkeys;
 
 /// <summary>
-/// Низкоуровневый хук клавиатуры (<c>WH_KEYBOARD_LL</c>) для Win+Shift+S — это сочетание зарезервировано ОС, и
-/// <c>RegisterHotKey</c> для него не работает.
+/// Low-level keyboard hook (<c>WH_KEYBOARD_LL</c>) for Win+Shift+S — this combo is reserved by OS, and
+/// <c>RegisterHotKey</c> doesn't work for it.
 /// <para>
-/// Хук живёт на отдельном потоке со своим циклом сообщений: Windows вызывает callback через очередь потока, который
-/// поставил хук, и молча снимает хук, если callback не уложился в <c>LowLevelHooksTimeout</c>. Поэтому callback только
-/// читает vkCode/флаги, спрашивает <see cref="WinShiftSDetector"/> и при срабатывании отправляет своему потоку
-/// сообщение; маску меню «Пуск» (SendInput) и уведомление <see cref="Triggered"/> делает уже обработчик этого
-/// сообщения в цикле.
+/// Hook lives on separate thread with its message loop: Windows calls callback via thread queue that
+/// installed hook, and silently removes hook if callback doesn't finish within <c>LowLevelHooksTimeout</c>. So callback only
+/// reads vkCode/flags, asks <see cref="WinShiftSDetector"/> and on trigger sends message to its thread;
+/// a message; the Start menu mask (SendInput) and <see cref="Triggered"/> notification are handled by that
+/// message handler in the message loop.
 /// </para>
-/// Не создаётся в тестах и в <c>--dev</c> без <c>--enable-ll-hook</c> (решает <see cref="HotkeyManager"/>).
+/// Not created in tests and in <c>--dev</c> without <c>--enable-ll-hook</c> (decided by <see cref="HotkeyManager"/>).
 /// </summary>
 public sealed class LowLevelKeyboardHook : IDisposable
 {
@@ -24,7 +24,7 @@ public sealed class LowLevelKeyboardHook : IDisposable
     private const uint InputKeyboard = 1, KeyeventfExtendedKey = 0x1, KeyeventfKeyUp = 0x2;
 
     private readonly WinShiftSDetector _detector = new();
-    private readonly HookProc _proc; // держим делегат: иначе GC соберёт его, пока хук стоит
+    private readonly HookProc _proc; // keep delegate: else GC would collect it while hook installed
     private readonly Thread _thread;
     private readonly ManualResetEventSlim _ready = new(false);
     private uint _threadId;
@@ -32,7 +32,7 @@ public sealed class LowLevelKeyboardHook : IDisposable
     private int _startError;
     private int _disposed;
 
-    /// <summary>Сработал Win+Shift+S. Вызывается в потоке хука: подписчик сам переходит в UI-поток.</summary>
+    /// <summary>Win+Shift+S triggered. Called on hook thread: subscriber moves to UI thread itself.</summary>
     public event Action? Triggered;
 
     private LowLevelKeyboardHook()
@@ -41,7 +41,7 @@ public sealed class LowLevelKeyboardHook : IDisposable
         _thread = new Thread(Run) { IsBackground = true, Name = "Screeny.KeyboardHook", Priority = ThreadPriority.AboveNormal };
     }
 
-    /// <summary>Ставит хук; null и код ошибки Windows, если <c>SetWindowsHookEx</c> не удался.</summary>
+    /// <summary>Installs hook; null and Windows error code if <c>SetWindowsHookEx</c> failed.</summary>
     public static LowLevelKeyboardHook? TryStart(Action triggered, out int win32Error)
     {
         var hook = new LowLevelKeyboardHook();
@@ -66,12 +66,12 @@ public sealed class LowLevelKeyboardHook : IDisposable
     private void Run()
     {
         _threadId = GetCurrentThreadId();
-        PeekMessage(out _, IntPtr.Zero, 0, 0, PmNoRemove); // создаёт очередь сообщений до первого PostThreadMessage
+        PeekMessage(out _, IntPtr.Zero, 0, 0, PmNoRemove); // creates message queue before first PostThreadMessage
         _hook = SetWindowsHookEx(WhKeyboardLl, _proc, GetModuleHandle(null), 0);
         if (_hook == IntPtr.Zero) _startError = Marshal.GetLastWin32Error();
         _ready.Set();
         if (_hook == IntPtr.Zero) return;
-        if (Volatile.Read(ref _disposed) != 0) { UnhookWindowsHookEx(_hook); return; } // TryStart уже сдался по таймауту
+        if (Volatile.Read(ref _disposed) != 0) { UnhookWindowsHookEx(_hook); return; } // TryStart already gave up by timeout
         try
         {
             while (GetMessage(out var msg, IntPtr.Zero, 0, 0) > 0)
@@ -92,22 +92,22 @@ public sealed class LowLevelKeyboardHook : IDisposable
             int vk = Marshal.ReadInt32(lParam, 0);
             int flags = Marshal.ReadInt32(lParam, 8);
             var d = _detector.OnKey(vk, down: (flags & LlkhfUp) == 0, injected: (flags & LlkhfInjected) != 0);
-            // Не удалось отправить себе сообщение — снимаем «маска ожидается» сразу: иначе каждое отпускание Win
-            // придерживалось бы навсегда. «Пуск» тогда может открыться, но клавиша не залипнет.
+            // Failed to send message to self — clear “mask pending” immediately: otherwise every Win release
+            // would be held forever. Start menu may open but key won't stick.
             if (d.Triggered && !PostThreadMessage(_threadId, WmTriggered, IntPtr.Zero, IntPtr.Zero)) _detector.OnMaskSent();
             if (d.Swallow) return 1;
         }
         return CallNextHookEx(IntPtr.Zero, nCode, wParam, lParam);
     }
 
-    /// <summary>Маска «Пуск» (vkE8 вниз/вверх), затем придержанные отпускания Win, затем уведомление.</summary>
+    /// <summary>Start menu mask (vkE8 down/up), then held Win releases, then notification.</summary>
     private void OnTriggered()
     {
         var winUps = _detector.OnMaskSent();
         var inputs = new INPUT[2 + winUps.Count];
         inputs[0] = Key(WinShiftSDetector.MaskKey, 0);
         inputs[1] = Key(WinShiftSDetector.MaskKey, KeyeventfKeyUp);
-        for (int i = 0; i < winUps.Count; i++) inputs[2 + i] = Key(winUps[i], KeyeventfKeyUp | KeyeventfExtendedKey); // Win — расширенная клавиша
+        for (int i = 0; i < winUps.Count; i++) inputs[2 + i] = Key(winUps[i], KeyeventfKeyUp | KeyeventfExtendedKey); // Win is extended key
         if (SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<INPUT>()) != inputs.Length)
             Log.Error($"Keyboard hook: SendInput failed ({Marshal.GetLastWin32Error()})");
         try { Triggered?.Invoke(); }
@@ -139,7 +139,7 @@ public sealed class LowLevelKeyboardHook : IDisposable
     [StructLayout(LayoutKind.Sequential)]
     private struct MOUSEINPUT { public int dx, dy; public uint mouseData, dwFlags, time; public IntPtr dwExtraInfo; }
 
-    /// <summary>Объединение размером с MOUSEINPUT (самый большой член): иначе SendInput отвергнет cbSize.</summary>
+    /// <summary>Union size of MOUSEINPUT (largest member): else SendInput rejects cbSize.</summary>
     [StructLayout(LayoutKind.Explicit)]
     private struct InputUnion { [FieldOffset(0)] public MOUSEINPUT mi; [FieldOffset(0)] public KEYBDINPUT ki; }
 

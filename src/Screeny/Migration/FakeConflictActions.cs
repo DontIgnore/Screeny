@@ -4,18 +4,18 @@ using Screeny.Logging;
 namespace Screeny.Migration;
 
 /// <summary>
-/// Действия мастера в <c>--dev</c> и тестах: ничего не делают с системой, только пишут в журнал, запоминают вызовы
-/// и меняют <see cref="FakeEnvironmentSnapshot"/>, чтобы пересканирование показало результат.
+/// Wizard actions in <c>--dev</c> and tests: do nothing to system, only log, remember calls
+/// and mutate <see cref="FakeEnvironmentSnapshot"/>, so re-scan shows result.
 /// </summary>
 public sealed class FakeConflictActions(FakeEnvironmentSnapshot env) : IConflictActions
 {
     private readonly object _gate = new();
     private readonly List<string> _calls = new();
 
-    /// <summary>Вызовы: «close:lightshot», «autostart:sharex», «elevated:lightshot», «uninstall:sharex», «printscreen».</summary>
+    /// <summary>Calls: “close:lightshot”, “autostart:sharex”, “elevated:lightshot”, “uninstall:sharex”, “printscreen”.</summary>
     public IReadOnlyList<string> Calls { get { lock (_gate) return _calls.ToList(); } }
 
-    /// <summary>Что вернёт повышенное действие (для проверки отмены UAC и ошибок в UI и тестах).</summary>
+    /// <summary>What elevated action will return (for testing UAC cancel and errors in UI/tests).</summary>
     public ActionOutcome ElevatedOutcome { get; set; } = ActionOutcome.Done;
 
     private void Record(string call)
@@ -31,7 +31,7 @@ public sealed class FakeConflictActions(FakeEnvironmentSnapshot env) : IConflict
         return Task.FromResult(new ActionResult(ActionOutcome.Done, Loc.F("Action.Closed", conflict.Program.DisplayName)));
     }
 
-    /// <summary>Как <see cref="ConflictActions"/> в повышенном экземпляре: отключает записи для всех пользователей.</summary>
+    /// <summary>Like <see cref="ConflictActions"/> in elevated instance: disables entries for all users.</summary>
     public bool Elevated { get; init; }
 
     public ActionResult DisableAutostart(Conflict conflict)
@@ -86,8 +86,8 @@ public sealed class FakeConflictActions(FakeEnvironmentSnapshot env) : IConflict
 }
 
 /// <summary>
-/// Единственное место, где выбирается реальная или подставная среда. В <c>--dev</c> всегда подставная — реальные
-/// действия мастера в тестовом экземпляре невозможны, даже без <c>--scenario</c>.
+/// Only place where real or fake environment is chosen. In <c>--dev</c> always fake — real
+/// wizard actions impossible in test instance, even without <c>--scenario</c>.
 /// </summary>
 public static class MigrationServices
 {

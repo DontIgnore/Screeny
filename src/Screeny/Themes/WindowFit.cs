@@ -3,21 +3,21 @@ using System.Windows;
 namespace Screeny.Themes;
 
 /// <summary>
-/// Геометрия окна на мониторе — чистые функции для <see cref="ChromeWindow"/>: предел высоты по рабочей области
-/// монитора, на котором окно на самом деле, и прямоугольник, целиком лежащий в этой области.
+/// Window geometry on monitor — pure functions for <see cref="ChromeWindow"/>: height limit by work area of monitor
+/// window actually on, and rectangle fully inside that area.
 /// </summary>
 public static class WindowFit
 {
-    /// <summary>Поле между окном и краями рабочей области, DIP.</summary>
+    /// <summary>Margin between window and work area edges, DIP.</summary>
     public const double Margin = 40;
 
-    /// <summary>Меньше этого окно не сжимается, если только сам монитор не ниже.</summary>
+    /// <summary>Below this window doesn't shrink unless monitor itself lower.</summary>
     public const double MinimumHeight = 360;
 
     /// <summary>
-    /// Предел высоты, DIP: рабочая область минус <see cref="Margin"/>, но не больше <paramref name="naturalCap"/>
-    /// (окну с прокруткой незачем быть башней на высоком экране) и не меньше <see cref="MinimumHeight"/> — если
-    /// рабочая область это позволяет.
+    /// Height limit, DIP: work area minus <see cref="Margin"/>, but no more than <paramref name="naturalCap"/>
+    /// (scrollable window doesn't need to be tower on tall screen) and no less than <see cref="MinimumHeight"/> — if
+    /// work area allows.
     /// </summary>
     public static double CapHeight(double workHeight, double naturalCap = double.PositiveInfinity)
     {
@@ -27,8 +27,8 @@ public static class WindowFit
     }
 
     /// <summary>
-    /// Прямоугольник окна внутри рабочей области: размер урезается до области, положение — по центру области
-    /// (<paramref name="center"/>) или ближайшее к прежнему, при котором окно не выходит за края.
+    /// Window rectangle inside work area: size trimmed to area, position centered in area
+    /// (<paramref name="center"/>) or nearest to previous without going outside edges.
     /// </summary>
     public static Rect FitInto(Rect window, Rect work, bool center)
     {
@@ -38,7 +38,7 @@ public static class WindowFit
         return new Rect(x, y, width, height);
     }
 
-    /// <summary>«x,y,w,h» (целые, пиксели устройства) → прямоугольник; null — не задано, не разобрано или пустой размер.</summary>
+    /// <summary>“x,y,w,h” (integers, device pixels) → rectangle; null — not set, unparsable or empty size.</summary>
     public static Rect? ParseWorkArea(string? text)
     {
         var parts = text?.Split(',', StringSplitOptions.TrimEntries);
@@ -49,7 +49,7 @@ public static class WindowFit
         return n[2] > 0 && n[3] > 0 ? new Rect(n[0], n[1], n[2], n[3]) : null;
     }
 
-    /// <summary>Пиксели устройства → DIP при масштабе монитора <paramref name="scale"/> (1.0 = 96 DPI, 1.5 = 144 DPI).</summary>
+    /// <summary>Device pixels → DIP at monitor scale <paramref name="scale"/> (1.0 = 96 DPI, 1.5 = 144 DPI).</summary>
     public static Rect ToDips(Rect pixels, double scale)
         => scale > 0 ? new Rect(pixels.X / scale, pixels.Y / scale, pixels.Width / scale, pixels.Height / scale) : pixels;
 }

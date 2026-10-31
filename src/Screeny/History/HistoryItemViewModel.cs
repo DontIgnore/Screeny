@@ -3,15 +3,15 @@ using System.Windows.Media.Imaging;
 
 namespace Screeny.History;
 
-/// <summary>Миниатюра и исходный размер снимка; Image заморожена, null — файл не прочитался.</summary>
+/// <summary>Thumbnail and original screenshot dimensions. Image is frozen; null means the file could not be read.</summary>
 public sealed record ThumbnailResult(BitmapSource? Image, int Width, int Height)
 {
     public static readonly ThumbnailResult Empty = new(null, 0, 0);
 }
 
 /// <summary>
-/// Карточка истории: миниатюра (без удержания файла), подпись и временная метка «Скопировано».
-/// Миниатюра загружается отдельно (<see cref="LoadThumbnail"/> в фоне, затем <see cref="SetThumbnail"/> в UI-потоке).
+/// A history card with a thumbnail (without holding the file open), caption, and temporary "Copied" status.
+/// The thumbnail is loaded separately (<see cref="LoadThumbnail"/> on a background thread, then <see cref="SetThumbnail"/> on the UI thread).
 /// </summary>
 public sealed class HistoryItemViewModel : INotifyPropertyChanged
 {
@@ -30,7 +30,7 @@ public sealed class HistoryItemViewModel : INotifyPropertyChanged
 
     public string Path { get; }
     public DateTime CreatedAt { get; }
-    /// <summary>Дата и время снимка в региональном формате пользователя, с секундами (снимки идут подряд).</summary>
+    /// <summary>Screenshot date and time in the user's regional format, including seconds for consecutive captures.</summary>
     public string DateText => CreatedAt.ToString("G", System.Globalization.CultureInfo.CurrentCulture);
 
     public BitmapSource? Thumbnail
@@ -45,10 +45,10 @@ public sealed class HistoryItemViewModel : INotifyPropertyChanged
         private set { _sizeText = value; OnPropertyChanged(nameof(SizeText)); }
     }
 
-    /// <summary>Кнопки действий видны без наведения (тестовый снимок окна истории).</summary>
+    /// <summary>Show action buttons without hovering, for test screenshots of the history window.</summary>
     public bool ForceActions { get; set; }
 
-    /// <summary>Кнопка и пункт меню «Закрепить на экране»: без функции «Закрепление» их нет.</summary>
+    /// <summary>Controls whether the Pin to Screen button and menu item are available.</summary>
     public bool CanPin
     {
         get => _canPin;
@@ -72,7 +72,7 @@ public sealed class HistoryItemViewModel : INotifyPropertyChanged
         SizeText = result.Width > 0 ? $"{result.Width}×{result.Height}" : "";
     }
 
-    /// <summary>Полноразмерная картинка; OnLoad — чтобы файл не оставался открытым (его можно удалить).</summary>
+    /// <summary>Loads the full-size image. OnLoad prevents the file from remaining open so it can be deleted.</summary>
     public BitmapSource LoadFull()
     {
         using var fs = File.OpenRead(Path);
@@ -80,8 +80,8 @@ public sealed class HistoryItemViewModel : INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Читает файл и декодирует уменьшенную копию. Потокобезопасно (результат заморожен), поэтому вызывается
-    /// из фонового потока. Через поток, а не Uri: <c>new Uri(path)</c> ломается на '#' и '%' в пути.
+    /// Reads the file and decodes a reduced copy. Thread-safe because the result is frozen; called
+    /// on a background thread. Uses a stream because <c>new Uri(path)</c> fails on '#' and '%' in paths.
     /// </summary>
     public static ThumbnailResult LoadThumbnail(string path)
     {
@@ -112,8 +112,8 @@ public sealed class HistoryItemViewModel : INotifyPropertyChanged
     {
         var bmp = new BitmapImage();
         bmp.BeginInit();
-        bmp.CacheOption = BitmapCacheOption.OnLoad; // читает поток целиком в EndInit, после него поток можно закрыть
-        // IgnoreImageCache не ставим: кэш WPF ключуется по Uri, а с StreamSource этот флаг бросает ArgumentNullException
+        bmp.CacheOption = BitmapCacheOption.OnLoad; // Reads the entire stream in EndInit so it can be closed afterwards.
+        // Do not use IgnoreImageCache: the WPF cache uses Uri keys, and this flag throws ArgumentNullException with StreamSource.
         if (decodeWidth > 0) bmp.DecodePixelWidth = decodeWidth;
         if (decodeHeight > 0) bmp.DecodePixelHeight = decodeHeight;
         bmp.StreamSource = stream;

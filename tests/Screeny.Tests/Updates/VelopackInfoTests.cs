@@ -27,7 +27,7 @@ public class VelopackInfoTests
     [Fact]
     public void EntryPoint_IsProgramMain()
     {
-        // VelopackApp.Build().Run() должен выполняться до WPF: точка входа — Program.Main, а не сгенерированный App.Main.
+        // VelopackApp.Build().Run() must run before WPF: entry point Program.Main, not generated App.Main.
         var entry = typeof(App).Assembly.EntryPoint;
         Assert.Equal(typeof(Program), entry?.DeclaringType);
         Assert.NotNull(entry!.GetCustomAttributes(typeof(STAThreadAttribute), false).SingleOrDefault());

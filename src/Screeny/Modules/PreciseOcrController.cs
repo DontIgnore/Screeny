@@ -2,39 +2,39 @@ using Screeny.Logging;
 
 namespace Screeny.Modules;
 
-/// <summary>Что показать в настройках про модуль точного распознавания.</summary>
-/// <param name="Installed">Установленная версия (с диска) или null.</param>
-/// <param name="Progress">Проценты загрузки, пока <paramref name="Downloading"/>.</param>
-/// <param name="RemovalPending">Модуль удалён, но файлы держит загруженная библиотека: сотрутся после перезапуска.</param>
-/// <param name="Error">Последняя ошибка загрузки или установки (или загрузки модуля в процесс) — для красной строки.</param>
-/// <param name="SourceAvailable">Скачать есть откуда: обычный запуск — GitHub, dev — только с <c>--module-source</c>.</param>
+/// <summary>What to show in settings about precise recognition module.</summary>
+/// <param name="Installed">Installed version (from disk) or null.</param>
+/// <param name="Progress">Download percent while <paramref name="Downloading"/>.</param>
+/// <param name="RemovalPending">Module deleted but files held by loaded library: erased after restart.</param>
+/// <param name="Error">Last download/install error (or module load into process) — for red line.</param>
+/// <param name="SourceAvailable">Download source exists: normal — GitHub, dev — only with <c>--module-source</c>.</param>
 public sealed record PreciseOcrStatus(int? Installed, bool Downloading, int Progress, bool RemovalPending, string? Error, bool SourceAvailable)
 {
-    /// <summary>Стоит ровно та версия, что нужна этой сборке.</summary>
+    /// <summary>Exactly the version this build needs is installed.</summary>
     public bool Ready => Installed == OcrModule.Version && !RemovalPending;
-    /// <summary>Стоит другая версия (Screeny обновился): нужно «Обновить модуль».</summary>
+    /// <summary>Another version installed (Screeny updated): need “Update module”.</summary>
     public bool Outdated => Installed is { } v && v != OcrModule.Version && !RemovalPending;
 }
 
-/// <summary>Модуль точного распознавания для окна настроек и мастера.</summary>
+/// <summary>Precise recognition module for settings window and wizard.</summary>
 public interface IPreciseOcrHost
 {
     PreciseOcrStatus Status { get; }
-    /// <summary>Состояние поменялось (прогресс, конец загрузки, удаление). Всегда в потоке UI.</summary>
+    /// <summary>State changed (progress, download end, deletion). Always UI thread.</summary>
     event Action? Changed;
-    /// <param name="notifyInTray">Итог показать уведомлением в трее (загрузка из мастера: окно уже закрыто).</param>
+    /// <param name="notifyInTray">Show result as tray notification (wizard download: window already closed).</param>
     void StartDownload(bool notifyInTray = false);
     void CancelDownload();
     void Remove();
-    /// <summary>Отменить отложенное удаление (<see cref="PreciseOcrStatus.RemovalPending"/>).</summary>
+    /// <summary>Cancel pending deletion (<see cref="PreciseOcrStatus.RemovalPending"/>).</summary>
     void UndoRemove();
 }
 
 /// <summary>
-/// Скачивание, установка и удаление модуля. Скачивается только по явному действию пользователя (кнопка в настройках,
-/// галочка в мастере) — в том числе при выключенной проверке обновлений; сам модуль никогда не перекачивается.
-/// Одна загрузка за раз: мастер и настройки видят одну и ту же. Установка (хеши, распаковка) идёт в фоне,
-/// события — в потоке UI.
+/// Module download, install and delete. Downloaded only on explicit user action (settings button,
+/// wizard checkbox) — including when update check disabled; module itself never re-downloaded.
+/// One download at a time: wizard and settings see same. Install (hashing, unpack) in background,
+/// events in UI thread.
 /// </summary>
 public sealed class PreciseOcrController : IPreciseOcrHost
 {
@@ -47,16 +47,16 @@ public sealed class PreciseOcrController : IPreciseOcrHost
     private string? _error;
     private int? _installed;
 
-    /// <summary>Модуль поставлен (true) или нет (false, с текстом ошибки; отмена — без текста), и нужно ли уведомление в трее.</summary>
+    /// <summary>Module installed (true) or not (false, with error text; cancel without text), and whether tray notification needed.</summary>
     public event Action<bool, string?, bool>? Finished;
     public event Action? Changed;
-    /// <summary>Модуль удалён (или помечен к удалению после перезапуска).</summary>
+    /// <summary>Module deleted (or marked for deletion after restart).</summary>
     public event Action? Removed;
-    /// <summary>Отложенное удаление отменено («Не удалять»), модуль снова на месте.</summary>
+    /// <summary>Pending deletion canceled (“Don't delete”), module back in place.</summary>
     public event Action? Restored;
 
-    /// <param name="source">Источник архива или null — скачать неоткуда (dev без <c>--module-source</c>).</param>
-    /// <param name="inUse">Папку модуля держит загруженная в процесс библиотека.</param>
+    /// <param name="source">Archive source or null — nothing to download from (dev without <c>--module-source</c>).</param>
+    /// <param name="inUse">Module folder held by library loaded into process.</param>
     public PreciseOcrController(ModuleInstaller installer, Func<IModuleSource?> source, Func<string, bool> inUse)
     {
         _installer = installer;
@@ -66,13 +66,13 @@ public sealed class PreciseOcrController : IPreciseOcrHost
         Refresh();
     }
 
-    /// <summary>Установленная версия (обновляется после установки и удаления).</summary>
+    /// <summary>Installed version (updates after install/delete).</summary>
     public int? InstalledVersion => _installed;
 
-    /// <summary>Папка модуля нужной версии, если он установлен и не помечен к удалению.</summary>
+    /// <summary>Module folder of needed version if installed and not marked for deletion.</summary>
     public string? ReadyFolder => Status.Ready ? _installer.TargetFolder : null;
 
-    /// <summary>Ошибка загрузки модуля в процесс (<see cref="Ocr.Paddle.PreciseOcrService.LoadError"/>), если была.</summary>
+    /// <summary>Module load error (<see cref="Ocr.Paddle.PreciseOcrService.LoadError"/>), if any.</summary>
     public Func<string?> LoadError { get; init; } = () => null;
 
     public PreciseOcrStatus Status => new(_installed, _download is not null, _progress, _installer.RemovalPending,
@@ -80,7 +80,7 @@ public sealed class PreciseOcrController : IPreciseOcrHost
 
     public void Refresh() => _installed = ModuleInstaller.DetectInstalled(_installer.Root, OcrModule.Id, OcrModule.Version);
 
-    /// <summary>При запуске, в фоне: стереть помеченное к удалению и остатки прерванных загрузок.</summary>
+    /// <summary>At startup in background: erase marked for deletion and interrupted download remnants.</summary>
     public Task CleanupAsync() => Task.Run(_installer.CleanupOnStartup);
 
     public void StartDownload(bool notifyInTray = false)
@@ -119,13 +119,13 @@ public sealed class PreciseOcrController : IPreciseOcrHost
         _error = error;
         Refresh();
         Changed?.Invoke();
-        // Загрузка из мастера всегда заканчивается уведомлением — и при отмене (её мог нажать в настройках сам пользователь).
+        // Wizard download always ends with notification — also on cancel (could be pressed in settings by user).
         if (!cancelled) Finished?.Invoke(ok, error, notifyInTray);
         else if (notifyInTray) Finished?.Invoke(false, Localization.Loc.T("PreciseOcr.Cancelled"), true);
     }
 
-    /// <summary>Текст ошибки для настроек и уведомления: свои сообщения как есть, сеть и диск — понятными словами;
-    /// сообщения исключений .NET пользователю не показываются (они в журнале).</summary>
+    /// <summary>Error text for settings and notification: own messages as-is, network/disk in plain words;
+    /// .NET exception messages not shown (they are in log).</summary>
     public static string FriendlyError(Exception ex) => ex switch
     {
         ModuleInstallException m => m.Message,

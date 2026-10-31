@@ -9,15 +9,15 @@ namespace Screeny.Export;
 public static class ImageComposer
 {
     /// <summary>
-    /// Вырезает регион из снимка и рисует поверх аннотации тем же кодом, что и на экране.
-    /// Всё в 96 DPI, 1 единица = 1 пиксель, без DPI-масштаба оверлея. Результат заморожен.
+    /// Cuts region from screenshot and draws annotations on top with same code as on screen.
+    /// All in 96 DPI, 1 unit = 1 pixel, no overlay DPI scaling. Result frozen.
     /// </summary>
     public static BitmapSource Compose(BitmapSource shot, PixelRect region, AnnotationDocument? doc)
     {
         var inside = region.Clamp(new PixelRect(0, 0, shot.PixelWidth, shot.PixelHeight));
         bool fullyInside = inside == region && !region.IsEmpty;
 
-        // Без аннотаций рисовать нечего: просто копия пикселей региона, без RenderTargetBitmap.
+        // Without annotations nothing to draw: just copy of region pixels, without RenderTargetBitmap.
         if (fullyInside && (doc is null || doc.Items.Count == 0))
             return CopyRegion(shot, region);
 
@@ -25,12 +25,12 @@ public static class ImageComposer
         using (var dc = dv.RenderOpen())
         {
             dc.PushClip(new RectangleGeometry(new Rect(0, 0, region.Width, region.Height)));
-            // Только пиксели региона, а не весь снимок под клипом.
+            // Only region pixels, not whole screenshot under clip.
             if (!inside.IsEmpty)
                 dc.DrawImage(new CroppedBitmap(shot, inside.ToInt32Rect()),
                     new Rect(inside.X - region.X, inside.Y - region.Y, inside.Width, inside.Height));
             dc.PushTransform(new TranslateTransform(-region.X, -region.Y));
-            // Эффекты считают свою область в координатах всего снимка — передаём именно его.
+            // Effects compute their region in whole screenshot coordinates — pass it.
             doc?.Render(dc, new RenderContext(shot, ForExport: true));
             dc.Pop();
             dc.Pop();
@@ -42,8 +42,8 @@ public static class ImageComposer
     }
 
     /// <summary>
-    /// Независимая копия пикселей региона. CroppedBitmap сам по себе держал бы ссылку на весь снимок
-    /// виртуального экрана (до ~100 МБ), пока результат живёт в pin-окне или истории.
+    /// Independent copy of region pixels. CroppedBitmap alone would hold reference to whole screenshot
+    /// of virtual screen (up to ~100 MB) while result lives in pin window or history.
     /// </summary>
     private static BitmapSource CopyRegion(BitmapSource shot, PixelRect region)
     {

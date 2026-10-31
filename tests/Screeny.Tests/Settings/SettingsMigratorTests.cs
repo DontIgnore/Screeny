@@ -26,8 +26,8 @@ public class SettingsMigratorTests
         Assert.Equal(Entries(PsOn, WssOff), Hotkeys(r));
         Assert.Equal(2, (int)r["SettingsVersion"]!);
         Assert.False(r.ContainsKey("Hotkey"));
-        Assert.False(r.ContainsKey("FallbackHotkey")); // запасной больше не настраивается
-        Assert.Equal(5, (int)r["HistoryLimit"]!);     // прочие поля не тронуты
+        Assert.False(r.ContainsKey("FallbackHotkey")); // fallback no longer configurable
+        Assert.Equal(5, (int)r["HistoryLimit"]!);     // other fields untouched
     }
 
     [Theory]
@@ -57,7 +57,7 @@ public class SettingsMigratorTests
     [Fact]
     public void V1HotkeyRejectedByRules_IsCarriedOverForNormalizeToDrop()
     {
-        // «Shift+A» распознаётся, но недопустим: Normalize выбросит его и включит PrintScreen.
+        // “Shift+A” recognized but invalid: Normalize drops it and enables PrintScreen.
         var (r, _) = Migrate("""{ "Hotkey": "Shift+A" }""");
         var settings = r.Deserialize<AppSettings>()!.Normalize();
         Assert.Equal([HotkeyBinding.PrintScreen(true), HotkeyBinding.WinShiftS(false)], settings.Hotkeys);
@@ -108,7 +108,7 @@ public class SettingsMigratorTests
             """);
         Assert.True(changed);
         Assert.Equal(Entries(PsOn, """{"Kind":"custom","Spec":"Ctrl+W","Enabled":true}""", """{"Kind":1,"Enabled":true}"""), Hotkeys(r));
-        var settings = r.Deserialize<AppSettings>()!.Normalize(); // остаток действительно десериализуется
+        var settings = r.Deserialize<AppSettings>()!.Normalize(); // remainder deserializes
         Assert.Equal([HotkeyBinding.PrintScreen(true), HotkeyBinding.WinShiftS(true), HotkeyBinding.Custom("Ctrl+W")], settings.Hotkeys);
     }
 

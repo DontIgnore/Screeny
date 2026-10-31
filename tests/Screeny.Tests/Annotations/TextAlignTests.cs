@@ -57,7 +57,7 @@ public class TextAlignTests
             Assert.Equal(left.TextBounds, other.TextBounds);
             Assert.Equal(left.Bounds, other.Bounds);
         }
-        // И при смене стиля у той же аннотации (полоса параметров, undo) блок остаётся на месте.
+        // And on style change of same annotation (options strip, undo) block stays in place.
         var before = left.Bounds;
         left.Style = Style(TextAlign.Right);
         Assert.Equal(before, left.Bounds);
@@ -85,7 +85,7 @@ public class TextAlignTests
         var block = t.TextBounds;
         var (line1, line2) = InkRanges(t, block);
 
-        // Длинная строка заполняет блок при любом выравнивании: блок начинается в Origin.
+        // Long line fills block at any alignment: block starts at Origin.
         Assert.InRange(line1.Min, block.Left - 1, block.Left + 3);
         Assert.InRange(line1.Max, block.Right - 4, block.Right + 2);
 
@@ -110,7 +110,7 @@ public class TextAlignTests
     {
         var o = StyleOptions.FromSettings(new AppSettings { LastTextAlign = TextAlign.Center }, Colors.Red);
         Assert.Equal(TextAlign.Center, o.StyleFor(ToolKind.Text, Colors.Red, 3).TextAlign);
-        Assert.Equal(TextAlign.Left, o.StyleFor(ToolKind.Rect, Colors.Red, 3).TextAlign); // не текст — по умолчанию
+        Assert.Equal(TextAlign.Left, o.StyleFor(ToolKind.Rect, Colors.Red, 3).TextAlign); // not text — default
 
         o.Absorb(StyleOptions.WithTextAlign(new AnnotationStyle(Colors.Red, 3), TextAlign.Right), OptionsSectionKind.Text);
         var s = new AppSettings();
@@ -118,7 +118,7 @@ public class TextAlignTests
         Assert.Equal(TextAlign.Right, s.LastTextAlign);
     }
 
-    /// <summary>Крайние столбцы «чернил» первой и второй строки текста (по нижней и верхней половине блока).</summary>
+    /// <summary>Extreme ink columns of first and second text lines (by lower and upper half of block).</summary>
     private static ((int Min, int Max) Line1, (int Min, int Max) Line2) InkRanges(TextAnnotation t, Rect block)
     {
         int w = (int)Math.Ceiling(block.Right) + 20, h = (int)Math.Ceiling(block.Bottom) + 10;

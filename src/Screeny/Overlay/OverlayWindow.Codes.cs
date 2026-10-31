@@ -7,16 +7,16 @@ using Screeny.Ocr;
 
 namespace Screeny.Overlay;
 
-// QR- и штрихкоды в режиме текста (Ctrl+T): ищутся параллельно с OCR, подсвечиваются рамкой,
-// клик по коду — плашка с содержимым, «Копировать» и (только для http/https) «Открыть».
-// Ссылка никогда не открывается сама — только кнопкой.
+// QR/barcodes in text mode (Ctrl+T): searched parallel with OCR, highlighted with border,
+// click on code — plaque with content, “Copy” and (only http/https) “Open”.
+// Link never opens itself — only by button.
 public partial class OverlayWindow
 {
-    private IReadOnlyList<DetectedCode> _codes = [];   // в пикселях снимка
-    private int? _openCode;                              // код, показанный в плашке
-    private bool _devOpenCodeWhenReady;                  // сценарий qr: открыть плашку, как только коды найдены
+    private IReadOnlyList<DetectedCode> _codes = [];   // in screenshot pixels
+    private int? _openCode;                              // code shown in plaque
+    private bool _devOpenCodeWhenReady;                  // qr scenario: open plaque as soon as codes found
 
-    /// <summary>Поиск кодов в той же картинке, что уходит в OCR. Пиксели снимаются здесь, распознавание — вне UI-потока.</summary>
+    /// <summary>Code search on same image that goes to OCR. Pixels captured here, recognition outside UI thread.</summary>
     private static Task<IReadOnlyList<DetectedCode>> ScanCodesAsync(System.Windows.Media.Imaging.BitmapSource image)
     {
         var px = CodeScanner.Pixels(image);
@@ -32,7 +32,7 @@ public partial class OverlayWindow
         });
     }
 
-    /// <summary>Коды найдены (рамки уже в пикселях снимка): подсветить, при сценарии qr — открыть плашку.</summary>
+    /// <summary>Codes found (borders already in screenshot pixels): highlight, on qr scenario open plaque.</summary>
     private void ShowCodes(IReadOnlyList<DetectedCode> codes)
     {
         _codes = codes;
@@ -67,7 +67,7 @@ public partial class OverlayWindow
         PositionCodePopup(code.Box);
     }
 
-    /// <returns>Плашка была открыта.</returns>
+    /// <returns>Plaque was opened.</returns>
     private bool CloseCodePopup()
     {
         if (CodePopup.Visibility != Visibility.Visible) return false;
@@ -84,7 +84,7 @@ public partial class OverlayWindow
         _devOpenCodeWhenReady = false;
     }
 
-    /// <summary>Справа от кода; не влезает — слева, затем под ним; всегда целиком на мониторе кода.</summary>
+    /// <summary>Right of code; doesn't fit — left, then below; always fully on code's monitor.</summary>
     private void PositionCodePopup(Rect box)
     {
         CodePopup.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
@@ -106,13 +106,13 @@ public partial class OverlayWindow
     private void OnCodeCopy(object sender, RoutedEventArgs e)
     {
         if (_openCode is not { } i || i >= _codes.Count) return;
-        // Запись в буфер: незавершённый OCR не должен её перезаписать.
+        // Clipboard write: unfinished OCR must not overwrite it.
         (Application.Current as App)?.NoteClipboardWrite();
         bool ok = ClipboardService.CopyText(_codes[i].Text);
         ShowHint(Localization.Loc.T(ok ? "Codes.Copied" : "Common.ClipboardBusy"), TimeSpan.FromSeconds(1.6));
     }
 
-    /// <summary>Только по явному клику и только http/https: схема проверяется ещё раз перед запуском.</summary>
+    /// <summary>Only explicit click and only http/https: scheme rechecked before launch.</summary>
     private void OnCodeOpen(object sender, RoutedEventArgs e)
     {
         if (_openCode is not { } i || i >= _codes.Count) return;
@@ -128,10 +128,10 @@ public partial class OverlayWindow
             ShowHint(Localization.Loc.T("Codes.OpenFailed"), TimeSpan.FromSeconds(2));
             return;
         }
-        Cancel(); // браузер выходит на передний план; оверлей поверх него больше не нужен
+        Cancel(); // browser comes to front; overlay over it no longer needed
     }
 
-    /// <summary>Клик в режиме текста по коду открывает плашку. true — клик обработан.</summary>
+    /// <summary>Click in text mode on code opens plaque. true — click handled.</summary>
     private bool CodeMouseDown(MouseButtonEventArgs e)
     {
         var p = e.GetPosition(PixelCanvas);

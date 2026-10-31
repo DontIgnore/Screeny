@@ -6,7 +6,7 @@
                 Title="{l:Loc Update.Title}" Width="520" SizeToContent="Height" ResizeMode="NoResize"
                 WindowStartupLocation="CenterScreen" Icon="/Assets/screeny.ico">
   <DockPanel>
-    <!-- Нижняя панель: «Пропустить» слева, «Позже» и основное действие справа -->
+    <!-- Bottom bar: “Skip” left, “Later” and main action right -->
     <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource Brush.Stroke}" BorderThickness="0,1,0,0" Padding="24,16,24,20">
       <DockPanel>
         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">

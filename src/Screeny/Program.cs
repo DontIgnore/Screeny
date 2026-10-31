@@ -6,9 +6,9 @@ using Velopack.Locators;
 namespace Screeny;
 
 /// <summary>
-/// Точка входа вместо сгенерированного WPF Main (<c>StartupObject</c> в csproj): Velopack требует, чтобы
-/// <see cref="VelopackApp"/> выполнился первым — при установке, обновлении и удалении Update.exe запускает Screeny.exe
-/// с особыми ключами, и <c>Run()</c> обрабатывает их и завершает процесс до появления любого окна.
+/// Entry point instead of generated WPF Main (<c>StartupObject</c> in csproj): Velopack requires
+/// <see cref="VelopackApp"/> to run first — on install/update/uninstall Update.exe runs Screeny.exe
+/// with special keys, and <c>Run()</c> handles them and exits before any window.
 /// </summary>
 public static class Program
 {
@@ -16,15 +16,15 @@ public static class Program
     public static void Main(string[] args)
     {
         VelopackApp.Build()
-            // Хуки без UI и с таймаутом (удаление — 30 с): только быстрые действия.
+            // Hooks without UI and with timeouts (uninstall — 30s): only fast actions.
             .OnBeforeUninstallFastCallback(_ => { RemoveStartupEntry(); RemoveModules(); })
-            // Скачанное обновление применяется только явно (App.Updates.cs): кнопкой в окне или молча при выходе, если
-            // проверка обновлений всё ещё включена. Иначе Velopack поставил бы его при следующем запуске сам.
+            // Downloaded update applied only explicitly (App.Updates.cs): by button in window or silently on exit if
+            // update check still enabled. Else Velopack would install it at next launch itself.
             .SetAutoApplyOnStartup(false)
             .Run();
 
-        // До любого окна (мастер, --settings): автозапуск записывает стабильный стаб корня, а не current\Screeny.exe.
-        // Тестовый экземпляр Run-ключ не трогает вовсе, так что для него это значение ни на что не влияет.
+        // Before any window (wizard, --settings): autostart writes stable root stub, not current\Screeny.exe.
+        // Test instance doesn't touch Run key at all, so value affects nothing for it.
         StartupRegistrar.UseLaunchPath(Updates.VelopackInfo.Detect().StubPath);
 
         var app = new App();
@@ -32,7 +32,7 @@ public static class Program
         app.Run();
     }
 
-    /// <summary>Удаление: запись автозапуска, указывающая в папку установки, иначе Windows запускала бы несуществующий exe.</summary>
+    /// <summary>Uninstall: autostart entry pointing into install folder, else Windows would launch nonexistent exe.</summary>
     private static void RemoveStartupEntry()
     {
         try
@@ -44,10 +44,10 @@ public static class Program
     }
 
     /// <summary>
-    /// Удаление: скачанные модули (<c>%LocalAppData%\Screeny\Modules</c>, точное распознавание) — около 30 МБ, которые
-    /// без Screeny не нужны. Только эта папка: история и настройки пользователя остаются. Папка общая с портативной
-    /// копией: если она есть, она вернётся к распознаванию Windows и предложит скачать модуль снова. Если модуль сейчас
-    /// загружен в работающую портативную копию, его папка помечается и стирается при её следующем запуске.
+    /// Uninstall: downloaded modules (<c>%LocalAppData%\Screeny\Modules</c>, precise recognition) — ~30 MB that
+    /// are useless without Screeny. Only this folder: history and user settings remain. Folder shared with portable
+    /// copy: if it runs, it will return to Windows recognition and offer re-download. If module currently loaded
+    /// into running portable copy, its folder marked and erased at its next launch.
     /// </summary>
     private static void RemoveModules()
     {

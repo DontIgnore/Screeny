@@ -8,7 +8,7 @@
                 Title="{l:Loc Editor.Title}" Width="1180" Height="800" MinWidth="760" MinHeight="480" ResizeMode="CanResize"
                 WindowStartupLocation="CenterScreen" Icon="/Assets/screeny.ico">
   <Window.Resources>
-    <!-- Сегмент переключателя «Оригинал / С пометками» -->
+    <!-- “Original / With marks” toggle segment -->
     <Style x:Key="Segment" TargetType="RadioButton">
       <Setter Property="OverridesDefaultStyle" Value="True"/>
       <Setter Property="Focusable" Value="False"/>
@@ -47,7 +47,7 @@
       <Setter Property="Height" Value="28"/>
       <Setter Property="Padding" Value="10,0"/>
     </Style>
-    <!-- Плашки поверх холста: всегда тёмные, как панель инструментов -->
+    <!-- Plaques over canvas: always dark, like toolbar -->
     <Style x:Key="Plaque" TargetType="Border">
       <Setter Property="Background" Value="{DynamicResource Overlay.Panel}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource Overlay.ShotRing}"/>
@@ -83,7 +83,7 @@
 
   <t:ChromeWindow.CaptionContent>
     <StackPanel Orientation="Horizontal">
-      <!-- Только если у записи есть оригинал без пометок -->
+      <!-- Only if entry has original without marks -->
       <Border x:Name="ModeSwitch" CornerRadius="8" Padding="2" Margin="0,0,8,0" BorderThickness="1"
               Background="{DynamicResource Brush.Card}" BorderBrush="{DynamicResource Brush.Stroke}">
         <StackPanel Orientation="Horizontal">
@@ -105,25 +105,25 @@
     </Grid.RowDefinitions>
 
     <Grid x:Name="Viewport" ClipToBounds="True" Background="{DynamicResource Brush.Thumb}">
-      <!-- Слои в пикселях снимка; масштаб и сдвиг (зум, панорама) задаются в code-behind -->
+      <!-- Layers in screenshot pixels; scale and offset (zoom, pan) set in code-behind -->
       <Canvas x:Name="PixelCanvas" HorizontalAlignment="Left" VerticalAlignment="Top">
         <Canvas.RenderTransform><MatrixTransform x:Name="ViewTransform"/></Canvas.RenderTransform>
         <Image x:Name="BaseImage" Stretch="None"/>
         <ann:AnnotationLayer x:Name="Annotations"/>
         <ov:RulerLayer x:Name="RulerOverlay"/>
-        <!-- Направляющие прилипания: только на время жеста, не в документе и не в экспорте -->
+        <!-- Snap guides: only during gesture, not in document or export -->
         <ov:SnapGuideLayer x:Name="SnapGuides"/>
       </Canvas>
-      <!-- HUD в DIP поверх снимка -->
+      <!-- HUD in DIP over screenshot -->
       <Canvas x:Name="Hud">
         <ov:MagnifierControl x:Name="Magnifier" IsHitTestVisible="False" Visibility="Collapsed"/>
-        <!-- Поле ввода текстового инструмента; шрифт и размер совпадают с TextAnnotation -->
+        <!-- Text tool input field; font and size match TextAnnotation -->
         <TextBox x:Name="TextEditor" Visibility="Collapsed" MinWidth="40" Padding="0" BorderThickness="1"
                  BorderBrush="#AAFFFFFF" Background="#33000000" CaretBrush="White"
                  FontFamily="Segoe UI" FontWeight="SemiBold" AcceptsReturn="True" Cursor="IBeam"/>
       </Canvas>
 
-      <!-- Подсказка: нет оригинала, пометки не прочитались, режим «Оригинал» -->
+      <!-- Hint: no original, marks not read, “Original” mode -->
       <Border x:Name="Notice" Style="{StaticResource Plaque}" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="16,12,16,0"
               MaxWidth="760" Visibility="Collapsed">
         <DockPanel>
@@ -136,13 +136,13 @@
         </DockPanel>
       </Border>
 
-      <!-- Итог действия: «Скопировано · новая запись в истории» -->
+      <!-- Action result: “Copied · new history entry” -->
       <Border x:Name="Toast" Style="{StaticResource Plaque}" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,64"
               Visibility="Collapsed" IsHitTestVisible="False">
         <TextBlock x:Name="ToastText" Foreground="{DynamicResource Overlay.Ink}" FontFamily="{DynamicResource Font.UI}" FontSize="12.5"/>
       </Border>
 
-      <!-- Масштаб; клик — вписать / 100 % -->
+      <!-- Zoom; click — fit / 100% -->
       <Border x:Name="ZoomBadge" Style="{StaticResource Plaque}" Padding="8,3" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10"
               Cursor="Hand" ToolTip="{l:Loc Editor.ZoomTip}"
               MouseLeftButtonUp="OnZoomBadgeClick">
@@ -152,13 +152,13 @@
     </Grid>
 
     <Border Grid.Row="1" Padding="12,10" BorderBrush="{DynamicResource Brush.Stroke}" BorderThickness="0,1,0,0">
-      <!-- На узком окне панель уменьшается целиком, а не обрезается -->
+      <!-- On narrow window panel shrinks as whole, not clipped -->
       <Viewbox StretchDirection="DownOnly" Stretch="Uniform" HorizontalAlignment="Center">
         <ov:ToolbarControl x:Name="Toolbar"/>
       </Viewbox>
     </Border>
 
-    <!-- Flyout'ы параметров (у кнопок панели и рядом с выбранной фигурой): поверх холста и панели -->
+    <!-- Options flyouts (near panel buttons and next to selected shape): over canvas and panel -->
     <Canvas x:Name="FlyoutLayer" Grid.RowSpan="2" ClipToBounds="True"/>
   </Grid>
 </t:ChromeWindow>

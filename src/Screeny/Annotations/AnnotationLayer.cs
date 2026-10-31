@@ -5,8 +5,8 @@ using System.Windows.Media.Imaging;
 namespace Screeny.Annotations;
 
 /// <summary>
-/// Рисует документ в пикселях снимка (слой лежит в PixelCanvas под ScaleTransform).
-/// Мышь обрабатывает окно оверлея, поэтому слой не участвует в hit-test.
+/// Draws the document in screenshot pixels (layer sits in PixelCanvas under ScaleTransform).
+/// The overlay window handles mouse, so the layer is not hit-tested.
 /// </summary>
 public sealed class AnnotationLayer : FrameworkElement
 {
@@ -19,8 +19,8 @@ public sealed class AnnotationLayer : FrameworkElement
     public BitmapSource? Source { get; set; }
 
     /// <summary>
-    /// Толщина рамки выбранной фигуры в единицах слоя (1 — как в оверлее). Окно редактора с масштабом задаёт
-    /// 1/масштаб, чтобы рамка на экране оставалась тонкой и видимой при любом зуме.
+    /// Selected shape border thickness in layer units (1 — like in overlay). The editor window with zoom sets
+    /// 1/zoom so the border stays thin and visible on screen at any zoom.
     /// </summary>
     public double OutlineScale
     {

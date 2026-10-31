@@ -31,7 +31,7 @@ public static class HotkeyParser
         }
         var last = parts[^1];
         if (ModNames.ContainsKey(last)) return false;
-        if (last.Length == 1 && char.IsAsciiDigit(last[0])) last = "D" + last; // "5" → Key.D5, а не числовое значение enum
+        if (last.Length == 1 && char.IsAsciiDigit(last[0])) last = "D" + last; // "5" → Key.D5, not numeric enum value
         else if (last.All(char.IsAsciiDigit)) return false;
         if (!KeyAliases.TryGetValue(last, out var key) && !Enum.TryParse(last, true, out key)) return false;
         int vk = KeyInterop.VirtualKeyFromKey(key);

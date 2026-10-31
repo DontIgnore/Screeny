@@ -5,9 +5,9 @@ public enum HotkeyModifiers { None = 0, Alt = 1, Control = 2, Shift = 4, Win = 8
 
 public readonly record struct HotkeySpec(HotkeyModifiers Modifiers, int VirtualKey)
 {
-    /// <summary>PrintScreen без модификаторов (VK_SNAPSHOT).</summary>
+    /// <summary>PrintScreen without modifiers (VK_SNAPSHOT).</summary>
     public static readonly HotkeySpec PrintScreen = new(HotkeyModifiers.None, 0x2C);
-    /// <summary>Запасной хоткей, когда PrintScreen недоступен и ничего другого не работает.</summary>
+    /// <summary>Fallback hotkey when PrintScreen unavailable and nothing else works.</summary>
     public static readonly HotkeySpec Fallback = new(HotkeyModifiers.Control | HotkeyModifiers.Alt, 0x53);
 
     public override string ToString()

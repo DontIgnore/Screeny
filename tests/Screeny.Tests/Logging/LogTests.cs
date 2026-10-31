@@ -21,7 +21,7 @@ public class LogTests : IDisposable
     [Fact]
     public void RotateIfNeeded_SmallOrMissingFile_KeepsIt()
     {
-        Log.RotateIfNeeded(LogPath, maxBytes: 1000); // нет файла — не бросает
+        Log.RotateIfNeeded(LogPath, maxBytes: 1000); // no file — doesn't throw
         Directory.CreateDirectory(_dir);
         File.WriteAllText(LogPath, "short");
         Log.RotateIfNeeded(LogPath, maxBytes: 1000);

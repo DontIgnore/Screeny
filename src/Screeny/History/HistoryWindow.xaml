@@ -7,7 +7,7 @@
                 Title="{l:Loc History.Title}" Width="920" Height="620" MinWidth="480" MinHeight="320"
                 WindowStartupLocation="CenterScreen" Icon="/Assets/screeny.ico">
   <Window.Resources>
-    <!-- Отдельный экземпляр меню на каждую карточку: обработчики подключаются, DataContext — карточки -->
+    <!-- Separate menu instance per card: handlers attached, DataContext — card -->
     <ContextMenu x:Key="CardMenu" x:Shared="False">
       <MenuItem Header="{l:Loc History.Edit}" InputGestureText="E" Click="OnMenuEdit"/>
       <MenuItem Header="{l:Loc Common.Copy}" InputGestureText="Ctrl+C" Click="OnMenuCopy"/>
@@ -17,7 +17,7 @@
       <Separator/>
       <MenuItem Header="{l:Loc Common.Delete}" InputGestureText="Del" Click="OnMenuDelete"/>
     </ContextMenu>
-    <!-- Кнопки действий поверх миниатюры: на собственной подложке, чтобы читались на любом снимке -->
+    <!-- Action buttons over thumbnail: on own background for readability on any screenshot -->
     <Style x:Key="CardAction" TargetType="Button" BasedOn="{StaticResource IconButton}">
       <Setter Property="Width" Value="28"/>
       <Setter Property="Height" Value="28"/>
@@ -29,7 +29,7 @@
   </Window.Resources>
 
   <DockPanel>
-    <!-- Верхняя панель: счётчик и действия над всей историей -->
+    <!-- Top panel: counter and actions over whole history -->
     <DockPanel DockPanel.Dock="Top" Margin="24,4,24,12">
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
         <Button Content="{l:Loc History.OpenFolder}" Click="OnOpenFolder"/>
@@ -106,7 +106,7 @@
                 <Border CornerRadius="8" Background="{DynamicResource Brush.Thumb}" BorderBrush="{DynamicResource Brush.Stroke}" BorderThickness="1">
                   <Image Source="{Binding Thumbnail}" Stretch="Uniform" Margin="1" RenderOptions.BitmapScalingMode="HighQuality"/>
                 </Border>
-                <!-- Действия появляются при наведении на карточку -->
+                <!-- Actions appear on card hover -->
                 <Border x:Name="Actions" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="6" Padding="2"
                         CornerRadius="8" Background="{DynamicResource Brush.Popup}" BorderBrush="{DynamicResource Brush.Stroke}"
                         BorderThickness="1" Visibility="Collapsed">

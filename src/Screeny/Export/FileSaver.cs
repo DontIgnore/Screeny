@@ -10,10 +10,10 @@ public enum ImageFileFormat { Png, Jpeg }
 
 public static class FileSaver
 {
-    /// <summary>Порядок фильтров совпадает с <see cref="FromFilterIndex"/>.</summary>
+    /// <summary>Filter order matches <see cref="FromFilterIndex"/>.</summary>
     private const string Filter = "PNG|*.png|JPEG|*.jpg";
 
-    /// <summary>Диалог «Сохранить как» (PNG/JPEG). Возвращает итоговый путь или null, если пользователь отменил.</summary>
+    /// <summary>“Save As” dialog (PNG/JPEG). Returns final path or null if canceled.</summary>
     public static string? SaveWithDialog(BitmapSource image, Window? owner = null)
     {
         var path = ChoosePath(owner);
@@ -36,12 +36,12 @@ public static class FileSaver
         return ConfirmResolvedPath(owner, dialog.FilterIndex, dialog.FileName);
     }
 
-    /// <summary>Формат по 1-based индексу фильтра диалога (1 — PNG, 2 — JPEG).</summary>
+    /// <summary>Format by 1-based dialog filter index (1 — PNG, 2 — JPEG).</summary>
     public static ImageFileFormat FromFilterIndex(int filterIndex) => filterIndex == 2 ? ImageFileFormat.Jpeg : ImageFileFormat.Png;
 
     /// <summary>
-    /// Формат определяется выбранным фильтром, а не расширением. Если расширение не соответствует формату
-    /// («shot.bmp» при PNG), дописывается правильное: «shot.bmp.png».
+    /// Format determined by selected filter, not extension. If extension doesn't match format
+    /// (“shot.bmp” when PNG), correct one appended: “shot.bmp.png”.
     /// </summary>
     public static (ImageFileFormat Format, string Path) Resolve(int filterIndex, string fileName)
     {
@@ -49,7 +49,7 @@ public static class FileSaver
         return (format, HasExtensionFor(fileName, format) ? fileName : fileName + DefaultExtension(format));
     }
 
-    /// <summary>Если приложение изменило имя после системного диалога, отдельно подтверждает замену итогового файла.</summary>
+    /// <summary>If app changed name after system dialog, separately confirms overwriting final file.</summary>
     public static string? ResolveForSave(int filterIndex, string fileName, Func<string, bool> confirmOverwrite)
     {
         var path = Resolve(filterIndex, fileName).Path;
@@ -70,18 +70,18 @@ public static class FileSaver
 
     private static string DefaultExtension(ImageFileFormat format) => format == ImageFileFormat.Jpeg ? ".jpg" : ".png";
 
-    /// <summary>Формат по расширению (.jpg/.jpeg — JPEG, остальное — PNG).</summary>
+    /// <summary>Format by extension (.jpg/.jpeg — JPEG, rest — PNG).</summary>
     public static void Save(BitmapSource image, string path)
         => Save(image, path, HasExtensionFor(path, ImageFileFormat.Jpeg) ? ImageFileFormat.Jpeg : ImageFileFormat.Png);
 
     /// <summary>
-    /// Пишет во временный файл рядом и заменяет целевой только после успешной записи:
-    /// при ошибке существующий файл остаётся нетронутым.
+    /// Writes to temporary file next to target and replaces only after successful write:
+    /// on error existing file stays intact.
     /// </summary>
     public static void Save(BitmapSource image, string path, ImageFileFormat format)
     {
         BitmapEncoder encoder = format == ImageFileFormat.Jpeg ? new JpegBitmapEncoder { QualityLevel = 92 } : new PngBitmapEncoder();
-        // JPEG не умеет альфу — сводим на непрозрачный формат.
+        // JPEG has no alpha — flatten to opaque format.
         var frame = format == ImageFileFormat.Jpeg ? new FormatConvertedBitmap(image, PixelFormats.Bgr24, null, 0) : image;
         encoder.Frames.Add(BitmapFrame.Create(frame));
 
@@ -95,7 +95,7 @@ public static class FileSaver
         }
         catch
         {
-            try { File.Delete(tmp); } catch { /* не мешаем исходной ошибке */ }
+            try { File.Delete(tmp); } catch { /* don't interfere with original error */ }
             throw;
         }
     }

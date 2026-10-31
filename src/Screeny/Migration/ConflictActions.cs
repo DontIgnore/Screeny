@@ -9,48 +9,48 @@ public enum ActionOutcome
 {
     Done,
     Failed,
-    /// <summary>Пользователь отменил запрос прав администратора (UAC).</summary>
+    /// <summary>User canceled admin rights request (UAC).</summary>
     Cancelled,
-    /// <summary>Нужны права администратора: для записи для всех пользователей есть отдельное действие.</summary>
+    /// <summary>Admin rights needed: for writing for all users there is separate action.</summary>
     NeedsAdmin,
 }
 
-/// <summary>Итог одного действия мастера — понятный пользователю текст для карточки.</summary>
+/// <summary>Result of one wizard action — user-understandable text for card.</summary>
 public sealed record ActionResult(ActionOutcome Outcome, string Message)
 {
     public bool Success => Outcome == ActionOutcome.Done;
 }
 
-/// <summary>Действия мастера над мешающими программами. Реальные — <see cref="ConflictActions"/>, для dev и тестов — <see cref="FakeConflictActions"/>.</summary>
+/// <summary>Wizard actions on conflicting programs. Real — <see cref="ConflictActions"/>, for dev/tests — <see cref="FakeConflictActions"/>.</summary>
 public interface IConflictActions
 {
-    /// <summary>Закрыть процессы программы из найденного списка: <c>CloseMainWindow</c>, через 2 с — <c>Kill</c>.</summary>
+    /// <summary>Close program processes from found list: <c>CloseMainWindow</c>, after 2s — <c>Kill</c>.</summary>
     Task<ActionResult> CloseProcessesAsync(Conflict conflict);
 
-    /// <summary>Отключить автозапуск через <c>StartupApproved</c> (как Диспетчер задач). Без прав — только записи текущего пользователя.</summary>
+    /// <summary>Disable autostart via <c>StartupApproved</c> (like Task Manager). Without rights — only current user entries.</summary>
     ActionResult DisableAutostart(Conflict conflict);
 
-    /// <summary>Отключить автозапуск для всех пользователей: перезапуск Screeny с правами администратора и ожидание его завершения.</summary>
+    /// <summary>Disable autostart for all users: restart Screeny with admin rights and wait for exit.</summary>
     Task<ActionResult> DisableAutostartElevatedAsync(Conflict conflict);
 
-    /// <summary>Запустить родной деинсталлятор программы (<c>UninstallString</c>, без тихих ключей).</summary>
+    /// <summary>Run program's native uninstaller (<c>UninstallString</c>, without silent keys).</summary>
     ActionResult LaunchUninstaller(Conflict conflict);
 
-    /// <summary><c>HKCU\Control Panel\Keyboard\PrintScreenKeyForSnippingEnabled = 0</c>: PrintScreen больше не открывает захват Windows.</summary>
+    /// <summary><c>HKCU\Control Panel\Keyboard\PrintScreenKeyForSnippingEnabled = 0</c>: PrintScreen no longer opens Windows capture.</summary>
     ActionResult DisableSystemPrintScreen();
 }
 
-/// <summary>Запись в реестр (только то, что нужно мастеру).</summary>
+/// <summary>Registry write (only what wizard needs).</summary>
 public interface IRegistryWriter
 {
     void SetBinary(RegistryHive hive, string subKey, string name, byte[] value);
     void SetDword(RegistryHive hive, string subKey, string name, int value);
 }
 
-/// <summary>Работа с процессами по PID.</summary>
+/// <summary>Working with processes by PID.</summary>
 public interface IProcessControl
 {
-    /// <summary>Процесс по PID или null, если его уже нет.</summary>
+    /// <summary>Process by PID or null if gone.</summary>
     IRunningProcess? Open(int pid);
 }
 
@@ -64,18 +64,18 @@ public interface IRunningProcess : IDisposable
     void Kill();
 }
 
-/// <summary>Запуск внешних программ через ShellExecute.</summary>
+/// <summary>Launching external programs via ShellExecute.</summary>
 public interface IShellLauncher
 {
     void Open(string file, string arguments);
 
-    /// <summary>Запуск с <c>runas</c> и ожидание завершения; возвращает код выхода. Отмена UAC — <see cref="Win32Exception"/> 1223.</summary>
+    /// <summary>Launch with <c>runas</c> and wait; returns exit code. UAC cancel — <see cref="Win32Exception"/> 1223.</summary>
     Task<int> RunElevatedAsync(string file, IReadOnlyList<string> arguments);
 }
 
 /// <summary>
-/// Реальные действия мастера. Ничего не удаляет само: автозапуск отключается флагом StartupApproved (обратимо),
-/// программа удаляется её собственным деинсталлятором, закрываются только процессы из найденного списка.
+/// Real wizard actions. Nothing deletes itself: autostart disabled via StartupApproved flag (reversible),
+/// program removed by its own uninstaller, only processes from found list are closed.
 /// </summary>
 public sealed class ConflictActions(
     IRegistryWriter registry,
@@ -89,7 +89,7 @@ public sealed class ConflictActions(
     private const int ErrorCancelled = 1223;
     private readonly TimeSpan _closeTimeout = closeTimeout ?? TimeSpan.FromSeconds(2);
 
-    /// <summary>Реальные действия на этой машине. Не вызывать в <c>--dev</c> и в тестах — для них <see cref="MigrationServices"/>.</summary>
+    /// <summary>Real actions on this machine. Do not call in <c>--dev</c> or tests — use <see cref="MigrationServices"/>.</summary>
     public static ConflictActions CreateReal(bool elevated)
         => new(new WindowsRegistryWriter(), new WindowsProcessControl(), new WindowsShellLauncher(), elevated, ConflictCatalog.Default);
 
@@ -102,7 +102,7 @@ public sealed class ConflictActions(
             {
                 using var process = processes.Open(entry.Pid);
                 if (process is null || process.HasExited) continue;
-                // PID мог достаться другому процессу: закрываем только тот, что нашли при сканировании.
+                // PID could be reused by another process: close only the one found at scan.
                 if (!IsSame(process, entry)) continue;
                 process.CloseMainWindow();
                 if (await process.WaitForExitAsync(_closeTimeout)) continue;
@@ -212,8 +212,8 @@ public sealed class ConflictActions(
     }
 
     /// <summary>
-    /// Значение пишется сразу, но Windows может подхватить его только после выхода из системы: официального описания
-    /// того, когда изменение вступает в силу без переключателя в Параметрах, нет, а Параметры сами предупреждают о перезагрузке.
+    /// Value written immediately, but Windows may pick it up only after sign-out: no official description
+    /// of when change takes effect without Settings toggle, and Settings itself warns about restart.
     /// </summary>
     public static string SystemPrintScreenDoneText => Loc.T("Action.PrintScreenDone");
 }
@@ -240,7 +240,7 @@ internal sealed class WindowsProcessControl : IProcessControl
     public IRunningProcess? Open(int pid)
     {
         try { return new RunningProcess(System.Diagnostics.Process.GetProcessById(pid)); }
-        catch (ArgumentException) { return null; } // уже завершился
+        catch (ArgumentException) { return null; } // already exited
     }
 
     private sealed class RunningProcess(System.Diagnostics.Process process) : IRunningProcess

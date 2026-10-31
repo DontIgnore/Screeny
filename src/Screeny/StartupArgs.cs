@@ -4,37 +4,37 @@ using Screeny.Overlay;
 namespace Screeny;
 
 /// <summary>
-/// Ключи командной строки.
+/// Command-line keys.
 /// <list type="bullet">
-/// <item><c>--settings</c>, <c>--history</c> — открыть окно сразу после старта.</item>
-/// <item><c>--dev</c> — тестовый экземпляр: свои имена mutex/event (суффикс <see cref="DevSuffix"/>), свой файл
-/// настроек и папка истории, хоткей не регистрируется, снимок экрана не делается ни при старте, ни по клику в трее.</item>
-/// <item><c>--overlay-test &lt;png&gt;</c> (только с <c>--dev</c>) — открыть оверлей по картинке, как будто это снимок экрана.</item>
-/// <item><c>--select x,y,w,h</c> (только с <c>--overlay-test</c>) — готовое выделение.</item>
-/// <item><c>--edit &lt;png&gt;</c> (только с <c>--dev</c>) — окно повторного редактирования снимка, как из истории.</item>
-/// <item><c>--scenario &lt;имя&gt;</c> (с <c>--overlay-test</c>, <c>--edit</c>, <c>--history</c> или <c>--settings</c>) — готовое состояние окна
-/// для проверки UI без ввода мышью: набор фигур оверлея, <c>original</c> для редактора, <c>hover</c> для истории,
-/// <c>hotkey-problems</c> для настроек, <c>conflicts</c> для мастера первого запуска.</item>
-/// <item><c>--setup-wizard</c> — открыть мастер первого запуска (конфликты с другими программами) сразу после старта.
-/// В <c>--dev</c> мастер работает только с подставной средой и подставными действиями; без этого ключа dev-экземпляр
-/// мастер сам не показывает.</item>
-/// <item><c>--enable-ll-hook</c> (только с <c>--dev</c>) — разрешить тестовому экземпляру низкоуровневый хук Win+Shift+S
-/// (если он включён в настройках). Без этого ключа dev-экземпляр хук не ставит никогда.</item>
-/// <item><c>--update-source &lt;папка&gt;</c> (только с <c>--dev</c>) — искать обновления в локальной папке релизов
-/// (результат <c>tools/pack.ps1</c>) вместо GitHub. Без этого ключа dev-экземпляр обновления не ищет никогда.</item>
-/// <item><c>--check-updates</c> (только с <c>--dev</c>) — сразу после старта ручная проверка обновлений.</item>
-/// <item><c>--module-source &lt;папка&gt;</c> (только с <c>--dev</c>) — брать архив модуля точного распознавания
-/// (<c>Screeny-OcrModule-N.zip</c>, результат <c>tools/pack-ocr-module.ps1</c>) из локальной папки вместо GitHub. Без этого
-/// ключа dev-экземпляр модуль не скачивает никогда.</item>
-/// <item><c>--feedback-endpoint &lt;url&gt;</c> (только с <c>--dev</c>) — куда отправлять сообщения об ошибках и предложения
-/// (свой тестовый сервер). Без этого ключа dev-экземпляр сообщения не отправляет никогда, а «Отправить» говорит, что адрес не задан.</item>
-/// <item><c>--feedback bug|idea</c> — открыть окно сообщения об ошибке или предложения сразу после старта. С <c>--dev</c> и
+/// <item><c>--settings</c>, <c>--history</c> — open window right after startup.</item>
+/// <item><c>--dev</c> — test instance: own mutex/event names (suffix <see cref="DevSuffix"/>), own settings file
+/// and history folder, no hotkey registration, no screen capture at startup or tray click.</item>
+/// <item><c>--overlay-test &lt;png&gt;</c> (only with <c>--dev</c>) — open overlay on image as if screenshot.</item>
+/// <item><c>--select x,y,w,h</c> (only with <c>--overlay-test</c>) — ready selection.</item>
+/// <item><c>--edit &lt;png&gt;</c> (only with <c>--dev</c>) — re-edit window like from history.</item>
+/// <item><c>--scenario &lt;name&gt;</c> (with <c>--overlay-test</c>, <c>--edit</c>, <c>--history</c> or <c>--settings</c>) — ready window state
+/// for UI verification without mouse input: overlay shapes set, <c>original</c> for editor, <c>hover</c> for history,
+/// <c>hotkey-problems</c> for settings, <c>conflicts</c> for first-run wizard.</item>
+/// <item><c>--setup-wizard</c> — open first-run wizard (conflicts with other programs) right after startup.
+/// In <c>--dev</c> wizard works only with fake environment and fake actions; without key dev instance never shows wizard.</item>
+///
+/// <item><c>--enable-ll-hook</c> (only with <c>--dev</c>) — allow test instance low-level Win+Shift+S hook
+/// (if enabled in settings). Without key dev instance never installs hook.</item>
+/// <item><c>--update-source &lt;folder&gt;</c> (only with <c>--dev</c>) — search updates in local releases folder
+/// (result of <c>tools/pack.ps1</c>) instead of GitHub. Without key dev instance never checks updates.</item>
+/// <item><c>--check-updates</c> (only with <c>--dev</c>) — manual update check right after startup.</item>
+/// <item><c>--module-source &lt;folder&gt;</c> (only with <c>--dev</c>) — take precise recognition module archive
+/// (<c>Screeny-OcrModule-N.zip</c>, result of <c>tools/pack-ocr-module.ps1</c>) from local folder instead of GitHub. Without this
+/// key dev instance never downloads module.</item>
+/// <item><c>--feedback-endpoint &lt;url&gt;</c> (only with <c>--dev</c>) — where to send error/suggestion messages
+/// (own test server). Without key dev instance never sends, “Send” says address not set.</item>
+/// <item><c>--feedback bug|idea</c> — open error/suggestion window right after startup. With <c>--dev</c> and
 /// <c>--scenario</c> (<c>sending</c>, <c>sent</c>, <c>offline</c>, <c>rate-limited</c>, <c>invalid</c>, <c>server</c>,
-/// <c>validation</c>, <c>details</c>, <c>not-configured</c>) — готовое состояние окна с подставной отправкой, без сети.</item>
-/// <item>Переменная окружения <c>SCREENY_DEV=1</c> — то же, что <c>--dev</c>: она переживает перезапуск через
-/// Velopack-стаб и Update.exe, поэтому тестовая копия не превращается в рабочий экземпляр.</item>
+/// <c>validation</c>, <c>details</c>, <c>not-configured</c>) — ready state with fake send, without network.</item>
+/// <item>Environment variable <c>SCREENY_DEV=1</c> — same as <c>--dev</c>: survives restart via
+/// Velopack stub and Update.exe, so test copy doesn't become working instance.</item>
 /// </list>
-/// Без <c>--dev</c> тестовые ключи игнорируются: рабочий экземпляр не открывает оверлей по чужому файлу.
+/// Without <c>--dev</c> test keys ignored: working instance doesn't open overlay on foreign file.
 /// </summary>
 public sealed record StartupArgs(bool Dev, bool OpenSettings, bool OpenHistory, string? OverlayTest, PixelRect? Select, string? Scenario, string? Edit = null, bool EnableLlHook = false,
     string? UpdateSource = null, bool CheckUpdates = false, bool SetupWizard = false, string? ModuleSource = null,
@@ -43,14 +43,14 @@ public sealed record StartupArgs(bool Dev, bool OpenSettings, bool OpenHistory, 
     public const string DevSuffix = ".Dev";
     public const string DevEnvironmentVariable = "SCREENY_DEV";
 
-    /// <summary>Ключи текущего процесса с учётом <see cref="DevEnvironmentVariable"/>.</summary>
+    /// <summary>Keys of current process accounting for <see cref="DevEnvironmentVariable"/>.</summary>
     public static StartupArgs FromProcess(IReadOnlyList<string> args)
         => Parse(args, Environment.GetEnvironmentVariable(DevEnvironmentVariable));
 
-    /// <summary>Суффикс имён объектов ядра и файлов тестового экземпляра.</summary>
+    /// <summary>Suffix for kernel object and file names of test instance.</summary>
     public string Suffix => Dev ? DevSuffix : "";
 
-    /// <param name="devEnvironment">Значение <see cref="DevEnvironmentVariable"/>: «1» или «true» включают dev-режим.</param>
+    /// <param name="devEnvironment">Value of <see cref="DevEnvironmentVariable"/>: “1” or “true” enable dev mode.</param>
     public static StartupArgs Parse(IReadOnlyList<string> args, string? devEnvironment = null)
     {
         bool dev = devEnvironment?.Trim() is "1" || string.Equals(devEnvironment?.Trim(), "true", StringComparison.OrdinalIgnoreCase);
@@ -90,7 +90,7 @@ public sealed record StartupArgs(bool Dev, bool OpenSettings, bool OpenHistory, 
 
     private static bool Is(string a, string key) => string.Equals(a, key, StringComparison.OrdinalIgnoreCase);
 
-    /// <summary>«x,y,w,h» в пикселях картинки; null, если формат неверный или размер не положительный.</summary>
+    /// <summary>“x,y,w,h” in image pixels; null if format invalid or size not positive.</summary>
     public static PixelRect? TryParseRect(string? text)
     {
         var parts = text?.Split(',', StringSplitOptions.TrimEntries);

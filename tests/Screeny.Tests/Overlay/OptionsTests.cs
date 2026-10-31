@@ -100,7 +100,7 @@ public class StyleOptionsTests
     {
         var o = Options(s => s.LastFillEnabled = true);
         var rect = o.StyleFor(ToolKind.Rect, Colors.Red, 3);
-        Assert.Equal(ColorHex.WithOpacity(Blue, 40), rect.Fill); // заливка — цвет палитры с прозрачностью 40 %
+        Assert.Equal(ColorHex.WithOpacity(Blue, 40), rect.Fill); // fill — palette color with 40% opacity
         Assert.Equal(Colors.Red, rect.Color);
         Assert.NotNull(o.StyleFor(ToolKind.Ellipse, Colors.Red, 3).Fill);
         foreach (var tool in new[] { ToolKind.Line, ToolKind.Pen, ToolKind.Highlighter, ToolKind.Number, ToolKind.Arrow, ToolKind.Text, ToolKind.Pixelate })
@@ -134,7 +134,7 @@ public class StyleOptionsTests
         Assert.NotNull(filled.Fill);
         var fillOnly = o.ToggleStroke(filled);
         Assert.False(fillOnly.StrokeEnabled);
-        Assert.Same(fillOnly, o.ToggleFill(fillOnly)); // убрать заливку у фигуры без обводки нельзя
+        Assert.Same(fillOnly, o.ToggleFill(fillOnly)); // cannot remove fill from shape without stroke
     }
 
     [Fact]
@@ -143,13 +143,13 @@ public class StyleOptionsTests
         var o = Options();
         var s = o.StyleFor(ToolKind.Rect, Colors.Red, 3);
         var fill = o.Paint(s, PaintTarget.Fill, Colors.Green);
-        Assert.Equal(ColorHex.WithOpacity(Colors.Green, 40), fill.Fill); // заливка включилась, 40 %
-        Assert.Equal(Colors.Red, fill.Color);                           // обводка не тронута
+        Assert.Equal(ColorHex.WithOpacity(Colors.Green, 40), fill.Fill); // fill enabled, 40%
+        Assert.Equal(Colors.Red, fill.Color);                           // stroke untouched
         var fill80 = fill with { Fill = ColorHex.WithOpacity(Colors.Green, 80) };
-        Assert.Equal(ColorHex.WithOpacity(Colors.Yellow, 80), o.Paint(fill80, PaintTarget.Fill, Colors.Yellow).Fill); // прозрачность сохраняется
+        Assert.Equal(ColorHex.WithOpacity(Colors.Yellow, 80), o.Paint(fill80, PaintTarget.Fill, Colors.Yellow).Fill); // opacity preserved
         var stroke = o.Paint(fill.WithStroke(false), PaintTarget.Color, Colors.Black);
         Assert.Equal(Colors.Black, stroke.Color);
-        Assert.True(stroke.StrokeEnabled);                              // покраска обводки возвращает её
+        Assert.True(stroke.StrokeEnabled);                              // painting stroke brings it back
         var text = o.Paint(o.StyleFor(ToolKind.Text, Colors.Red, 3), PaintTarget.Background, Colors.White);
         Assert.Equal(Colors.White, text.TextBackground);
     }
@@ -192,7 +192,7 @@ public class StyleOptionsTests
     {
         var s = new AnnotationStyle(Colors.Red, 3) { Fill = ColorHex.WithOpacity(Colors.Green, 40) };
         Assert.Equal(Colors.Red, StyleOptions.SwatchColor(s, PaintTarget.Color));
-        Assert.Equal(Colors.Green, StyleOptions.SwatchColor(s, PaintTarget.Fill)); // без прозрачности
+        Assert.Equal(Colors.Green, StyleOptions.SwatchColor(s, PaintTarget.Fill)); // without opacity
         Assert.Null(StyleOptions.SwatchColor(s, PaintTarget.Background));
     }
 }
@@ -214,9 +214,9 @@ public class RulerTests
         => Assert.Equal("Δx 10 · Δy 1 · 10 px", new RulerMeasurement(new Point(10, 1), new Point(0, 0)).Label);
 
     [Theory]
-    [InlineData(100, 10, 100.5, 0)]   // почти горизонталь → горизонталь
-    [InlineData(10, 100, 0, 100.5)]   // почти вертикаль → вертикаль
-    [InlineData(100, 90, 95.1, 95.1)] // почти диагональ → 45°
+    [InlineData(100, 10, 100.5, 0)]   // almost horizontal → horizontal
+    [InlineData(10, 100, 0, 100.5)]   // almost vertical → vertical
+    [InlineData(100, 90, 95.1, 95.1)] // almost diagonal → 45°
     [InlineData(-100, 95, -97.5, 97.5)]
     public void Snap45_KeepsLength_AndSnapsAngle(double x, double y, double ex, double ey)
     {

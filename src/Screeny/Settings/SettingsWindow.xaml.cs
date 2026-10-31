@@ -13,8 +13,8 @@ using Screeny.Themes;
 namespace Screeny.Settings;
 
 /// <summary>
-/// Окно настроек. Сохранение делегировано App: перерегистрация хоткеев может не удаться (занято) —
-/// тогда показываем ошибку под записью и окно не закрываем. Ошибки проверки выводятся красным под своим полем.
+/// Settings window. Saving delegated to App: hotkey re-registration may fail (busy) —
+/// then show error under entry and keep window open. Validation errors red under own field.
 /// </summary>
 public partial class SettingsWindow : ChromeWindow
 {
@@ -23,14 +23,14 @@ public partial class SettingsWindow : ChromeWindow
     private readonly Func<AppSettings, SettingsApplyError?> _apply;
     private readonly List<CustomRow> _customRows = new();
 
-    /// <summary>Строка своего сочетания: поле, крестик и ошибка под полем. Enabled сохраняется как был в настройках.</summary>
+    /// <summary>Custom combo row: field, X and error under field. Enabled saved as in settings.</summary>
     private sealed record CustomRow(FrameworkElement Root, HotkeyBox Box, TextBlock Error, bool Enabled);
 
-    /// <param name="current">Текущие настройки (не изменяются окном).</param>
-    /// <param name="hotkeys">Что сейчас реально работает: занятые записи и запасной хоткей показываются подсказками.</param>
-    /// <param name="printScreenReserved">PrintScreen забирает системный захват экрана Windows.</param>
-    /// <param name="apply">Применить и сохранить; возвращает ошибку или null.</param>
-    /// <param name="preciseOcr">Модуль точного распознавания; null — блока нет.</param>
+    /// <param name="current">Current settings (not modified by window).</param>
+    /// <param name="hotkeys">What actually works now: busy entries and fallback hotkey shown as tooltips.</param>
+    /// <param name="printScreenReserved">PrintScreen taken by Windows system screen capture.</param>
+    /// <param name="apply">Apply and save; returns error or null.</param>
+    /// <param name="preciseOcr">Precise recognition module; null — no block.</param>
     public SettingsWindow(AppSettings current, HotkeyReport hotkeys, bool printScreenReserved, bool startupEnabled,
         Func<AppSettings, SettingsApplyError?> apply, Modules.IPreciseOcrHost? preciseOcr = null)
     {
@@ -59,23 +59,23 @@ public partial class SettingsWindow : ChromeWindow
         }
         _features.Changed += ShowFeatureFields;
         ShowFeatureFields();
-        // Содержимое прокручивается, кнопки внизу всегда видны: окно не выше 780 DIP и рабочей области своего монитора
-        // (ChromeWindow подгоняет его при открытии и при переходе на другой монитор).
+        // Content scrolls, bottom buttons always visible: window not taller than 780 DIP and work area of its monitor
+        // (ChromeWindow fits it on open and monitor change).
         NaturalMaxHeight = 780;
-        // Клиент обновлений App создаёт после окон из ключей запуска (--settings): версию и состояние — после загрузки окна.
+        // Update client App creates after windows from startup keys (--settings): version and state after window load.
         Loaded += (_, _) => InitAbout();
         Loc.Changed += OnLanguageChanged;
         Closed += (_, _) => Loc.Changed -= OnLanguageChanged;
     }
 
     /// <summary>
-    /// Язык сменили, пока окно открыто (мастер, открытый отсюда): подписи из XAML обновились сами, здесь — собранные в коде.
-    /// Уже показанные ошибки остаются на прежнем языке до следующей проверки.
+    /// Language changed while window open (wizard opened from here): XAML labels updated, here — code-built.
+    /// Already shown errors stay in old language until next validation.
     /// </summary>
     private void OnLanguageChanged()
     {
         LanguagePicker.Relabel(LanguageInput);
-        ShowCurrentProblems(_report); // тексты проблем хоткеев собираются заново на новом языке
+        ShowCurrentProblems(_report); // hotkey problem texts rebuilt in new language
         _preciseOcr?.Refresh();
         ShowAboutStatus();
     }
@@ -93,13 +93,13 @@ public partial class SettingsWindow : ChromeWindow
     private readonly FeatureCheckList _features;
     private readonly PreciseOcrPanel? _preciseOcr;
 
-    /// <summary>Модуль скачан, и App уже записал согласие в настройки: галочка «Использовать» — по ним.</summary>
+    /// <summary>Module downloaded and App already wrote consent to settings: “Use” checkbox per them.</summary>
     public void RefreshPreciseOcr(bool use) => _preciseOcr?.SetUse(use);
 
     /// <summary>
-    /// Мастер, открытый отсюда («Проверить конфликты…»), применил свой выбор: хоткеи и «Проверять обновления» — заново из
-    /// текущих настроек, функции — только нетронутые здесь (<see cref="FeatureCheckList.Sync"/>). Иначе «Сохранить» вернуло
-    /// бы то, что было при открытии окна.
+    /// Wizard opened from here (“Check conflicts…”) applied its choice: hotkeys and “Check for updates” — from
+    /// current settings again, features — only untouched here (<see cref="FeatureCheckList.Sync"/>). Else “Save” would return
+    /// what was at window open.
     /// </summary>
     public void RefreshFromLiveSettings(HotkeyReport hotkeys)
     {
@@ -124,17 +124,17 @@ public partial class SettingsWindow : ChromeWindow
         ShowCurrentProblems(hotkeys);
     }
 
-    /// <summary>Поля выключенной функции исчезают сразу (история — раздел, «Enter копирует»; закрепление — его галочка).</summary>
+    /// <summary>Disabled feature fields disappear immediately (history — section, “Enter copies”; pin — its checkbox).</summary>
     private void ShowFeatureFields()
     {
         bool history = _features.IsOn(FeatureCatalog.History);
         HistorySection.Visibility = CopyInput.Visibility = history ? Visibility.Visible : Visibility.Collapsed;
-        StartupInput.Margin = new Thickness(0, history ? 12 : 0, 0, 0); // первая галочка раздела — без отступа сверху
+        StartupInput.Margin = new Thickness(0, history ? 12 : 0, 0, 0); // first checkbox of section — no top margin
         ExcludePinsInput.Visibility = _features.IsOn(FeatureCatalog.Pins) ? Visibility.Visible : Visibility.Collapsed;
         if (_preciseOcr is not null) _preciseOcr.Root.Visibility = _features.IsOn(FeatureCatalog.Ocr) ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    /// <summary>Записи, которые сейчас не работают (заняты, хук не поставился), и запасной хоткей — подсказками.</summary>
+    /// <summary>Entries not working now (busy, hook failed) and fallback hotkey — tooltips.</summary>
     private void ShowCurrentProblems(HotkeyReport report)
     {
         _report = report;
@@ -184,7 +184,7 @@ public partial class SettingsWindow : ChromeWindow
         row.Box.Focus();
     }
 
-    /// <summary>«Как отключить»: страница Windows с настройкой «Использовать клавишу Print Screen для захвата экрана».</summary>
+    /// <summary>“How to disable”: Windows page with “Use Print Screen key to open screen capture” setting.</summary>
     private void OnOpenKeyboardSettings(object sender, RoutedEventArgs e)
     {
         try { Process.Start(new ProcessStartInfo("ms-settings:easeofaccess-keyboard") { UseShellExecute = true }); }
@@ -195,7 +195,7 @@ public partial class SettingsWindow : ChromeWindow
         }
     }
 
-    /// <summary>Мастер конфликтов с другими программами снимков (тот же, что при первом запуске).</summary>
+    /// <summary>Conflict wizard with other screenshot programs (same as first run).</summary>
     private void OnCheckConflicts(object sender, RoutedEventArgs e) => (Application.Current as App)?.ShowSetupWizard();
 
     private void OnBrowse(object sender, RoutedEventArgs e)
@@ -209,7 +209,7 @@ public partial class SettingsWindow : ChromeWindow
     {
         ClearErrors();
         if (CollectHotkeys() is not { } hotkeys) return;
-        // Скрытые поля истории не проверяются (ошибку под ними не увидеть) и сохраняются как были — KeepHiddenSettings.
+        // Hidden history fields not validated (error under them invisible) and saved as were — KeepHiddenSettings.
         bool history = _features.IsOn(FeatureCatalog.History);
         var folder = FolderInput.Text.Trim();
         int limit = _current.HistoryLimit;
@@ -217,8 +217,8 @@ public partial class SettingsWindow : ChromeWindow
         if (history && (!int.TryParse(LimitInput.Text.Trim(), out limit) || limit < MinLimit || limit > MaxLimit))
         { ShowError(LimitError, Loc.F("Settings.LimitInvalid", MinLimit, MaxLimit)); return; }
 
-        // Только поля, которые правит окно: App переносит их в текущий объект настроек,
-        // остальные (LastColor, LastThickness) остаются как есть.
+        // Only fields window edits: App transfers to current settings object,
+        // others (LastColor, LastThickness) stay.
         var updated = new AppSettings
         {
             Hotkeys = hotkeys,
@@ -232,7 +232,7 @@ public partial class SettingsWindow : ChromeWindow
             CheckForUpdates = UpdatesInput.IsChecked == true,
             Language = LanguagePicker.Selected(LanguageInput),
             PreciseOcr = _preciseOcr?.Use ?? _current.PreciseOcr,
-            DisabledFeatures = FeatureGate.MergeDisabled(_current.DisabledFeatures, _features.Changes), // _current — живые настройки
+            DisabledFeatures = FeatureGate.MergeDisabled(_current.DisabledFeatures, _features.Changes), // _current — live settings
         };
         FeatureGate.KeepHiddenSettings(updated, _current);
         if (_apply(updated) is { } error)
@@ -244,9 +244,9 @@ public partial class SettingsWindow : ChromeWindow
     }
 
     /// <summary>
-    /// Список хоткеев из окна или null, если есть ошибка (показана под полем). Пустые строки своих сочетаний
-    /// пропускаются; недопустимые (<see cref="HotkeyRules"/>), повторы и PrintScreen отклоняются; хотя бы один хоткей
-    /// должен быть включён.
+    /// Hotkey list from window or null on error (shown under field). Empty custom strings skipped; invalid (<see cref="HotkeyRules"/>), duplicates and PrintScreen rejected; at least one hotkey must be enabled.
+    ///
+    ///
     /// </summary>
     private List<HotkeyBinding>? CollectHotkeys()
     {
@@ -274,7 +274,7 @@ public partial class SettingsWindow : ChromeWindow
         return list;
     }
 
-    /// <summary>Куда выводить ошибку записи: под галочкой или под строкой своего сочетания.</summary>
+    /// <summary>Where to show entry error: under checkbox or under custom combo row.</summary>
     private TextBlock? ErrorTargetFor(HotkeyBinding binding) => binding.Kind switch
     {
         HotkeyKind.PrintScreen => PrintScreenError,

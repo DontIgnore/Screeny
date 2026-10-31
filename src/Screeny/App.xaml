@@ -7,7 +7,7 @@
   <Application.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <!-- Палитра первой: ThemeManager подменяет её на Light.xaml по системной теме -->
+        <!-- Palette first: ThemeManager replaces it with Light.xaml per system theme -->
         <ResourceDictionary Source="Themes/Dark.xaml"/>
         <ResourceDictionary Source="Themes/Theme.xaml"/>
       </ResourceDictionary.MergedDictionaries>
@@ -18,7 +18,7 @@
         <tb:TaskbarIcon.ContextMenu>
           <ContextMenu>
             <MenuItem Header="{l:Loc Tray.Capture}" Command="{Binding CaptureCommand}" InputGestureText="{Binding HotkeyText}"/>
-            <!-- Без функции «История» пунктов нет -->
+            <!-- Without History feature no items -->
             <MenuItem Header="{l:Loc Tray.History}" Command="{Binding HistoryCommand}"
                       Visibility="{Binding HistoryFeatureOn, Converter={StaticResource BoolToVisibility}}"/>
             <MenuItem Header="{l:Loc Tray.OpenHistoryFolder}" Command="{Binding OpenFolderCommand}"

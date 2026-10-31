@@ -92,7 +92,7 @@ public class AnnotationSerializerTests
         Assert.Equal(new Rect(10, 10, 20, 10), ((RectAnnotation)file.Annotations[0]).Rect);
         var line = (LineAnnotation)file.Annotations[1];
         Assert.Equal(new Point(0, 0), line.Start);
-        Assert.Equal(new Point(-10, -10), line.End); // вне региона — сохраняется как есть
+        Assert.Equal(new Point(-10, -10), line.End); // outside region — preserved as-is
         Assert.Equal(new Point(50, 50), ((NumberAnnotation)file.Annotations[2]).Center);
     }
 
@@ -157,14 +157,14 @@ public class AnnotationSerializerTests
     [InlineData("{ not json")]
     [InlineData("")]
     [InlineData("[]")]
-    [InlineData("{\"size\":{\"w\":1,\"h\":1},\"annotations\":[]}")]                                     // нет версии
-    [InlineData("{\"version\":1,\"annotations\":[]}")]                                                  // нет размера
-    [InlineData("{\"version\":1,\"size\":{\"w\":1,\"h\":1}}")]                                          // нет аннотаций
-    [InlineData("{\"version\":\"1\",\"size\":{\"w\":1,\"h\":1},\"annotations\":[]}")]                    // версия строкой
-    [InlineData("{\"version\":1,\"size\":{\"w\":0,\"h\":1},\"annotations\":[]}")]                        // пустой размер
-    [InlineData("{\"version\":1,\"size\":{\"w\":1,\"h\":1},\"annotations\":[{\"type\":\"rect\",\"style\":{\"color\":\"#FFFF0000\"},\"x\":1}]}")]   // нет геометрии
-    [InlineData("{\"version\":1,\"size\":{\"w\":1,\"h\":1},\"annotations\":[{\"type\":\"rect\",\"style\":{\"color\":\"nope\"},\"x\":1,\"y\":1,\"w\":1,\"h\":1}]}")] // битый стиль
-    [InlineData("{\"version\":1,\"size\":{\"w\":1,\"h\":1},\"annotations\":[{\"type\":\"pen\",\"style\":{},\"points\":[]}]}")]  // штрих без точек
+    [InlineData("{\"size\":{\"w\":1,\"h\":1},\"annotations\":[]}")]                                     // no version
+    [InlineData("{\"version\":1,\"annotations\":[]}")]                                                  // no size
+    [InlineData("{\"version\":1,\"size\":{\"w\":1,\"h\":1}}")]                                          // no annotations
+    [InlineData("{\"version\":\"1\",\"size\":{\"w\":1,\"h\":1},\"annotations\":[]}")]                    // version string
+    [InlineData("{\"version\":1,\"size\":{\"w\":0,\"h\":1},\"annotations\":[]}")]                        // empty size
+    [InlineData("{\"version\":1,\"size\":{\"w\":1,\"h\":1},\"annotations\":[{\"type\":\"rect\",\"style\":{\"color\":\"#FFFF0000\"},\"x\":1}]}")]   // no geometry
+    [InlineData("{\"version\":1,\"size\":{\"w\":1,\"h\":1},\"annotations\":[{\"type\":\"rect\",\"style\":{\"color\":\"nope\"},\"x\":1,\"y\":1,\"w\":1,\"h\":1}]}")] // broken style
+    [InlineData("{\"version\":1,\"size\":{\"w\":1,\"h\":1},\"annotations\":[{\"type\":\"pen\",\"style\":{},\"points\":[]}]}")]  // stroke without points
     [InlineData("{\"version\":1,\"size\":{\"w\":1,\"h\":1},\"beautify\":{\"preset\":\"Neon\",\"padding\":\"M\",\"radius\":8,\"shadow\":true},\"annotations\":[]}")]
     public void Deserialize_BrokenJson_ThrowsFormatException(string json)
         => Assert.Throws<FormatException>(() => AnnotationSerializer.Deserialize(json));
@@ -178,7 +178,7 @@ public class AnnotationSerializerTests
         node["version"] = version;
         var ex = Assert.ThrowsAny<FormatException>(() => AnnotationSerializer.Deserialize(node.ToJsonString()));
         Assert.Contains(version.ToString(), ex.Message);
-        // Документ от более новой версии — отдельный тип: редактор называет пользователю его версию.
+        // Document from newer version — separate type: editor tells user its version.
         Assert.Equal(version > AnnotationSerializer.CurrentVersion, ex is UnsupportedDocumentVersionException);
     }
 }

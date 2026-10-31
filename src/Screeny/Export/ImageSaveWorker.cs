@@ -6,8 +6,8 @@ namespace Screeny.Export;
 public sealed record ImageSaveResult(byte[] Png, bool InHistory, Exception? HistoryError, Exception? SaveError);
 
 /// <summary>
-/// Кодирует снимки и последовательно выполняет файловые операции вне UI-потока. Без хранилища (функция «История»
-/// выключена) снимок только кодируется и, если выбран путь, сохраняется в файл: InHistory = false без ошибки.
+/// Encodes screenshots and sequentially performs file operations outside UI thread. Without storage (History feature
+/// disabled) screenshot is only encoded and, if path selected, saved to file: InHistory = false without error.
 /// </summary>
 public sealed class ImageSaveWorker
 {

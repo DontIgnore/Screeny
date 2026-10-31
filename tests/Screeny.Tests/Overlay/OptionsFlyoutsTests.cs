@@ -12,7 +12,7 @@ using Screeny.Settings;
 
 namespace Screeny.Tests.Overlay;
 
-/// <summary>Всплывающие панели параметров в дереве без окна: панель и слой в одном Canvas 1280×800.</summary>
+/// <summary>Options flyouts in windowless tree: panel and layer in one Canvas 1280×800.</summary>
 [Collection(WpfControls.Name)]
 public class OptionsFlyoutsTests
 {
@@ -113,7 +113,7 @@ public class OptionsFlyoutsTests
         fly = RectOf(flyouts.OptionsFlyout, layer);
         Assert.Equal(rect.Bounds.Left + rect.Bounds.Width / 2, fly.Left + fly.Width / 2, 0);
 
-        flyouts.Update(State()); // выбор снят
+        flyouts.Update(State()); // selection cleared
         Assert.False(flyouts.OptionsFlyout.IsOpen);
     });
 
@@ -136,7 +136,7 @@ public class OptionsFlyoutsTests
         toolbar.SetActiveTool(ToolKind.Rect);
         flyouts.Options.Show(OptionsSectionKind.Shape, new AnnotationStyle(Colors.Red, 3), PaintTarget.Color, 40);
         flyouts.Update(State(ToolKind.Rect, OptionsSectionKind.Shape));
-        Assert.False(flyouts.OptionsFlyout.IsOpen); // без наведения не открывается
+        Assert.False(flyouts.OptionsFlyout.IsOpen); // no hover, no open
 
         flyouts.OnToolPicked(ToolKind.Rect);
         Assert.True(flyouts.OptionsFlyout.IsOpen);
@@ -146,15 +146,15 @@ public class OptionsFlyoutsTests
         Assert.True(fly.Top >= bar.Bottom, $"flyout {fly} must be below toolbar {bar}");
         Assert.Equal(button.Left + button.Width / 2, fly.Left + fly.Width / 2, 0);
 
-        // Подсказка кнопки легла бы на flyout: пока он открыт, она выключена.
+        // Button tooltip would overlap flyout: while open, disabled.
         Assert.True(OptionsFlyouts.TooltipMuted(toolbar.ToolButton(ToolKind.Rect)));
 
         flyouts.CloseAll();
         Assert.False(OptionsFlyouts.TooltipMuted(toolbar.ToolButton(ToolKind.Rect)));
         flyouts.OnToolPicked(ToolKind.Rect);
-        Assert.False(flyouts.OptionsFlyout.IsOpen); // второй раз в сессии — только по наведению
+        Assert.False(flyouts.OptionsFlyout.IsOpen); // second time in session — only on hover
 
-        // Другой инструмент без параметров: flyout закрыт и не открывается.
+        // Another tool without options: flyout closed and won't open.
         flyouts.Update(State(ToolKind.Pen));
         flyouts.OnToolPicked(ToolKind.Pen);
         Assert.False(flyouts.OptionsFlyout.IsOpen);
@@ -179,7 +179,7 @@ public class OptionsFlyoutsTests
     {
         var (flyouts, toolbar, _, layer) = Create();
         flyouts.Update(State(beautify: false));
-        flyouts.OnBeautifyToggled(true); // состояние ещё «выключено»: якоря нет
+        flyouts.OnBeautifyToggled(true); // state still “disabled”: no anchor
         Assert.False(flyouts.BeautifyFlyout.IsOpen);
 
         flyouts.Update(State(beautify: true));
@@ -234,12 +234,12 @@ public class OptionsFlyoutsTests
         var rows = section.FlyoutItems;
         Assert.Equal(4, rows.Count);
         Assert.True(rows[0].Opacity > rows[^1].Opacity, "строки появляются поочерёдно");
-        Assert.Equal(0, rows[^1].Opacity); // последняя строка ещё не началась: 30 + 3·28 > 80
+        Assert.Equal(0, rows[^1].Opacity); // last row not started: 30 + 3·28 > 80
         Assert.True(((TranslateTransform)rows[0].RenderTransform).Y < 0, "вниз вылетает — строки приезжают сверху");
 
         panel.Close(animate: false);
         Assert.Equal(Visibility.Collapsed, panel.Visibility);
-        Assert.Equal(1, rows[^1].Opacity); // после закрытия строки сброшены
+        Assert.Equal(1, rows[^1].Opacity); // after close rows reset
     });
 
     [Fact]
@@ -271,15 +271,15 @@ public class OptionsFlyoutsTests
         var editor = new AnnotationEditor(new AnnotationEditorParts(toolbar, flyouts, new TextBox(), new AnnotationLayer(), new RulerLayer()),
             bmp, new AppSettings(), new EditorHost(), new BeautifyState(false, BeautifyOptions.Default, Persist: false));
 
-        // Нарисованный прямоугольник не открывает параметры рядом с собой.
+        // Drawn rectangle doesn't open options next to it.
         editor.SetTool(ToolKind.Rect);
-        flyouts.CloseAll(animate: false); // подсказка первого выбора инструмента
+        flyouts.CloseAll(animate: false); // first tool selection tooltip
         editor.BeginGesture(new Point(400, 200));
         editor.MoveGesture(new Point(600, 320));
         editor.EndGesture(new Point(600, 320));
         Assert.False(flyouts.OptionsAtShape);
 
-        // Выбор инструментом «Выбор»: пока фигуру тащат — скрыт, после отпускания — рядом с ней.
+        // Select selection: while shape dragged hidden, after release next to it.
         editor.SetTool(ToolKind.Select);
         Assert.True(editor.BeginGesture(new Point(400, 260)));
         editor.MoveGesture(new Point(380, 260));

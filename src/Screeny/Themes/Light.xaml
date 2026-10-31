@@ -1,4 +1,4 @@
-<!-- Светлая палитра. Ключи совпадают с Dark.xaml. -->
+<!-- Light palette. Keys match Dark.xaml. -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <Color x:Key="Color.WindowBorder">#FFE1D9D0</Color>

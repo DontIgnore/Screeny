@@ -6,7 +6,7 @@ public class EdgeSnapperTests
 {
     private const int W = 200, H = 120;
 
-    /// <summary>Синтетический Bgra32: яркость пикселя задаёт функция (серый).</summary>
+    /// <summary>Synthetic Bgra32: pixel brightness by function (gray).</summary>
     private static EdgeSnapper Image(Func<int, int, int> luma)
     {
         var px = new byte[W * H * 4];
@@ -24,7 +24,7 @@ public class EdgeSnapperTests
     [Fact]
     public void SharpVerticalEdgeNearby_Snaps()
     {
-        // Светлое слева, тёмное с x = 100: граница между столбцами 99 и 100 — позиция 100.
+        // Light left, dark from x = 100: boundary between columns 99 and 100 — position 100.
         var s = Image((x, _) => x < 100 ? 230 : 40);
         Assert.Equal(100, s.Find(EdgeAxis.Vertical, 95, 60, 8));
         Assert.Equal(100, s.Find(EdgeAxis.Vertical, 107, 60, 8));
@@ -66,7 +66,7 @@ public class EdgeSnapperTests
     [Fact]
     public void TwoEdges_NearestWins()
     {
-        // Границы на 96 и 103; курсор на 101 — ближе 103.
+        // Boundaries at 96 and 103; cursor at 101 — closer 103.
         var s = Image((x, _) => x < 96 ? 220 : x < 103 ? 120 : 20);
         Assert.Equal(103, s.Find(EdgeAxis.Vertical, 101, 60, 8));
         Assert.Equal(96, s.Find(EdgeAxis.Vertical, 98, 60, 8));
@@ -75,7 +75,7 @@ public class EdgeSnapperTests
     [Fact]
     public void BlurredTwoPixelEdge_GivesSinglePosition()
     {
-        // 230 | 135 | 40: два равных перепада — одна позиция, а не дрожание между соседями.
+        // 230 | 135 | 40: two equal steps — one position, not jitter between neighbors.
         var s = Image((x, _) => x < 100 ? 230 : x == 100 ? 135 : 40);
         var a = s.Find(EdgeAxis.Vertical, 97, 60, 8);
         var b = s.Find(EdgeAxis.Vertical, 104, 60, 8);
@@ -87,7 +87,7 @@ public class EdgeSnapperTests
     [Fact]
     public void EdgeOnlyAcrossPartOfBand_IsNotStable()
     {
-        // Граница есть только в 10 строках из 41 (текст, мелкая деталь) — не прилипаем.
+        // Boundary only in 10 of 41 rows (text, small detail) — no snap.
         var s = Image((x, y) => y >= 55 && y < 65 && x >= 100 ? 40 : 230);
         Assert.Null(s.Find(EdgeAxis.Vertical, 98, 60, 8));
     }
@@ -112,7 +112,7 @@ public class SelectionSnapTests
 {
     private static readonly PixelRect Bounds = new(0, 0, 400, 300);
 
-    /// <summary>Заглушка: вертикальная граница на 100, горизонтальная на 50, порог 8.</summary>
+    /// <summary>Stub: vertical boundary at 100, horizontal at 50, threshold 8.</summary>
     private static int? Snap(EdgeAxis axis, int edge, int cross)
     {
         int target = axis == EdgeAxis.Vertical ? 100 : 50;
@@ -122,7 +122,7 @@ public class SelectionSnapTests
     [Fact]
     public void NewFrame_DraggedRightDown_RightAndBottomEdgesSnap()
     {
-        // Курсор на пикселе 96 → правый край 97 → прилипает к границе 100 (включает столбец 99).
+        // Cursor at pixel 96 → right edge 97 → snaps to boundary 100 (includes column 99).
         var r = SelectionModel.FromPoints(new PixelPoint(10, 10), new PixelPoint(96, 45), Snap);
         Assert.Equal(new PixelRect(10, 10, 90, 40), r);
     }
@@ -161,14 +161,14 @@ public class SelectionSnapTests
     {
         var m = new SelectionModel(Bounds) { Rect = new PixelRect(10, 10, 50, 50) };
         m.BeginDrag(Handle.Move, new PixelPoint(30, 30));
-        m.DragTo(new PixelPoint(115, 30), Snap); // левый край 95 был бы в пороге от 100
+        m.DragTo(new PixelPoint(115, 30), Snap); // left edge 95 would be within threshold of 100
         Assert.Equal(new PixelRect(95, 10, 50, 50), m.Rect);
     }
 
     [Fact]
     public void HandleDrag_EdgeAtImageBorder_StaysThere()
     {
-        // Граница 395 рядом с краем снимка 400: край, прижатый к краю снимка, не уходит с него.
+        // Boundary 395 near screenshot edge 400: edge pressed to screenshot edge doesn't leave.
         int? nearBorder(EdgeAxis axis, int edge, int cross) => Math.Abs(edge - 395) <= 8 ? 395 : null;
         var m = new SelectionModel(Bounds) { Rect = new PixelRect(10, 10, 50, 50) };
         m.BeginDrag(Handle.Right, new PixelPoint(60, 30));
@@ -179,7 +179,7 @@ public class SelectionSnapTests
     [Fact]
     public void HandleDrag_SnapNeverCollapsesFrame()
     {
-        // Узкая рамка: прилипание правого края за левый не применяется.
+        // Narrow border: snapping right edge past left not applied.
         int? behind(EdgeAxis axis, int edge, int cross) => axis == EdgeAxis.Vertical ? 100 : null;
         var m = new SelectionModel(Bounds) { Rect = new PixelRect(102, 10, 3, 50) };
         m.BeginDrag(Handle.Right, new PixelPoint(105, 30));

@@ -13,13 +13,13 @@ using Screeny.Themes;
 namespace Screeny.Feedback;
 
 /// <summary>
-/// Сообщение об ошибке или предложение, без аккаунта: заголовок, описание, необязательный контакт и (для ошибки)
-/// технические подробности, которые можно посмотреть перед отправкой. Ошибки проверки — под полями, после первой попытки
-/// отправить. При неудаче текст остаётся в полях. Тексты, собранные в коде, пересобираются при смене языка.
+/// Error message or suggestion, without account: title, description, optional contact and (for error)
+/// technical details viewable before send. Validation errors under fields, after first attempt
+/// to send. On failure text stays in fields. Code-built texts rebuild on language change.
 /// </summary>
 public partial class FeedbackWindow : ChromeWindow
 {
-    /// <summary>Отправка (App: адрес, installId, HTTP). Отмена токена — окно закрыли во время отправки.</summary>
+    /// <summary>Send (App: address, installId, HTTP). Token cancel — window closed during send.</summary>
     public delegate Task<FeedbackResult> SendHandler(FeedbackDraft draft, CancellationToken ct);
 
     private SendHandler _send;
@@ -47,12 +47,12 @@ public partial class FeedbackWindow : ChromeWindow
         ProgressTrack.SizeChanged += (_, _) => { if (SendingPanel.IsVisible) StartProgress(); };
     }
 
-    /// <summary>Технические подробности: собираются один раз, показываются и отправляются одни и те же.</summary>
+    /// <summary>Technical details: collected once, shown and sent same.</summary>
     private FeedbackDiagnostics Diagnostics => _diagnostics ??= _collectDiagnostics();
 
     private string Key(string bug, string idea) => Kind == FeedbackKind.Bug ? bug : idea;
 
-    /// <summary>Всё, что собрано в коде: заголовки, подсказки, ошибки, итог отправки.</summary>
+    /// <summary>Everything built in code: titles, hints, errors, send result.</summary>
     private void Render()
     {
         Title = Loc.T(Key("Feedback.BugTitle", "Feedback.IdeaTitle"));
@@ -80,7 +80,7 @@ public partial class FeedbackWindow : ChromeWindow
         if (_validate) ShowValidation();
     }
 
-    /// <returns>true, если все поля в порядке.</returns>
+    /// <returns>true if all fields valid.</returns>
     private bool ShowValidation()
     {
         var title = FeedbackRules.CheckTitle(TitleInput.Text);
@@ -115,7 +115,7 @@ public partial class FeedbackWindow : ChromeWindow
         SetSending(true);
         FeedbackResult result;
         try { result = await _send(draft, _sending.Token); }
-        catch (OperationCanceledException) { return; } // окно закрыли
+        catch (OperationCanceledException) { return; } // window closed
         catch (Exception ex)
         {
             Log.Error("Feedback send failed", ex);
@@ -152,7 +152,7 @@ public partial class FeedbackWindow : ChromeWindow
         });
     }
 
-    /// <summary>Итог отправки: успех заменяет форму, ошибка — строка над кнопками, текст в полях остаётся.</summary>
+    /// <summary>Send result: success replaces form, error — line above buttons, text in fields stays.</summary>
     private void ShowResult()
     {
         bool sent = _result is FeedbackResult.Sent;
@@ -171,7 +171,7 @@ public partial class FeedbackWindow : ChromeWindow
         ErrorPanel.Visibility = error is null || _sending is not null ? Visibility.Collapsed : Visibility.Visible;
     }
 
-    /// <summary>Текст ошибки отправки на текущем языке; null — ошибки нет.</summary>
+    /// <summary>Send error text in current language; null — no error.</summary>
     public static string? ErrorMessage(FeedbackResult? result) => result switch
     {
         FeedbackResult.Offline => Loc.T("Feedback.ErrorOffline"),
@@ -195,12 +195,12 @@ public partial class FeedbackWindow : ChromeWindow
 
     private void OnAttachChanged(object sender, RoutedEventArgs e)
     {
-        if (DetailsToggle is null) return; // при InitializeComponent
+        if (DetailsToggle is null) return; // at InitializeComponent
         DetailsToggle.IsEnabled = AttachDetailsInput.IsChecked == true;
         if (AttachDetailsInput.IsChecked != true && _detailsShown) OnToggleDetails(sender, e);
     }
 
-    /// <summary>То, что уходит в <c>diagnostics</c>, построчно: подписи на языке интерфейса, значения как есть.</summary>
+    /// <summary>What goes into <c>diagnostics</c> line by line: UI language labels, values as-is.</summary>
     public static string PreviewText(FeedbackDiagnostics d)
     {
         var lines = new List<string>
@@ -233,10 +233,10 @@ public partial class FeedbackWindow : ChromeWindow
     }
 
     /// <summary>
-    /// Тестовый экземпляр: <c>--feedback bug|idea --scenario &lt;имя&gt;</c> — заполненные поля и подставная отправка без сети
-    /// (<c>sending</c> не заканчивается никогда). <c>validation</c> — пустые поля после «Отправить», <c>details</c> — открытый
-    /// список подробностей, <c>not-configured</c> — «Отправить» через настоящую отправку App (без <c>--feedback-endpoint</c>
-    /// это состояние «адрес не задан»).
+    /// Test instance: <c>--feedback bug|idea --scenario &lt;name&gt;</c> — filled fields and fake send without network
+    /// (<c>sending</c> never finishes). <c>validation</c> — empty fields after “Send”, <c>details</c> — open
+    /// details list, <c>not-configured</c> — “Send” via real App send (without <c>--feedback-endpoint</c>
+    /// this state is “address not set”).
     /// </summary>
     public void ApplyDevScenario(string? name)
     {
@@ -266,7 +266,7 @@ public partial class FeedbackWindow : ChromeWindow
                 Loaded += (_, _) => OnToggleDetails(this, new RoutedEventArgs());
                 return;
             case "not-configured":
-                break; // настоящая отправка App: без --feedback-endpoint она не ходит в сеть и не создаёт installId
+                break; // real App send: without --feedback-endpoint it does not go to network and doesn't create installId
             case "sending":
                 _send = (_, ct) => Task.Delay(Timeout.Infinite, ct).ContinueWith<FeedbackResult>(_ => new FeedbackResult.Offline(), TaskScheduler.Default);
                 break;
@@ -279,7 +279,7 @@ public partial class FeedbackWindow : ChromeWindow
     }
 }
 
-/// <summary>Технические подробности этой копии: версия, Windows, язык, DPI окна, мониторы и очищенный хвост журнала.</summary>
+/// <summary>Technical details of this copy: version, Windows, language, window DPI, monitors, scrubbed log tail.</summary>
 public static class FeedbackDiagnosticsCollector
 {
     private const int SM_CMONITORS = 80;
@@ -293,7 +293,7 @@ public static class FeedbackDiagnosticsCollector
             Loc.Culture.Name, dpi, monitors, LogScrubber.ReadTail(Log.FilePath, ScrubContext.Current()));
     }
 
-    /// <summary>«Windows 11 (10.0.26200, X64)»: сборка 22000 и новее — Windows 11.</summary>
+    /// <summary>“Windows 11 (10.0.26200, X64)”: build 22000 and newer — Windows 11.</summary>
     public static string OsVersion(Version v, string architecture)
         => $"Windows {(v.Major == 10 && v.Build >= 22000 ? "11" : v.Major == 10 ? "10" : $"{v.Major}.{v.Minor}")} ({v.Major}.{v.Minor}.{v.Build}, {architecture})";
 }

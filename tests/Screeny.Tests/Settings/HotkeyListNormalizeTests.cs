@@ -48,7 +48,7 @@ public class HotkeyListNormalizeTests
     [InlineData("Nonsense+Q")]
     [InlineData("A")]
     [InlineData("Shift+A")]
-    [InlineData("Win+Shift+S")] // для него отдельная запись WinShiftS
+    [InlineData("Win+Shift+S")] // separate WinShiftS entry for it
     [InlineData("")]
     public void InvalidCustom_IsDropped(string spec)
         => Assert.Equal([HotkeyBinding.PrintScreen(false), HotkeyBinding.WinShiftS(false), HotkeyBinding.Custom("Ctrl+Q")],

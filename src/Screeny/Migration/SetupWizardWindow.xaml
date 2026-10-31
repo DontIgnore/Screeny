@@ -40,7 +40,7 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
       <StackPanel Margin="24,4,24,24">
-        <!-- Язык — в первой строке, рядом с заголовком: его выбирают до того, как читать остальное -->
+        <!-- Language first line, next to title: chosen before reading rest -->
         <DockPanel>
           <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top" Margin="16,0,0,0">
             <TextBlock Text="&#xE774;" FontFamily="{DynamicResource Font.Icon}" FontSize="14" VerticalAlignment="Center"
@@ -67,7 +67,7 @@
         <s:HotkeyBox x:Name="CustomInput" ToolTip="{l:Loc Hotkeys.BoxTip}" AutomationProperties.Name="{l:Loc Hotkeys.CustomName}"/>
         <TextBlock x:Name="CustomStatus" Style="{StaticResource Caption}" Margin="0,4,0,0" TextWrapping="Wrap" Visibility="Collapsed"/>
 
-        <!-- Функции: те же галочки, что в настройках (FeatureCatalog); по умолчанию включены все -->
+        <!-- Features: same checkboxes as in settings (FeatureCatalog); all enabled by default -->
         <TextBlock Text="{l:Loc Settings.SectionFeatures}" Style="{StaticResource SectionLabel}" Margin="0,28,0,8"/>
         <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" LineHeight="17" Margin="0,0,0,10"
                    Text="{l:Loc Wizard.FeaturesNote}"/>

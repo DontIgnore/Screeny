@@ -4,10 +4,10 @@ using Screeny.Native;
 
 namespace Screeny.Hotkeys;
 
-/// <summary>Регистрирует глобальный хоткей на message-only окне. Вызывать из UI-потока.</summary>
+/// <summary>Registers global hotkey on message-only window. Call from UI thread.</summary>
 public sealed class GlobalHotkey : IDisposable
 {
-    /// <summary>ERROR_HOTKEY_ALREADY_REGISTERED: сочетание уже занято другим приложением.</summary>
+    /// <summary>ERROR_HOTKEY_ALREADY_REGISTERED: combo already used by another app.</summary>
     public const int ErrorHotkeyAlreadyRegistered = 1409;
 
     private static int _nextId = 0xB000;
@@ -20,7 +20,7 @@ public sealed class GlobalHotkey : IDisposable
 
     public static bool TryRegister(HotkeySpec spec, out GlobalHotkey? hotkey) => TryRegister(spec, out hotkey, out _);
 
-    /// <param name="win32Error">Код GetLastError при неудаче (1409 — занято), 0 при успехе.</param>
+    /// <param name="win32Error">GetLastError code on failure (1409 — busy), 0 on success.</param>
     public static bool TryRegister(HotkeySpec spec, out GlobalHotkey? hotkey, out int win32Error)
     {
         hotkey = null;
@@ -29,7 +29,7 @@ public sealed class GlobalHotkey : IDisposable
         int id = Interlocked.Increment(ref _nextId);
         if (!User32.RegisterHotKey(source.Handle, id, (uint)spec.Modifiers | User32.MOD_NOREPEAT, (uint)spec.VirtualKey))
         {
-            win32Error = Marshal.GetLastWin32Error(); // до любых других вызовов Win32
+            win32Error = Marshal.GetLastWin32Error(); // before any other Win32 calls
             source.Dispose();
             return false;
         }
@@ -39,7 +39,7 @@ public sealed class GlobalHotkey : IDisposable
 
     public static bool IsAlreadyRegistered(int win32Error) => win32Error == ErrorHotkeyAlreadyRegistered;
 
-    /// <summary>Текст для пользователя: «занято» только для 1409, иначе — с кодом ошибки.</summary>
+    /// <summary>User text: “busy” only for 1409, otherwise with error code.</summary>
     public static string DescribeFailure(HotkeySpec spec, int win32Error) => IsAlreadyRegistered(win32Error)
         ? Localization.Loc.F("Hotkeys.Busy", spec)
         : Localization.Loc.F("Hotkeys.RegisterFailed", spec, win32Error);

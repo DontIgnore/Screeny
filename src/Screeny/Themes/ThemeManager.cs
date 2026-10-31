@@ -7,9 +7,9 @@ namespace Screeny.Themes;
 public enum AppTheme { Dark, Light }
 
 /// <summary>
-/// Выбирает палитру (Dark.xaml / Light.xaml) по системной настройке «Режим приложений» и переключает её на лету.
-/// Палитра — первый словарь в MergedDictionaries приложения; стили ссылаются на её кисти через DynamicResource.
-/// Отладка: переменная окружения SCREENY_THEME=light|dark фиксирует тему и отключает слежение за системой.
+/// Chooses palette (Dark.xaml / Light.xaml) by system “App mode” setting and switches on the fly.
+/// Palette is first dictionary in app MergedDictionaries; styles reference its brushes via DynamicResource.
+/// Debug: environment variable SCREENY_THEME=light|dark locks theme and disables system tracking.
 /// </summary>
 public static class ThemeManager
 {
@@ -20,7 +20,7 @@ public static class ThemeManager
     private static ResourceDictionary? _palette;
     private static bool _followingSystem;
 
-    /// <summary>Текущая тема; по умолчанию тёмная (её палитра подключена в App.xaml).</summary>
+    /// <summary>Current theme; default dark (its palette in App.xaml).</summary>
     public static AppTheme Current { get; private set; } = AppTheme.Dark;
 
     public static void Initialize(Application app)
@@ -49,7 +49,7 @@ public static class ThemeManager
         _ => null,
     };
 
-    /// <summary>AppsUseLightTheme: 1 — светлая, 0 или нет значения — тёмная.</summary>
+    /// <summary>AppsUseLightTheme: 1 — light, 0 or missing — dark.</summary>
     public static AppTheme FromRegistryValue(object? value) => value is int i && i != 0 ? AppTheme.Light : AppTheme.Dark;
 
     public static AppTheme ReadSystemTheme()
@@ -66,7 +66,7 @@ public static class ThemeManager
         }
     }
 
-    /// <summary>Событие приходит из потока SystemEvents: переключаем в UI-потоке.</summary>
+    /// <summary>Event from SystemEvents thread: switch in UI thread.</summary>
     private static void OnUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
     {
         if (e.Category is not (UserPreferenceCategory.General or UserPreferenceCategory.VisualStyle or UserPreferenceCategory.Color)) return;

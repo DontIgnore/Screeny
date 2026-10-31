@@ -13,7 +13,7 @@ public sealed class SettingsStore
     {
         WriteIndented = true,
         NumberHandling = JsonNumberHandling.AllowReadingFromString,
-        // Файл читают люди и установщик: «Ctrl+Shift+X» и кириллица в путях — как есть, без + и А.
+        // Keep shortcut labels and Cyrillic paths readable for humans and the installer, without Unicode escaping.
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
     };
 
@@ -24,19 +24,19 @@ public sealed class SettingsStore
     public static SettingsStore Default() => new(
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Screeny", "settings.json"));
 
-    /// <summary>Настройки тестового экземпляра (<c>--dev</c>): отдельный файл, рабочие настройки не меняются.</summary>
+    /// <summary>Test instance settings (<c>--dev</c>): separate file, working settings unchanged.</summary>
     public static SettingsStore Dev() => new(
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Screeny", "settings.dev.json"));
 
-    /// <summary>Папка истории тестового экземпляра по умолчанию — не рядом с историей пользователя.</summary>
+    /// <summary>Test instance default history folder — not next to user history.</summary>
     public static string DevHistoryFolder() =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Screeny", "Dev", "History");
 
     /// <summary>
-    /// Настройки из файла: сначала <see cref="SettingsMigrator"/> (файл старого формата после чтения переписывается,
-    /// копия старого — <c>settings.json.v1.bak</c>), затем <see cref="AppSettings.Normalize"/>. Никогда не бросает: при недоступном
-    /// файле — значения по умолчанию, при битом — тоже, но сначала рядом сохраняется его копия
-    /// <c>settings.json.corrupt-yyyyMMdd-HHmmss</c>, чтобы следующий Save не уничтожил данные пользователя.
+    /// Settings from file: first <see cref="SettingsMigrator"/> (old format file rewritten after read,
+    /// old copy — <c>settings.json.v1.bak</c>), then <see cref="AppSettings.Normalize"/>. Never throws: inaccessible file — defaults,
+    /// corrupted — also, but first copy saved next to it <c>settings.json.corrupt-yyyyMMdd-HHmmss</c>, so next Save doesn't destroy user data.
+    ///
     /// </summary>
     public AppSettings Load()
     {
@@ -57,7 +57,7 @@ public sealed class SettingsStore
         try
         {
             var node = JsonNode.Parse(json);
-            if (node is null) return new AppSettings(); // литерал null
+            if (node is null) return new AppSettings(); // literal null
             if (node is not JsonObject raw) throw new JsonException("Settings root is not an object");
             int fromVersion = SettingsMigrator.ReadVersion(raw);
             (raw, migrated) = SettingsMigrator.Migrate(raw);
@@ -71,7 +71,7 @@ public sealed class SettingsStore
             return new AppSettings();
         }
 
-        // Файл старого формата переписываем сразу: следующий запуск читает уже новый формат.
+        // Old format file rewritten immediately: next launch reads new format.
         if (migrated)
         {
             try { Save(settings); }
@@ -80,7 +80,7 @@ public sealed class SettingsStore
         return settings;
     }
 
-    /// <summary>Копия файла старого формата перед перезаписью (<c>settings.json.v1.bak</c>); уже существующую не трогаем.</summary>
+    /// <summary>Copy of old format file before rewrite (<c>settings.json.v1.bak</c>); existing not touched.</summary>
     private void BackupBeforeMigration(int fromVersion)
     {
         var backup = $"{FilePath}.v{fromVersion}.bak";
@@ -88,7 +88,7 @@ public sealed class SettingsStore
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Log.Error($"Settings pre-migration backup failed: {backup}", ex); }
     }
 
-    /// <summary>Атомарная запись: временный файл рядом, затем замена. Сбой посреди записи не оставит пустой settings.json.</summary>
+    /// <summary>Atomic write: temp file next to, then replace. Mid-write failure leaves no empty settings.json.</summary>
     public void Save(AppSettings settings)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);

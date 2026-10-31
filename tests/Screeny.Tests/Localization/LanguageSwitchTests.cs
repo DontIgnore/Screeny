@@ -7,11 +7,11 @@ using Screeny.Localization;
 
 namespace Screeny.Tests.Localization;
 
-/// <summary>Смена языка на лету: привязки XAML и кода обновляются, подписчики узнают о смене. Язык потом возвращается.</summary>
+/// <summary>On-the-fly language switch: XAML and code bindings update, subscribers notified. Language restored.</summary>
 [Collection(LanguageSwitchCollection.Name)]
 public class LanguageSwitchTests : IDisposable
 {
-    /// <summary>После каждого теста никто не остался подписан на смену языка (окна и панели отписываются).</summary>
+    /// <summary>After each test nobody stays subscribed to language change (windows/panels unsubscribe).</summary>
     public void Dispose() => Assert.Equal(0, Loc.ChangedSubscriberCount);
 
     private static void Sta(Action body)
@@ -44,7 +44,7 @@ public class LanguageSwitchTests : IDisposable
             Assert.Equal("ja", Loc.Culture.Name);
             Assert.Equal("キャンセル", Loc.T("Common.Cancel"));
             Assert.Equal("キャンセル", Loc.Instance["Common.Cancel"]);
-            Loc.Apply("JA"); // тот же язык — без событий
+            Loc.Apply("JA"); // same language — no events
             Assert.Equal(["Item[]"], props);
             Assert.Equal(1, changed);
         }
@@ -120,15 +120,15 @@ public class LanguageSwitchTests : IDisposable
         Loc.Apply("ru");
         LanguagePicker.Relabel(box);
         Assert.StartsWith("Как в системе (", LanguagePicker.AutoText(box));
-        Assert.Equal("es", LanguagePicker.Selected(box)); // подпись сменилась, выбор — нет
+        Assert.Equal("es", LanguagePicker.Selected(box)); // label changed, selection not
 
         LanguagePicker.Select(box, "nonsense");
         Assert.Equal(Loc.Auto, LanguagePicker.Selected(box));
     });
 
     /// <summary>
-    /// Ошибка ревью: переименование пункта «как в системе» выбирало его заново, мастер получал SelectionChanged и из
-    /// обработчика смены языка применял «auto» — язык откатывался. Теперь подпись меняется на месте, без событий выбора.
+    /// Review error: renaming “as system” item re-selected it, wizard got SelectionChanged and from language change
+    /// handler applied “auto” — language rolled back. Now label changes in place, without selection events.
     /// </summary>
     [Fact]
     public void LanguagePicker_RelabelOnAuto_RaisesNoSelectionChanged() => Sta(() =>
@@ -138,17 +138,17 @@ public class LanguageSwitchTests : IDisposable
         var picked = new List<string>();
         box.SelectionChanged += (_, _) => picked.Add(LanguagePicker.Selected(box));
         void Relabel() => LanguagePicker.Relabel(box);
-        Loc.Changed += Relabel; // как окно настроек или мастер
+        Loc.Changed += Relabel; // like settings window or wizard
         try
         {
             Loc.Apply("ja");
-            Assert.Equal("ja", Loc.Culture.Name); // не откатилось к языку «auto»
+            Assert.Equal("ja", Loc.Culture.Name); // not rolled back to “auto”
             Assert.StartsWith("システムと同じ（", LanguagePicker.AutoText(box));
             Loc.Apply("es");
             Assert.StartsWith("Igual que Windows (", LanguagePicker.AutoText(box));
             Assert.Empty(picked);
             Assert.Equal(Loc.Auto, LanguagePicker.Selected(box));
-            // Поле выбора показывает тот же объект, что и пункт: его подпись обновилась вместе с ним.
+            // Combo shows same object as item: its label updated with it.
             Assert.Equal(LanguagePicker.AutoText(box), box.SelectionBoxItem?.ToString() ?? ((ComboBoxItem)box.SelectedItem).Content.ToString());
         }
         finally { Loc.Changed -= Relabel; }

@@ -6,23 +6,23 @@ using Screeny.Editing;
 namespace Screeny.Overlay.Tools;
 
 /// <summary>
-/// Клик открывает поле ввода в оверлее; аннотация добавляется, когда ввод подтверждён. С <paramref name="snap"/>
-/// левый верхний угол текста прилипает к краям и центрам других фигур и области.
+/// Click opens input field in overlay; annotation added when input confirmed. With <paramref name="snap"/>
+/// text top-left snaps to edges/centers of other shapes and area.
 /// </summary>
 public sealed class TextTool(Snapper? snap = null) : ITool
 {
-    /// <summary>Точка (пиксели снимка), документ и стиль, для которых оверлей должен показать поле ввода.</summary>
+    /// <summary>Point (screenshot pixels), document and style for which overlay should show input field.</summary>
     public event Action<Point, AnnotationDocument, AnnotationStyle>? EditRequested;
 
     public Cursor Cursor => Cursors.IBeam;
-    /// <summary>Жеста мыши нет: ввод текста ведёт сам оверлей.</summary>
+    /// <summary>No mouse gesture: text input driven by overlay itself.</summary>
     public bool IsActive => false;
 
     public void Down(Point px, AnnotationDocument doc, AnnotationStyle style)
     {
         if (snap is not null)
         {
-            // Жеста мыши нет: прилипание разовое, направляющие не остаются.
+            // No mouse gesture: snap one-time, guides don't stay.
             snap.Begin(doc);
             px = snap.SnapPoint(px);
             snap.End();

@@ -10,7 +10,7 @@
     <Style x:Key="FieldLabel" TargetType="TextBlock" BasedOn="{StaticResource Body}">
       <Setter Property="Margin" Value="0,0,0,6"/>
     </Style>
-    <!-- HotkeyBox наследует TextBox: неявный стиль на него не распространяется -->
+    <!-- HotkeyBox inherits TextBox: implicit style doesn't apply to it -->
     <Style TargetType="s:HotkeyBox" BasedOn="{StaticResource {x:Type TextBox}}">
       <Setter Property="FontFamily" Value="{DynamicResource Font.Mono}"/>
       <Setter Property="Cursor" Value="Hand"/>
@@ -18,7 +18,7 @@
   </Window.Resources>
 
   <DockPanel>
-    <!-- Нижняя панель кнопок -->
+    <!-- Bottom button bar -->
     <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource Brush.Stroke}" BorderThickness="0,1,0,0" Padding="24,16,24,20">
       <DockPanel>
         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
@@ -31,11 +31,11 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
     <StackPanel Margin="24,8,24,24">
-      <!-- Язык: первым, чтобы его нашёл и тот, кто не читает текущий язык -->
+      <!-- Language: first, so non-current-language readers find it -->
       <TextBlock Text="{l:Loc Language.Section}" Style="{StaticResource SectionLabel}"/>
       <ComboBox x:Name="LanguageInput" Width="260" HorizontalAlignment="Left" AutomationProperties.Name="{l:Loc Language.Name}"/>
 
-      <!-- Снимок: несколько хоткеев сразу -->
+      <!-- Capture: several hotkeys at once -->
       <TextBlock Text="{l:Loc Settings.SectionCapture}" Style="{StaticResource SectionLabel}" Margin="0,28,0,10"/>
       <CheckBox x:Name="PrintScreenInput" Content="PrintScreen"/>
       <TextBlock x:Name="PrintScreenWarning" Style="{StaticResource Caption}" Margin="28,4,0,0" TextWrapping="Wrap" LineHeight="17" Visibility="Collapsed">
@@ -63,11 +63,11 @@
       <Button x:Name="ConflictsButton" Content="{l:Loc Common.CheckConflicts}" HorizontalAlignment="Left" Margin="0,12,0,0" Click="OnCheckConflicts"
               ToolTip="{l:Loc Settings.ConflictsTip}"/>
 
-      <!-- Функции: галочки из FeatureCatalog строит FeatureCheckList; выключенная прячет свои поля ниже сразу -->
+      <!-- Features: checkboxes built by FeatureCheckList; disabled hides its fields below immediately -->
       <TextBlock Text="{l:Loc Settings.SectionFeatures}" Style="{StaticResource SectionLabel}" Margin="0,28,0,10"/>
       <StackPanel x:Name="FeaturesPanel"/>
 
-      <!-- История -->
+      <!-- History -->
       <StackPanel x:Name="HistorySection">
       <TextBlock Text="{l:Loc Settings.SectionHistory}" Style="{StaticResource SectionLabel}" Margin="0,28,0,8"/>
       <TextBlock Text="{l:Loc Settings.Folder}" Style="{StaticResource FieldLabel}"/>
@@ -89,7 +89,7 @@
                  Text="{l:Loc Settings.KeepOriginalsNote}"/>
       </StackPanel>
 
-      <!-- Поведение -->
+      <!-- Behavior -->
       <TextBlock Text="{l:Loc Settings.SectionBehavior}" Style="{StaticResource SectionLabel}" Margin="0,28,0,10"/>
       <CheckBox x:Name="CopyInput" Content="{l:Loc Settings.EnterCopies}"/>
       <CheckBox x:Name="StartupInput" Margin="0,12,0,0" Content="{l:Loc Settings.StartWithWindows}"/>
@@ -101,7 +101,7 @@
       <TextBlock Style="{StaticResource Caption}" Margin="28,4,0,0" TextWrapping="Wrap" LineHeight="17"
                  Text="{l:Loc Common.PrivacyNote}"/>
 
-      <!-- О программе: версия, ручная проверка обновлений (та же, что в меню трея; идёт и без галочки выше) и ссылки -->
+      <!-- About: version, manual update check (same as tray menu; runs even without checkbox above) and links -->
       <TextBlock Text="{l:Loc Settings.SectionAbout}" Style="{StaticResource SectionLabel}" Margin="0,28,0,10"/>
       <TextBlock x:Name="VersionText" Text="Screeny" Style="{StaticResource Body}"/>
       <Button x:Name="CheckUpdatesButton" Content="{l:Loc About.CheckNow}" HorizontalAlignment="Left" Margin="0,12,0,0" Click="OnCheckUpdates"/>
@@ -119,7 +119,7 @@
           <Hyperlink Click="OnOpenRepository" Foreground="{DynamicResource Brush.Accent}"><Run Text="GitHub"/></Hyperlink>
         </TextBlock>
       </WrapPanel>
-      <!-- Сообщить об ошибке или предложить улучшение: то же окно, что из меню трея -->
+      <!-- Report a bug or suggest improvement: same window as from tray menu -->
       <WrapPanel Margin="0,8,0,0">
         <TextBlock Style="{StaticResource Caption}" Margin="0,0,20,0">
           <Hyperlink Click="OnReportBug" Foreground="{DynamicResource Brush.Accent}"><Run Text="{l:Loc Tray.ReportBug}"/></Hyperlink>

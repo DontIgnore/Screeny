@@ -1,6 +1,6 @@
 namespace Screeny.Overlay;
 
-/// <summary>Пиксели снимка → DIP окна оверлея (мышь приходит уже в пикселях снимка через GetPosition(PixelCanvas)).</summary>
+/// <summary>Maps screenshot pixels to overlay window DIPs. GetPosition(PixelCanvas) already returns mouse positions in screenshot pixels.</summary>
 public sealed class CoordinateMapper
 {
     public PixelPoint VirtualOrigin { get; }

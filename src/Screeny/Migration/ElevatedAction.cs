@@ -4,11 +4,11 @@ using Screeny.Logging;
 namespace Screeny.Migration;
 
 /// <summary>
-/// Экземпляр Screeny, перезапущенный с правами администратора ради одного действия:
-/// <c>Screeny.exe --elevated-action disable-autostart &lt;id&gt;</c>. Принимает только id из <see cref="ConflictCatalog"/>
-/// (белый список) и ровно три аргумента — никогда путь реестра или команду. Сам заново находит запись через снимок среды,
-/// отключает автозапуск для всех пользователей флагом StartupApproved и выходит с кодом. Без UI, без mutex и без хоткеев:
-/// <see cref="App"/> вызывает <see cref="RunReal"/> первой строкой запуска.
+/// Screeny instance restarted with admin rights for one action:
+/// <c>Screeny.exe --elevated-action disable-autostart &lt;id&gt;</c>. Accepts only id from <see cref="ConflictCatalog"/>
+/// (whitelist) and exactly three arguments — never registry path or command. Finds entry again via environment snapshot,
+/// disables autostart for all users via StartupApproved flag and exits with code. No UI, no mutex, no hotkeys:
+/// <see cref="App"/> calls <see cref="RunReal"/> as first startup line.
 /// </summary>
 public static partial class ElevatedAction
 {
@@ -16,23 +16,23 @@ public static partial class ElevatedAction
     public const string DisableAutostartVerb = "disable-autostart";
 
     public const int ExitOk = 0;
-    /// <summary>Записи для всех пользователей нет или она уже отключена.</summary>
+    /// <summary>No all-users entry or already disabled.</summary>
     public const int ExitNothingToDo = 1;
-    /// <summary>Аргументы не прошли белый список.</summary>
+    /// <summary>Arguments failed whitelist.</summary>
     public const int ExitInvalidArgs = 2;
     public const int ExitFailed = 3;
 
-    /// <summary>Есть ли в аргументах ключ повышенного действия (в любом месте): такой процесс никогда не запускает обычное приложение.</summary>
+    /// <summary>Whether arguments contain elevated action key (anywhere): such process never launches normal app.</summary>
     public static bool IsRequested(IReadOnlyList<string> args)
         => args.Any(a => string.Equals(a?.Trim(), Flag, StringComparison.OrdinalIgnoreCase));
 
-    /// <summary>Аргументы для запуска: ровно три токена.</summary>
+    /// <summary>Arguments for launch: exactly three tokens.</summary>
     public static string[] Arguments(string conflictId) => [Flag, DisableAutostartVerb, conflictId];
 
     [GeneratedRegex("^[a-z0-9]{1,32}$")]
     private static partial Regex IdPattern();
 
-    /// <summary>id программы или null, если аргументы не прошли проверку (лишние, неизвестный id, путь, другой порядок).</summary>
+    /// <summary>Program id or null if arguments failed validation (extra, unknown id, path, wrong order).</summary>
     public static string? Parse(IReadOnlyList<string> args, ConflictCatalog catalog)
     {
         if (args.Count != 3) return null;
@@ -43,7 +43,7 @@ public static partial class ElevatedAction
         return catalog.Find(id)?.Id;
     }
 
-    /// <summary>Выполняет одно действие и возвращает код выхода.</summary>
+    /// <summary>Executes one action and returns exit code.</summary>
     public static int Run(IReadOnlyList<string> args, ConflictCatalog catalog, Func<IEnvironmentSnapshot> capture, IConflictActions actions)
     {
         if (Parse(args, catalog) is not { } id)
@@ -58,7 +58,7 @@ public static partial class ElevatedAction
         return result.Success ? ExitOk : ExitFailed;
     }
 
-    /// <summary>Точка входа повышенного экземпляра: реальная среда и реальные действия в режиме администратора.</summary>
+    /// <summary>Entry point of elevated instance: real environment and real actions in admin mode.</summary>
     public static int RunReal(IReadOnlyList<string> args)
     {
         try { return Run(args, ConflictCatalog.Default, WindowsEnvironmentSnapshot.Capture, ConflictActions.CreateReal(elevated: true)); }
@@ -66,8 +66,8 @@ public static partial class ElevatedAction
     }
 
     /// <summary>
-    /// Как перезапустить себя: обычно <c>Screeny.exe</c>; под <c>dotnet run</c> процесс — dotnet.exe, и первым аргументом
-    /// идёт путь к Screeny.dll (как в <see cref="Settings.StartupRegistrar.BuildCommand"/>).
+    /// How to restart self: usually <c>Screeny.exe</c>; under <c>dotnet run</c> process is dotnet.exe, and first argument
+    /// is path to Screeny.dll (as in <see cref="Settings.StartupRegistrar.BuildCommand"/>).
     /// </summary>
     public static (string File, string[] Prefix) SelfLaunch()
     {

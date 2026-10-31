@@ -5,7 +5,7 @@
              Cursor="Arrow" Focusable="False">
   <UserControl.Resources>
     <FontFamily x:Key="IconFont">Segoe Fluent Icons, Segoe MDL2 Assets, Segoe UI Symbol</FontFamily>
-    <!-- Панель всегда тёмная (лежит на затемнённом экране), поэтому и подсказки тёмные независимо от темы приложения -->
+    <!-- Panel always dark (lies on dimmed screen), so tooltips dark regardless of app theme -->
     <Style TargetType="ToolTip" BasedOn="{StaticResource {x:Type ToolTip}}">
       <Setter Property="Background" Value="{DynamicResource Overlay.Tooltip}"/>
       <Setter Property="Foreground" Value="{DynamicResource Overlay.Ink}"/>
@@ -86,7 +86,7 @@
       <Rectangle Style="{StaticResource Separator}"/>
       <StackPanel x:Name="ActionPanel" Orientation="Horizontal">
         <ToggleButton x:Name="BeautifyButton" Style="{StaticResource IconButton}" ToolTip="{l:Loc Toolbar.Beautify}" Click="OnBeautify">
-          <!-- ✨ векторно: глиф эмодзи в WPF монохромный и в разных шрифтах разный -->
+          <!-- ✨ vector: emoji glyph in WPF is monochrome and differs across fonts -->
           <Path Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}" Width="16" Height="16" Stretch="None"
                 Data="M7,2 C7.5,6 9,7.5 13,8 C9,8.5 7.5,10 7,14 C6.5,10 5,8.5 1,8 C5,7.5 6.5,6 7,2 Z M13,0.5 C13.2,2 13.8,2.6 15.5,2.8 C13.8,3 13.2,3.6 13,5.1 C12.8,3.6 12.2,3 10.5,2.8 C12.2,2.6 12.8,2 13,0.5 Z"/>
         </ToggleButton>

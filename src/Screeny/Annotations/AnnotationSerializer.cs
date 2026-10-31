@@ -8,23 +8,23 @@ using Screeny.Logging;
 
 namespace Screeny.Annotations;
 
-/// <summary>Документ, прочитанный из JSON: аннотации (уже в координатах региона), размер региона, оформление.</summary>
-/// <param name="Skipped">Сколько аннотаций неизвестного типа пропущено (файл из более новой версии).</param>
+/// <summary>Document read from JSON: annotations (already in region coordinates), region size, decoration.</summary>
+/// <param name="Skipped">How many annotations of unknown type were skipped (file from a newer version).</param>
 public sealed record AnnotationFile(IReadOnlyList<Annotation> Annotations, int Width, int Height, BeautifyOptions? Beautify, int Skipped = 0);
 
 /// <summary>
-/// JSON документа аннотаций для повторного редактирования из истории (<c>&lt;stamp&gt;.screeny.json</c>):
+/// Annotation document JSON for re-editing from history (<c>&lt;stamp&gt;.screeny.json</c>):
 /// <code>
 /// { "version": 1, "size": { "w": 900, "h": 560 }, "beautify": { ... } | null,
 ///   "annotations": [ { "type": "rect", "style": { ... }, "x": 10, "y": 20, "w": 100, "h": 50 }, ... ] }
 /// </code>
-/// Координаты — в пикселях снимка относительно левого верхнего угла региона. Геометрия по типам:
+/// Coordinates are in screenshot pixels relative to the region top-left corner. Geometry by type:
 /// <c>rect|ellipse|pixelate|blur</c> — x, y, w, h; <c>line|arrow</c> — x1, y1, x2, y2; <c>pen|highlighter</c> — points [[x, y], …];
-/// <c>text</c> — x, y, text; <c>number</c> — x, y (центр), n. Стиль — <see cref="AnnotationStyleJsonConverter"/>.
-/// <para>Неизвестный <c>type</c> пропускается (с записью в журнал). Битый JSON, нет обязательного поля или
-/// <c>version</c> новее поддерживаемой — <see cref="FormatException"/>: вызывающий открывает снимок без аннотаций.</para>
+/// <c>text</c> — x, y, text; <c>number</c> — x, y (center), n. Style — <see cref="AnnotationStyleJsonConverter"/>.
+/// <para>Unknown <c>type</c> is skipped (logged). Malformed JSON, missing required field or
+/// <c>version</c> newer than supported — <see cref="FormatException"/>: caller opens the screenshot without annotations.</para>
 /// </summary>
-/// <summary>Документ пометок от более новой Screeny: его версия выше поддерживаемой.</summary>
+/// <summary>Marks document from a newer Screeny: its version is higher than supported.</summary>
 public sealed class UnsupportedDocumentVersionException(int version) : FormatException($"Unsupported annotation document version: {version}.")
 {
     public int Version { get; } = version;
@@ -37,7 +37,7 @@ public static class AnnotationSerializer
     public static string Serialize(AnnotationDocument doc, Point regionOrigin, int width, int height, BeautifyOptions? beautify)
         => Serialize(doc.Items, regionOrigin, width, height, beautify);
 
-    /// <param name="regionOrigin">Левый верхний угол региона в координатах аннотаций: он становится (0, 0).</param>
+    /// <param name="regionOrigin">Top-left corner of region in annotation coordinates: it becomes (0, 0).</param>
     public static string Serialize(IEnumerable<Annotation> annotations, Point regionOrigin, int width, int height, BeautifyOptions? beautify)
     {
         var offset = new Vector(-regionOrigin.X, -regionOrigin.Y);
@@ -55,7 +55,7 @@ public static class AnnotationSerializer
             w.WriteStartArray("annotations");
             foreach (var a in annotations)
             {
-                // Порядок важен: наследники (стрелка, маркер) раньше базовых типов.
+                // Order matters: subclasses (arrow, marker) before base types.
                 if (TypeName(a) is not { } type) { Log.Error($"Annotation type {a.GetType().Name} is not serializable; skipped"); continue; }
                 w.WriteStartObject();
                 w.WriteString("type", type);
@@ -127,7 +127,7 @@ public static class AnnotationSerializer
         w.WriteEndObject();
     }
 
-    /// <exception cref="FormatException">Битый JSON, нет обязательного поля, неверное значение или неподдерживаемая версия.</exception>
+    /// <exception cref="FormatException">Malformed JSON, missing required field, invalid value or unsupported version.</exception>
     public static AnnotationFile Deserialize(string json)
     {
         try
@@ -163,7 +163,7 @@ public static class AnnotationSerializer
         }
         catch (Exception ex) when (ex is JsonException or InvalidOperationException or KeyNotFoundException or ArgumentException)
         {
-            // JsonException — синтаксис и стиль, InvalidOperationException — значение не того типа (GetDouble у строки).
+            // JsonException — syntax and style, InvalidOperationException — value of wrong type (GetDouble on string).
             throw new FormatException($"Corrupt annotation document: {ex.Message}", ex);
         }
     }

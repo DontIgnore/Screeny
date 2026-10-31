@@ -3,14 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:l="clr-namespace:Screeny.Localization"
              Cursor="Arrow" Focusable="False">
-  <!-- Параметры активного инструмента или выбранной фигуры: содержимое flyout'а (строки появляются поочерёдно) -->
+  <!-- Options of active tool or selected shape: flyout content (rows appear one by one) -->
   <UserControl.Resources>
     <ResourceDictionary Source="FlyoutStyles.xaml"/>
   </UserControl.Resources>
-  <!-- Видна одна секция за раз (Show) -->
+  <!-- One section visible at a time (Show) -->
   <Grid x:Name="Sections">
       <StackPanel x:Name="ShapeSection" Visibility="Collapsed">
-        <!-- Прямоугольник и эллипс -->
+        <!-- Rectangle and ellipse -->
         <StackPanel Style="{StaticResource Row}">
           <TextBlock Style="{StaticResource Label}" Text="{l:Loc Options.Stroke}"/>
           <Button x:Name="StrokeSwatch" Style="{StaticResource SwatchButton}" ToolTip="{l:Loc Options.StrokeSwatch}" Click="OnStrokeSwatch">
@@ -29,7 +29,7 @@
         </StackPanel>
       </StackPanel>
 
-      <!-- Стрелка: четыре стиля, кнопки появляются по одной -->
+      <!-- Arrow: four styles, buttons appear one by one -->
       <StackPanel x:Name="ArrowSection" Orientation="Horizontal" Visibility="Collapsed">
         <ToggleButton x:Name="ArrowNormal" Style="{StaticResource StripButton}" Width="36" Height="30" ToolTip="{l:Loc Options.ArrowNormal}" Click="OnArrowStyle" Tag="Normal">
           <Path Style="{StaticResource ArrowIcon}" Data="M1,6 L14,6 M13,1.5 L21,6 L13,10.5 Z" StrokeThickness="2"/>
@@ -48,7 +48,7 @@
         </ToggleButton>
       </StackPanel>
 
-      <!-- Текст -->
+      <!-- Text -->
       <StackPanel x:Name="TextSection" Visibility="Collapsed">
         <StackPanel Style="{StaticResource Row}">
           <TextBlock Style="{StaticResource Label}" Text="{l:Loc Options.Text}"/>
@@ -63,7 +63,7 @@
           </Button>
           <ToggleButton x:Name="BackgroundNoneButton" Style="{StaticResource NoneButton}" Click="OnBackgroundNone"/>
         </StackPanel>
-        <!-- Выравнивание строк внутри блока текста -->
+        <!-- Line alignment inside text block -->
         <StackPanel Style="{StaticResource Row}">
           <TextBlock Style="{StaticResource Label}" Text="{l:Loc Options.Align}"/>
           <ToggleButton x:Name="AlignLeft" Style="{StaticResource AlignButton}" Tag="Left" Content="&#xE8E4;" ToolTip="{l:Loc Options.AlignLeft}" Click="OnTextAlign"/>

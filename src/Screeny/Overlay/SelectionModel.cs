@@ -12,13 +12,13 @@ public sealed class SelectionModel
 
     public SelectionModel(PixelRect bounds) => Bounds = bounds;
 
-    /// <summary>Прямоугольник по двум точкам перетаскивания; конечный пиксель включается.</summary>
+    /// <summary>Rectangle by two drag points; final pixel included.</summary>
     public static PixelRect FromPoints(PixelPoint a, PixelPoint b)
         => PixelRect.FromCorners(Math.Min(a.X, b.X), Math.Min(a.Y, b.Y), Math.Max(a.X, b.X) + 1, Math.Max(a.Y, b.Y) + 1);
 
     /// <summary>
-    /// То же, но тянущиеся края (со стороны курсора <paramref name="b"/>) прилипают через <paramref name="snap"/>.
-    /// Прилипание, которое схлопнуло бы рамку, не применяется.
+    /// Same, but dragged edges (from cursor side <paramref name="b"/>) snap via <paramref name="snap"/>.
+    /// Snap that would collapse rectangle not applied.
     /// </summary>
     public static PixelRect FromPoints(PixelPoint a, PixelPoint b, EdgeSnap? snap)
     {
@@ -71,8 +71,8 @@ public sealed class SelectionModel
     public void BeginDrag(Handle handle, PixelPoint at) { _dragHandle = handle; _dragStart = at; _dragOrigin = Rect; }
 
     /// <summary>
-    /// Перетаскивание ручки или края. С <paramref name="snap"/> тянущиеся края прилипают (к краям окон, контрастным
-    /// границам), кроме края, прижатого к границе снимка. Перемещение рамки целиком не прилипает.
+    /// Handle or edge drag. With <paramref name="snap"/> dragged edges snap (window edges, contrast
+    /// edges), except edge pressed to screenshot boundary. Whole rectangle move doesn't snap.
     /// </summary>
     public void DragTo(PixelPoint p, EdgeSnap? snap = null)
     {
@@ -92,9 +92,9 @@ public sealed class SelectionModel
             case Handle.Left: x1 += dx; break;
             default: return;
         }
-        // Курсор у самого края снимка прижимает тянущийся край к границе: хватают обычно за линию рамки
-        // (пиксель Right/Bottom или на 1 px снаружи), и без этого дельта не доводила бы край до последнего
-        // столбца/строки (курсор не бывает дальше Bounds.Right − 1) или до нулевого.
+        // Cursor at very screenshot edge presses dragged edge to boundary: usually grabbed by border line
+        // (pixel Right/Bottom or 1 px outside), without this delta would not bring edge to last
+        // column/row (cursor never beyond Bounds.Right − 1) or zero.
         bool movesX1 = _dragHandle is Handle.TopLeft or Handle.Left or Handle.BottomLeft;
         bool movesX2 = _dragHandle is Handle.TopRight or Handle.Right or Handle.BottomRight;
         bool movesY1 = _dragHandle is Handle.TopLeft or Handle.Top or Handle.TopRight;
@@ -109,7 +109,7 @@ public sealed class SelectionModel
             int sx2 = movesX2 ? SnapInside(snap, EdgeAxis.Vertical, x2, p.Y, Bounds.X, Bounds.Right) : x2;
             int sy1 = movesY1 ? SnapInside(snap, EdgeAxis.Horizontal, y1, p.X, Bounds.Y, Bounds.Bottom) : y1;
             int sy2 = movesY2 ? SnapInside(snap, EdgeAxis.Horizontal, y2, p.X, Bounds.Y, Bounds.Bottom) : y2;
-            // Прилипание не должно схлопывать или выворачивать узкую рамку.
+            // Snap must not collapse or invert narrow rectangle.
             if (Math.Sign(sx2 - sx1) == Math.Sign(x2 - x1) && sx2 != sx1) (x1, x2) = (sx1, sx2);
             if (Math.Sign(sy2 - sy1) == Math.Sign(y2 - y1) && sy2 != sy1) (y1, y2) = (sy1, sy2);
         }
@@ -119,7 +119,7 @@ public sealed class SelectionModel
         Rect = new PixelRect(x, y, w, h);
     }
 
-    /// <summary>Край у границы снимка остаётся на ней; иначе — куда прилип (если прилип внутрь снимка).</summary>
+    /// <summary>Edge at screenshot boundary stays there; else — where snapped (if snapped inside screenshot).</summary>
     private static int SnapInside(EdgeSnap snap, EdgeAxis axis, int edge, int cross, int min, int max)
         => edge <= min || edge >= max ? edge : snap(axis, edge, cross) is { } s && s >= min && s <= max ? s : edge;
 
@@ -127,8 +127,8 @@ public sealed class SelectionModel
         => cursor <= min ? min : cursor >= max - 1 ? max : edge;
 
     /// <summary>
-    /// Отрезок [a, b) (в любом порядке), прижатый к [min, max). Схлопнувшаяся ось получает размер 1,
-    /// не затрагивая другую. Exclusive-край может быть равен max — так достигается последний столбец/строка.
+    /// Segment [a, b) (any order) clamped to [min, max). Collapsed axis gets size 1,
+    /// not affecting other. Exclusive edge may equal max — so last column/row reached.
     /// </summary>
     private static (int Start, int Length) Axis(int a, int b, int min, int max)
     {

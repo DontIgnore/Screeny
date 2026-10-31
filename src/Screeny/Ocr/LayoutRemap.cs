@@ -3,10 +3,10 @@ using System.Windows;
 namespace Screeny.Ocr;
 
 /// <summary>
-/// Перенос выделения слов на другую раскладку того же снимка: уточнённое распознавание заменило раскладку Windows OCR,
-/// а пользователь уже выделил часть текста. Сквозные индексы слов у двух движков не совпадают (они иначе режут строки
-/// и слова), поэтому переносится место: выделяются новые слова, рамка которых пересекает рамку хотя бы одного прежнего
-/// выделенного слова. Касание краями не считается — соседнее слово не прихватывается.
+/// Moving word selection to another layout of same screenshot: refined recognition replaced Windows OCR layout,
+/// and user already selected part of text. Throughword indices of two engines don't match (they split lines
+/// and words differently), so location is moved: new words whose border intersects at least one previous
+/// selected word get selected. Edge touching doesn't count — neighboring word not grabbed.
 /// </summary>
 public static class LayoutRemap
 {
@@ -23,7 +23,7 @@ public static class LayoutRemap
         return result;
     }
 
-    /// <summary>Слово-якорь (начало выделения для Shift+клик): первое новое слово на месте прежнего, или null.</summary>
+    /// <summary>Anchor word (selection start for Shift+click): first new word at place of old, or null.</summary>
     public static int? Word(OcrLayout from, int? word, OcrLayout to)
     {
         if (word is not { } w || w < 0 || w >= from.WordCount) return null;

@@ -3,8 +3,8 @@ using Microsoft.Win32;
 namespace Screeny.Hotkeys;
 
 /// <summary>
-/// Когда в Windows включено «PrintScreen открывает захват экрана», RegisterHotKey(VK_SNAPSHOT) успешен,
-/// но WM_HOTKEY не приходит — клавишу забирает система. Определяем это по настройке, а не по результату регистрации.
+/// When Windows has “Open screen snipping with PrintScreen” enabled, RegisterHotKey(VK_SNAPSHOT) succeeds,
+/// but WM_HOTKEY never arrives — key taken by system. Detect by setting, not registration result.
 /// </summary>
 public static class PrintScreenPolicy
 {
@@ -27,7 +27,7 @@ public static class PrintScreenPolicy
             using var key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Keyboard");
             if (key?.GetValue("PrintScreenKeyForSnippingEnabled") is int v) value = v;
         }
-        catch (Exception) { /* нет доступа к реестру — считаем по умолчанию для ОС */ }
+        catch (Exception) { /* no registry access — assume OS default */ }
         return IsSnippingKeyEnabled(value, Environment.OSVersion.Version.Build);
     }
 }

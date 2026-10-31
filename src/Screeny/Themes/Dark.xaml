@@ -1,8 +1,8 @@
-<!-- Тёмная палитра. Ключи совпадают с Light.xaml: ThemeManager подменяет словарь целиком,
-     а стили в Theme.xaml ссылаются на кисти через DynamicResource. -->
+<!-- Dark palette. Keys match Light.xaml: ThemeManager replaces dictionary entirely,
+     styles in Theme.xaml reference brushes via DynamicResource. -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <!-- Обводка окна DWM (Windows 11): фон + 10 % текста, без альфы -->
+  <!-- DWM window border (Windows 11): background + 10% text, no alpha -->
   <Color x:Key="Color.WindowBorder">#FF3E3A38</Color>
 
   <SolidColorBrush x:Key="Brush.Bg" Color="#FF292524"/>
@@ -17,7 +17,7 @@
   <SolidColorBrush x:Key="Brush.CardPressed" Color="#24FFF7ED"/>
   <SolidColorBrush x:Key="Brush.Stroke" Color="#1AFFF7ED"/>
   <SolidColorBrush x:Key="Brush.StrokeStrong" Color="#33FFF7ED"/>
-  <!-- Всплывающие панели (меню, подсказки) непрозрачны: под ними может быть что угодно -->
+  <!-- Popup panels (menus, tooltips) opaque: anything may be under them -->
   <SolidColorBrush x:Key="Brush.Popup" Color="#FF332F2D"/>
   <SolidColorBrush x:Key="Brush.Thumb" Color="#FF211E1D"/>
   <SolidColorBrush x:Key="Brush.DangerSubtle" Color="#26FF3B30"/>

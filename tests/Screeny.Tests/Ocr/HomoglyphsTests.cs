@@ -5,10 +5,10 @@ namespace Screeny.Tests.Ocr;
 public class HomoglyphsTests
 {
     [Theory]
-    [InlineData("Privaсу", "Privacy")]                    // латинское слово с кириллическими «с», «у»
+    [InlineData("Privaсу", "Privacy")]                    // Latin word with Cyrillic “с”, “у”
     [InlineData("PrintSсгееn", "PrintScreen")]
     [InlineData("Соmmittеd", "Committed")]
-    [InlineData("Привeт", "Привет")]                      // русское слово с латинской «e»
+    [InlineData("Привeт", "Привет")]                      // Russian word with Latin “e”
     [InlineData("Нажмите Privaсу сейчас", "Нажмите Privacy сейчас")]
     public void Fix_ReplacesMinorityScript(string input, string expected) => Assert.Equal(expected, Homoglyphs.Fix(input));
 
@@ -18,7 +18,7 @@ public class HomoglyphsTests
     [InlineData("X5K7M")]
     [InlineData("ТихийВечер")]
     [InlineData("MrPixel")]
-    [InlineData("Wi-Fiсеть")]          // у «т»/«ь» нет латинских двойников — это не гомоглифы, слово как есть
+    [InlineData("Wi-Fiсеть")]          // “т”/“ь” have no Latin doubles — not homoglyphs, word as-is
     [InlineData("")]
     public void Fix_LeavesCleanAndGenuinelyMixedWords(string input) => Assert.Equal(input, Homoglyphs.Fix(input));
 
@@ -31,7 +31,7 @@ public class HomoglyphsTests
 
     [Fact]
     public void Fix_LatinBAndHBecomeCyrillicCapitals_NotLowercase()
-        // Латинские «B» и «H» в кириллическом слове — заглавные «В» и «Н», а не строчные «в»/«н» (их двойники только в части шрифтов).
+        // Latin “B” and “H” in Cyrillic word — capitals “В”/“Н”, not lowercase “в”/“н” (doubles only in some fonts).
         => Assert.Equal("ДомНВ", Homoglyphs.Fix("ДомHB"));
 
     [Theory]

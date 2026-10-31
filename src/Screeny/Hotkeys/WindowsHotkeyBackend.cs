@@ -2,7 +2,7 @@ using System.Windows.Threading;
 
 namespace Screeny.Hotkeys;
 
-/// <summary>Настоящие RegisterHotKey и низкоуровневый хук. Создаётся в UI-потоке.</summary>
+/// <summary>Real RegisterHotKey and low-level hook. Created in UI thread.</summary>
 public sealed class WindowsHotkeyBackend(Dispatcher dispatcher) : IHotkeyBackend
 {
     public bool TryRegister(HotkeySpec spec, Action pressed, out IDisposable? handle, out int win32Error)
@@ -15,7 +15,7 @@ public sealed class WindowsHotkeyBackend(Dispatcher dispatcher) : IHotkeyBackend
 
     public bool TryInstallWinShiftSHook(Action triggered, out IDisposable? hook, out int win32Error)
     {
-        // Из потока хука — сразу в UI-поток, не дожидаясь: поток хука должен вернуться к своей очереди.
+        // From hook thread — straight to UI thread, without waiting: hook thread must return to its queue.
         var started = LowLevelKeyboardHook.TryStart(() => dispatcher.BeginInvoke(triggered), out win32Error);
         hook = started;
         return started is not null;

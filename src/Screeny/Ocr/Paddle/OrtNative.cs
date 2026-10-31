@@ -5,23 +5,23 @@ using Screeny.Logging;
 
 namespace Screeny.Ocr.Paddle;
 
-/// <summary>Нативный рантайм модуля загружать нельзя; текст — для пользователя (настройки).</summary>
+/// <summary>Native module runtime cannot be loaded; text is for user (settings).</summary>
 public sealed class OrtLoadException(string message) : Exception(message);
 
 /// <summary>
-/// Нативный ONNX Runtime из папки модуля. В приложении только управляемая сборка
-/// (<c>Microsoft.ML.OnnxRuntime.Managed</c>), а <c>onnxruntime.dll</c> лежит в скачанном модуле: перед первым обращением
-/// к типам ORT её DllImport перенаправляется туда. Загруженная библиотека остаётся в процессе до выхода, поэтому
-/// удалить или заменить файлы модуля после первого распознавания можно только после перезапуска.
+/// Native ONNX Runtime from module folder. App has only managed assembly
+/// (<c>Microsoft.ML.OnnxRuntime.Managed</c>), and <c>onnxruntime.dll</c> lives in downloaded module: before first ORT
+/// type access its DllImport is redirected there. Loaded library stays in process until exit, so
+/// deleting or replacing module files after first recognition requires restart.
 /// </summary>
 public static class OrtNative
 {
     public const string LibraryName = "onnxruntime";
 
     /// <summary>
-    /// Рантайм Visual C++, от которого зависит <c>onnxruntime.dll</c> (MSVCP140, MSVCP140_1, VCRUNTIME140, VCRUNTIME140_1).
-    /// На машине без распространяемого пакета VC++ их нет, поэтому модуль везёт свои копии; грузятся по полному пути до ORT,
-    /// и ORT связывается с уже загруженными.
+    /// Visual C++ runtime required by <c>onnxruntime.dll</c> (MSVCP140, MSVCP140_1, VCRUNTIME140, VCRUNTIME140_1).
+    /// On machines without VC++ redistributable these are missing, so module carries its copies; loaded by full path before ORT,
+    /// and ORT binds to already loaded ones.
     /// </summary>
     public static readonly string[] CrtLibraries = ["vcruntime140.dll", "vcruntime140_1.dll", "msvcp140.dll", "msvcp140_1.dll"];
 
@@ -29,12 +29,12 @@ public static class OrtNative
     private static IntPtr _handle;
     private static string? _loadedFrom;
 
-    /// <summary>Папка, из которой уже загружен нативный ORT, или null.</summary>
+    /// <summary>Folder from which native ORT already loaded, or null.</summary>
     public static string? LoadedFrom { get { lock (Gate) return _loadedFrom; } }
 
     /// <summary>
-    /// Грузит рантайм из <paramref name="folder"/> (один раз за процесс). Бросает <see cref="OrtLoadException"/>, если в
-    /// процессе уже есть более старый рантайм VC++, и исключения загрузчика, если библиотека не загружается.
+    /// Loads runtime from <paramref name="folder"/> (once per process). Throws <see cref="OrtLoadException"/>, if in
+    /// process there's already older VC++ runtime, and loader exceptions if library fails to load.
     /// </summary>
     public static void EnsureLoaded(string folder)
     {
@@ -51,8 +51,8 @@ public static class OrtNative
             try { NativeLibrary.SetDllImportResolver(typeof(Microsoft.ML.OnnxRuntime.InferenceSession).Assembly, Resolve); }
             catch (InvalidOperationException ex)
             {
-                // Резолвер уже стоит (сборку ORT кто-то тронул раньше): библиотека загружена по полному пути, и поиск по
-                // имени «onnxruntime.dll» найдёт уже загруженный модуль.
+                // Resolver already set (ORT assembly touched earlier): library loaded by full path, search by
+                // name “onnxruntime.dll” will find already loaded module.
                 Log.Error("ORT DllImport resolver was already set; relying on the preloaded library", ex);
             }
             _handle = handle;
@@ -61,9 +61,9 @@ public static class OrtNative
     }
 
     /// <summary>
-    /// Загрузчик Windows связывает импорт по имени с уже загруженным модулем, где бы тот ни лежал. Если какое-то расширение
-    /// оболочки уже подтянуло в процесс старый <c>msvcp140.dll</c> из другого места, ORT (собран VC++ 14.4x) свяжется с ним
-    /// и может упасть с нарушением доступа, которое не перехватить. Поэтому такой случай — отказ с понятной причиной.
+    /// Windows loader binds import by name to already loaded module wherever it is. If some shell extension
+    /// already pulled old <c>msvcp140.dll</c> into process from elsewhere, ORT (built with VC++ 14.4x) binds to it
+    /// and may crash with access violation that can't be caught. So such case is refusal with clear reason.
     /// </summary>
     private static void CheckLoadedCrt(string folder)
     {
@@ -80,8 +80,8 @@ public static class OrtNative
     }
 
     /// <summary>
-    /// Текст отказа, если в процессе уже загружена <paramref name="name"/> из другого места и более старой версии, чем в
-    /// модуле; иначе null (та же копия, та же или более новая версия — с ней ORT работает).
+    /// Refusal text if process already has <paramref name="name"/> loaded from elsewhere and older than module's;
+    /// else null (same copy, same or newer — ORT works with it).
     /// </summary>
     public static string? CrtConflict(string name, string loadedPath, Version? loadedVersion, string ourPath, Version? ourVersion)
     {

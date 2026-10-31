@@ -1,8 +1,8 @@
 namespace Screeny.Migration;
 
 /// <summary>
-/// Подставная среда для тестов и dev-сценариев (<c>--dev --setup-wizard --scenario conflicts</c>). Изменяемая:
-/// <see cref="FakeConflictActions"/> «выполняет» действия, меняя её, — так пересканирование в мастере показывает результат.
+/// Fake environment for tests and dev scenarios (<c>--dev --setup-wizard --scenario conflicts</c>). Mutable:
+/// <see cref="FakeConflictActions"/> “executes” actions by mutating it — so re-scan in wizard shows result.
 /// </summary>
 public sealed class FakeEnvironmentSnapshot : IEnvironmentSnapshot
 {
@@ -17,7 +17,7 @@ public sealed class FakeEnvironmentSnapshot : IEnvironmentSnapshot
     public int OsBuild { get; set; } = 26100;
     public string? PowerToysKeyboardConfig { get; set; }
 
-    /// <summary>Сценарии dev-режима: «conflicts» — Lightshot (HKLM), ShareX (HKCU), запущенный Snipaste и системный PrintScreen; иначе — пусто.</summary>
+    /// <summary>Dev scenarios: “conflicts” — Lightshot (HKLM), ShareX (HKCU), running Snipaste and system PrintScreen; else — empty.</summary>
     public static FakeEnvironmentSnapshot ForScenario(string? scenario)
         => string.Equals(scenario, "conflicts", StringComparison.OrdinalIgnoreCase) ? Conflicts() : new FakeEnvironmentSnapshot();
 

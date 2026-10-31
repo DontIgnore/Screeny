@@ -3,7 +3,7 @@ using System.Windows.Media;
 
 namespace Screeny.Annotations.Shapes;
 
-/// <summary>Маркер: полупрозрачная широкая линия с квадратными концами.</summary>
+/// <summary>Marker: semi-transparent wide line with square caps.</summary>
 public sealed class HighlighterAnnotation(Point start, AnnotationStyle style) : PenAnnotation(start, style)
 {
     protected override Pen CreateStrokePen()

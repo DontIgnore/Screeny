@@ -7,9 +7,9 @@ using Screeny.Modules;
 namespace Screeny.Settings;
 
 /// <summary>
-/// Блок «Точное распознавание (PaddleOCR)» в настройках, под «Распознаванием текста и QR». Модуль не установлен —
-/// «Скачать» (с прогрессом и отменой); установлен — галочка «Использовать» (сохраняется вместе с окном) и «Удалить модуль»;
-/// стоит старая версия — «Обновить модуль». Скачивание и удаление выполняются сразу, не по «Сохранить».
+/// “Precise recognition (PaddleOCR)” block in settings, under “Text and QR recognition”. Module not installed —
+/// “Download” (with progress and cancel); installed — “Use” checkbox (saved with window) and “Delete module”;
+/// old version — “Update module”. Download/delete run immediately, not on “Save”.
 /// </summary>
 public sealed class PreciseOcrPanel
 {
@@ -20,7 +20,7 @@ public sealed class PreciseOcrPanel
     private readonly CheckBox _use = new() { Margin = new Thickness(0, 10, 0, 0) };
     private readonly Grid _bar = new() { Height = 4, Margin = new Thickness(0, 12, 0, 0) };
     private readonly ColumnDefinition _done = new(), _rest = new();
-    // Отступ справа у каждой кнопки: скрытые не сдвигают видимые.
+    // Right margin per button: hidden don't shift visible.
     private readonly Button _download = new() { Margin = new Thickness(0, 0, 8, 0) };
     private readonly Button _cancel = new() { Margin = new Thickness(0, 0, 8, 0) };
     private readonly Button _remove = new() { Margin = new Thickness(0, 0, 8, 0) };
@@ -29,7 +29,7 @@ public sealed class PreciseOcrPanel
 
     public StackPanel Root { get; } = new() { Margin = new Thickness(28, 12, 0, 0) };
 
-    /// <param name="use">Текущее значение <see cref="AppSettings.PreciseOcr"/>.</param>
+    /// <param name="use">Current <see cref="AppSettings.PreciseOcr"/> value.</param>
     public PreciseOcrPanel(IPreciseOcrHost host, bool use)
     {
         _host = host;
@@ -71,13 +71,13 @@ public sealed class PreciseOcrPanel
         Show();
     }
 
-    /// <summary>Значение «Использовать» для сохранения; null — модуля нужной версии нет, галочки не видно (остаётся как было).</summary>
+    /// <summary>“Use” value for saving; null — no module of needed version, checkbox hidden (stays as was).</summary>
     public bool? Use => _host.Status.Ready ? _use.IsChecked == true : null;
 
-    /// <summary>Загрузка закончилась и согласие уже записано в настройки (см. App): галочку — по ним.</summary>
+    /// <summary>Download finished and consent already written to settings (see App): checkbox per them.</summary>
     public void SetUse(bool use) => _use.IsChecked = use;
 
-    /// <summary>Язык интерфейса сменился: подписи с подстановками собираются заново.</summary>
+    /// <summary>UI language changed: labels with substitutions rebuilt.</summary>
     public void Refresh() => Show();
 
     private void Show()

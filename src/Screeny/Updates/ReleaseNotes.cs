@@ -5,42 +5,42 @@ namespace Screeny.Updates;
 
 public enum NoteBlockKind { Heading1, Heading2, Heading3, Bullet, Numbered, Paragraph }
 
-/// <summary>Кусок текста: обычный, жирный или код.</summary>
+/// <summary>Text piece: normal, bold or code.</summary>
 public sealed record NoteInline(string Text, bool Bold = false, bool Code = false);
 
-/// <param name="Number">Номер пункта нумерованного списка.</param>
-/// <param name="Level">Вложенность пункта списка (0 — верхний уровень).</param>
+/// <param name="Number">Numbered list item number.</param>
+/// <param name="Level">List nesting (0 — top).</param>
 public sealed record NoteBlock(NoteBlockKind Kind, IReadOnlyList<NoteInline> Inlines, int Number = 0, int Level = 0)
 {
     public string PlainText => string.Concat(Inlines.Select(i => i.Text));
 
     /// <summary>
-    /// Каких функций (<see cref="Features.FeatureCatalog"/>) касается блок; пусто — общий, показывается всегда.
-    /// Несколько id — блок показывается, если включена хотя бы одна из функций.
+    /// Which features (<see cref="Features.FeatureCatalog"/>) block concerns; empty — general, always shown.
+    /// Multiple ids — block shown if at least one feature enabled.
     /// </summary>
     public IReadOnlyList<string> Features { get; init; } = [];
 
-    /// <summary>Глубина заголовка в исходнике (число <c>#</c>, 1–6); 0 — не заголовок или не из <see cref="ReleaseNotes.Parse"/>.</summary>
+    /// <summary>Header depth in source (number of <c>#</c>, 1–6); 0 — not header or not from <see cref="ReleaseNotes.Parse"/>.</summary>
     public int Depth { get; init; }
 }
 
 /// <summary>
-/// Очень маленькое подмножество markdown для списка изменений: заголовки <c>#</c>–<c>###</c> (глубже — как <c>###</c>),
-/// маркированные (<c>-</c>, <c>*</c>, <c>+</c>) и нумерованные списки, жирный (<c>**</c>, <c>__</c>), <c>`код`</c>.
-/// Ссылки показываются только текстом (без перехода), курсив и прочая разметка снимаются, HTML не интерпретируется
-/// (кроме комментариев <c>&lt;!-- --&gt;</c>: они не показываются).
+/// Very small markdown subset for changelog: headers <c>#</c>–<c>###</c> (deeper — as <c>###</c>),
+/// bullets (<c>-</c>, <c>*</c>, <c>+</c>) and numbered lists, bold (<c>**</c>, <c>__</c>), <c>`code`</c>.
+/// Links shown as text only (no navigation), italic and other markup removed, HTML not interpreted
+/// (except comments <c>&lt;!-- --&gt;</c>: not shown).
 /// <para>
-/// Метка функции — комментарий <c>&lt;!-- feature: ocr --&gt;</c> (или <c>&lt;!-- feature: ocr, history --&gt;</c>) в строке
-/// заголовка или пункта; на GitHub она не видна. Метка заголовка действует на всё под ним до следующего заголовка того же
-/// или более высокого уровня (уровень — число <c>#</c> в исходнике), метка пункта заменяет её для этого пункта (и вложенных
-/// в него пунктов). Метка на отдельной строке относится к следующему блоку: к разделу следующего заголовка или к
-/// следующему пункту (абзацу). Неотмеченное — общее. Метки в блоках кода, в <c>`коде`</c> и в многострочных комментариях
-/// не распознаются; <c>&lt;!--</c> внутри <c>`кода`</c> — не комментарий.
+/// Feature label — comment <c>&lt;!-- feature: ocr --&gt;</c> (or <c>&lt;!-- feature: ocr, history --&gt;</c>) in line
+/// of header or item; invisible on GitHub. Header label applies to everything under it until next header of same or
+/// higher level (level — number of <c>#</c> in source), item label replaces it for that item (and nested
+/// items). Label on separate line applies to next block: next header section or next
+/// item (paragraph). Unmarked — general. Labels in code blocks, in <c>`code`</c> and multiline comments
+/// not recognized; <c>&lt;!--</c> inside <c>`code`</c> is not comment.
 /// </para>
 /// <para>
-/// Языки — разделы в одном файле: строка <c>&lt;!-- lang: en --&gt;</c> начинает раздел языка, он идёт до следующей такой
-/// строки. Окно обновления показывает раздел языка интерфейса, иначе английский, иначе первый (<see cref="ForLanguage"/>).
-/// Текст до первой метки языка — общий для всех языков; файл без меток — один язык для всех.
+/// Languages — sections in one file: line <c>&lt;!-- lang: en --&gt;</c> starts language section until next such
+/// line. Update window shows UI language section, else English, else first (<see cref="ForLanguage"/>).
+/// Text before first language label — common for all languages; file without labels — one language for all.
 /// </para>
 /// </summary>
 public static partial class ReleaseNotes
@@ -57,7 +57,7 @@ public static partial class ReleaseNotes
     [GeneratedRegex(@"^\s*([-*_])(\s*\1){2,}\s*$")]
     private static partial Regex RuleRx();
 
-    /// <summary>Символы, которые <c>\</c> экранирует.</summary>
+    /// <summary>Characters <c>\</c> escapes.</summary>
     private const string Escapable = "\\`*_[]()#+-.!<>";
 
     [GeneratedRegex(@"^\s*feature\s*:(.*)$", RegexOptions.IgnoreCase)]
@@ -66,15 +66,15 @@ public static partial class ReleaseNotes
     [GeneratedRegex(@"^ {0,3}<!--\s*lang\s*:\s*([A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*)\s*-->\s*$", RegexOptions.IgnoreCase)]
     private static partial Regex LangTagRx();
 
-    /// <summary>Метки языков в файле в порядке появления (без повторов); пусто — файл без разделов.</summary>
+    /// <summary>Language labels in file in appearance order (no duplicates); empty — no sections.</summary>
     public static IReadOnlyList<string> Languages(string? markdown) => Sections(markdown).Sections.Select(s => s.Language)
         .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 
     /// <summary>
-    /// Раздел списка изменений для языка интерфейса <paramref name="language"/> (код из <see cref="Localization.Loc.Supported"/>),
-    /// перед ним — общий текст до первой метки. Берётся первый подходящий раздел: сначала с точно этой меткой, затем
-    /// с меткой, которая этому языку соответствует («zh» и «zh-CN» — для «zh-Hans», «en-US» — для «en»); если такого нет —
-    /// так же английский, иначе первый раздел. Без меток — текст как есть.
+    /// Changelog section for UI language <paramref name="language"/> (code from <see cref="Localization.Loc.Supported"/>),
+    /// before it common text up to first label. First matching section taken: first exactly this label, then
+    /// label matching that language (“zh” and “zh-CN” — for “zh-Hans”, “en-US” — for “en”); if none —
+    /// same English, else first section. Without labels — text as-is.
     /// </summary>
     public static string? ForLanguage(string? markdown, string language)
     {
@@ -91,14 +91,14 @@ public static partial class ReleaseNotes
         }
     }
 
-    /// <summary>Метка раздела подходит языку: «zh» — для «zh-Hans» (префикс), «en-US» и «zh-CN» — через родительские культуры.</summary>
+    /// <summary>Section label matches language: “zh” — for “zh-Hans” (prefix), “en-US” and “zh-CN” — via parent cultures.</summary>
     private static bool Serves(string tag, string language)
         => language.StartsWith(tag + "-", StringComparison.OrdinalIgnoreCase)
            || string.Equals(Localization.Loc.MatchCulture(tag), language, StringComparison.Ordinal);
 
     /// <summary>
-    /// Общий текст и разделы языков. Метка — строка из одного комментария <c>&lt;!-- lang: xx --&gt;</c> с отступом меньше
-    /// четырёх пробелов (больший отступ в Markdown — код); внутри блоков кода и многострочных комментариев метки не считаются.
+    /// Common text and language sections. Label — line of single comment <c>&lt;!-- lang: xx --&gt;</c> with indent less than
+    /// four spaces (larger indent in Markdown — code); inside code blocks and multiline comments labels not counted.
     /// </summary>
     private static (string Common, List<(string Language, string Text)> Sections) Sections(string? markdown)
     {
@@ -117,7 +117,7 @@ public static partial class ReleaseNotes
             else if (!inFence)
             {
                 var rest = line;
-                StripComments(ref rest, ref inComment); // только чтобы знать, открыт ли многострочный комментарий
+                StripComments(ref rest, ref inComment); // only to know if multiline comment open
             }
             (sections.Count > 0 ? sections[^1].Text : common).Append(line).Append('\n');
         }
@@ -130,9 +130,9 @@ public static partial class ReleaseNotes
         if (string.IsNullOrWhiteSpace(markdown)) return blocks;
         var paragraph = new StringBuilder();
         IReadOnlyList<string>? paragraphTag = null;
-        IReadOnlyList<string>? pendingTag = null; // метка с отдельной строки — для следующего блока
+        IReadOnlyList<string>? pendingTag = null; // label on separate line — for next block
         bool inFence = false, inComment = false;
-        // Метки открытых заголовков и пунктов списка: (уровень, функции).
+        // Open header and list item labels: (level, features).
         var headings = new List<(int Level, IReadOnlyList<string> Features)>();
         var items = new List<(int Level, IReadOnlyList<string> Features)>();
         IReadOnlyList<string> HeadingScope() => headings.Count > 0 ? headings[^1].Features : [];
@@ -143,13 +143,13 @@ public static partial class ReleaseNotes
             blocks.Add(new NoteBlock(NoteBlockKind.Paragraph, ParseInlines(paragraph.ToString())) { Features = paragraphTag ?? HeadingScope() });
             paragraph.Clear();
             paragraphTag = null;
-            items.Clear(); // абзац заканчивает список
+            items.Clear(); // paragraph ends list
         }
 
         foreach (var rawLine in markdown.ReplaceLineEndings("\n").Split('\n'))
         {
             var line = rawLine.TrimEnd();
-            // Внутри многострочного комментария ``` — тоже комментарий, а не начало блока кода.
+            // Inside multiline comment ``` is also comment, not code block start.
             if (!inComment && line.TrimStart().StartsWith("```", StringComparison.Ordinal)) { FlushParagraph(); inFence = !inFence; continue; }
             if (inFence)
             {
@@ -160,7 +160,7 @@ public static partial class ReleaseNotes
             var tag = StripComments(ref line, ref inComment);
             if (hadComment && line.Trim().Length == 0)
             {
-                // Строка из одного комментария — как будто её нет; метка в ней переходит к следующему блоку.
+                // Line of single comment — as if absent; its label moves to next block.
                 if (tag is not null) pendingTag = tag;
                 continue;
             }
@@ -170,7 +170,7 @@ public static partial class ReleaseNotes
                                 && !HeadingRx().IsMatch(line) && !BulletRx().IsMatch(line) && !NumberedRx().IsMatch(line);
             if (!continuation && paragraph.Length == 0 && pendingTag is not null)
             {
-                tag ??= pendingTag; // начинается новый блок
+                tag ??= pendingTag; // new block starts
                 pendingTag = null;
             }
 
@@ -199,7 +199,7 @@ public static partial class ReleaseNotes
             }
             else if (continuation)
             {
-                // Продолжение пункта списка на следующей строке с отступом; метка здесь — тоже метка пункта.
+                // Continuation of list item on next line with indent; label here is item label too.
                 var last = blocks[^1];
                 blocks[^1] = last with { Inlines = [.. last.Inlines, new NoteInline(" "), .. ParseInlines(line.Trim())], Features = tag ?? last.Features };
                 if (tag is not null && items.Count > 0) items[^1] = (items[^1].Level, tag);
@@ -214,7 +214,7 @@ public static partial class ReleaseNotes
         FlushParagraph();
         return blocks;
 
-        // Своя метка пункта, иначе метка пункта, в который он вложен, иначе — заголовка.
+        // Own item label, else label of containing item, else — header.
         IReadOnlyList<string> ItemFeatures(int level, IReadOnlyList<string>? own)
         {
             items.RemoveAll(s => s.Level >= level);
@@ -225,9 +225,9 @@ public static partial class ReleaseNotes
     }
 
     /// <summary>
-    /// Убирает из строки комментарии <c>&lt;!-- --&gt;</c> (и начало многострочного); возвращает id из меток
-    /// <c>feature:</c> или null, если меток нет. <c>&lt;!--</c> внутри <c>`кода`</c> и экранированный (<c>\&lt;!--</c>) —
-    /// обычный текст (код и экранирование — как в <see cref="ParseInlines"/>).
+    /// Removes comments <c>&lt;!-- --&gt;</c> from line (and multiline start); returns id from labels
+    /// <c>feature:</c> or null if none. <c>&lt;!--</c> inside <c>`code`</c> and escaped (<c>\&lt;!--</c>) —
+    /// plain text (code and escaping as in <see cref="ParseInlines"/>).
     /// </summary>
     private static IReadOnlyList<string>? StripComments(ref string line, ref bool inComment)
     {
@@ -278,9 +278,9 @@ public static partial class ReleaseNotes
     }
 
     /// <summary>
-    /// Список изменений без блоков про выключенные функции (выключены все функции блока) и без заголовков, под которыми
-    /// после этого ничего не осталось. Заголовок судится только по содержимому: если пункт со своей меткой остался
-    /// под заголовком выключенной функции, заголовок остаётся вместе с ним.
+    /// Changelog without blocks about disabled features (all block features disabled) and without headers under which
+    /// nothing remains after that. Header judged only by content: if item with own label remains under
+    /// disabled feature header, header stays with it.
     /// </summary>
     public static IReadOnlyList<NoteBlock> Filter(IReadOnlyList<NoteBlock> blocks, Func<string, bool> isOn)
     {
@@ -291,10 +291,10 @@ public static partial class ReleaseNotes
         return result;
     }
 
-    /// <summary>Хотя бы один блок отмечен функцией.</summary>
+    /// <summary>At least one block marked with feature.</summary>
     public static bool IsTagged(IReadOnlyList<NoteBlock> blocks) => blocks.Any(b => b.Features.Count > 0);
 
-    /// <summary>До следующего заголовка того же или более высокого уровня (по числу <c>#</c>) есть не-заголовок.</summary>
+    /// <summary>Before next header of same or higher level (by number of <c>#</c>) there is non-header.</summary>
     private static bool HasContentUnder(List<NoteBlock> blocks, int heading, int rank)
     {
         for (int j = heading + 1; j < blocks.Count; j++)
@@ -306,8 +306,8 @@ public static partial class ReleaseNotes
     }
 
     /// <summary>
-    /// Уровень заголовка — число <c>#</c> в исходнике (<c>####</c> показывается как <c>###</c>, но вложен в него);
-    /// у блока не из <see cref="Parse"/> — по виду. null — не заголовок.
+    /// Header level — number of <c>#</c> in source (<c>####</c> displayed as <c>###</c>, but nested into it);
+    /// for block not from <see cref="Parse"/> — by appearance. null — not header.
     /// </summary>
     private static int? HeadingRank(NoteBlock block) => block.Kind switch
     {
@@ -318,14 +318,14 @@ public static partial class ReleaseNotes
         _ => null,
     };
 
-    /// <summary>Два пробела (или таб) отступа — один уровень вложенности; не больше двух уровней.</summary>
+    /// <summary>Two spaces (or tab) indent — one nesting level; no more than two levels.</summary>
     private static int Level(string indent)
     {
         int width = indent.Sum(c => c == '\t' ? 4 : 1);
         return Math.Min(width / 2, 2);
     }
 
-    /// <summary>Жирный, код, ссылки (только текст); экранирование <c>\*</c>; одиночные <c>*</c>/<c>_</c> курсива снимаются.</summary>
+    /// <summary>Bold, code, links (text only); escaping <c>\*</c>; lone <c>*</c>/<c>_</c> italics removed.</summary>
     public static IReadOnlyList<NoteInline> ParseInlines(string text)
     {
         var result = new List<NoteInline>();
@@ -354,7 +354,7 @@ public static partial class ReleaseNotes
             }
             else if ((c == '*' || c == '_') && i + 1 < text.Length && text[i + 1] == c)
             {
-                // «__» внутри слова (snake__case) — не разметка.
+                // “__” inside word (snake__case) — not markup.
                 bool wordInside = c == '_' && i > 0 && char.IsLetterOrDigit(text[i - 1]) && i + 2 < text.Length && char.IsLetterOrDigit(text[i + 2]);
                 if (wordInside) { current.Append(c).Append(c); i++; continue; }
                 Flush();
@@ -363,7 +363,7 @@ public static partial class ReleaseNotes
             }
             else if (c == '*' || (c == '_' && (i == 0 || !char.IsLetterOrDigit(text[i - 1]) || i + 1 >= text.Length || !char.IsLetterOrDigit(text[i + 1]))))
             {
-                // Курсив не выделяем: маркер просто убираем.
+                // Italic not marked: marker simply removed.
             }
             else if (c == '[' && TryParseLink(text, i, out var label, out int next))
             {
@@ -376,7 +376,7 @@ public static partial class ReleaseNotes
         return Merge(result);
     }
 
-    /// <summary><c>[текст](адрес)</c> → текст. Адрес отбрасывается: окно обновления не открывает ссылки.</summary>
+    /// <summary><c>[text](url)</c> → text. URL discarded: update window doesn't open links.</summary>
     private static bool TryParseLink(string text, int start, out string label, out int next)
     {
         label = "";
@@ -390,7 +390,7 @@ public static partial class ReleaseNotes
         return true;
     }
 
-    /// <summary>Склеивает соседние куски с одинаковым оформлением.</summary>
+    /// <summary>Merges adjacent pieces with same styling.</summary>
     private static IReadOnlyList<NoteInline> Merge(List<NoteInline> inlines)
     {
         var merged = new List<NoteInline>();

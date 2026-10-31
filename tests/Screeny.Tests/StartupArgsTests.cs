@@ -65,7 +65,7 @@ public class StartupArgsTests
         Assert.Equal("hover", StartupArgs.Parse(["--dev", "--history", "--scenario", "hover"]).Scenario);
         Assert.Equal("hotkey-problems", StartupArgs.Parse(["--dev", "--settings", "--scenario", "hotkey-problems"]).Scenario);
         Assert.Null(StartupArgs.Parse(["--dev", "--scenario", "hover"]).Scenario);
-        Assert.Null(StartupArgs.Parse(["--dev", "--select", "0,0,5,5"]).Select); // выделение — только с --overlay-test
+        Assert.Null(StartupArgs.Parse(["--dev", "--select", "0,0,5,5"]).Select); // selection only with --overlay-test
     }
 
     [Theory]

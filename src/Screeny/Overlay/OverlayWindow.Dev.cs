@@ -7,25 +7,25 @@ using Screeny.Overlay.Tools;
 
 namespace Screeny.Overlay;
 
-// Сценарии тестового экземпляра (--dev --overlay-test x.png --scenario имя): готовые фигуры и состояние параметров,
-// чтобы проверить UI по скриншоту окна без синтетического ввода. Без --dev сюда не попасть (StartupArgs).
+// Test instance scenarios (--dev --overlay-test x.png --scenario name): ready shapes and options state,
+// to verify UI by window screenshot without synthetic input. Without --dev unreachable (StartupArgs).
 public partial class OverlayWindow
 {
-    /// <summary>Имена сценариев для <c>--scenario</c>.</summary>
+    /// <summary>Scenario names for <c>--scenario</c>.</summary>
     public static readonly string[] DevScenarios = ["shape", "shape-tool", "arrow", "text", "ruler", "badge", "qr", "beautify", "beautify-sunset", "beautify-light",
         "guides", "textalign", "edgesnap", "flyout-beautify", "flyout-beautify-mid", "flyout-tool", "flyout-shape", "pen-bounds",
         "ocr", "ocr-select", "readme-hero", "readme-text", "readme-beautify"];
 
     /// <summary>
-    /// Сценарии ocr-select и readme-text: как только показана первая раскладка (Windows OCR), выделить слова в этой части
-    /// выделения (доли ширины и высоты; ocr-select — левая треть верхней половины).
+    /// Scenarios ocr-select and readme-text: once first layout shown (Windows OCR), select words in that part of
+    /// selection (fractions of width/height; ocr-select — left third of top half).
     /// </summary>
     private Rect? _devSelectWhenReady;
 
     /// <summary>
-    /// Раскладка режима текста показана (dev). Для ocr-select — выделение рамкой, как мышью: уточнение,
-    /// пришедшее позже, переносит его на свои слова по месту (<see cref="Screeny.Ocr.LayoutRemap"/>). В журнал — слова
-    /// раскладки, чтобы по нему было видно, какая раскладка на экране.
+    /// Text mode layout shown (dev). For ocr-select — selection by border like mouse: refinement,
+    /// arriving later, moves it to its words by location (<see cref="Screeny.Ocr.LayoutRemap"/>). Log words of layout,
+    /// to see which layout is on screen.
     /// </summary>
     private void DevTextLayoutShown()
     {
@@ -52,7 +52,7 @@ public partial class OverlayWindow
         {
             case "shape":
             {
-                // Залитый прямоугольник выбран, активный образец — заливка.
+                // Filled rectangle selected, active swatch fill.
                 var filled = new RectAnnotation(Box(0.05, 0.08, 0.35, 0.35), new AnnotationStyle(red, 4) { Fill = ColorHex.WithOpacity(blue, 40) });
                 Document.Add(filled);
                 Document.Add(new EllipseAnnotation(Box(0.5, 0.08, 0.4, 0.35), new AnnotationStyle(red, 3) { StrokeEnabled = false, Fill = ColorHex.WithOpacity(green, 60) }));
@@ -64,7 +64,7 @@ public partial class OverlayWindow
                 break;
             }
             case "shape-tool":
-                // Будущий прямоугольник: обводка + заливка из настроек сессии, ничего не выбрано.
+                // Future rectangle: stroke + fill from session settings, nothing selected.
                 _editor.Options.Absorb(new AnnotationStyle(red, 3) { Fill = ColorHex.WithOpacity(red, 40) }, OptionsSectionKind.Shape);
                 SetTool(ToolKind.Rect);
                 break;
@@ -92,14 +92,14 @@ public partial class OverlayWindow
                 break;
             }
             case "ruler":
-                if (!Screeny.Features.FeatureGate.ToolAllowed(_settings, ToolKind.Ruler)) break; // линейка выключена
+                if (!Screeny.Features.FeatureGate.ToolAllowed(_settings, ToolKind.Ruler)) break; // ruler disabled
                 SetTool(ToolKind.Ruler);
                 _editor.Tool(ToolKind.Ruler).Down(At(0.1, 0.2), Document, _editor.CurrentStyle);
                 _editor.Tool(ToolKind.Ruler).Up(At(0.75, 0.7));
                 break;
             case "badge":
             {
-                // Состояние после C при выделении: лупа и бейдж (без записи в буфер обмена).
+                // State after C with selection: magnifier and badge (no clipboard write).
                 var p = new PixelPoint((int)At(0.2, 0.3).X, (int)At(0.2, 0.3).Y);
                 UpdateMagnifier(p);
                 var c = Pipette.ColorAt(_shot.Bitmap, p);
@@ -107,26 +107,26 @@ public partial class OverlayWindow
                 break;
             }
             case "beautify":
-                // Оформление по умолчанию (синий, M, 8, тень) с выбранным инструментом «Выбор».
+                // Default decoration (blue, M, 8, shadow) with Select tool selected.
                 _editor.SetBeautifyOptions(BeautifyOptions.Default);
                 _editor.SetBeautify(true);
                 break;
             case "beautify-sunset":
-                // Закат, L, 16, тень + секция прямоугольника слева от секции оформления.
+                // Sunset, L, 16, shadow + rectangle section left of decoration section.
                 _editor.SetBeautifyOptions(new BeautifyOptions(BeautifyPreset.Sunset, BeautifyPadding.L, 16, true));
                 _editor.SetBeautify(true);
                 SetTool(ToolKind.Rect);
                 break;
             case "beautify-light":
-                // Светлый, S, без скругления и тени, с готовой стрелкой.
+                // Light, S, no rounding/shadow, with ready arrow.
                 Document.Add(new ArrowAnnotation(At(0.15, 0.2), At(0.6, 0.6), new AnnotationStyle(red, 4)));
                 _editor.SetBeautifyOptions(new BeautifyOptions(BeautifyPreset.Light, BeautifyPadding.S, 0, false));
                 _editor.SetBeautify(true);
                 break;
             case "guides":
             {
-                // Перетаскивание инструментом «Выбор» посреди жеста: правый прямоугольник почти выровнен по верху и
-                // центру левого — видны направляющие (жест не завершён, мышь не захвачена: только для скриншота).
+                // Dragging with Select mid-gesture: right rectangle almost aligned with top and
+                // center of left — guides visible (gesture unfinished, mouse not captured: only for screenshot).
                 Document.Add(new RectAnnotation(Box(0.08, 0.2, 0.3, 0.3), new AnnotationStyle(red, 3)));
                 var moving = new RectAnnotation(Box(0.5, 0.6, 0.3, 0.25), new AnnotationStyle(blue, 3));
                 Document.Add(moving);
@@ -138,7 +138,7 @@ public partial class OverlayWindow
             }
             case "textalign":
             {
-                // Многострочный текст в трёх выравниваниях; выбран средний — в его параметрах (рядом с ним) нажата кнопка «по центру».
+                // Multiline text in three alignments; middle selected — its options (next to it) have “center” pressed.
                 const string text = "Short line\nA much longer second line\nMid";
                 Document.Add(new TextAnnotation(At(0.04, 0.1), text, new AnnotationStyle(red, 4) { TextAlign = TextAlign.Left }));
                 var center = new TextAnnotation(At(0.36, 0.1), text, new AnnotationStyle(Colors.White, 4) { TextAlign = TextAlign.Center, TextBackground = StyleOptions.DefaultTextBackground });
@@ -150,8 +150,8 @@ public partial class OverlayWindow
             }
             case "edgesnap":
             {
-                // Протяжка новой рамки посреди жеста (как мышью): правый и нижний край в нескольких пикселях от
-                // контрастных границ снимка — прилипают, прилипшие края видны направляющими через весь снимок.
+                // Dragging new border mid-gesture (like mouse): right and bottom edges within few pixels of
+                // contrast image edges — snap, snapped edges shown by guides across screenshot.
                 _selection.Rect = default;
                 _mode = OverlayMode.Selecting;
                 Toolbar.Visibility = Visibility.Collapsed;
@@ -167,24 +167,24 @@ public partial class OverlayWindow
                 break;
             }
             case "flyout-beautify":
-                // Оформление включено: вокруг выделения ничего нет, его параметры — во flyout'е у кнопки ✨ (как после наведения).
+                // Decoration enabled: nothing around selection, its options in flyout at ✨ (like after hover).
                 _editor.SetBeautify(true);
                 Dispatcher.BeginInvoke(() => _editor.Flyouts.DevOpenBeautify(), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
                 break;
             case "flyout-beautify-mid":
-                // Тот же flyout, остановленный на 80-й миллисекунде анимации открытия: вылет из кнопки, строки проявляются.
+                // Same flyout stopped at 80th ms of opening animation: flies out of button, rows fade in.
                 _editor.SetBeautify(true);
                 Dispatcher.BeginInvoke(() => _editor.Flyouts.DevFreezeBeautifyAt(80), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
                 break;
             case "flyout-tool":
-                // Активный «Прямоугольник»: обводка и заливка во flyout'е у его кнопки (как после наведения).
+                // Active “Rectangle”: stroke and fill in flyout at its button (like after hover).
                 _editor.Options.Absorb(new AnnotationStyle(red, 3) { Fill = ColorHex.WithOpacity(red, 40) }, OptionsSectionKind.Shape);
                 SetTool(ToolKind.Rect);
                 Dispatcher.BeginInvoke(() => _editor.Flyouts.DevOpenTool(), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
                 break;
             case "flyout-shape":
             {
-                // Инструментом «Выбор» выбрана стрелка: её стили во flyout'е над ней; рядом залитый прямоугольник.
+                // Arrow selected by Select: its styles in flyout above it; filled rectangle nearby.
                 Document.Add(new RectAnnotation(Box(0.08, 0.15, 0.3, 0.3), new AnnotationStyle(red, 4) { Fill = ColorHex.WithOpacity(blue, 40) }));
                 var arrow = new ArrowAnnotation(At(0.45, 0.55), At(0.85, 0.35), new AnnotationStyle(blue, 6) { Arrow = ArrowStyle.Thick });
                 Document.Add(arrow);
@@ -195,7 +195,7 @@ public partial class OverlayWindow
             }
             case "pen-bounds":
             {
-                // Карандаш толщиной 20 с резкими изгибами выбран: пунктирная рамка охватывает весь штрих.
+                // Pencil thickness 20 with sharp turns selected: dashed border covers whole stroke.
                 var pen = new PenAnnotation(At(0.1, 0.25), new AnnotationStyle(red, 20));
                 foreach (var (fx, fy) in new[] { (0.3, 0.1), (0.2, 0.6), (0.45, 0.3), (0.4, 0.85), (0.6, 0.2), (0.55, 0.7), (0.7, 0.5), (0.65, 0.9) })
                     pen.AddPoint(At(fx, fy));
@@ -208,19 +208,19 @@ public partial class OverlayWindow
                 break;
             }
             case "ocr":
-                // Режим текста по выделению: сначала Windows OCR, затем (если модуль установлен и включён) уточнение.
+                // Text mode on selection: first Windows OCR, then (if module installed and enabled) refinement.
                 ToggleTextMode();
                 break;
             case "ocr-select":
-                // То же, но с выделением части слов до уточнения: видно, как выделение переносится на новые слова.
+                // Same, with selection of part of words before refinement: selection moves to new words.
                 _devSelectWhenReady = new Rect(0, 0, 1 / 3.0, 0.5);
                 ToggleTextMode();
                 break;
-            // Сценарии readme-*: кадры для README по синтетическому рабочему столу; доли подобраны под его разметку
-            // (--select из docs/maintainers.md).
+            // readme-* scenarios: frames for README on synthetic desktop; fractions tuned to its layout
+            // (--select from docs/maintainers.md).
             case "readme-hero":
             {
-                // Подпись и стрелка к самому высокому столбцу графика, рамка вокруг первой метрики; ничего не выбрано.
+                // Label and arrow to tallest chart bar, border around first metric; nothing selected.
                 Document.Add(new RectAnnotation(Box(0.029, 0.098, 0.128, 0.117), new AnnotationStyle(red, 3)));
                 Document.Add(new TextAnnotation(At(0.105, 0.37), "Best week so far", new AnnotationStyle(Colors.White, 4) { TextBackground = red }));
                 Document.Add(new ArrowAnnotation(At(0.335, 0.405), At(0.762, 0.425), new AnnotationStyle(red, 5)));
@@ -228,14 +228,14 @@ public partial class OverlayWindow
                 break;
             }
             case "readme-text":
-                // Режим текста: выделены строки русской заметки, открыта плашка QR-кода.
+                // Text mode: Russian note lines selected, QR plaque open.
                 _devSelectWhenReady = new Rect(0.02, 0.43, 0.96, 0.17);
                 _devOpenCodeWhenReady = true;
                 ToggleTextMode();
                 break;
             case "readme-beautify":
             {
-                // Итоговая картинка с оформлением (как при копировании) пишется рядом с исходником: <имя>.export.png.
+                // Final image with decoration (like on copy) written next to source: <name>.export.png.
                 Document.Add(new TextAnnotation(At(0.11, 0.17), "Best week so far", new AnnotationStyle(Colors.White, 4) { TextBackground = red }));
                 Document.Add(new ArrowAnnotation(At(0.355, 0.22), At(0.765, 0.25), new AnnotationStyle(red, 5)));
                 _editor.SetBeautifyOptions(new BeautifyOptions(BeautifyPreset.Blue, BeautifyPadding.L, 16, true));
@@ -249,8 +249,8 @@ public partial class OverlayWindow
                 break;
             }
             case "qr":
-                // Режим текста по выделению; как только коды найдены, плашка открывается на первой ссылке
-                // (или первом коде). Ни «Открыть», ни «Копировать» сценарий не нажимает.
+                // Text mode on selection; as soon as codes found, plaque opens on first link
+                // (or first code). Neither “Open” nor “Copy” pressed by scenario.
                 _devOpenCodeWhenReady = true;
                 ToggleTextMode();
                 break;

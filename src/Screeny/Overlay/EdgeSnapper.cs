@@ -4,17 +4,17 @@ using System.Windows.Media.Imaging;
 
 namespace Screeny.Overlay;
 
-/// <summary>Граница между пикселями: вертикальная — между столбцами <c>e − 1</c> и <c>e</c>, горизонтальная — между строками.</summary>
+/// <summary>Boundary between pixels: vertical — between columns <c>e − 1</c> and <c>e</c>, horizontal — between rows.</summary>
 public enum EdgeAxis { Vertical, Horizontal }
 
 /// <summary>
-/// Прилипание края рамки: <paramref name="edge"/> — граница, куда сейчас встаёт край (как <see cref="PixelRect.X"/>
-/// или <see cref="PixelRect.Right"/>), <paramref name="cross"/> — координата курсора по другой оси.
-/// Возвращает границу, к которой край прилип, или null.
+/// Border edge snap: <paramref name="edge"/> — boundary where edge now sits (like <see cref="PixelRect.X"/>
+/// or <see cref="PixelRect.Right"/>), <paramref name="cross"/> — cursor coordinate on other axis.
+/// Returns boundary edge snapped to, or null.
 /// </summary>
 public delegate int? EdgeSnap(EdgeAxis axis, int edge, int cross);
 
-/// <summary>Яркость пикселя 0…255; абстракция над снимком, чтобы искать границы и в тестах на синтетике.</summary>
+/// <summary>Pixel brightness 0…255; abstraction over screenshot to search edges in synthetic tests too.</summary>
 public interface ILumaSource
 {
     int Width { get; }
@@ -22,7 +22,7 @@ public interface ILumaSource
     int Luma(int x, int y);
 }
 
-/// <summary>Яркость из буфера Bgra32 (тесты, маленькие картинки).</summary>
+/// <summary>Brightness from Bgra32 buffer (tests, small images).</summary>
 public sealed class BgraLuma : ILumaSource
 {
     private readonly byte[] _px;
@@ -40,8 +40,8 @@ public sealed class BgraLuma : ILumaSource
 }
 
 /// <summary>
-/// Яркость снимка, читаемая лениво плитками 64×64 через <see cref="BitmapSource.CopyPixels(Int32Rect, Array, int, int)"/>:
-/// на 4K копируется только окрестность курсора, а не весь кадр. Плитки кэшируются на время жизни объекта.
+/// Screenshot brightness read lazily in 64×64 tiles via <see cref="BitmapSource.CopyPixels(Int32Rect, Array, int, int)"/>:
+/// on 4K only cursor neighborhood copied, not whole frame. Tiles cached for object lifetime.
 /// </summary>
 public sealed class BitmapLuma : ILumaSource
 {
@@ -85,51 +85,51 @@ public sealed class BitmapLuma : ILumaSource
 }
 
 /// <summary>
-/// Поиск контрастной границы на снимке рядом с курсором — для прилипания края рамки выделения. Чистая логика.
+/// Contrast edge search on screenshot near cursor — for selection border edge snap. Pure logic.
 /// <para>
-/// Для вертикальной границы <c>e</c> берётся полоса строк <c>cross ± <see cref="BandHalf"/></c> и в каждой строке
-/// перепад яркости <c>L(e) − L(e − 1)</c>. Граница — кандидат, если средний перепад (со знаком) по полосе не меньше
-/// <see cref="MinContrast"/> и не меньше <see cref="MinAgreement"/> строк перепадают в ту же сторону хотя бы на
-/// <see cref="MinStep"/>. Знак отсекает шум (у него перепады в разные стороны), порог — плавные градиенты,
-/// согласие строк — текст и мелкие детали. Из соседних кандидатов берётся локальный максимум (размытая
-/// на 2 px граница даёт одну позицию), из оставшихся — ближайший к <c>edge</c>.
+/// For vertical boundary <c>e</c>, band of rows <c>cross ± <see cref="BandHalf"/></c> and in each row
+/// brightness step <c>L(e) − L(e − 1)</c>. Boundary candidate if mean step (signed) over band ≥
+/// <see cref="MinContrast"/> and ≥ <see cref="MinAgreement"/> rows step same direction by at least
+/// <see cref="MinStep"/>. Sign filters noise (mixed directions), threshold smooth gradients,
+/// row agreement text/small details. Among neighboring candidates take local maximum (blurred
+/// 2 px edge gives one position), remaining — nearest to <c>edge</c>.
 /// </para>
-/// Считается лениво и только в окрестности ±порог; результат по каждой границе кэшируется до <see cref="ResetCache"/>
-/// (вызывается в начале жеста).
+/// Computed lazily only within ±threshold neighborhood; result per edge cached until <see cref="ResetCache"/>
+/// (called at gesture start).
 /// </summary>
 public sealed class EdgeSnapper(ILumaSource luma)
 {
-    /// <summary>Половина высоты (ширины) полосы, по которой проверяется устойчивость границы, пиксели.</summary>
+    /// <summary>Half height/width of band for edge stability check, pixels.</summary>
     public const int BandHalf = 20;
-    /// <summary>Минимальный средний перепад яркости по полосе (0…255).</summary>
+    /// <summary>Minimum mean brightness step over band (0…255).</summary>
     public const double MinContrast = 16;
-    /// <summary>Минимальный перепад в одной строке, чтобы она «согласилась» с границей.</summary>
+    /// <summary>Minimum step in one row for it to “agree” with edge.</summary>
     public const int MinStep = 8;
-    /// <summary>Доля строк полосы, перепадающих в одну сторону.</summary>
+    /// <summary>Fraction of band rows stepping one direction.</summary>
     public const double MinAgreement = 0.8;
-    /// <summary>Шаг сетки центра полосы вдоль края (для кэша), пиксели.</summary>
+    /// <summary>Band center grid step along edge (for cache), pixels.</summary>
     private const int CrossStep = 4;
 
     private readonly Dictionary<(EdgeAxis Axis, int Edge, int Cross), double> _scores = new();
 
     public static EdgeSnapper FromBgra(byte[] bgra, int width, int height, int stride) => new(new BgraLuma(bgra, width, height, stride));
 
-    /// <summary>Яркость по Rec. 601 в целых: 0…255.</summary>
+    /// <summary>Brightness by Rec. 601 integer: 0…255.</summary>
     public static int LumaOf(int r, int g, int b) => (r * 299 + g * 587 + b * 114) / 1000;
 
-    /// <summary>Сбросить кэш оценок (новый жест: полоса вокруг курсора другая).</summary>
+    /// <summary>Reset estimate cache (new gesture: band around cursor different).</summary>
     public void ResetCache() => _scores.Clear();
 
     /// <summary>
-    /// Ближайшая к <paramref name="edge"/> контрастная граница в пределах <paramref name="threshold"/> по оси
-    /// <paramref name="axis"/>, устойчивая в полосе вокруг <paramref name="cross"/>; null — такой нет.
+    /// Nearest contrast edge to <paramref name="edge"/> within <paramref name="threshold"/> on axis
+    /// <paramref name="axis"/>, stable in band around <paramref name="cross"/>; null — none.
     /// </summary>
     public int? Find(EdgeAxis axis, int edge, int cross, int threshold)
     {
         int length = axis == EdgeAxis.Vertical ? luma.Width : luma.Height;
         int crossLength = axis == EdgeAxis.Vertical ? luma.Height : luma.Width;
         if (threshold < 0 || length < 2 || crossLength < 1) return null;
-        // Полоса центрируется по сетке в CrossStep пикселей: при движении курсора вдоль края оценки берутся из кэша.
+        // Band centered on grid at CrossStep pixels: moving cursor along edge uses cached estimates.
         cross = Math.Clamp(cross / CrossStep * CrossStep + CrossStep / 2, 0, crossLength - 1);
         int from = Math.Max(1, edge - threshold), to = Math.Min(length - 1, edge + threshold);
         int? best = null;
@@ -137,14 +137,14 @@ public sealed class EdgeSnapper(ILumaSource luma)
         {
             double s = Score(axis, e, cross);
             if (s <= 0) continue;
-            // Локальный максимум: на размытой границе из двух равных соседей берётся правый (нижний).
+            // Local maximum: on blurred edge of two equal neighbors take right (bottom).
             if (s < Score(axis, e - 1, cross) || s <= Score(axis, e + 1, cross)) continue;
             if (best is null || Math.Abs(e - edge) < Math.Abs(best.Value - edge)) best = e;
         }
         return best;
     }
 
-    /// <summary>Сила границы <paramref name="e"/> (средний |перепад|) или 0, если она не проходит пороги.</summary>
+    /// <summary>Edge strength of <paramref name="e"/> (mean |step|) or 0 if fails thresholds.</summary>
     private double Score(EdgeAxis axis, int e, int cross)
     {
         int length = axis == EdgeAxis.Vertical ? luma.Width : luma.Height;

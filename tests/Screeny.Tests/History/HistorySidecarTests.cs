@@ -4,7 +4,7 @@ using Screeny.History;
 
 namespace Screeny.Tests.History;
 
-/// <summary>Sidecar-файлы снимка истории: <c>&lt;stamp&gt;.screeny.json</c> и <c>&lt;stamp&gt;.orig.png</c>.</summary>
+/// <summary>History screenshot sidecar files: <c>&lt;stamp&gt;.screeny.json</c> and <c>&lt;stamp&gt;.orig.png</c>.</summary>
 public class HistorySidecarTests : IDisposable
 {
     private readonly string _dir = Path.Combine(Path.GetTempPath(), "ScreenyTests", Guid.NewGuid().ToString("N"));
@@ -28,7 +28,7 @@ public class HistorySidecarTests : IDisposable
         Assert.Equal(Png, File.ReadAllBytes(path));
         Assert.Equal("{\"version\":1}", File.ReadAllText(P("20261024_120000_005.screeny.json")));
         Assert.Equal(OrigPng, File.ReadAllBytes(P("20261024_120000_005.orig.png")));
-        var item = Assert.Single(store.List()); // sidecar-файлы — не отдельные записи
+        var item = Assert.Single(store.List()); // sidecars not separate entries
         Assert.Equal(P("20261024_120000_005.screeny.json"), item.JsonPath);
         Assert.Equal(P("20261024_120000_005.orig.png"), item.OriginalPath);
         Assert.DoesNotContain(Directory.GetFiles(_dir), f => f.EndsWith(".tmp"));
@@ -71,7 +71,7 @@ public class HistorySidecarTests : IDisposable
     {
         var store = new HistoryStore(_dir, 10);
         var t = new DateTime(2026, 2, 2);
-        // Папка с именем временного файла снимка: запись в него падает после того, как sidecar-файлы уже записаны.
+        // Folder named as screenshot temp file: entry falls into it after sidecars written.
         Directory.CreateDirectory(P("20260202_000000_000.png.tmp"));
         Assert.ThrowsAny<Exception>(() => store.Save(Png, Both, t));
         Assert.Empty(store.List());
@@ -98,7 +98,7 @@ public class HistorySidecarTests : IDisposable
     public void Save_SkipsNameWhoseOrphanSidecarExists()
     {
         Directory.CreateDirectory(_dir);
-        // Сирота без снимка: новый снимок не должен «унаследовать» его оригинал. Prune после сохранения уберёт её.
+        // Orphan without screenshot: new screenshot must not “inherit” its original. Prune after save removes it.
         File.WriteAllText(P("20260303_000000_000.orig.png"), "stale");
         var path = new HistoryStore(_dir, 10).Save(Png, new HistorySidecar("{}", null), new DateTime(2026, 3, 3));
         Assert.Equal("20260303_000000_000_1.png", Path.GetFileName(path));
@@ -210,7 +210,7 @@ public class HistorySidecarTests : IDisposable
         Assert.NotNull(original);
         Assert.Equal((2, 2), (original!.PixelWidth, original.PixelHeight));
 
-        // Без оригинала запись истории не получает .orig.png.
+        // Without original entry gets no .orig.png.
         var store = new HistoryStore(_dir, 10);
         store.Save(Png, new HistorySidecar("{}", null), new DateTime(2026, 2, 2));
         Assert.Empty(store.ListOriginals());

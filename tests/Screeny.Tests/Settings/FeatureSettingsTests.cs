@@ -63,7 +63,7 @@ public class FeatureSettingsTests : IDisposable
     {
         var s = LoadJson(json);
         Assert.Empty(s.DisabledFeatures);
-        Assert.Equal(9, s.HistoryLimit); // битое поле не сбрасывает весь файл
+        Assert.Equal(9, s.HistoryLimit); // broken field doesn't reset whole file
     }
 
     [Fact]

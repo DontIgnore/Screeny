@@ -21,9 +21,9 @@ public class HotkeyRulesTests
     public void FromKeys_IgnoresBareModifiers(Key key) => Assert.Null(HotkeyRules.FromKeys(key, ModifierKeys.Control));
 
     [Theory]
-    [InlineData("Win+Shift+S")]   // системный захват экрана
-    [InlineData("S")]             // заблокировал бы ввод буквы везде
-    [InlineData("Shift+A")]       // тоже обычный ввод текста
+    [InlineData("Win+Shift+S")]   // system screen capture
+    [InlineData("S")]             // would block letter input everywhere
+    [InlineData("Shift+A")]       // also normal text input
     [InlineData("Enter")]
     public void Validate_RejectsReservedAndTypingKeys(string text)
     {
