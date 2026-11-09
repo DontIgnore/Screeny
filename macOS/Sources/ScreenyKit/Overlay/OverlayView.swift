@@ -60,6 +60,8 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
     private var draggingHandle = false
     private(set) var closing = false
     var dialogOpen = false
+    /// A link was opened from a QR code: don't bring the previous app over the browser.
+    var keepPreviousAppInBack = false
     private var toolbarBelow = true
     private var edgeSnapper: EdgeSnapper?
     private var frameGuides: [SnapGuide] = []
@@ -169,10 +171,12 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
     private var monitorPixels: PixelRect { shot.bounds }
     private var handleTolerance: Int { Int((6 * pixelScale).rounded()) }
 
-    private func isFromHud(_ e: NSEvent) -> Bool {
-        guard let hit = hitTest(convert(e.locationInWindow, from: nil).applying(.identity)) else { return false }
-        return hit !== self
+    /// The HUD view under a point of this view (toolbar, flyouts, popups), or nil over the screenshot.
+    private func hudView(at p: CGPoint) -> NSView? {
+        guard let sv = superview, let hit = hitTest(convert(p, to: sv)), hit !== self, hit !== canvas else { return nil }
+        return hit
     }
+    var hasSelection: Bool { selection.hasSelection }
 
     // MARK: Host protocols
 
@@ -262,7 +266,7 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
     override func mouseMoved(with e: NSEvent) {
         let p = local(e)
         if textMode { textMouseMove(p, dragging: false); return }
-        if let hit = hitTest(p), hit !== self, hit !== canvas {
+        if hudView(at: p) != nil {
             NSCursor.arrow.set()
             if editor.pipetteOn { magnifier.isHidden = true }
             return
@@ -419,6 +423,7 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
 
     /// Back to choosing an area. Markup stays in screenshot coordinates.
     func resetSelection() {
+        exitTextMode()
         editor.commitTextEdit()
         resetInteraction()
         editor.setPipette(false)
@@ -430,7 +435,13 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
         editor.refreshOptions()
         hideHint()
         refreshSelectionVisuals()
-        updateHover(mouseLocal)
+        if window?.frame.contains(NSEvent.mouseLocation) == true { updateHover(mouseLocal) } else { mouseLeftDisplay() }
+    }
+
+    /// The mouse left this display: hide what follows it.
+    func mouseLeftDisplay() {
+        magnifier.isHidden = true
+        if mode == .selecting && !selection.hasSelection && hint != nil { hint = nil; canvas.needsDisplay = true }
     }
 
     // MARK: HUD
@@ -526,7 +537,7 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
         if editor.isTextEditing { return }
         let cmd = e.modifierFlags.contains(.command), shift = e.modifierFlags.contains(.shift)
         if textMode { if !textKeyDown(e) { super.keyDown(with: e) }; return }
-        switch e.keyCode {
+        switch Key.code(e) {
         case Key.esc: stepBack()
         case Key.ret, Key.enter:
             if mode == .selecting && !selection.hasSelection && !hasGesture { selectHintUnderCursor() }
@@ -536,7 +547,9 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
         case Key.s where cmd: saveAs()
         case Key.f3 where settings.actionAllowed(.pin): complete(.pin)
         case Key.t where cmd && settings.isOn(.ocr): toggleTextMode()
-        case Key.left, Key.right, Key.up, Key.down where selection.hasSelection && document.selected == nil:
+        case Key.left, Key.right, Key.up, Key.down:
+            guard selection.hasSelection else { return }
+            if document.selected != nil { _ = editor.handleKey(e, editing: mode == .editing); return }
             if hasGesture { return }
             let step = e.modifierFlags.contains(.option) || e.modifierFlags.contains(.command) ? 10 : 1
             let k = e.keyCode
@@ -790,7 +803,7 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
 
     private func textKeyDown(_ e: NSEvent) -> Bool {
         let cmd = e.modifierFlags.contains(.command)
-        switch e.keyCode {
+        switch Key.code(e) {
         case Key.esc: stepBack()
         case Key.t where cmd: exitTextMode()
         case Key.a where cmd:
@@ -861,7 +874,7 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
 
     private func openCodeLink() {
         guard let i = openCode, codes[i].isLink, let url = URL(string: codes[i].text.trimmingCharacters(in: .whitespacesAndNewlines)) else { return }
-        if !NSWorkspace.shared.open(url) { showHint(Loc.t("Codes.OpenFailed"), hideAfter: 2) } else { cancel() }
+        if !NSWorkspace.shared.open(url) { showHint(Loc.t("Codes.OpenFailed"), hideAfter: 2) } else { keepPreviousAppInBack = true; cancel() }
     }
 
     // MARK: Dev/QA

@@ -60,7 +60,7 @@ final class PinWindow: NSPanel, NSWindowDelegate {
         let s = max(scale, 0.01)
         logicalSize = CGSize(width: CGFloat(image.width) / s, height: CGFloat(image.height) / s)
         self.services = services
-        let screen = near.flatMap { p in NSScreen.screens.first { $0.frame.contains(p) } } ?? NSScreen.main ?? NSScreen.screens[0]
+        let screen = near.flatMap { p in NSScreen.screens.first { $0.frame.contains(CGPoint(x: p.x, y: p.y - 1)) } } ?? NSScreen.main ?? NSScreen.screens[0]
         let vis = screen.visibleFrame
         let z = PinGeometry.fitZoom(logicalSize, in: vis.size)
         let size = CGSize(width: (logicalSize.width * z).rounded(), height: (logicalSize.height * z).rounded())

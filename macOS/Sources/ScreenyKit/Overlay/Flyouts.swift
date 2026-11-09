@@ -534,12 +534,23 @@ final class FlyoutController {
         if inside { endIntro(); timers[id]?.invalidate() } else { scheduleClose(f) }
     }
 
+    /// Decided from where the pointer really is when the timer fires (hidden views send no exit events).
+    private func pointerOver(_ v: NSView?) -> Bool {
+        guard let v, !v.isHidden, let w = v.window else { return false }
+        return v.bounds.contains(v.convert(w.mouseLocationOutsideOfEventStream, from: nil))
+    }
+
+    private func hovering(_ f: FlyoutPanel) -> Bool {
+        let anchor: NSView? = f === optionsFlyout ? toolbar.button(for: state.tool) : toolbar.beautifyButton
+        return pointerOver(f) || pointerOver(anchor)
+    }
+
     private func scheduleClose(_ f: FlyoutPanel) {
         let id = ObjectIdentifier(f)
         if f === optionsFlyout && anchoredAtShape { return } // shape options stay while the shape is selected
         schedule(id, Self.hoverClose) { [weak self, weak f] in
             guard let self, let f else { return }
-            if self.overAnchor[id] == true || self.overFlyout[id] == true { return }
+            if self.hovering(f) { return }
             if f === self.optionsFlyout && self.anchoredAtShape { return }
             f.close()
         }
@@ -554,8 +565,7 @@ final class FlyoutController {
         introTimer?.invalidate()
         introTimer = Timer.scheduledTimer(withTimeInterval: Self.intro, repeats: false) { [weak self, weak f] _ in
             guard let self, let f else { return }
-            let id = ObjectIdentifier(f)
-            if self.overAnchor[id] == true || self.overFlyout[id] == true { return }
+            if self.hovering(f) { return }
             if f === self.optionsFlyout && self.anchoredAtShape { return }
             f.close()
         }

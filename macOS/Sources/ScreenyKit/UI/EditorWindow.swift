@@ -65,7 +65,7 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate {
         guard let s = EditSession.load(item) else { return nil }
         session = s
         self.services = services
-        let w = NSWindow(contentRect: CGRect(x: 0, y: 0, width: 1180, height: 800), styleMask: [.titled, .closable, .resizable, .miniaturizable],
+        let w = NSWindow(contentRect: CGRect(x: 0, y: 0, width: 1180, height: 800), styleMask: [.titled, .closable, .resizable, .miniaturizable, .fullSizeContentView],
                          backing: .buffered, defer: false)
         w.minSize = CGSize(width: 760, height: 480)
         Theme.style(w)
@@ -176,8 +176,8 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate {
         canvas.toast(Loc.t("Editor.Saving"))
         var done: String
         switch action {
-        case .copyExplicit, .copy: done = Loc.t(services.copyImage(image, scale: 1) ? "Common.Copied" : "Common.ClipboardBusy")
-        case .pin: services.pin(image, scale: 1); done = Loc.t("Editor.Pinned")
+        case .copyExplicit, .copy: done = Loc.t(services.copyImage(image, scale: ed.unitScale) ? "Common.Copied" : "Common.ClipboardBusy")
+        case .pin: services.pin(image, scale: ed.unitScale); done = Loc.t("Editor.Pinned")
         default: done = Loc.t("Editor.Saved")
         }
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
@@ -528,7 +528,7 @@ final class EditorCanvasView: FlippedView, AnnotationEditorHost, FlyoutHost {
     override func magnify(with e: NSEvent) { zoomAt(zoom * (1 + e.magnification), anchor: local(e)) }
 
     private func updateHover(_ p: CGPoint) {
-        if let hit = hitTest(p), hit !== self { return }
+        if let sv = superview, let hit = hitTest(convert(p, to: sv)), hit !== self { return }
         if spaceDown { NSCursor.openHand.set(); return }
         if editor.pipetteOn {
             let px = pixel(p)
@@ -552,7 +552,7 @@ final class EditorCanvasView: FlippedView, AnnotationEditorHost, FlyoutHost {
     override func keyDown(with e: NSEvent) {
         if editor.isTextEditing { return }
         let cmd = e.modifierFlags.contains(.command)
-        switch e.keyCode {
+        switch Key.code(e) {
         case Key.space: spaceDown = true; NSCursor.openHand.set()
         case Key.esc: stepBack(close: true)
         case Key.c where cmd: actionRequested?(.copyExplicit)

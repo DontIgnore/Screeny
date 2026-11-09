@@ -1,4 +1,5 @@
 import XCTest
+import AppKit
 @testable import ScreenyKit
 
 final class CoreTests: XCTestCase {
@@ -176,5 +177,18 @@ final class CoreTests: XCTestCase {
     func testLocMacifiesKeys() {
         XCTAssertEqual(Loc.macify("Copy (Ctrl+C), Alt to skip, Shift+click"), "Copy (⌘C), ⌥ Option to skip, ⇧click")
         XCTAssertEqual(Loc.macify("Altura"), "Altura")
+    }
+
+    func testShortcutKeysFollowLayout() {
+        func ev(_ code: UInt16, _ ch: String) -> NSEvent {
+            NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: .command, timestamp: 0, windowNumber: 0, context: nil,
+                             characters: ch, charactersIgnoringModifiers: ch, isARepeat: false, keyCode: code)!
+        }
+        XCTAssertEqual(Key.code(ev(6, "z")), Key.z)    // US
+        XCTAssertEqual(Key.code(ev(16, "z")), Key.z)   // German QWERTZ: the key labelled Z
+        XCTAssertEqual(Key.code(ev(6, "y")), Key.y)
+        XCTAssertEqual(Key.code(ev(6, "я")), Key.z)    // Russian: physical position
+        XCTAssertNotEqual(Key.code(ev(0, "q")), Key.a) // French AZERTY: Q is not ⌘A
+        XCTAssertEqual(Key.code(ev(123, "\u{F702}")), Key.left)
     }
 }

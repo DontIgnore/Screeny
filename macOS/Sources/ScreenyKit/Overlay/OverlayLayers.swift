@@ -36,12 +36,10 @@ final class CanvasView: FlippedView {
         let full = CGRect(x: 0, y: 0, width: m.shot.width, height: m.shot.height)
 
         // Annotations, clipped to the selection (effects never spill out).
-        if let clip = m.annotationClip {
-            ctx.saveGState()
-            ctx.clip(to: clip)
-            m.document.render(ctx, RenderContext(source: m.shot, forExport: false))
-            ctx.restoreGState()
-        }
+        ctx.saveGState()
+        if let clip = m.annotationClip { ctx.clip(to: clip) }
+        m.document.render(ctx, RenderContext(source: m.shot, forExport: false))
+        ctx.restoreGState()
 
         // Dim around the selection.
         let dim = RGBA(0, 0, 0, a: m.dimAlpha).cgColor

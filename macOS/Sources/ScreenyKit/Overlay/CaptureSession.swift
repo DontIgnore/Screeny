@@ -19,7 +19,7 @@ final class CaptureSession {
             v.finished = { [weak self] r in self?.finish(r) }
             v.becameActive = { [weak self] active in
                 // Selection lives on one display at a time.
-                for o in self?.views ?? [] where o !== active { o.resetSelection() }
+                for o in self?.views ?? [] where o !== active && o.hasSelection { o.resetSelection() }
             }
             windows.append(w); views.append(v)
         }
@@ -39,13 +39,21 @@ final class CaptureSession {
         })
         observers.append(nc.addObserver(forName: NSApplication.didResignActiveNotification, object: nil, queue: .main) { [weak self] _ in
             // Another app took over (⌘Tab, a system dialog): a frozen screen without focus only gets in the way.
-            guard let self, Date().timeIntervalSince(self.shownAt) > 0.6, !self.views.contains(where: { $0.dialogOpen }) else { return }
+            guard let self, !self.done, !self.views.contains(where: { $0.dialogOpen }) else { return }
+            if Date().timeIntervalSince(self.shownAt) < 0.6 {
+                // Right after showing, the closing status menu can take activation for a moment: take it back.
+                DispatchQueue.main.async { self.focus() }
+                return
+            }
             self.finish(nil)
         })
         // Mouse moves over other displays should go to their overlays.
         NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) { [weak self] e in
-            guard let self, !self.done else { return e }
-            if let w = self.windows.first(where: { $0.frame.contains(NSEvent.mouseLocation) }), w !== NSApp.keyWindow, NSEvent.pressedMouseButtons == 0 {
+            guard let self, !self.done, NSApp.modalWindow == nil, NSEvent.pressedMouseButtons == 0,
+                  !self.views.contains(where: { $0.dialogOpen || $0.hasSelection }) else { return e }
+            // Before anything is selected, the keyboard follows the display under the mouse.
+            if let w = self.windows.first(where: { $0.frame.contains(NSEvent.mouseLocation) }), w !== NSApp.keyWindow {
+                for o in self.views where o.window !== w { o.mouseLeftDisplay() }
                 w.makeKey()
                 (w.contentView as? OverlayView)?.didShow()
             }
@@ -68,7 +76,7 @@ final class CaptureSession {
         if let m = monitor { NSEvent.removeMonitor(m) }
         for w in windows { w.orderOut(nil); w.close() }
         NSCursor.arrow.set()
-        if r?.action != .pin, let p = previousApp, !p.isTerminated, p != NSRunningApplication.current { p.activate() }
+        if r?.action != .pin, !views.contains(where: { $0.keepPreviousAppInBack }), let p = previousApp, !p.isTerminated, p != NSRunningApplication.current { p.activate() }
         let cb = finished
         finished = nil
         DispatchQueue.main.async {

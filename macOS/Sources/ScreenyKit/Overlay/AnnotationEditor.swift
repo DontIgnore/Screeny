@@ -28,6 +28,17 @@ enum Key {
     static let left: UInt16 = 123, right: UInt16 = 124, down: UInt16 = 125, up: UInt16 = 126
     static let minus: UInt16 = 27, equal: UInt16 = 24
 
+    private static let letterCodes: [Character: UInt16] = ["a": 0, "s": 1, "c": 8, "b": 11, "e": 14, "y": 16, "t": 17, "z": 6, "i": 34, "p": 35]
+
+    /// Key code for shortcut matching: on Latin layouts the printed letter decides (⌘Z on QWERTZ is the key labelled Z);
+    /// on other layouts (Russian) the physical position does.
+    static func code(_ e: NSEvent) -> UInt16 {
+        if let ch = e.charactersIgnoringModifiers?.lowercased().first, ch.isASCII, ch.isLetter {
+            return letterCodes[ch] ?? (letterCodes.values.contains(e.keyCode) ? 999 : e.keyCode)
+        }
+        return e.keyCode
+    }
+
     static let toolKeys: [UInt16: ToolKind] = [
         18: .select, 19: .rect, 20: .ellipse, 21: .line, 23: .arrow, 22: .pen, 26: .highlighter, 28: .text, 25: .number, 29: .pixelate,
         27: .blur, 24: .ruler,
@@ -41,6 +52,7 @@ final class AnnotationTextView: NSTextView {
     var commit: (() -> Void)?
     var cancel: (() -> Void)?
     override func keyDown(with event: NSEvent) {
+        if hasMarkedText() { super.keyDown(with: event); return } // CJK input method is composing
         if event.keyCode == Key.esc { cancel?(); return }
         if (event.keyCode == Key.ret || event.keyCode == Key.enter) && !event.modifierFlags.contains(.shift) { commit?(); return }
         super.keyDown(with: event)
@@ -220,7 +232,7 @@ final class AnnotationEditor {
     /// Drawing keys: ⌘Z/⇧⌘Z/⌘Y, Delete and arrows for the selected shape; in drawing mode also I, B and tool keys.
     func handleKey(_ e: NSEvent, editing: Bool) -> Bool {
         let cmd = e.modifierFlags.contains(.command), shift = e.modifierFlags.contains(.shift)
-        let k = e.keyCode
+        let k = Key.code(e)
         switch k {
         case Key.i where editing && !cmd && settings.isOn(.pipette): togglePipette(); return true
         case Key.b where editing && !cmd && settings.isOn(.beautify): toggleBeautify(); return true
@@ -240,7 +252,7 @@ final class AnnotationEditor {
             document.move(s, CGVector(dx: dx, dy: dy))
             return true
         default:
-            if editing && !cmd && drawingEnabledValue, let t = Key.toolKeys[k], settings.toolAllowed(t) { setTool(t); return true }
+            if editing && !cmd && drawingEnabledValue, let t = Key.toolKeys[e.keyCode], settings.toolAllowed(t) { setTool(t); return true }
             return false
         }
     }
@@ -255,8 +267,8 @@ final class AnnotationEditor {
         tv.drawsBackground = true
         tv.textContainerInset = .zero
         tv.textContainer?.lineFragmentPadding = 0
-        tv.isHorizontallyResizable = true
-        tv.isVerticallyResizable = true
+        tv.isHorizontallyResizable = false
+        tv.isVerticallyResizable = false
         tv.textContainer?.widthTracksTextView = false
         tv.textContainer?.containerSize = CGSize(width: 100_000, height: 100_000)
         tv.insertionPointColor = .white
