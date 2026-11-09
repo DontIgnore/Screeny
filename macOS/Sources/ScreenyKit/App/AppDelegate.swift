@@ -33,7 +33,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, AppServices {
             self?.applyHotkeys()
         }
         if DevScenarios.handle(CommandLine.arguments, app: self) { return }
-        if settings.setupWizardVersion < 1 || !ScreenCapture.hasPermission { showSetupWizard() }
+        if settings.setupWizardVersion < 1 { showSetupWizard() }
         startUpdateChecks()
         selfTestCapture()
     }
@@ -195,19 +195,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, AppServices {
     func startCapture() {
         if let s = session { s.focus(); return }
         if capturing { return }
-        guard ScreenCapture.hasPermission else {
-            // The system dialog appears once; after that the wizard explains how to turn it on.
-            CGRequestScreenCaptureAccess()
-            showSetupWizard()
-            return
-        }
         capturing = true
         let previous = NSWorkspace.shared.frontmostApplication
         let exclude = settings.excludePinsFromCapture ? PinWindow.windowNumbers.map { CGWindowID($0) } : []
-        ScreenCapture.captureAll(excludingWindows: exclude) { [weak self] result in
+        // Without Screen Recording permission macOS's screen picker asks which display to capture (no permission needed).
+        let capture: (@escaping (Result<[DisplayShot], CaptureError>) -> Void) -> Void = ScreenCapture.hasPermission
+            ? { ScreenCapture.captureAll(excludingWindows: exclude, completion: $0) }
+            : { ScreenCapture.captureViaPicker(completion: $0) }
+        capture { [weak self] result in
             guard let self else { return }
             self.capturing = false
             switch result {
+            case .failure(.cancelled):
+                break
             case .failure(.noPermission):
                 self.showSetupWizard()
             case .failure(let e):

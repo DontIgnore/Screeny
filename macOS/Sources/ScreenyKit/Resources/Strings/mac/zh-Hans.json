@@ -30,7 +30,7 @@
  "Mac.Wizard.GrantAccess": "授予权限…",
  "Mac.Wizard.Intro": "允许屏幕录制，选择截图快捷键和需要的功能。这些以后都可以在设置中更改。",
  "Mac.Wizard.PermissionGranted": "✓ Screeny 已获准录制屏幕。",
- "Mac.Wizard.PermissionNeeded": "Screeny 需要屏幕录制权限才能截图。",
+ "Mac.Wizard.PermissionNeeded": "没有屏幕录制权限时 Screeny 也能使用：macOS 每次都会让你点击要截取的屏幕。授予权限后即可像在 Windows 上一样直接截图。",
  "Mac.Wizard.PermissionNote": "请在“系统设置 › 隐私与安全性 › 录屏与系统录音”中打开 Screeny。macOS 可能会要求你退出并重新打开 Screeny——这没关系：此窗口会再次打开，你可以继续完成设置。",
  "Mac.Wizard.SectionPermission": "屏幕录制",
  "Mac.Wizard.ShortcutNote": "⌘⇧3、⌘⇧4 和 ⌘⇧5 属于 macOS 截屏工具。若要在 Screeny 中使用 ⌘⇧4，请先在“系统设置 › 键盘 › 键盘快捷键 › 截屏”中将其关闭，然后在这里添加。",

@@ -31,7 +31,7 @@
  "Mac.Wizard.GrantAccess": "Grant access…",
  "Mac.Wizard.Intro": "Allow screen recording, choose your capture shortcuts and the features you want. You can change all of this later in Settings.",
  "Mac.Wizard.PermissionGranted": "✓ Screeny is allowed to record the screen.",
- "Mac.Wizard.PermissionNeeded": "Screeny needs the Screen Recording permission to take screenshots.",
+ "Mac.Wizard.PermissionNeeded": "Screeny works without the Screen Recording permission: macOS then asks you to click the screen to capture each time. Allow it to skip that step and capture straight away, like on Windows.",
  "Mac.Wizard.PermissionNote": "Turn on Screeny in System Settings › Privacy & Security › Screen & System Audio Recording. macOS may ask you to quit and reopen Screeny — that's fine: this window opens again so you can finish the setup.",
  "Mac.Wizard.SectionPermission": "SCREEN RECORDING",
  "Mac.Wizard.ShortcutNote": "⌘⇧3, ⌘⇧4 and ⌘⇧5 belong to the macOS screenshot tool. To use ⌘⇧4 in Screeny, turn it off in System Settings › Keyboard › Keyboard Shortcuts › Screenshots, then add it here.",

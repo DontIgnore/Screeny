@@ -31,7 +31,7 @@
  "Mac.Wizard.GrantAccess": "Dar acceso…",
  "Mac.Wizard.Intro": "Permite la grabación de pantalla, elige los atajos de captura y las funciones que quieras. Puedes cambiarlo todo más tarde en Ajustes.",
  "Mac.Wizard.PermissionGranted": "✓ Screeny tiene permiso para grabar la pantalla.",
- "Mac.Wizard.PermissionNeeded": "Screeny necesita el permiso de grabación de pantalla para hacer capturas.",
+ "Mac.Wizard.PermissionNeeded": "Screeny funciona sin el permiso de grabación de pantalla: macOS te pedirá cada vez que hagas clic en la pantalla que quieres capturar. Concede el permiso para capturar al instante, como en Windows.",
  "Mac.Wizard.PermissionNote": "Activa Screeny en Ajustes del Sistema › Privacidad y seguridad › Grabación de pantalla y audio del sistema. macOS puede pedirte que cierres y vuelvas a abrir Screeny; no pasa nada: esta ventana se abrirá de nuevo para que termines la configuración.",
  "Mac.Wizard.SectionPermission": "GRABACIÓN DE PANTALLA",
  "Mac.Wizard.ShortcutNote": "⌘⇧3, ⌘⇧4 y ⌘⇧5 pertenecen a la herramienta de capturas de macOS. Para usar ⌘⇧4 en Screeny, desactívalo en Ajustes del Sistema › Teclado › Funciones rápidas de teclado › Capturas de pantalla y añádelo aquí.",

@@ -30,7 +30,7 @@
  "Mac.Wizard.GrantAccess": "アクセスを許可…",
  "Mac.Wizard.Intro": "画面収録を許可し、撮影用のショートカットと使いたい機能を選んでください。これらはすべて後から設定で変更できます。",
  "Mac.Wizard.PermissionGranted": "✓ Screeny は画面収録を許可されています。",
- "Mac.Wizard.PermissionNeeded": "スクリーンショットを撮るには、Screeny に画面収録の許可が必要です。",
+ "Mac.Wizard.PermissionNeeded": "画面収録の許可がなくても Screeny は使えます。その場合、macOS が毎回キャプチャする画面をクリックするよう求めます。許可すると Windows と同じようにすぐにキャプチャできます。",
  "Mac.Wizard.PermissionNote": "「システム設定 › プライバシーとセキュリティ › 画面収録とシステムオーディオ録音」で Screeny をオンにしてください。macOS から Screeny を終了して再度開くよう求められることがありますが、問題ありません。このウィンドウが再び開くので、続けてセットアップを完了できます。",
  "Mac.Wizard.SectionPermission": "画面収録",
  "Mac.Wizard.ShortcutNote": "⌘⇧3、⌘⇧4、⌘⇧5 は macOS のスクリーンショットツールが使用しています。Screeny で ⌘⇧4 を使うには、「システム設定 › キーボード › キーボードショートカット › スクリーンショット」でオフにしてから、ここに追加してください。",

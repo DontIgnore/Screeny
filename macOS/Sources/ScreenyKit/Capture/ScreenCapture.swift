@@ -21,7 +21,7 @@ struct DisplayShot {
     var raw: [ScreenCapture.RawWindow] = []
 }
 
-enum CaptureError: Error { case noPermission, failed(String) }
+enum CaptureError: Error { case noPermission, cancelled, failed(String) }
 
 enum ScreenCapture {
     static var hasPermission: Bool { CGPreflightScreenCaptureAccess() }
@@ -43,19 +43,7 @@ enum ScreenCapture {
                 for screen in screens {
                     let id = displayID(screen)
                     guard let display = content.displays.first(where: { $0.displayID == id }) else { continue }
-                    let scale = screen.backingScaleFactor
-                    let cfg = SCStreamConfiguration()
-                    cfg.width = Int((screen.frame.width * scale).rounded())
-                    cfg.height = Int((screen.frame.height * scale).rounded())
-                    cfg.showsCursor = false
-                    cfg.captureResolution = .best
-                    if #available(macOS 15.0, *) { cfg.captureDynamicRange = .SDR }
-                    cfg.colorSpaceName = CGColorSpace.sRGB
-                    let filter = SCContentFilter(display: display, excludingWindows: excluded)
-                    let cg = try await SCScreenshotManager.captureImage(contentFilter: filter, configuration: cfg)
-                    let img = PixelImage(cgImage: cg, scale: scale)
-                    shots.append(DisplayShot(frame: screen.frame, displays: [DisplayArea(frame: screen.frame, visibleFrame: screen.visibleFrame)], image: img,
-                                             windows: windows(windowList, in: screen.frame, scale: scale, pixelBounds: img.bounds), raw: windowList))
+                    shots.append(try await shot(of: screen, filter: SCContentFilter(display: display, excludingWindows: excluded), windowList: windowList))
                 }
                 let result = shots
                 await MainActor.run { result.isEmpty ? completion(.failure(.failed("no displays"))) : completion(.success(result)) }
@@ -64,6 +52,37 @@ enum ScreenCapture {
                 await MainActor.run { completion(.failure(hasPermission ? .failed(error.localizedDescription) : .noPermission)) }
             }
         }
+    }
+
+    /// Without Screen Recording permission: macOS's own screen picker (no permission needed; the user clicks the display
+    /// to capture each time), then one screenshot of that display through the filter the picker hands back.
+    static func captureViaPicker(completion: @escaping (Result<[DisplayShot], CaptureError>) -> Void) {
+        PickerCapture.shared.start(completion)
+    }
+
+    /// The picker's display as an NSScreen (macOS 15.2 names it; older systems: match by size, prefer the mouse's screen).
+    static func screen(for filter: SCContentFilter) -> NSScreen? {
+        if #available(macOS 15.2, *), let id = filter.includedDisplays.first?.displayID {
+            return NSScreen.screens.first { displayID($0) == id }
+        }
+        let size = filter.contentRect.size
+        let fits = NSScreen.screens.filter { $0.frame.size == size }
+        return fits.first { $0.frame.contains(NSEvent.mouseLocation) } ?? fits.first ?? NSScreen.main
+    }
+
+    static func shot(of screen: NSScreen, filter: SCContentFilter, windowList: [RawWindow]) async throws -> DisplayShot {
+        let scale = screen.backingScaleFactor
+        let cfg = SCStreamConfiguration()
+        cfg.width = Int((screen.frame.width * scale).rounded())
+        cfg.height = Int((screen.frame.height * scale).rounded())
+        cfg.showsCursor = false
+        cfg.captureResolution = .best
+        if #available(macOS 15.0, *) { cfg.captureDynamicRange = .SDR }
+        cfg.colorSpaceName = CGColorSpace.sRGB
+        let cg = try await SCScreenshotManager.captureImage(contentFilter: filter, configuration: cfg)
+        let img = PixelImage(cgImage: cg, scale: scale)
+        return DisplayShot(frame: screen.frame, displays: [DisplayArea(frame: screen.frame, visibleFrame: screen.visibleFrame)], image: img,
+                           windows: windows(windowList, in: screen.frame, scale: scale, pixelBounds: img.bounds), raw: windowList)
     }
 
     struct RawWindow { let bounds: CGRect; let layer: Int }
@@ -133,5 +152,60 @@ enum ScreenCapture {
 
     static func openPermissionSettings() {
         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture")!)
+    }
+}
+
+/// Keeps the picker observer alive for one capture at a time.
+private final class PickerCapture: NSObject, SCContentSharingPickerObserver {
+    static let shared = PickerCapture()
+    private var completion: ((Result<[DisplayShot], CaptureError>) -> Void)?
+
+    func start(_ completion: @escaping (Result<[DisplayShot], CaptureError>) -> Void) {
+        guard self.completion == nil else { return }
+        self.completion = completion
+        let picker = SCContentSharingPicker.shared
+        var cfg = SCContentSharingPickerConfiguration()
+        cfg.allowedPickerModes = .singleDisplay
+        cfg.allowsChangingSelectedContent = false
+        picker.defaultConfiguration = cfg
+        picker.add(self)
+        picker.isActive = true
+        picker.present(using: .display)
+    }
+
+    private func done(_ r: Result<[DisplayShot], CaptureError>) {
+        let picker = SCContentSharingPicker.shared
+        picker.remove(self)
+        picker.isActive = false
+        let cb = completion
+        completion = nil
+        cb?(r)
+    }
+
+    func contentSharingPicker(_ picker: SCContentSharingPicker, didCancelFor stream: SCStream?) {
+        DispatchQueue.main.async { self.done(.failure(.cancelled)) }
+    }
+
+    func contentSharingPickerStartDidFailWithError(_ error: any Error) {
+        Log.error("Screen picker failed", error)
+        DispatchQueue.main.async { self.done(.failure(.failed(error.localizedDescription))) }
+    }
+
+    func contentSharingPicker(_ picker: SCContentSharingPicker, didUpdateWith filter: SCContentFilter, for stream: SCStream?) {
+        DispatchQueue.main.async {
+            guard let screen = ScreenCapture.screen(for: filter) else { self.done(.failure(.failed("no display"))); return }
+            let list = ScreenCapture.windowSnapshot()
+            Task {
+                // Let the picker's highlight fade before the picture is taken.
+                try? await Task.sleep(nanoseconds: 250_000_000)
+                do {
+                    let s = try await ScreenCapture.shot(of: screen, filter: filter, windowList: list)
+                    await MainActor.run { self.done(.success([s])) }
+                } catch {
+                    Log.error("Picker capture failed", error)
+                    await MainActor.run { self.done(.failure(.failed(error.localizedDescription))) }
+                }
+            }
+        }
     }
 }
