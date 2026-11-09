@@ -26,6 +26,7 @@
  "Mac.Settings.SetupWizard": "セットアップウィザード…",
  "Mac.Settings.SystemShortcut": "{0} は macOS のスクリーンショット用ショートカットです。「システム設定 › キーボード › キーボードショートカット › スクリーンショット」でオフにしないと、Screeny はこのキー操作を受け取れません。",
  "Mac.Tray.Setup": "セットアップと権限…",
+ "Mac.Update.Install": "更新して再起動",
  "Mac.Wizard.GrantAccess": "アクセスを許可…",
  "Mac.Wizard.Intro": "画面収録を許可し、撮影用のショートカットと使いたい機能を選んでください。これらはすべて後から設定で変更できます。",
  "Mac.Wizard.PermissionGranted": "✓ Screeny は画面収録を許可されています。",

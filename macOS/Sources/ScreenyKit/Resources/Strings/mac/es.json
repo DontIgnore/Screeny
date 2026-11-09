@@ -27,6 +27,7 @@
  "Mac.Settings.SetupWizard": "Asistente de configuración…",
  "Mac.Settings.SystemShortcut": "{0} es un atajo de capturas de pantalla de macOS. Desactívalo en Ajustes del Sistema › Teclado › Funciones rápidas de teclado › Capturas de pantalla; si no, Screeny nunca recibirá la pulsación.",
  "Mac.Tray.Setup": "Configuración y permisos…",
+ "Mac.Update.Install": "Actualizar y reiniciar",
  "Mac.Wizard.GrantAccess": "Dar acceso…",
  "Mac.Wizard.Intro": "Permite la grabación de pantalla, elige los atajos de captura y las funciones que quieras. Puedes cambiarlo todo más tarde en Ajustes.",
  "Mac.Wizard.PermissionGranted": "✓ Screeny tiene permiso para grabar la pantalla.",

@@ -235,6 +235,20 @@ enum DevScenarios {
                                                 doc: v.document)
                 try PixelImage.encode(BeautifyComposer.compose(img, .default), type: .png)?.write(to: out.deletingPathExtension().appendingPathExtension("export.png"))
             }
+        case "selfupdate":
+            // out = the release zip from pack.sh
+            let app = try SelfUpdater.unpack(out)
+            try SelfUpdater.verify(app)
+            print("PASS release zip unpacks and is signed by the same developer")
+            let p = Process(); p.executableURL = URL(fileURLWithPath: "/usr/bin/codesign")
+            p.arguments = ["--force", "--deep", "--sign", "-", app.path]; try p.run(); p.waitUntilExit()
+            do { try SelfUpdater.verify(app); print("FAIL ad-hoc build accepted"); exit(1) } catch { print("PASS foreign signature rejected") }
+            exit(0)
+        case "swap":
+            // out = a copy of the app to replace; the zip path comes as the fixture argument
+            let zip = URL(fileURLWithPath: CommandLine.arguments.last!)
+            try SelfUpdater.scheduleSwap(new: try SelfUpdater.unpack(zip), replacing: out)
+            exit(0)
         case "flow":
             try flow(app: app, fixture: fixture, out: out)
         case "editor":

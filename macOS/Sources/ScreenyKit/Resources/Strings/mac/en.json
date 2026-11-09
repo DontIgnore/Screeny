@@ -27,6 +27,7 @@
  "Mac.Settings.SetupWizard": "Setup wizard…",
  "Mac.Settings.SystemShortcut": "{0} is a macOS screenshot shortcut. Turn it off in System Settings › Keyboard › Keyboard Shortcuts › Screenshots, otherwise Screeny never gets the key press.",
  "Mac.Tray.Setup": "Setup and permissions…",
+ "Mac.Update.Install": "Update and restart",
  "Mac.Wizard.GrantAccess": "Grant access…",
  "Mac.Wizard.Intro": "Allow screen recording, choose your capture shortcuts and the features you want. You can change all of this later in Settings.",
  "Mac.Wizard.PermissionGranted": "✓ Screeny is allowed to record the screen.",

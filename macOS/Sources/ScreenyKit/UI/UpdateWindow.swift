@@ -87,8 +87,19 @@ final class UpdateWindowController: NSWindowController, NSWindowDelegate {
         laterButton.keyEquivalent = "\u{1b}"
         openButton.handler = { [weak self] in
             guard let self else { return }
-            NSWorkspace.shared.open(self.release.pageURL)
-            self.close()
+            guard let asset = self.release.macAssetURL else { NSWorkspace.shared.open(self.release.pageURL); self.close(); return }
+            // Like Velopack on Windows: download, check it's signed by the same developer, replace, restart.
+            [self.openButton, self.laterButton, self.skipButton].forEach { $0.isEnabled = false }
+            self.openButton.title = Loc.t("Update.Downloading")
+            SelfUpdater.install(from: asset, progress: { p in
+                self.openButton.title = Loc.f("Update.DownloadingPercent", Int(p * 100))
+            }, completion: { error in
+                guard let error else { self.openButton.title = Loc.t("Update.Restarting"); return }
+                Log.error("Self-update failed", error)
+                [self.openButton, self.laterButton, self.skipButton].forEach { $0.isEnabled = true }
+                self.render()
+                let a = NSAlert(); a.messageText = Loc.f("Update.Failed", error.localizedDescription); a.runModal()
+            })
         }
         openButton.keyEquivalent = "\r"
         let buttons = NSStackView(views: [skipButton, NSView(), laterButton, openButton])
@@ -106,7 +117,7 @@ final class UpdateWindowController: NSWindowController, NSWindowDelegate {
         whatsNew.stringValue = Loc.t("Update.WhatsNew").uppercased()
         skipButton.title = Loc.t("Update.SkipVersion")
         laterButton.title = Loc.t("Update.Later")
-        openButton.title = Loc.t("Update.UpdateAndRestart")
+        openButton.title = Loc.t(release.macAssetURL == nil ? "Update.UpdateAndRestart" : "Mac.Update.Install")
         if notes.isEmpty { notesView.textStorage?.setAttributedString(Self.attributed(notes)) }
         [skipButton, laterButton, openButton].forEach { $0.invalidateIntrinsicContentSize() }
         refit()

@@ -13,6 +13,7 @@ cd macOS
 ./build.sh --install  # also copies it to ~/Applications/Screeny.app (quits a running copy first)
 ./build.sh --run      # install and launch
 swift test            # unit tests
+./pack.sh             # release zip for GitHub Releases (the in-app updater installs it)
 ```
 
 ### Screen Recording permission
@@ -37,7 +38,7 @@ first port attempt.
 | Tray icon: click captures, right click opens the menu | Menu bar icon: click captures, right click (or ⌃/⌥ click) opens the menu |
 | Windows OCR + optional PaddleOCR module | Apple Vision text recognition, built in (no module to download) |
 | Conflicts wizard (Lightshot, ShareX…) | Setup window: Screen Recording permission, shortcuts, features, updates, open at login |
-| Velopack self-update | Update check against GitHub Releases; the download page opens in the browser |
+| Velopack self-update | Same flow: the update check finds a `*mac*.zip` asset on GitHub Releases, downloads it, checks it's signed by the same developer, swaps the app and restarts (without such an asset it opens the release page). `./pack.sh` builds that zip. |
 
 Annotation thickness and text size are chosen in screen points, so markup looks the same size as on a 100 % Windows
 display; the files store pixels like on Windows.

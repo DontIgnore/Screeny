@@ -191,4 +191,12 @@ final class CoreTests: XCTestCase {
         XCTAssertNotEqual(Key.code(ev(0, "q")), Key.a) // French AZERTY: Q is not ⌘A
         XCTAssertEqual(Key.code(ev(123, "\u{F702}")), Key.left)
     }
+
+    func testReleaseFindsMacAsset() {
+        let json = #"{"tag_name":"v0.3.0","html_url":"https://github.com/x/y/releases/tag/v0.3.0","assets":[{"name":"Screeny-win-Setup.exe","browser_download_url":"https://e/w.exe"},{"name":"Screeny-mac-0.3.0.zip","browser_download_url":"https://e/m.zip"}]}"#
+        let r = UpdateChecker.parseRelease(Data(json.utf8))
+        XCTAssertEqual(r?.version, "0.3.0")
+        XCTAssertEqual(r?.macAssetURL, URL(string: "https://e/m.zip"))
+        XCTAssertNil(UpdateChecker.parseRelease(Data(#"{"tag_name":"v1","assets":[]}"#.utf8))?.macAssetURL)
+    }
 }

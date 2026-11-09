@@ -35,6 +35,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate, AppServices {
         if DevScenarios.handle(CommandLine.arguments, app: self) { return }
         if settings.setupWizardVersion < 1 || !ScreenCapture.hasPermission { showSetupWizard() }
         startUpdateChecks()
+        selfTestCapture()
+    }
+
+    /// Once Screen Recording is granted, quietly capture every display once and confirm the pixels are real
+    /// (not the blank image macOS returns without permission). The result goes to the log and a short notice.
+    private func selfTestCapture() {
+        guard ScreenCapture.hasPermission else { Log.error("Self-test: no Screen Recording permission yet"); return }
+        ScreenCapture.captureAll(excludingWindows: []) { [weak self] r in
+            switch r {
+            case .success(let shots):
+                let ok = shots.allSatisfy { s in
+                    let img = s.image
+                    var seen = Set<UInt32>()
+                    for i in stride(from: 0, to: img.width * img.height, by: max(1, img.width * img.height / 4000)) {
+                        let o = i * 4
+                        seen.insert(UInt32(img.pixels[o]) << 16 | UInt32(img.pixels[o + 1]) << 8 | UInt32(img.pixels[o + 2]))
+                        if seen.count > 8 { return true }
+                    }
+                    return false
+                }
+                let sizes = shots.map { "\($0.image.width)×\($0.image.height)" }.joined(separator: ", ")
+                Log.error("Self-test: capture \(ok ? "OK" : "returned a blank picture") \(sizes)")
+                if ok, let t = self?.hotkeyText { Toast.show("Screeny ✓ \(t)") }
+            case .failure(let e):
+                Log.error("Self-test: capture failed: \(e)")
+            }
+        }
     }
 
     /// Opening Screeny again from Finder or Spotlight (it's already running) takes a screenshot, like on Windows.

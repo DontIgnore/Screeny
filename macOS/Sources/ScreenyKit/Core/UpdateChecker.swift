@@ -6,6 +6,8 @@ public struct ReleaseInfo: Equatable {
     public var version: String
     public var notes: String?
     public var pageURL: URL
+    /// The macOS build attached to the release (a zip with Screeny.app), if there is one.
+    public var macAssetURL: URL? = nil
 }
 
 public enum UpdateCheckResult: Equatable {
@@ -60,7 +62,12 @@ public enum UpdateChecker {
         guard let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let tag = obj["tag_name"] as? String, !tag.isEmpty else { return nil }
         let page = (obj["html_url"] as? String).flatMap(URL.init(string:)) ?? URL(string: "\(AppInfo.repositoryURL)/releases/tag/\(tag)")!
-        return ReleaseInfo(version: normalize(tag), notes: obj["body"] as? String, pageURL: page)
+        let assets = obj["assets"] as? [[String: Any]] ?? []
+        let mac = assets.first { a in
+            let n = (a["name"] as? String ?? "").lowercased()
+            return n.hasSuffix(".zip") && (n.contains("mac") || n.contains("osx") || n.contains("darwin"))
+        }.flatMap { ($0["browser_download_url"] as? String).flatMap(URL.init(string:)) }
+        return ReleaseInfo(version: normalize(tag), notes: obj["body"] as? String, pageURL: page, macAssetURL: mac)
     }
 
     /// Friendly reason like Windows (AboutInfo.cs ReasonKeyFor); nil = show the raw error.
