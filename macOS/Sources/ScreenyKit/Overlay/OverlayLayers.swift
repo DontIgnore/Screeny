@@ -3,11 +3,15 @@ import AppKit
 /// The frozen screenshot as a layer (cheap to redraw over: only the canvas above it repaints).
 final class ShotView: NSView {
     private let image: CGImage
-    init(image: CGImage) {
+    /// Part of the image this view shows, in unit coordinates with the origin at the bottom left (CALayer contentsRect).
+    private let crop: CGRect
+    init(image: CGImage, crop: CGRect = CGRect(x: 0, y: 0, width: 1, height: 1)) {
         self.image = image
+        self.crop = crop
         super.init(frame: .zero)
         wantsLayer = true
         layer?.contents = image
+        layer?.contentsRect = crop
         layer?.contentsGravity = .resize
         layer?.magnificationFilter = .nearest
         layer?.minificationFilter = .linear
@@ -16,7 +20,8 @@ final class ShotView: NSView {
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
     /// Used only by offscreen rendering (cacheDisplay); on screen the layer shows the image.
     override func draw(_ dirtyRect: NSRect) {
-        NSGraphicsContext.current?.cgContext.draw(image, in: bounds)
+        let full = CGSize(width: bounds.width / crop.width, height: bounds.height / crop.height)
+        NSGraphicsContext.current?.cgContext.draw(image, in: CGRect(x: -crop.minX * full.width, y: -crop.minY * full.height, width: full.width, height: full.height))
     }
 }
 
@@ -24,6 +29,8 @@ final class ShotView: NSView {
 /// ruler, text-mode highlights and snap guides (DimLayer, AnnotationLayer, RulerLayer, TextLayer, SnapGuideLayer).
 final class CanvasView: FlippedView {
     weak var model: CanvasModel?
+    /// Where this view's top-left sits in the model's view (another display's part of the virtual screen).
+    var offset = CGPoint.zero
 
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
 
@@ -31,6 +38,7 @@ final class CanvasView: FlippedView {
         guard let m = model, let ctx = NSGraphicsContext.current?.cgContext else { return }
         let k = 1 / m.pixelScale // pixels → points
         ctx.saveGState()
+        ctx.translateBy(x: -offset.x, y: -offset.y)
         ctx.scaleBy(x: k, y: k)
         let s = m.pixelScale // one point in pixels
         let full = CGRect(x: 0, y: 0, width: m.shot.width, height: m.shot.height)

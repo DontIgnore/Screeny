@@ -10,28 +10,57 @@ final class CaptureSession {
     private let shownAt = Date()
     var finished: ((CaptureResult?) -> Void)?
 
+    /// The whole capture is one view over the virtual screen of all displays (one selection, one markup, like Windows);
+    /// it lives in the window of the display that holds the selection, other displays show panes onto it.
     init(shots: [DisplayShot], settings: AppSettings, previousApp: NSRunningApplication?) {
         self.previousApp = previousApp
-        for s in shots {
-            let w = OverlayWindow(screen: s.screen)
-            let v = OverlayView(shot: s, settings: settings)
-            w.contentView = v
-            v.finished = { [weak self] r in self?.finish(r) }
-            v.becameActive = { [weak self] active in
-                // Selection lives on one display at a time.
-                for o in self?.views ?? [] where o !== active && o.hasSelection { o.resetSelection() }
+        let shot = ScreenCapture.virtualScreen(shots)
+        let master = OverlayView(shot: shot, settings: settings)
+        master.finished = { [weak self] r in self?.finish(r) }
+        master.afterGesture = { [weak self] in self?.rehome() }
+        views = [master]
+        for d in shot.displays {
+            let w = OverlayWindow(frame: d.frame)
+            if shot.displays.count > 1 {
+                let pane = OverlayPane(master: master, area: d.frame, virtualFrame: shot.frame, image: shot.image.cgImage)
+                w.contentView?.addSubview(pane)
+                panes.append(pane)
             }
-            windows.append(w); views.append(v)
+            windows.append(w)
         }
+        master.panes = panes
+        home(at: windows.firstIndex { $0.frame.contains(NSEvent.mouseLocation) } ?? 0)
+    }
+
+    private var panes: [OverlayPane] = []
+    var master: OverlayView { views[0] }
+
+    /// Puts the overlay view into display `i`'s window (offset so its virtual-screen coordinates line up).
+    private func home(at i: Int) {
+        let w = windows[i], u = master.shotInfo.frame
+        if master.window === w { return }
+        let typing = master.editor.isTextEditing
+        if typing { master.editor.commitTextEdit() }
+        master.removeFromSuperview()
+        master.frame = CGRect(x: u.minX - w.frame.minX, y: u.minY - w.frame.minY, width: u.width, height: u.height)
+        w.contentView?.addSubview(master)
+        for (j, p) in panes.enumerated() { p.isHidden = j == i }
+        if !done && w.isVisible { w.makeKey(); w.makeFirstResponder(master) }
+    }
+
+    /// After a gesture or a mouse move: keep the overlay view on the display that holds the selection (or the mouse).
+    func rehome() {
+        guard !done, windows.count > 1 else { return }
+        let d = master.activeDisplay.frame
+        if let i = windows.firstIndex(where: { $0.frame == d }) { home(at: i) }
     }
 
     func show() {
         NSApp.activate(ignoringOtherApps: true)
-        let mouse = NSEvent.mouseLocation
         for w in windows { w.orderFrontRegardless() }
-        let main = windows.first { $0.frame.contains(mouse) } ?? windows.first
-        main?.makeKeyAndOrderFront(nil)
-        for (w, v) in zip(windows, views) { if w === main { v.didShow() } }
+        let main = master.window ?? windows[0]
+        main.makeKeyAndOrderFront(nil)
+        master.didShow()
         let nc = NotificationCenter.default
         observers.append(nc.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { [weak self] _ in
             Toast.show(Loc.t("App.DisplaysChanged"))
@@ -47,16 +76,11 @@ final class CaptureSession {
             }
             self.finish(nil)
         })
-        // Mouse moves over other displays should go to their overlays.
+        // Before anything is selected, the overlay (keyboard, magnifier) follows the display under the mouse.
         NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) { [weak self] e in
             guard let self, !self.done, NSApp.modalWindow == nil, NSEvent.pressedMouseButtons == 0,
-                  !self.views.contains(where: { $0.dialogOpen || $0.hasSelection }) else { return e }
-            // Before anything is selected, the keyboard follows the display under the mouse.
-            if let w = self.windows.first(where: { $0.frame.contains(NSEvent.mouseLocation) }), w !== NSApp.keyWindow {
-                for o in self.views where o.window !== w { o.mouseLeftDisplay() }
-                w.makeKey()
-                (w.contentView as? OverlayView)?.didShow()
-            }
+                  !self.master.dialogOpen, !self.master.hasSelection else { return e }
+            self.rehome()
             return e
         }.map { monitor = $0 }
     }
@@ -65,7 +89,7 @@ final class CaptureSession {
 
     func focus() {
         NSApp.activate(ignoringOtherApps: true)
-        windows.first { $0.frame.contains(NSEvent.mouseLocation) }?.makeKeyAndOrderFront(nil)
+        (master.window ?? windows.first)?.makeKeyAndOrderFront(nil)
     }
 
     private func finish(_ r: CaptureResult?) {

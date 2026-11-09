@@ -16,8 +16,8 @@ struct CaptureResult {
 
 /// Borderless full-screen window above everything, including the menu bar and the Dock.
 final class OverlayWindow: NSPanel {
-    init(screen: NSScreen) {
-        super.init(contentRect: screen.frame, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
+    init(frame: CGRect) {
+        super.init(contentRect: frame, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
         level = .screenSaver
         isOpaque = true
         backgroundColor = .black
@@ -27,7 +27,10 @@ final class OverlayWindow: NSPanel {
         acceptsMouseMovedEvents = true
         isMovable = false
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle]
-        setFrame(screen.frame, display: false)
+        setFrame(frame, display: false)
+        let container = NSView(frame: CGRect(origin: .zero, size: frame.size))
+        container.autoresizingMask = [.width, .height]
+        contentView = container
     }
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { true }
@@ -103,12 +106,12 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
         self.settings = settings
         selection = SelectionModel(bounds: shot.image.bounds)
         shotView = ShotView(image: shot.image.cgImage)
-        super.init(frame: CGRect(origin: .zero, size: shot.screen.frame.size))
+        super.init(frame: CGRect(origin: .zero, size: shot.frame.size))
         wantsLayer = true
         editor = AnnotationEditor(host: self, toolbar: toolbar, source: shot.image, settings: settings,
                                   beautifyOn: settings.beautifyEnabled, beautify: settings.beautify, persistBeautify: true,
                                   unitScale: shot.scale)
-        editor.guidesChanged = { [weak self] in self?.canvas.needsDisplay = true }
+        editor.guidesChanged = { [weak self] in self?.invalidateCanvas() }
         shotView.frame = bounds
         canvas.frame = bounds
         canvas.model = self
@@ -151,8 +154,13 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
         PixelPoint(x: clamp(Int(floor(p.x * pixelScale)), 0, shot.width - 1), y: clamp(Int(floor(p.y * pixelScale)), 0, shot.height - 1))
     }
     private func exact(_ p: CGPoint) -> CGPoint { CGPoint(x: p.x * pixelScale, y: p.y * pixelScale) }
-    private func local(_ e: NSEvent) -> CGPoint { convert(e.locationInWindow, from: nil) }
-    private var mouseLocal: CGPoint { window.map { convert($0.mouseLocationOutsideOfEventStream, from: nil) } ?? .zero }
+    /// Event point in this view, through screen coordinates: events can come from any display's window.
+    private func local(_ e: NSEvent) -> CGPoint {
+        let sp = e.window.map { $0.convertPoint(toScreen: e.locationInWindow) } ?? NSEvent.mouseLocation
+        return fromScreen(sp)
+    }
+    private var mouseLocal: CGPoint { fromScreen(NSEvent.mouseLocation) }
+    func fromScreen(_ sp: CGPoint) -> CGPoint { CGPoint(x: sp.x - shotInfo.frame.minX, y: shotInfo.frame.maxY - sp.y) }
 
     /// Tool point: fractional pixels clamped into the selection (drawing happens only inside).
     private func toolPoint(_ p: CGPoint) -> CGPoint {
@@ -163,12 +171,32 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
     func toPoints(_ r: CGRect) -> CGRect { CGRect(x: r.minX / pixelScale, y: r.minY / pixelScale, width: r.width / pixelScale, height: r.height / pixelScale) }
 
     /// Usable area of this display without the menu bar and Dock, in view points.
-    private var workArea: CGRect {
-        let s = shotInfo.screen
-        let v = s.visibleFrame, f = s.frame
-        return CGRect(x: v.minX - f.minX, y: f.maxY - v.maxY, width: v.width, height: v.height)
+    /// The display under a view point (or the nearest one).
+    func display(at p: CGPoint) -> DisplayArea {
+        let sp = CGPoint(x: p.x + shotInfo.frame.minX, y: shotInfo.frame.maxY - p.y)
+        return shotInfo.displays.first { $0.frame.contains(sp) }
+            ?? shotInfo.displays.min { hypot($0.frame.midX - sp.x, $0.frame.midY - sp.y) < hypot($1.frame.midX - sp.x, $1.frame.midY - sp.y) }!
     }
-    private var monitorPixels: PixelRect { shot.bounds }
+    private func toView(_ r: CGRect) -> CGRect {
+        CGRect(x: r.minX - shotInfo.frame.minX, y: shotInfo.frame.maxY - r.maxY, width: r.width, height: r.height)
+    }
+    /// Usable area (no menu bar, no Dock) of the display holding the selection, in view points.
+    private var workArea: CGRect {
+        let p = selection.hasSelection ? toPoints(selection.rect.cgRect).center : mouseLocal
+        return toView(display(at: p).visibleFrame)
+    }
+    /// The whole display under a pixel, in screenshot pixels.
+    private func monitorPixels(at px: PixelPoint) -> PixelRect {
+        let r = toView(display(at: CGPoint(x: CGFloat(px.x) / pixelScale, y: CGFloat(px.y) / pixelScale)).frame)
+        return PixelRect(enclosing: CGRect(x: r.minX * pixelScale, y: r.minY * pixelScale, width: r.width * pixelScale, height: r.height * pixelScale))
+            .clamped(to: shot.bounds)
+    }
+    /// The display holding the selection (or the mouse): the session keeps this view in that display's window.
+    var activeDisplay: DisplayArea { display(at: selection.hasSelection ? toPoints(selection.rect.cgRect).center : mouseLocal) }
+    /// Other displays' panes redraw with the canvas.
+    var panes: [OverlayPane] = []
+    func invalidateCanvas() { canvas.needsDisplay = true; panes.forEach { $0.invalidateCanvas() } }
+    var afterGesture: (() -> Void)?
     private var handleTolerance: Int { Int((6 * pixelScale).rounded()) }
 
     /// The HUD view under a point of this view (toolbar, flyouts, popups), or nil over the screenshot.
@@ -194,7 +222,7 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
         if !on { magnifier.isHidden = true } else { updateMagnifier(pixel(mouseLocal)) }
     }
     func beautifyChanged() { refreshSelectionVisuals() }
-    func redraw() { canvas.needsDisplay = true }
+    func redraw() { invalidateCanvas() }
     var flyoutLayer: NSView { self }
     var flyoutWorkArea: CGRect { workArea }
     var toolbarFlyoutsBelow: Bool { toolbarBelow }
@@ -275,6 +303,7 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
     }
 
     override func mouseUp(with e: NSEvent) {
+        defer { afterGesture?() }
         let p = local(e)
         if textMode { textMouseUp(e, p); return }
         if editor.endGesture(toolPoint(p)) { return }
@@ -289,7 +318,7 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
         if let a = dragAnchor {
             let click = !thresholdPassed
             dragAnchor = nil; thresholdPassed = false; frameGuides = []
-            if click { selection.rect = WindowInfo.topmost(shotInfo.windows, at: a)?.rect ?? monitorPixels }
+            if click { selection.rect = WindowInfo.topmost(shotInfo.windows, at: a)?.rect ?? monitorPixels(at: a) }
             if selection.hasSelection { enterEditing() } else { refreshSelectionVisuals() }
         }
     }
@@ -314,8 +343,8 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
         let px = pixel(p)
         if editor.pipetteOn { updateMagnifier(px); NSCursor.crosshair.set(); return }
         if mode == .selecting && !selection.hasSelection {
-            let h = WindowInfo.topmost(shotInfo.windows, at: px)?.rect ?? monitorPixels
-            if h != hint { hint = h; canvas.needsDisplay = true }
+            let h = WindowInfo.topmost(shotInfo.windows, at: px)?.rect ?? monitorPixels(at: px)
+            if h != hint { hint = h; invalidateCanvas() }
             updateMagnifier(px)
             NSCursor.crosshair.set()
             return
@@ -441,13 +470,13 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
     /// The mouse left this display: hide what follows it.
     func mouseLeftDisplay() {
         magnifier.isHidden = true
-        if mode == .selecting && !selection.hasSelection && hint != nil { hint = nil; canvas.needsDisplay = true }
+        if mode == .selecting && !selection.hasSelection && hint != nil { hint = nil; invalidateCanvas() }
     }
 
     // MARK: HUD
 
     func refreshSelectionVisuals() {
-        canvas.needsDisplay = true
+        invalidateCanvas()
         guard selection.hasSelection else { sizeLabel.isHidden = true; return }
         let r = selection.rect
         sizeLabel.text = "\(r.width) × \(r.height)"
@@ -570,7 +599,7 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
 
     private func selectHintUnderCursor() {
         let p = pixel(mouseLocal)
-        selection.rect = (hint ?? WindowInfo.topmost(shotInfo.windows, at: p)?.rect ?? monitorPixels).clamped(to: shot.bounds)
+        selection.rect = (hint ?? WindowInfo.topmost(shotInfo.windows, at: p)?.rect ?? monitorPixels(at: p)).clamped(to: shot.bounds)
     }
 
     // MARK: Finishing
@@ -624,7 +653,7 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
     }
 
     private func screenRect(_ r: PixelRect) -> CGRect {
-        let f = shotInfo.screen.frame
+        let f = shotInfo.frame
         let pt = toPoints(r.cgRect)
         return CGRect(x: f.minX + pt.minX, y: f.maxY - pt.maxY, width: pt.width, height: pt.height)
     }
@@ -687,7 +716,7 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
     private func showTextLayout(_ l: OcrLayout, _ region: PixelRect) {
         ocr = l
         textLayer = TextLayerState(layout: l, area: region.cgRect)
-        canvas.needsDisplay = true
+        invalidateCanvas()
         showHint(hintFor(textSelection))
         updateTextCursor(mouseLocal)
     }
@@ -721,7 +750,7 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
     private func showTextSelection(_ marquee: CGRect? = nil) {
         textLayer?.selection = textSelection
         textLayer?.marquee = marquee
-        canvas.needsDisplay = true
+        invalidateCanvas()
         if ocr != nil { showHint(hintFor(textSelection)) }
     }
 
@@ -834,7 +863,7 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
     private func showCodes(_ c: [DetectedCode]) {
         codes = c
         textLayer?.codes = c.map(\.box)
-        canvas.needsDisplay = true
+        invalidateCanvas()
     }
 
     private func codeAt(_ p: CGPoint) -> Int? { codes.firstIndex { $0.box.contains(p) } }
@@ -843,7 +872,7 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
         guard let i = codeAt(exact(pt)) else { return false }
         openCode = i
         textLayer?.activeCode = i
-        canvas.needsDisplay = true
+        invalidateCanvas()
         let c = codes[i]
         codePopup.show(format: c.isLink ? Loc.f("Codes.FormatLink", c.format) : c.format, text: c.text, link: c.isLink)
         let box = toPoints(c.box)
@@ -860,7 +889,7 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
         codePopup.isHidden = true
         openCode = nil
         textLayer?.activeCode = nil
-        canvas.needsDisplay = true
+        invalidateCanvas()
         return true
     }
 
@@ -884,7 +913,7 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
         selection.rect = r.clamped(to: shot.bounds)
         if selection.hasSelection { enterEditing() }
     }
-    func devSetHint(_ r: PixelRect?) { hint = r; canvas.needsDisplay = true }
+    func devSetHint(_ r: PixelRect?) { hint = r; invalidateCanvas() }
     func devMagnifier(at p: PixelPoint) { updateMagnifier(p) }
     func devEnterTextMode() { toggleTextMode() }
     var devTextReady: Bool { ocr != nil }

@@ -55,13 +55,14 @@ display; the files store pixels like on Windows.
 
 `Screeny.app/Contents/MacOS/Screeny --dev-render <scenario> <out.png> [fixture.png]` builds the real views over a
 fixture picture and saves what they draw. Scenarios: `select`, `draw`, `tools`, `beautify`, `pipette`, `text`
-(real OCR), `editor`, `history`, `settings`, `wizard`, and `flow` — an end-to-end run that sends real mouse and key
+(real OCR), `twodisplays` (a selection across two simulated displays), `editor`, `history`, `settings`, `wizard`, and `flow` — an end-to-end run that sends real mouse and key
 events through the overlay window (select, draw, undo/redo, type text, delete, Esc, copy) and prints PASS/FAIL.
 `SCREENY_LANG=en` and `SCREENY_APPEARANCE=light|dark` override language and appearance. `Tests/Fixtures/desktop.png`
 is a ready fixture.
 
 ## Known limitations
 
-- A selection stays on one display; a shot across two monitors isn't supported yet (Windows allows it).
-- Not tested on Intel Macs or macOS 14/15 hardware, nor with several monitors of different scale.
+- Several displays work like on Windows: one virtual screen, a selection can cross monitors. Checked with two simulated
+  displays (`--dev-render twodisplays`); not yet on real hardware with two monitors or with mixed scales (the virtual
+  screen uses the highest scale). Not tested on Intel Macs or macOS 14/15.
 - macOS 15+ may periodically ask whether Screeny should keep recording the screen; that prompt comes from the system.

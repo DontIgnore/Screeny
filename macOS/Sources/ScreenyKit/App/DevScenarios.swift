@@ -34,7 +34,7 @@ enum DevScenarios {
         }
         let img = PixelImage(cgImage: ctx.makeImage()!, scale: scale)
         let windows = [WindowInfo(rect: PixelRect(x: Int(80 * scale), y: Int(120 * scale), width: Int(900 * scale), height: Int(560 * scale)))]
-        return DisplayShot(screen: screen, displayID: CGMainDisplayID(), image: img, windows: windows)
+        return DisplayShot(frame: screen.frame, displays: [DisplayArea(frame: screen.frame, visibleFrame: screen.visibleFrame)], image: img, windows: windows)
     }
 
     static func pump(_ seconds: Double) { RunLoop.main.run(until: Date().addingTimeInterval(seconds)) }
@@ -183,15 +183,89 @@ enum DevScenarios {
         exit(failures.isEmpty ? 0 : 1)
     }
 
+    /// Two simulated displays (left and right halves of the screen, each with its own overlay window).
+    static func twoDisplays(app: AppDelegate, fixture: PixelImage?, out: URL) throws {
+        let settings = app.settings
+        settings.beautifyEnabled = false
+        let full = fixtureShot(fixture)
+        let f = full.frame, half = f.width / 2, s = full.scale
+        func part(_ x: CGFloat) -> DisplayShot {
+            let fr = CGRect(x: f.minX + x, y: f.minY, width: half, height: f.height)
+            let img = full.image.cropped(PixelRect(x: Int(x * s), y: 0, width: Int(half * s), height: full.image.height))
+            return DisplayShot(frame: fr, displays: [DisplayArea(frame: fr, visibleFrame: fr.insetBy(dx: 0, dy: 30))], image: img, windows: [])
+        }
+        let session = CaptureSession(shots: [part(0), part(half)], settings: settings, previousApp: nil)
+        var result: CaptureResult?
+        session.finished = { result = $0 }
+        session.show()
+        session.windows.forEach { $0.alphaValue = 0.01 }
+        pump(0.3)
+        var failures: [String] = []
+        func check(_ ok: Bool, _ what: String) { print((ok ? "PASS " : "FAIL ") + what); if !ok { failures.append(what) } }
+        let v = session.master
+        check(session.windows.count == 2 && session.windows.allSatisfy { $0.frame.width == half }, "one overlay window per display")
+        check(v.shot.width == full.image.width, "virtual screen stitches both displays (\(v.shot.width) px)")
+        // Drag from the left display into the right one: events go to the window where the drag started.
+        let w = session.windows[0], H = w.frame.height
+        func mouse(_ type: NSEvent.EventType, _ x: CGFloat, _ y: CGFloat, in win: NSWindow) {
+            let loc = CGPoint(x: x - (win.frame.minX - f.minX), y: H - y)
+            w.sendEvent(NSEvent.mouseEvent(with: type, location: loc, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
+                                           windowNumber: win.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)!)
+        }
+        func send(_ type: NSEvent.EventType, _ x: CGFloat, _ y: CGFloat, to win: NSWindow) {
+            let loc = CGPoint(x: x - (win.frame.minX - f.minX), y: H - y)
+            win.sendEvent(NSEvent.mouseEvent(with: type, location: loc, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
+                                             windowNumber: win.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)!)
+        }
+        _ = mouse
+        let a = CGPoint(x: half - 300, y: 200), b = CGPoint(x: half + 300, y: 600)
+        send(.leftMouseDown, a.x, a.y, to: w)
+        for i in 1...10 { let t = CGFloat(i) / 10; send(.leftMouseDragged, a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, to: w) }
+        send(.leftMouseUp, b.x, b.y, to: w)
+        pump(0.2)
+        check(v.hole.map { abs($0.width - Int(600 * s)) <= 2 } == true, "selection spans the seam (\(v.hole?.description ?? "-"))")
+        check(!v.toolbar.isHidden && v.window != nil, "toolbar is shown on the display holding the selection")
+        // Draw an arrow on the other display's pane: its window forwards to the overlay view.
+        let other = session.windows.first { $0 !== v.window }!
+        let k = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0, windowNumber: v.window!.windowNumber, context: nil,
+                                 characters: "5", charactersIgnoringModifiers: "5", isARepeat: false, keyCode: 23)!
+        v.window!.sendEvent(k)
+        // Inside the selection, on the display that only shows a pane.
+        let ox = other.frame.minX - f.minX
+        let inOther = ox < half ? half - 250 : half + 100
+        let p1 = CGPoint(x: inOther, y: 300), p2 = CGPoint(x: inOther + 150, y: 450)
+        send(.leftMouseDown, p1.x, p1.y, to: other)
+        for i in 1...6 { let t = CGFloat(i) / 6; send(.leftMouseDragged, p1.x + (p2.x - p1.x) * t, p1.y + (p2.y - p1.y) * t, to: other) }
+        send(.leftMouseUp, p2.x, p2.y, to: other)
+        check(v.document.items.count == 1, "drawing on the other display's pane adds markup")
+        for (i, win) in session.windows.enumerated() {
+            try save(win.contentView!, out.deletingPathExtension().appendingPathExtension("display\(i).png"))
+        }
+        let ret = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0, windowNumber: v.window!.windowNumber, context: nil,
+                                   characters: "\r", charactersIgnoringModifiers: "\r", isARepeat: false, keyCode: 36)!
+        v.window!.sendEvent(ret)
+        pump(0.3)
+        if let r = result {
+            check(r.image.width == v.hole?.width ?? -1 || abs(r.image.width - Int(600 * s)) <= 2, "result is the spanning region (\(r.image.width)×\(r.image.height))")
+            // Pixels on both sides of the seam match the original picture.
+            let img = PixelImage(cgImage: r.image)
+            let left = full.image.color(at: PixelPoint(x: r.region.x + 5, y: r.region.y + 5)), right = full.image.color(at: PixelPoint(x: r.region.right - 5, y: r.region.y + 5))
+            check(img.color(at: PixelPoint(x: 5, y: 5)) == left && img.color(at: PixelPoint(x: img.width - 5, y: 5)) == right, "both displays' pixels are in the result")
+            try PixelImage.encode(r.image, type: .png)?.write(to: out)
+        } else { check(false, "Enter finishes") }
+        print(failures.isEmpty ? "ALL PASSED" : "FAILED: \(failures.count)")
+        exit(failures.isEmpty ? 0 : 1)
+    }
+
     static func run(_ scenario: String, out: URL, fixture: PixelImage?, app: AppDelegate) throws {
         let settings = app.settings
         settings.beautifyEnabled = scenario.hasPrefix("beautify")
         switch scenario {
         case "select", "draw", "beautify", "text", "pipette", "tools":
             let shot = fixtureShot(fixture)
-            let w = OverlayWindow(screen: shot.screen)
+            let w = OverlayWindow(frame: shot.frame)
             let v = OverlayView(shot: shot, settings: settings)
-            w.contentView = v
+            w.contentView?.addSubview(v)
             w.orderFrontRegardless()
             w.alphaValue = 0.01
             let s = shot.scale
@@ -249,6 +323,8 @@ enum DevScenarios {
             let zip = URL(fileURLWithPath: CommandLine.arguments.last!)
             try SelfUpdater.scheduleSwap(new: try SelfUpdater.unpack(zip), replacing: out)
             exit(0)
+        case "twodisplays":
+            try twoDisplays(app: app, fixture: fixture, out: out)
         case "flow":
             try flow(app: app, fixture: fixture, out: out)
         case "editor":
