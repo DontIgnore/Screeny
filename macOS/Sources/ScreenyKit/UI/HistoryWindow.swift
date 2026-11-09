@@ -65,7 +65,8 @@ final class HistoryWindowController: NSWindowController, NSWindowDelegate {
         let top = NSStackView(views: [titles, buttons])
         top.distribution = .fill
         top.spacing = 16
-        titles.setHuggingPriority(.defaultLow, for: .horizontal)
+        titles.setHuggingPriority(NSLayoutConstraint.Priority(1), for: .horizontal)
+        buttons.setHuggingPriority(.required, for: .horizontal)
 
         scroll.drawsBackground = false
         scroll.hasVerticalScroller = true
