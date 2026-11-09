@@ -199,4 +199,47 @@ final class CoreTests: XCTestCase {
         XCTAssertEqual(r?.macAssetURL, URL(string: "https://e/m.zip"))
         XCTAssertNil(UpdateChecker.parseRelease(Data(#"{"tag_name":"v1","assets":[]}"#.utf8))?.macAssetURL)
     }
+
+    /// The cases Windows needed the PaddleOCR module for: small screen text, nicknames, mixed Cyrillic/Latin.
+    func testVisionReadsSmallMixedScreenText() throws {
+        let lines = ["xX_Dark_Knight_Xx joined the chat", "Квартал закрыт с ростом по метрикам Q3",
+                     "Deploy v2.8.1 на прод в 14:30", "user_42: ок, проверю PR #1187", "Settings › Privacy › Screen Recording",
+                     "Экспорт в CSV и PDF работает"]
+        var worst = 1.0
+        for scale in [1, 2] { for size in [10.0, 11.0, 12.0, 13.0] {
+            let w = 900, h = 30 * lines.count + 20
+            let ctx = CGContext(data: nil, width: w * scale, height: h * scale, bitsPerComponent: 8, bytesPerRow: 0, space: PixelImage.colorSpace, bitmapInfo: PixelImage.bitmapInfo)!
+            ctx.scaleBy(x: CGFloat(scale), y: CGFloat(scale)) // 1x external display and Retina
+            ctx.setFillColor(CGColor(gray: 1, alpha: 1)); ctx.fill(CGRect(x: 0, y: 0, width: w, height: h))
+            NSGraphicsContext.saveGraphicsState()
+            NSGraphicsContext.current = NSGraphicsContext(cgContext: ctx, flipped: false)
+            for (i, l) in lines.enumerated() {
+                NSAttributedString(string: l, attributes: [.font: NSFont.systemFont(ofSize: size), .foregroundColor: NSColor.darkGray])
+                    .draw(at: CGPoint(x: 10, y: h - 25 - i * 30))
+            }
+            NSGraphicsContext.restoreGraphicsState()
+            let text = try OcrService.recognize(ctx.makeImage()!).textOf(nil)
+            let got = text.split(separator: "\n").map(String.init)
+            var hits = 0
+            for l in lines where got.contains(where: { Self.similarity($0, l) >= 0.9 }) { hits += 1 }
+            let rate = Double(hits) / Double(lines.count)
+            print("Vision \(scale)x \(Int(size)) pt: \(hits)/\(lines.count) lines ≥90 % exact")
+            worst = min(worst, rate)
+        } }
+        XCTAssertGreaterThanOrEqual(worst, 0.8)
+    }
+
+    static func similarity(_ a: String, _ b: String) -> Double {
+        let x = Array(a), y = Array(b)
+        var d = Array(0...y.count)
+        for i in 1...max(1, x.count) where !x.isEmpty {
+            var prev = d[0]; d[0] = i
+            for j in 1...max(1, y.count) where !y.isEmpty {
+                let t = d[j]
+                d[j] = min(d[j] + 1, d[j - 1] + 1, prev + (x[i - 1] == y[j - 1] ? 0 : 1))
+                prev = t
+            }
+        }
+        return 1 - Double(d[y.count]) / Double(max(x.count, y.count, 1))
+    }
 }
