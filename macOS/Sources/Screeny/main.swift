@@ -1,0 +1,3 @@
+import ScreenyKit
+
+ScreenyMain.run()
