@@ -78,11 +78,14 @@ final class AnnotationEditor {
     private(set) var beautify: BeautifyOptions
     private let persistBeautify: Bool
     var drawingEnabledValue = true
+    /// Screenshot pixels per screen point: thickness and text size are chosen in points, like on a 100 % Windows display.
+    let unitScale: CGFloat
     var guidesChanged: (() -> Void)?
     var rulerChanged: (() -> Void)?
 
     init(host: AnnotationEditorHost, toolbar: ToolbarView, source: PixelImage, settings: AppSettings,
-         beautifyOn: Bool, beautify: BeautifyOptions, persistBeautify: Bool) {
+         beautifyOn: Bool, beautify: BeautifyOptions, persistBeautify: Bool, unitScale: CGFloat = 1) {
+        self.unitScale = max(1, unitScale)
         self.host = host; self.toolbar = toolbar; self.source = source; self.settings = settings
         self.flyouts = FlyoutController(toolbar: toolbar)
         let shift = { NSEvent.modifierFlags.contains(.shift) }
@@ -142,7 +145,7 @@ final class AnnotationEditor {
     }
 
     var currentTool: ToolKind { toolbar.currentTool }
-    func style(for tool: ToolKind) -> AnnotationStyle { options.style(for: tool, color: toolbar.currentColor, thickness: Double(toolbar.currentThickness)) }
+    func style(for tool: ToolKind) -> AnnotationStyle { options.style(for: tool, color: toolbar.currentColor, thickness: Double(toolbar.currentThickness) * unitScale) }
     var currentStyle: AnnotationStyle { style(for: currentTool) }
     func cursor(for t: ToolKind) -> NSCursor { tools[t]!.cursor }
     var pipetteOn: Bool { pipette }
@@ -376,7 +379,7 @@ final class AnnotationEditor {
                 toolbar.setColor(after.color)
                 settings.lastColor = after.color.rgbHex
             }
-            if after.thickness != before.thickness { toolbar.setThickness(Int(after.thickness)) }
+            if after.thickness != before.thickness { toolbar.setThickness(Int((after.thickness / unitScale).rounded())) }
             options.save(to: settings)
         }
         stripKey = nil
