@@ -337,7 +337,7 @@ final class EditorCanvasView: FlippedView, AnnotationEditorHost, FlyoutHost {
         zoomBadge.title = Loc.f(fit ? "Editor.ZoomFit" : "Editor.Zoom", Int((zoom * 100).rounded()))
         zoomBadge.tip = Loc.t("Editor.ZoomTip")
         let bw = zoomBadge.intrinsicContentSize.width
-        zoomBadge.frame = CGRect(x: bounds.width - bw - 10, y: bounds.height - 22 - 10, width: bw, height: 22)
+        zoomBadge.frame = CGRect(x: bounds.width - bw - 10, y: viewport.maxY - 22 - 6, width: bw, height: 22)
         if !notice.isHidden { notice.layoutIn(width: bounds.width) }
         if !toastLabel.isHidden { toastLabel.setFrameOrigin(CGPoint(x: (bounds.width - toastLabel.frame.width) / 2, y: bounds.height - 64 - toastLabel.frame.height - 10)) }
         editor.relayoutTextField()

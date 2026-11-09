@@ -8,7 +8,9 @@ enum DevScenarios {
         guard let i = args.firstIndex(of: "--dev-render"), args.count > i + 2 else { return false }
         let scenario = args[i + 1], out = URL(fileURLWithPath: args[i + 2])
         let fixture = args.count > i + 3 ? PixelImage.load(url: URL(fileURLWithPath: args[i + 3])) : nil
-        Loc.setLanguage(ProcessInfo.processInfo.environment["SCREENY_LANG"] ?? app.settings.language)
+        let env = ProcessInfo.processInfo.environment
+        Loc.setLanguage(env["SCREENY_LANG"] ?? app.settings.language)
+        if let a = env["SCREENY_APPEARANCE"] { NSApp.appearance = NSAppearance(named: a == "light" ? .aqua : .darkAqua) }
         // A timer, not the main queue: the scenario pumps the run loop and must let main-queue work run.
         Timer.scheduledTimer(withTimeInterval: 0.05, repeats: false) { _ in
             do { try run(scenario, out: out, fixture: fixture, app: app) } catch {
@@ -42,7 +44,100 @@ enum DevScenarios {
         view.displayIfNeeded()
         guard let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { throw CocoaError(.fileWriteUnknown) }
         view.cacheDisplay(in: view.bounds, to: rep)
-        try rep.representation(using: .png, properties: [:])!.write(to: out)
+        // The window background isn't part of the content view: put it under, resolved for the current appearance.
+        let img = NSImage(size: view.bounds.size)
+        img.lockFocus()
+        view.effectiveAppearance.performAsCurrentDrawingAppearance {
+            (view.window?.backgroundColor ?? .windowBackgroundColor).setFill()
+            CGRect(origin: .zero, size: view.bounds.size).fill()
+        }
+        rep.draw(in: CGRect(origin: .zero, size: view.bounds.size))
+        img.unlockFocus()
+        let tiff = img.tiffRepresentation!
+        try NSBitmapImageRep(data: tiff)!.representation(using: .png, properties: [:])!.write(to: out)
+    }
+
+    /// End-to-end: real window, real event routing (window.sendEvent → hitTest → view), like a user's mouse and keys.
+    static func flow(app: AppDelegate, fixture: PixelImage?, out: URL) throws {
+        let settings = app.settings
+        settings.beautifyEnabled = false
+        let shot = fixtureShot(fixture)
+        let session = CaptureSession(shots: [shot], settings: settings, previousApp: nil)
+        var result: CaptureResult?
+        var finished = false
+        session.finished = { r in result = r; finished = true }
+        session.show()
+        let w = session.windows[0], v = session.views[0]
+        w.alphaValue = 0.01
+        pump(0.3)
+        let H = w.frame.height
+        var failures: [String] = []
+        func check(_ ok: Bool, _ what: String) { print((ok ? "PASS " : "FAIL ") + what); if !ok { failures.append(what) } }
+        func mouse(_ type: NSEvent.EventType, _ x: CGFloat, _ y: CGFloat, clicks: Int = 1, mods: NSEvent.ModifierFlags = []) {
+            let e = NSEvent.mouseEvent(with: type, location: CGPoint(x: x, y: H - y), modifierFlags: mods, timestamp: ProcessInfo.processInfo.systemUptime,
+                                       windowNumber: w.windowNumber, context: nil, eventNumber: 0, clickCount: clicks, pressure: 1)!
+            w.sendEvent(e)
+        }
+        func drag(_ a: CGPoint, _ b: CGPoint) {
+            mouse(.leftMouseDown, a.x, a.y)
+            for i in 1...8 { let t = CGFloat(i) / 8; mouse(.leftMouseDragged, a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t) }
+            mouse(.leftMouseUp, b.x, b.y)
+        }
+        func key(_ code: UInt16, _ chars: String = "", mods: NSEvent.ModifierFlags = []) {
+            for type in [NSEvent.EventType.keyDown, .keyUp] {
+                let e = NSEvent.keyEvent(with: type, location: .zero, modifierFlags: mods, timestamp: ProcessInfo.processInfo.systemUptime,
+                                         windowNumber: w.windowNumber, context: nil, characters: chars, charactersIgnoringModifiers: chars,
+                                         isARepeat: false, keyCode: code)!
+                if type == .keyDown && mods.contains(.command) { if !w.performKeyEquivalent(with: e) { w.sendEvent(e) } } else { w.sendEvent(e) }
+            }
+            pump(0.05)
+        }
+        check(w.isKeyWindow || w.firstResponder === v, "overlay window takes the keyboard")
+        mouse(.mouseMoved, 300, 300)
+        drag(CGPoint(x: 200, y: 200), CGPoint(x: 900, y: 650))
+        check(!v.toolbar.isHidden, "drag selects an area and shows the toolbar")
+        check(v.hole?.width == Int(700 * shot.scale) + 1 || v.hole?.width == Int(700 * shot.scale), "selection size follows the drag (\(v.hole?.description ?? "-"))")
+        key(23, "5")
+        check(v.toolbar.currentTool == .arrow, "key 5 picks the arrow")
+        drag(CGPoint(x: 300, y: 300), CGPoint(x: 500, y: 400))
+        check(v.document.items.count == 1 && v.document.items[0] is ArrowAnnotation, "dragging draws an arrow")
+        key(19, "2")
+        drag(CGPoint(x: 600, y: 300), CGPoint(x: 700, y: 380))
+        check(v.document.items.count == 2, "rectangle tool draws")
+        key(6, "z", mods: .command)
+        check(v.document.items.count == 1, "⌘Z undoes")
+        key(6, "z", mods: [.command, .shift])
+        check(v.document.items.count == 2, "⇧⌘Z redoes")
+        key(28, "8")
+        mouse(.leftMouseDown, 320, 500); mouse(.leftMouseUp, 320, 500)
+        pump(0.1)
+        if let tv = w.firstResponder as? NSTextView { tv.insertText("Привет", replacementRange: NSRange(location: NSNotFound, length: 0)); key(36, "\r") }
+        check(v.document.items.contains { ($0 as? TextAnnotation)?.text == "Привет" }, "text tool types a label and Return commits it")
+        key(18, "1")
+        mouse(.leftMouseDown, 650, 300); mouse(.leftMouseUp, 650, 300)
+        check(v.document.selected is RectAnnotation, "select tool picks the rectangle")
+        key(51, "\u{7f}")
+        check(!v.document.items.contains { $0 is RectAnnotation }, "Delete removes the selected shape")
+        key(19, "2")
+        key(53, "\u{1b}")
+        check(v.toolbar.currentTool == .select && v.hole != nil, "Esc with a drawing tool goes back to Select and keeps the selection")
+        mouse(.rightMouseDown, 650, 300); mouse(.rightMouseUp, 650, 300)
+        check(v.hole == nil && v.document.items.count == 2, "right click then drops the selection, markup stays")
+        drag(CGPoint(x: 200, y: 200), CGPoint(x: 900, y: 650))
+        // Click the toolbar's Copy button through real hit-testing.
+        let copy = v.toolbar.subviews.compactMap { $0 as? HudButton }.first { $0.accent }!
+        let c = copy.convert(CGPoint(x: copy.bounds.midX, y: copy.bounds.midY), to: v)
+        mouse(.leftMouseDown, c.x, c.y); mouse(.leftMouseUp, c.x, c.y)
+        pump(0.3)
+        check(finished && result?.action == .copyExplicit, "Copy button finishes with a copy")
+        if let r = result {
+            check(r.image.width == v.hole?.width ?? r.region.width, "result is the selected region")
+            check(r.annotationsJSON?.contains("\"arrow\"") == true, "markup document goes with the result")
+            check(Clipboard.copy(r.image, scale: r.scale) && NSPasteboard.general.data(forType: .png) != nil, "picture lands on the clipboard as PNG")
+            try PixelImage.encode(r.image, type: .png)?.write(to: out)
+        }
+        print(failures.isEmpty ? "ALL PASSED" : "FAILED: \(failures.count)")
+        exit(failures.isEmpty ? 0 : 1)
     }
 
     static func run(_ scenario: String, out: URL, fixture: PixelImage?, app: AppDelegate) throws {
@@ -97,6 +192,8 @@ enum DevScenarios {
                                                 doc: v.document)
                 try PixelImage.encode(BeautifyComposer.compose(img, .default), type: .png)?.write(to: out.deletingPathExtension().appendingPathExtension("export.png"))
             }
+        case "flow":
+            try flow(app: app, fixture: fixture, out: out)
         case "editor":
             let shot = fixtureShot(fixture)
             let folder = FileManager.default.temporaryDirectory.appendingPathComponent("screeny-dev-history")

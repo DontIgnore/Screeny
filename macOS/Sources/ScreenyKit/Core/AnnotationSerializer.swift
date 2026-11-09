@@ -119,7 +119,7 @@ public enum AnnotationSerializer {
     }
 
     private static func finite(_ v: Any) throws -> Double {
-        guard let n = v as? NSNumber, !(v is Bool), n.doubleValue.isFinite else { throw DocumentError.corrupt("Invalid number.") }
+        guard let n = v as? NSNumber, CFGetTypeID(n) != CFBooleanGetTypeID(), n.doubleValue.isFinite else { throw DocumentError.corrupt("Invalid number.") }
         return n.doubleValue
     }
 
