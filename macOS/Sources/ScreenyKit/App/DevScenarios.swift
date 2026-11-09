@@ -5,6 +5,11 @@ import AppKit
 /// and saves what they draw. Mirrors OverlayWindow.Dev.cs.
 enum DevScenarios {
     static func handle(_ args: [String], app: AppDelegate) -> Bool {
+        if args.contains("--dev-capture") {
+            // The normal app, plus one capture through the shortcut's handler two seconds after launch.
+            Timer.scheduledTimer(withTimeInterval: 2, repeats: false) { _ in app.hotkeys.pressed?() }
+            return false
+        }
         guard let i = args.firstIndex(of: "--dev-render"), args.count > i + 2 else { return false }
         let scenario = args[i + 1], out = URL(fileURLWithPath: args[i + 2])
         let fixture = args.count > i + 3 ? PixelImage.load(url: URL(fileURLWithPath: args[i + 3])) : nil
@@ -58,10 +63,34 @@ enum DevScenarios {
     }
 
     /// End-to-end: real window, real event routing (window.sendEvent → hitTest → view), like a user's mouse and keys.
+    /// `live`: the real thing. Presses the capture shortcut's handler, checks the overlay opens over a real screenshot,
+    /// closes it with Esc, then runs `flow` over that real screenshot.
+    static func live(app: AppDelegate, out: URL) {
+        app.hotkeys.pressed?()
+        let deadline = Date().addingTimeInterval(10)
+        while app.session == nil && Date() < deadline { pump(0.1) }
+        guard let s = app.session, let w = s.windows.first else { print("FAIL hotkey opens the overlay"); exit(1) }
+        // Focus can't be judged here: pumping the run loop holds back AppKit's activation events (see `--dev-capture`).
+        pump(1.0)
+        let shot = s.master.shotInfo
+        print("PASS hotkey opens the overlay (\(s.windows.count) window(s), visible: \(w.isVisible), \(shot.image.width)×\(shot.image.height))")
+        let real = DisplayShot(frame: shot.frame, displays: shot.displays, image: shot.image, windows: shot.windows)
+        print((real.windows.isEmpty ? "FAIL" : "PASS") + " window outlines found for hover snapping: \(real.windows.count)")
+        let e = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0, windowNumber: w.windowNumber, context: nil,
+                                 characters: "\u{1b}", charactersIgnoringModifiers: "\u{1b}", isARepeat: false, keyCode: 53)!
+        w.sendEvent(e)
+        pump(0.3)
+        print((app.session == nil && !w.isVisible ? "PASS" : "FAIL") + " Esc closes the overlay")
+        try? flow(app: app, shot: real, out: out, ocrNeedle: nil)
+    }
+
     static func flow(app: AppDelegate, fixture: PixelImage?, out: URL) throws {
+        try flow(app: app, shot: fixtureShot(fixture), out: out, ocrNeedle: "Q3 report")
+    }
+
+    static func flow(app: AppDelegate, shot: DisplayShot, out: URL, ocrNeedle: String?) throws {
         let settings = app.settings
         settings.beautifyEnabled = false
-        let shot = fixtureShot(fixture)
         let session = CaptureSession(shots: [shot], settings: settings, previousApp: nil)
         var result: CaptureResult?
         var finished = false
@@ -158,7 +187,7 @@ enum DevScenarios {
         key2(0, "a", mods: .command)
         key2(36, "\r")
         pump(0.2)
-        check(r2?.action == .copyText && (r2?.text ?? "").contains("Q3 report"), "Enter copies the recognized text (\((r2?.text ?? "").prefix(40)))")
+        check(r2?.action == .copyText && (ocrNeedle.map { (r2?.text ?? "").contains($0) } ?? !(r2?.text ?? "").isEmpty), "Enter copies the recognized text (\((r2?.text ?? "").prefix(40)))")
         let s3 = CaptureSession(shots: [shot], settings: settings, previousApp: nil)
         var r3: CaptureResult?
         s3.finished = { r3 = $0 }
@@ -325,6 +354,7 @@ enum DevScenarios {
             exit(0)
         case "twodisplays":
             try twoDisplays(app: app, fixture: fixture, out: out)
+        case "live": live(app: app, out: out)
         case "flow":
             try flow(app: app, fixture: fixture, out: out)
         case "editor":

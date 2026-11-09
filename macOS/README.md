@@ -18,7 +18,8 @@ swift test            # unit tests
 
 ### Screen Recording permission
 
-macOS asks for Screen Recording permission once. Screeny shows a setup window with a "Grant access" button that
+Screeny works without it: each capture then shows macOS's own screen picker, and you click the display to capture.
+With the permission the capture starts straight away, like on Windows. macOS asks for it once. Screeny shows a setup window with a "Grant access" button that
 opens System Settings › Privacy & Security › Screen & System Audio Recording. Turn Screeny on there; macOS may offer
 to quit and reopen it.
 
@@ -56,7 +57,9 @@ display; the files store pixels like on Windows.
 `Screeny.app/Contents/MacOS/Screeny --dev-render <scenario> <out.png> [fixture.png]` builds the real views over a
 fixture picture and saves what they draw. Scenarios: `select`, `draw`, `tools`, `beautify`, `pipette`, `text`
 (real OCR), `twodisplays` (a selection across two simulated displays), `editor`, `history`, `settings`, `wizard`, and `flow` — an end-to-end run that sends real mouse and key
-events through the overlay window (select, draw, undo/redo, type text, delete, Esc, copy) and prints PASS/FAIL.
+events through the overlay window (select, draw, undo/redo, type text, delete, Esc, copy) and prints PASS/FAIL. `live` does the
+same over a real screenshot, opened through the capture shortcut's handler (launch it with `open --stdout`, so the
+permission applies). `--dev-capture` starts the normal app and opens one capture two seconds later.
 `SCREENY_LANG=en` and `SCREENY_APPEARANCE=light|dark` override language and appearance. `Tests/Fixtures/desktop.png`
 is a ready fixture.
 

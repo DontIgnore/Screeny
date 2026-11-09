@@ -5,8 +5,8 @@ import ServiceManagement
 final class AppDelegate: NSObject, NSApplicationDelegate, AppServices {
     private(set) var settings = AppSettings.load()
     private var statusItem: NSStatusItem?
-    private let hotkeys = HotkeyManager()
-    private var session: CaptureSession?
+    let hotkeys = HotkeyManager()
+    private(set) var session: CaptureSession?
     private var historyWindow: HistoryWindowController?
     private var settingsWindow: SettingsWindowController?
     private var wizardWindow: SetupWizardWindowController?
