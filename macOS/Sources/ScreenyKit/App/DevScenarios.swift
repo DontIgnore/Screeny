@@ -136,6 +136,49 @@ enum DevScenarios {
             check(Clipboard.copy(r.image, scale: r.scale) && NSPasteboard.general.data(forType: .png) != nil, "picture lands on the clipboard as PNG")
             try PixelImage.encode(r.image, type: .png)?.write(to: out)
         }
+        // Second capture: text mode, then the frame and a pin.
+        let s2 = CaptureSession(shots: [shot], settings: settings, previousApp: nil)
+        var r2: CaptureResult?
+        s2.finished = { r2 = $0 }
+        s2.show()
+        let w2 = s2.windows[0], v2 = s2.views[0]
+        w2.alphaValue = 0.01
+        pump(0.2)
+        func key2(_ code: UInt16, _ chars: String, mods: NSEvent.ModifierFlags = []) {
+            let e = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: mods, timestamp: 0, windowNumber: w2.windowNumber, context: nil,
+                                     characters: chars, charactersIgnoringModifiers: chars, isARepeat: false, keyCode: code)!
+            if mods.contains(.command) { if !w2.performKeyEquivalent(with: e) { w2.sendEvent(e) } } else { w2.sendEvent(e) }
+            pump(0.05)
+        }
+        v2.devSelect(PixelRect(x: Int(100 * shot.scale), y: Int(150 * shot.scale), width: Int(800 * shot.scale), height: Int(300 * shot.scale)))
+        key2(17, "t", mods: .command)
+        let deadline = Date().addingTimeInterval(15)
+        while !v2.devTextReady && Date() < deadline { pump(0.1) }
+        check(v2.devTextReady, "⌘T recognizes text in the selection")
+        key2(0, "a", mods: .command)
+        key2(36, "\r")
+        pump(0.2)
+        check(r2?.action == .copyText && (r2?.text ?? "").contains("Q3 report"), "Enter copies the recognized text (\((r2?.text ?? "").prefix(40)))")
+        let s3 = CaptureSession(shots: [shot], settings: settings, previousApp: nil)
+        var r3: CaptureResult?
+        s3.finished = { r3 = $0 }
+        s3.show()
+        let w3 = s3.windows[0], v3 = s3.views[0]
+        w3.alphaValue = 0.01
+        pump(0.2)
+        v3.devSelect(PixelRect(x: 200, y: 300, width: 600, height: 400))
+        for (code, ch) in [(UInt16(11), "b"), (UInt16(99), "")] {
+            let e = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0, windowNumber: w3.windowNumber, context: nil,
+                                     characters: ch, charactersIgnoringModifiers: ch, isARepeat: false, keyCode: code)!
+            w3.sendEvent(e); pump(0.05)
+        }
+        pump(0.2)
+        check(r3?.action == .pin, "B then F3 pins")
+        check(r3.map { $0.image.width == 600 + 2 * 48 } == true, "the pin gets the background frame (\(r3?.image.width ?? 0) px)")
+        if let r = r3 { app.pin(r.image, scale: r.scale, near: CGPoint(x: r.screenRect.minX, y: r.screenRect.maxY)) }
+        pump(0.3)
+        check(PinWindow.all.count == 1, "pin window opens")
+        settings.beautifyEnabled = false
         print(failures.isEmpty ? "ALL PASSED" : "FAILED: \(failures.count)")
         exit(failures.isEmpty ? 0 : 1)
     }
