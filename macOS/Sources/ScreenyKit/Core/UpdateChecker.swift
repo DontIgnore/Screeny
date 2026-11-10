@@ -22,7 +22,10 @@ public enum UpdateCheckResult: Equatable {
 /// Update check against GitHub Releases. The Mac app can't install updates itself (Windows uses Velopack): a newer
 /// version opens the update window, whose main button opens the release page in the browser.
 public enum UpdateChecker {
-    public static let latestURL = URL(string: "https://api.github.com/repos/DontIgnore/Screeny/releases/latest")!
+    /// The release list, not /releases/latest: Mac builds ship as pre-releases next to the Windows line, and "latest"
+    /// skips pre-releases (and is a Windows release without a Mac zip).
+    /// shortcut: every Mac release counts, pre-release or not; add a channel setting once Mac has stable releases.
+    public static let latestURL = URL(string: "https://api.github.com/repos/DontIgnore/Screeny/releases?per_page=30")!
     public static let startupDelay: TimeInterval = 30
     public static let interval: TimeInterval = 24 * 60 * 60
     /// Release-notes tag of the downloadable precise-OCR module: Windows only, so never "on" here.
@@ -41,12 +44,12 @@ public enum UpdateChecker {
         URLSession.shared.dataTask(with: req) { data, response, error in
             let status = (response as? HTTPURLResponse)?.statusCode
             let result: UpdateCheckResult
-            if let status, (200..<300).contains(status), let data, let release = parseRelease(data) {
+            if let status, (200..<300).contains(status), let data, let list = (try? JSONSerialization.jsonObject(with: data)) as? [[String: Any]] {
                 let current = AppInfo.version
-                if compareVersions(release.version, current) != .orderedDescending { result = .upToDate(current: current) }
-                else if !interactive, let skipped = settings.skippedUpdateVersion, skipped.caseInsensitiveCompare(release.version) == .orderedSame {
-                    result = .skipped(release)
-                } else { result = .available(release) }
+                if let release = macRelease(list), compareVersions(release.version, current) == .orderedDescending {
+                    let skipped = !interactive && settings.skippedUpdateVersion?.caseInsensitiveCompare(release.version) == .orderedSame
+                    result = skipped ? .skipped(release) : .available(release)
+                } else { result = .upToDate(current: current) }
             } else {
                 let key = reasonKey(error: error, status: status)
                 let raw = error?.localizedDescription
@@ -58,9 +61,17 @@ public enum UpdateChecker {
         }.resume()
     }
 
+    /// The newest published release that has a Mac zip (GitHub lists newest first).
+    static func macRelease(_ list: [[String: Any]]) -> ReleaseInfo? {
+        list.lazy.filter { ($0["draft"] as? Bool) != true }.compactMap(parseRelease).first { $0.macAssetURL != nil }
+    }
+
     static func parseRelease(_ data: Data) -> ReleaseInfo? {
-        guard let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let tag = obj["tag_name"] as? String, !tag.isEmpty else { return nil }
+        (try? JSONSerialization.jsonObject(with: data) as? [String: Any]).flatMap(parseRelease)
+    }
+
+    static func parseRelease(_ obj: [String: Any]) -> ReleaseInfo? {
+        guard let tag = obj["tag_name"] as? String, !tag.isEmpty else { return nil }
         let page = (obj["html_url"] as? String).flatMap(URL.init(string:)) ?? URL(string: "\(AppInfo.repositoryURL)/releases/tag/\(tag)")!
         let assets = obj["assets"] as? [[String: Any]] ?? []
         let mac = assets.first { a in

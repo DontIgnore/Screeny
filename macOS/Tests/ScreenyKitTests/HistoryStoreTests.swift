@@ -33,3 +33,22 @@ final class HistoryStoreTests: XCTestCase {
         XCTAssertNil(OverlayView.originalForHistory(keep: false, shot: shot, region: region))
     }
 }
+
+final class MacReleasePickTests: XCTestCase {
+    func testPicksNewestPublishedReleaseWithMacZip() {
+        func rel(_ tag: String, _ assets: [String], draft: Bool = false) -> [String: Any] {
+            ["tag_name": tag, "draft": draft, "html_url": "https://example.com/\(tag)",
+             "assets": assets.map { ["name": $0, "browser_download_url": "https://example.com/\($0)"] }]
+        }
+        let list = [rel("v0.3.2-mac.1", ["Screeny-mac-0.3.2.zip"], draft: true),
+                    rel("v0.3.0-alpha.2", ["Screeny-win-Setup.exe", "releases.win.json"]),
+                    rel("v0.3.1-mac.1", ["Screeny-mac-0.3.1.zip"]),
+                    rel("v0.3.0-mac.1", ["Screeny-mac-0.3.0.zip"])]
+        let r = UpdateChecker.macRelease(list)
+        XCTAssertEqual(r?.version, "0.3.1-mac.1")
+        XCTAssertEqual(r?.macAssetURL?.lastPathComponent, "Screeny-mac-0.3.1.zip")
+        XCTAssertEqual(UpdateChecker.compareVersions(r!.version, "0.3.0"), .orderedDescending)
+        XCTAssertNotEqual(UpdateChecker.compareVersions(r!.version, "0.3.1"), .orderedDescending)
+        XCTAssertNil(UpdateChecker.macRelease([rel("v0.2.3", ["Screeny-win-Setup.exe"])]))
+    }
+}
