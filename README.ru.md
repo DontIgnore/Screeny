@@ -2,6 +2,9 @@
 
 [English](README.md) | Русский
 
+**Mac (публичная бета):** [скачать Screeny для Mac](https://github.com/DontIgnore/Screeny/releases/tag/v0.3.0-mac.1) — macOS 14+, Apple silicon и Intel. Чем отличается от Windows и
+как собрать: [macOS/README.md](macOS/README.md). Ссылки на загрузку ниже относятся к Windows.
+
 Screeny делает скриншоты в Windows 10 и 11. Нажмите PrintScreen, выберите окно или выделите область, нарисуйте
 стрелки и подписи прямо на замершем экране и нажмите Enter. Картинка уже в буфере обмена. Ещё Screeny умеет
 распознавать текст на скриншоте, читать QR-коды, закреплять скриншот поверх окон и хранить историю, к которой можно

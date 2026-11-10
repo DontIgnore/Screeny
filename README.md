@@ -2,6 +2,9 @@
 
 English | [Русский](README.ru.md)
 
+**Mac (public beta):** [download Screeny for Mac](https://github.com/DontIgnore/Screeny/releases/tag/v0.3.0-mac.1) — macOS 14+, Apple silicon and Intel. How it differs from Windows and
+how to build it: [macOS/README.md](macOS/README.md). Downloads below are for Windows.
+
 Screeny is a screenshot tool for Windows 10 and 11. Press PrintScreen, pick a window or drag over an area, draw
 arrows and notes right on the frozen screen, and press Enter. The picture is now in your clipboard. Screeny can also
 read text from a screenshot, decode QR codes, pin a shot on top of other windows and keep a history you can go back

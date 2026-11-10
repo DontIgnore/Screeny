@@ -5,7 +5,7 @@ settings and five interface languages as the Windows app. It lives in the menu b
 
 ## Build and install
 
-You need macOS 14 or later on Apple silicon and Xcode (Swift 6).
+You need macOS 14 or later and Xcode (Swift 6). `build.sh` makes a universal app (Apple silicon and Intel).
 
 ```bash
 cd macOS

@@ -3,7 +3,7 @@
 # The in-app updater picks the release asset whose name contains "mac" and ends with .zip.
 set -euo pipefail
 cd "$(dirname "$0")"
-app="$(./build.sh)"
+app="$(SCREENY_TIMESTAMP=1 ./build.sh)"
 version="$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$app/Contents/Info.plist")"
 out="$PWD/build/Screeny-mac-$version.zip"
 rm -f "$out"

@@ -15,8 +15,8 @@ for a in "$@"; do
   esac
 done
 
-swift build -c release --arch arm64 >&2
-bin="$(swift build -c release --arch arm64 --show-bin-path)"
+swift build -c release --arch arm64 --arch x86_64 >&2  # universal: Apple silicon and Intel
+bin="$(swift build -c release --arch arm64 --arch x86_64 --show-bin-path)"
 app="$PWD/build/Screeny.app"
 rm -rf "$app"
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
@@ -35,7 +35,9 @@ if [[ -z "$identity" ]]; then
   echo "warning: no signing certificate found; using ad-hoc signing (Screen Recording permission resets on every rebuild)" >&2
   identity="-"
 fi
-codesign --force --deep --options runtime --timestamp=none --sign "$identity" "$app" >&2
+# Release zips get a secure timestamp (the signature stays valid after the certificate expires); dev builds stay offline.
+ts="--timestamp=none"; [[ -n "${SCREENY_TIMESTAMP:-}" ]] && ts="--timestamp"
+codesign --force --deep --options runtime "$ts" --sign "$identity" "$app" >&2
 codesign --verify --strict "$app" >&2
 echo "Signed with: $identity" >&2
 
