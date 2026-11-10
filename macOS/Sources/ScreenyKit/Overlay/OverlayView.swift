@@ -639,10 +639,16 @@ final class OverlayView: FlippedView, CanvasModel, AnnotationEditorHost, FlyoutH
         if editor.beautifyOn { image = BeautifyComposer.compose(image, editor.beautify) }
         let json = AnnotationSerializer.serialize(document.items, regionOrigin: region.cgRect.origin, width: region.width, height: region.height,
                                                   beautify: editor.beautifyOn ? editor.beautify : nil)
-        let original = settings.keepOriginals && !document.items.isEmpty ? shot.cropped(region).cgImage : nil
+        let original = Self.originalForHistory(keep: settings.keepOriginals, shot: shot, region: region)
         closing = true
         finished?(CaptureResult(image: image, action: action, region: region, screenRect: screenRect(region), scale: pixelScale,
                                 saveURL: saveURL, text: nil, annotationsJSON: json, original: original))
+    }
+
+    /// The region without markup or frame, kept for re-editing whenever the setting is on (OriginalForHistory on Windows):
+    /// a frame-only shot needs it too, or the frame can't be changed or removed later.
+    static func originalForHistory(keep: Bool, shot: PixelImage, region: PixelRect) -> CGImage? {
+        keep ? shot.cropped(region).cgImage : nil
     }
 
     func cancel() {

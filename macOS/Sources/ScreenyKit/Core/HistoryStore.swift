@@ -45,10 +45,15 @@ public final class HistoryStore {
     }
 
     private var fm: FileManager { .default }
+    /// Saves come from the capture queue and the editor at the same time. Without this, one save's orphan cleanup can
+    /// delete the other's sidecar before its picture lands, and saves in the same millisecond share temp files.
+    /// Static: settings can create a new store for the same folder. Recursive: save → prune → delete.
+    private static let lock = NSRecursiveLock()
 
     /// Writes sidecars first and the picture last, each through a temp file; on failure nothing is left behind.
     @discardableResult
     public func save(png: Data, json: String? = nil, originalPng: Data? = nil, at time: Date = Date()) throws -> URL {
+        Self.lock.lock(); defer { Self.lock.unlock() }
         try fm.createDirectory(at: folder, withIntermediateDirectories: true)
         let url = nextFreeURL(Self.stampFormatter.string(from: time))
         let (jsonURL, origURL) = Self.sidecars(url)
@@ -101,6 +106,7 @@ public final class HistoryStore {
     }
 
     public func delete(_ url: URL) throws {
+        Self.lock.lock(); defer { Self.lock.unlock() }
         if fm.fileExists(atPath: url.path) { try fm.removeItem(at: url) }
         guard Self.parseName(url.lastPathComponent) != nil else { return }
         let (j, o) = Self.sidecars(url)
@@ -110,6 +116,7 @@ public final class HistoryStore {
     }
 
     public func clear() {
+        Self.lock.lock(); defer { Self.lock.unlock() }
         for i in list() { try? delete(i.url) }
         deleteOrphanSidecars()
     }
@@ -122,6 +129,7 @@ public final class HistoryStore {
     }
 
     @discardableResult public func deleteOriginals() -> (deleted: Int, total: Int) {
+        Self.lock.lock(); defer { Self.lock.unlock() }
         let all = listOriginals()
         var n = 0
         for u in all { do { try fm.removeItem(at: u); n += 1 } catch { Log.error("History original delete failed: \(u.path)", error) } }
