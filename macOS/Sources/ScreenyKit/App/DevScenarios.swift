@@ -5,6 +5,15 @@ import AppKit
 /// and saves what they draw. Mirrors OverlayWindow.Dev.cs.
 enum DevScenarios {
     static func handle(_ args: [String], app: AppDelegate) -> Bool {
+        if let i = args.firstIndex(of: "--dev-shot"), args.count > i + 1 {
+            // Saves one real screenshot of all displays (QA of what's on screen right now).
+            ScreenCapture.captureAll(excludingWindows: []) { r in
+                guard case .success(let shots) = r, let d = PixelImage.encode(ScreenCapture.virtualScreen(shots).image.cgImage, type: .png),
+                      (try? d.write(to: URL(fileURLWithPath: args[i + 1]))) != nil else { print("dev-shot failed: \(r)"); exit(1) }
+                exit(0)
+            }
+            return true
+        }
         if args.contains("--dev-capture") {
             // The normal app, plus one capture through the shortcut's handler two seconds after launch.
             Timer.scheduledTimer(withTimeInterval: 2, repeats: false) { _ in app.hotkeys.pressed?() }
