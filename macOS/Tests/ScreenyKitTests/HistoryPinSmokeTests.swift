@@ -43,6 +43,22 @@ final class HistoryPinSmokeTests: XCTestCase {
         c.close()
     }
 
+    func testFrameOnlyChangeCountsAsUnsaved() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let px = PixelImage(pixels: [UInt8](repeating: 200, count: 40 * 20 * 4), width: 40, height: 20)
+        let s = FakeServices(folder: dir)
+        let url = try s.history.save(png: px.pngData()!)
+        let item = try XCTUnwrap(s.history.list().first { $0.url == url })
+        let c = try XCTUnwrap(EditorWindowController(item: item, services: s))
+        XCTAssertFalse(c.dirty)
+        c.canvas.editor.setBeautify(true)
+        XCTAssertTrue(c.dirty, "turning the frame on must ask before closing")
+        c.canvas.editor.setBeautify(false)
+        XCTAssertFalse(c.dirty)
+        c.close()
+    }
+
     func testPinOpensFittedAndRegisters() {
         let img = PixelImage(pixels: [UInt8](repeating: 200, count: 100 * 60 * 4), width: 100, height: 60).cgImage
         let s = FakeServices(folder: FileManager.default.temporaryDirectory)
