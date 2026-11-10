@@ -54,10 +54,12 @@ struct EditSession {
 final class EditorWindowController: NSWindowController, NSWindowDelegate {
     let session: EditSession
     unowned let services: AppServices
-    private let canvas: EditorCanvasView
+    let canvas: EditorCanvasView
     private let modeSwitch = NSSegmentedControl()
     private let clearButton = ThemeButton("", kind: .subtle)
     private var savedRevision = 0
+    /// The frame isn't in the undo history, so it is compared separately (Windows: _beautifyEdits).
+    private var savedBeautify: BeautifyOptions?
     private var closingNow = false
     var closed: (() -> Void)?
 
@@ -99,6 +101,7 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(layoutRoot), name: NSView.frameDidChangeNotification, object: root)
         NotificationCenter.default.addObserver(self, selector: #selector(relocalize), name: Loc.changed, object: nil)
         savedRevision = canvas.editor.document.undo.revision
+        savedBeautify = currentBeautify
         relocalize()
         layoutRoot()
         w.center()
@@ -150,7 +153,8 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate {
 
     private func updateClear() { clearButton.isEnabled = !canvas.originalMode && !canvas.editor.document.items.isEmpty }
 
-    private var dirty: Bool { canvas.editor.document.undo.revision != savedRevision }
+    private var currentBeautify: BeautifyOptions? { canvas.editor.beautifyOn ? canvas.editor.beautify : nil }
+    var dirty: Bool { canvas.editor.document.undo.revision != savedRevision || currentBeautify != savedBeautify }
 
     // MARK: Actions: each adds a new history entry; the window stays open.
 
@@ -192,7 +196,7 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate {
                         historyKey = "Editor.ToastNewEntry"
                         DispatchQueue.main.async {
                             NotificationCenter.default.post(name: self.services.historyChanged, object: nil)
-                            if !originalMode { self.savedRevision = revision }
+                            if !originalMode { self.savedRevision = revision; self.savedBeautify = beautify }
                         }
                     } catch { Log.error("Editor history save failed", error); historyKey = "Editor.ToastHistoryFailed" }
                 }

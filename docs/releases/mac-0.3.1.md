@@ -2,6 +2,7 @@
 # Screeny for Mac 0.3.1 (public beta)
 
 - With "Keep originals for re-editing" on, a screenshot with only a frame now keeps its original too, so you can change or remove the frame later.
+- Closing the editor after changing only the frame now asks whether to save, like any other change.
 - Two screenshots saved at the same moment (for example, a new capture while the editor saves) no longer lose their editing data.
 - Update checks now find Mac betas. Copies on 0.3.0 don't see this update: download it once by hand, and later versions arrive by themselves.
 
@@ -11,6 +12,7 @@
 # Screeny для Mac 0.3.1 (публичная бета)
 
 - Если включено «Хранить оригиналы для повторного редактирования», скриншот только с рамкой теперь тоже хранит оригинал, так что рамку можно потом изменить или убрать.
+- Если в редакторе изменить только рамку, при закрытии он теперь спросит, сохранить ли изменения, как и при любой другой правке.
 - Два скриншота, сохранённые одновременно (например, новый снимок, пока сохраняет редактор), больше не теряют данные для редактирования.
 - Проверка обновлений теперь находит бета-версии для Mac. Копии на 0.3.0 этого обновления не увидят: скачайте его один раз вручную, дальше версии будут приходить сами.
 
@@ -20,6 +22,7 @@
 # Screeny para Mac 0.3.1 (beta pública)
 
 - Con «Conservar los originales para volver a editar» activado, una captura que solo tiene marco ahora también guarda el original, así que puedes cambiar o quitar el marco más tarde.
+- Si en el editor solo cambias el marco, al cerrarlo ahora pregunta si quieres guardar, como con cualquier otro cambio.
 - Dos capturas guardadas a la vez (por ejemplo, una captura nueva mientras el editor guarda) ya no pierden sus datos de edición.
 - La búsqueda de actualizaciones ahora encuentra las betas para Mac. Las copias con 0.3.0 no ven esta actualización: descárgala a mano una vez y las siguientes versiones llegarán solas.
 
@@ -29,6 +32,7 @@
 # Screeny Mac 版 0.3.1（公开测试版）
 
 - 开启“保留原图以便再次编辑”后，只加了边框的截图现在也会保留原图，之后可以修改或去掉边框。
+- 在编辑器里只改了边框，关闭时现在也会询问是否保存，和其他修改一样。
 - 同时保存的两张截图（例如编辑器保存时又截了一张）不会再丢失编辑数据。
 - 检查更新现在能找到 Mac 测试版。0.3.0 不会看到这次更新：请手动下载一次，之后的版本会自动推送。
 
@@ -38,6 +42,7 @@
 # Screeny for Mac 0.3.1（パブリックベータ）
 
 - 「再編集用に元画像を保存する」がオンなら、フレームだけを付けたスクリーンショットも元の画像を保存するようになり、あとからフレームを変えたり外したりできます。
+- エディターでフレームだけを変えた場合も、閉じるときに保存するか確認するようになりました。ほかの変更と同じです。
 - 同時に保存された 2 枚のスクリーンショット（エディターの保存中に新しく撮った場合など）が、編集用データを失わなくなりました。
 - 更新の確認で Mac 用ベータが見つかるようになりました。0.3.0 ではこの更新が表示されないので、一度だけ手動でダウンロードしてください。以降のバージョンは自動で届きます。
 
